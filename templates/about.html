@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>About Nakconel — Brand Management &amp; AI Strategy Company</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+@font-face{font-family:'Agrandir';src:url('https://fonts.cdnfonts.com/s/15785/Agrandir-GrandHeavy.woff') format('woff');font-weight:800;font-display:swap;}
+:root{
+  --wine-deep:#1B0404;--wine-mid:#3D0A0A;--ground:#0A0202;
+  --nakconel-red:#751008;--muted-rose:#a9443b;
+  --bronze:#C99A4A;--bronze-light:#E8C57A;--bronze-dim:#8B6A2E;
+  --olive-green:#5c632f;--warm-cream:#FDFBF7;
+  --cream:#F5E8C7;--white:#FDFAF4;--muted:rgba(245,232,199,0.52);
+  --border:rgba(201,154,74,0.15);--card:rgba(61,10,10,0.42);
+  --r:16px;--rs:8px;--tr:0.42s cubic-bezier(0.25,1,0.5,1);
+}
+*{margin:0;padding:0;box-sizing:border-box;scroll-behavior:smooth;}
+html, body { overflow-x: hidden; width: 100%; }
+body{
+  background: var(--ground);
+  background: radial-gradient(ellipse 60% 50% at 50% 40%, var(--wine-mid) 0%, transparent 70%),
+              radial-gradient(ellipse 130% 110% at 50% 50%, var(--wine-deep) 0%, var(--ground) 100%);
+  background-attachment: fixed;
+  color:var(--white);
+  font-family:'Poppins',sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+a{text-decoration:none;color:inherit;transition:var(--tr);}
+ul{list-style:none;}
+img{max-width:100%;height:auto;display:block;}
+
+/* --- HEADER --- */
+.h-nav{position:fixed;top:0;left:0;width:100%;z-index:100;background:rgba(27,4,4,0.92);box-shadow:0 10px 30px rgba(0,0,0,0.5);border-bottom:1px solid var(--border);}
+.nav-cont{max-width:1400px;margin:0 auto;padding:0 24px;height:84px;display:flex;align-items:center;justify-content:space-between;}
+.logo-wrapper{display:flex;align-items:center;gap:12px;}
+.nav-links{display:flex;gap:32px;align-items:center;}
+.nav-links a{font-size:14px;font-weight:500;color:var(--muted);letter-spacing:0.5px;cursor:pointer;}
+.nav-links a:hover, .nav-links a.active{color:var(--bronze-light);}
+.menu-tg{display:none;background:none;border:none;cursor:pointer;flex-direction:column;gap:6px;padding:4px;z-index:110;}
+.menu-tg span{width:24px;height:2px;background:var(--cream);transition:var(--tr);transform-origin:center;}
+
+.about-dd-wrap { position: relative; }
+.about-dd-btn { background: none; border: none; cursor: pointer; font-family: 'Poppins', sans-serif; font-size: 14px; font-weight: 500; color: var(--bronze-light); letter-spacing: 0.5px; display: flex; align-items: center; gap: 5px; padding: 6px 10px; border-radius: 6px; transition: var(--tr); position: relative; }
+.about-dd-btn:hover, .about-dd-btn.active { color: var(--bronze-light); }
+.about-dd-btn.open { background: rgba(201,154,74,0.07); }
+.dd-arrow { font-size: 11px; transition: transform 0.3s ease; display: inline-block; }
+.about-dd-btn.open .dd-arrow { transform: rotate(180deg); }
+.about-dd-menu { position: absolute; top: calc(100% + 12px); left: 50%; transform: translateX(-50%) translateY(-8px); min-width: 240px; background: linear-gradient(160deg, rgba(27,4,4,0.97) 0%, rgba(10,2,2,0.99) 100%); border: 1px solid rgba(201,154,74,0.25); border-radius: 14px; padding: 8px; box-shadow: 0 20px 50px rgba(0,0,0,0.7), 0 0 0 1px rgba(201,154,74,0.05); opacity: 0; visibility: hidden; pointer-events: none; transition: opacity 0.28s ease, transform 0.28s ease, visibility 0.28s; z-index: 200; backdrop-filter: blur(20px); }
+.about-dd-menu::before { content: ''; position: absolute; top: -6px; left: 50%; transform: translateX(-50%); width: 10px; height: 10px; background: rgba(27,4,4,0.97); border-left: 1px solid rgba(201,154,74,0.25); border-top: 1px solid rgba(201,154,74,0.25); transform: translateX(-50%) rotate(45deg); }
+.about-dd-menu.open { opacity: 1; visibility: visible; pointer-events: auto; transform: translateX(-50%) translateY(0); }
+.dd-item { display: flex; align-items: center; gap: 12px; padding: 11px 14px; border-radius: 9px; cursor: pointer; transition: background 0.2s ease, transform 0.2s ease; color: var(--white); text-decoration: none; }
+.dd-item:hover { background: rgba(201,154,74,0.1); transform: translateX(2px); }
+.dd-icon { width: 30px; height: 30px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: var(--bronze); font-size: 15px; background: rgba(201,154,74,0.08); border-radius: 7px; border: 1px solid rgba(201,154,74,0.12); }
+.dd-text { display: flex; flex-direction: column; gap: 1px; }
+.dd-text strong { font-size: 13px; font-weight: 600; color: var(--white); }
+.dd-text small { font-size: 11px; color: var(--muted); font-weight: 400; }
+.dd-divider { height: 1px; background: rgba(201,154,74,0.12); margin: 6px 8px; }
+.dd-cta .dd-icon { color: var(--bronze-light); background: rgba(117,16,8,0.3); border-color: rgba(201,154,74,0.2); }
+.dd-cta .dd-text strong { color: var(--bronze-light); }
+
+/* --- PAGE HERO --- */
+.page-hero{ padding: 160px 24px 70px 24px; text-align:center; position:relative; }
+.page-hero::before{ content:''; position:absolute; top:120px; left:50%; transform:translateX(-50%); width:1px; height:48px; background:linear-gradient(to bottom, transparent, var(--bronze)); }
+.eyebrow{ font-size:12px; letter-spacing:3px; text-transform:uppercase; color:var(--bronze); font-weight:600; }
+.page-hero h1{ font-family:'Agrandir',sans-serif; font-size: clamp(34px, 5vw, 58px); margin:18px 0 18px; color:var(--white); }
+.page-hero h1 span{ color: var(--bronze-light); }
+.page-hero p{ max-width:640px; margin:0 auto; color:var(--muted); font-size:15px; line-height:1.7; }
+
+/* --- STORY --- */
+.story-section{ max-width:880px; margin:0 auto; padding: 0 24px 60px 24px; }
+.story-section p{ color:var(--cream); font-size:16px; line-height:1.85; margin-bottom:22px; }
+.story-section p:first-of-type{ font-size:19px; color:var(--white); }
+
+/* --- VISION & MISSION --- */
+.vm-section{ max-width:1000px; margin:0 auto; padding: 60px 24px 120px 24px; }
+.vm-heading{ text-align:center; margin-bottom:40px; }
+.vm-heading h2{ font-family:'Agrandir',sans-serif; font-size: clamp(26px, 3vw, 36px); color:var(--white); }
+.vm-grid{ display:grid; grid-template-columns: 1fr 1fr; gap:24px; }
+.meta-block{ background: rgba(255,255,255,0.02); border: 1px solid var(--border); padding: 32px; border-radius: var(--r); transition: var(--tr); }
+.meta-block:hover{ border-color: rgba(201,154,74,0.35); background: rgba(117,16,8,0.08); }
+.meta-block h4{ font-family: 'Agrandir', sans-serif; font-size: 14px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--bronze); margin-bottom: 14px; }
+.meta-block p{ color: var(--muted); font-size: 15px; line-height: 1.75; margin: 0; }
+
+/* --- FOOTER --- */
+footer{background:var(--wine-deep);border-top:1px solid var(--border);padding:64px 24px 28px;}
+.ft-main{max-width:1400px;margin:0 auto;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:48px;padding-bottom:40px;}
+.ft-desc{color:var(--muted);font-size:13px;line-height:1.7;max-width:320px;}
+.ft-col h5{font-family:'Agrandir',sans-serif;font-size:13px;letter-spacing:1px;text-transform:uppercase;color:var(--bronze);margin-bottom:16px;}
+.ft-col ul li{margin-bottom:10px;}
+.ft-col ul li a{font-size:13px;color:var(--muted);}
+.ft-col ul li a:hover{color:var(--bronze-light);}
+.ft-btm{max-width:1400px;margin:0 auto;border-top:1px solid var(--border);padding-top:24px;display:flex;justify-content:space-between;font-size:12px;color:var(--muted);}
+
+@media (max-width:768px){
+  .menu-tg{display:flex;}
+  .nav-links{position:fixed;top:84px;left:-100%;width:100%;height:calc(100vh - 84px);background:rgba(27,4,4,0.98);backdrop-filter:blur(24px);flex-direction:column;justify-content:center;gap:35px;transition:var(--tr);padding:40px;border-top:1px solid var(--border);}
+  .nav-links.open{left:0;}
+  .vm-grid{ grid-template-columns: 1fr; }
+  .ft-main{grid-template-columns:1fr 1fr;gap:32px;}
+}
+@media (max-width:480px){ .ft-btm{flex-direction:column;gap:8px;text-align:center;} }
+</style>
+</head>
+<body>
+
+<header class="h-nav" id="navbar">
+  <div class="nav-cont">
+    <div class="logo-wrapper">
+      <a href="/"><img src="/static/image/logo.png" alt="NAKCONEL Logo" style="height:72px;width:auto;object-fit:contain;"></a>
+    </div>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="/home">Home</a></li>
+      <li class="about-dd-wrap">
+        <button class="about-dd-btn active" id="aboutDropBtn" aria-expanded="false" aria-haspopup="true">
+          About <span class="dd-arrow">▾</span>
+        </button>
+        <div class="about-dd-menu" id="aboutDropMenu" role="menu">
+          <a class="dd-item" href="/about" role="menuitem">
+            <span class="dd-icon">◈</span>
+            <span class="dd-text"><strong>About Nakconel</strong><small>Our story &amp; direction</small></span>
+          </a>
+          <a class="dd-item" href="/meet-the-team" role="menuitem">
+            <span class="dd-icon">◉</span>
+            <span class="dd-text"><strong>Meet the Team</strong><small>The people behind the brand</small></span>
+          </a>
+          <a class="dd-item" href="/about#vision-mission" role="menuitem">
+            <span class="dd-icon">◎</span>
+            <span class="dd-text"><strong>Vision &amp; Mission</strong><small>Where we are going</small></span>
+          </a>
+          <a class="dd-item" href="/voice" role="menuitem">
+            <span class="dd-icon">◇</span>
+            <span class="dd-text"><strong>Brand Voice</strong><small>How we speak &amp; show up</small></span>
+          </a>
+          <div class="dd-divider"></div>
+          <a class="dd-item dd-cta" href="/#contact" role="menuitem">
+            <span class="dd-icon">↗</span>
+            <span class="dd-text"><strong>Work With Us</strong><small>Book a strategy call</small></span>
+          </a>
+        </div>
+      </li>
+      <li><a href="/#services">Pillars</a></li>
+      <li><a href="/#markets">Global Footprints</a></li>
+      <li><a href="/#work">Showcase</a></li>
+      <li><a href="/#contact">Contact</a></li>
+    </ul>
+    <button class="menu-tg" id="menuToggle" aria-label="Toggle Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<section class="page-hero">
+  <span class="eyebrow">Our Story &amp; Direction</span>
+  <h1>About <span>Nakconel</span></h1>
+  <p>A brand management and AI strategy studio built at the intersection of cultural identity and enterprise-grade technology.</p>
+</section>
+
+<section class="story-section">
+  <p>NAKCONEL exists to help businesses lead with clarity in an AI-driven global marketplace &mdash; combining strategic brand thinking, considered design, and intelligent systems into one practice.</p>
+  <p>We work across borders and cultures, helping organizations in Africa, the Gulf, the United States, and Australia build identities that travel well &mdash; recognizable, trusted, and built to scale.</p>
+  <p>Every engagement starts with the same question: what does this brand need to say, and to whom? From there, we build the strategy, the content, and the technology to carry it through.</p>
+</section>
+
+<section class="vm-section" id="vision-mission">
+  <div class="vm-heading">
+    <h2>Our Direction</h2>
+  </div>
+  <div class="vm-grid">
+    <div class="meta-block">
+      <h4>Our Vision</h4>
+      <p>To redefine international authority systems by fusing complex cultural identity systems with enterprise-level intelligent automation engines.</p>
+    </div>
+    <div class="meta-block">
+      <h4>Our Mission</h4>
+      <p>To help companies identify clarity checkpoints, manage target content workflows securely, and maximize growth pipelines effortlessly.</p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="ft-main">
+    <div>
+      <div class="logo-wrapper" style="margin-bottom:16px;">
+        <a href="/"><img src="/static/image/logo.png" alt="NAKCONEL Logo" style="height:72px;width:auto;object-fit:contain;"></a>
+      </div>
+      <p class="ft-desc">Combining brand strategy, content design, and enterprise technology with deep cultural intelligence.</p>
+    </div>
+    <div class="ft-col">
+      <h5>Pillars</h5>
+      <ul>
+        <li><a href="/#services">Brand Strategy</a></li>
+        <li><a href="/#services">Content &amp; Design</a></li>
+        <li><a href="/#services">IT &amp; Tech Systems</a></li>
+      </ul>
+    </div>
+    <div class="ft-col">
+      <h5>Enablement</h5>
+      <ul>
+        <li><a href="/about">About Identity</a></li>
+        <li><a href="/#contact">Strategy Support Desk</a></li>
+      </ul>
+    </div>
+    <div class="ft-col">
+      <h5>Footprints</h5>
+      <ul>
+        <li><a href="/#markets">Africa &amp; Gulf Regions</a></li>
+        <li><a href="/#markets">United States &amp; Australia</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="ft-btm">
+    <p>&copy; 2026 NAKCONEL Studio Inc. All rights reserved.</p>
+    <p>Culture gives meaning. Intelligence gives movement.</p>
+  </div>
+</footer>
+
+<script>
+const aboutDropBtn = document.getElementById('aboutDropBtn');
+const aboutDropMenu = document.getElementById('aboutDropMenu');
+function openDropdown() { aboutDropBtn.classList.add('open'); aboutDropMenu.classList.add('open'); aboutDropBtn.setAttribute('aria-expanded', 'true'); }
+function closeDropdown() { aboutDropBtn.classList.remove('open'); aboutDropMenu.classList.remove('open'); aboutDropBtn.setAttribute('aria-expanded', 'false'); }
+aboutDropBtn.addEventListener('click', (e) => { e.stopPropagation(); aboutDropMenu.classList.contains('open') ? closeDropdown() : openDropdown(); });
+document.addEventListener('click', () => closeDropdown());
+aboutDropMenu.addEventListener('click', (e) => e.stopPropagation());
+
+const menuToggle = document.getElementById('menuToggle');
+const navLinks = document.getElementById('navLinks');
+menuToggle.addEventListener('click', () => {
+  navLinks.classList.toggle('open');
+  const spans = menuToggle.querySelectorAll('span');
+  if (navLinks.classList.contains('open')) {
+    spans[0].style.transform = 'translateY(8px) rotate(45deg)';
+    spans[1].style.opacity = '0';
+    spans[2].style.transform = 'translateY(-8px) rotate(-45deg)';
+  } else {
+    spans[0].style.transform = ''; spans[1].style.opacity = ''; spans[2].style.transform = '';
+  }
+});
+</script>
+
+</body>
+</html>

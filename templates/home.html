@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NAKCONEL — Brand Management & AI Strategy Company</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<style>
+@font-face{font-family:'Agrandir';src:url('https://fonts.cdnfonts.com/s/15785/Agrandir-GrandHeavy.woff') format('woff');font-weight:800;font-display:swap;}
+:root{
+  --wine-deep:#1B0404;--wine-mid:#3D0A0A;--ground:#0A0202;
+  --nakconel-red:#751008;--muted-rose:#a9443b;
+  --bronze:#C99A4A;--bronze-light:#E8C57A;--bronze-dim:#8B6A2E;
+  --olive-green:#5c632f;--warm-cream:#FDFBF7;
+  --cream:#F5E8C7;--white:#FDFAF4;--muted:rgba(245,232,199,0.52);
+  --border:rgba(201,154,74,0.15);--card:rgba(61,10,10,0.42);
+  --r:16px;--rs:8px;--tr:0.42s cubic-bezier(0.25,1,0.5,1);
+}
+*{margin:0;padding:0;box-sizing:border-box;scroll-behavior:smooth;}
+
+html, body { overflow-x: hidden; width: 100%; }
+body.loading-active { overflow: hidden !important; height: 100vh !important; }
+
+body{
+  background: var(--ground);
+  background: radial-gradient(ellipse 60% 50% at 50% 40%, var(--wine-mid) 0%, transparent 70%),
+              radial-gradient(ellipse 130% 110% at 50% 50%, var(--wine-deep) 0%, var(--ground) 100%);
+  background-attachment: fixed;
+  color:var(--white);
+  font-family:'Poppins',sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+a{text-decoration:none;color:inherit;transition:var(--tr);}
+ul{list-style:none;}
+img{max-width:100%;height:auto;display:block;}
+
+/* --- PRELOADER LAYER --- */
+#loader-container {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100vh;
+  z-index: 99999;
+  background: radial-gradient(ellipse 60% 50% at 50% 38%, var(--wine-mid) 0%, transparent 70%),
+              radial-gradient(ellipse 130% 110% at 50% 50%, var(--wine-deep) 0%, var(--ground) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.5s cubic-bezier(0.25, 1, 0.5, 1), visibility 0.5s;
+}
+#loader-container::after{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(ellipse 70% 60% at 50% 50%, transparent 40%, rgba(0,0,0,0.5) 100%);
+}
+#loader-container.fade-out { opacity: 0; visibility: hidden; pointer-events: none; }
+.stage{
+  position:relative;
+  width:100%;
+  height:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background: radial-gradient(ellipse 60% 50% at 50% 40%, var(--wine-mid) 0%, transparent 70%), radial-gradient(ellipse 130% 110% at 50% 50%, var(--wine-deep) 0%, var(--ground) 100%);
+}
+.loader-stage{ position:relative; width:min(90vw,520px); display:flex; flex-direction:column; align-items:center; gap:30px; }
+
+/* mark */
+.mark-wrap{ position:relative; width:min(50vw,250px); opacity:0; transform:scale(0.93); animation: markIn 0.9s cubic-bezier(0.16,1,0.3,1) 0.1s forwards; }
+@keyframes markIn{ to{ opacity:1; transform:scale(1); } }
+.mark-img{ width:100%; height:auto; display:block; filter: drop-shadow(0 6px 24px rgba(0,0,0,0.55)); }
+.mark-base{ filter: brightness(0.4) saturate(0.7) drop-shadow(0 6px 24px rgba(0,0,0,0.55)); }
+.mark-sweep-wrap{ position:absolute; inset:0; clip-path: inset(0 100% 0 0); animation: sweepClip 1.3s cubic-bezier(0.5,0,0.25,1) 0.55s forwards; }
+@keyframes sweepClip{ 0%{ clip-path: inset(0 100% 0 0); } 100%{ clip-path: inset(0 0 0 0); } }
+.mark-sweep-wrap .mark-img{ filter: brightness(1.18) saturate(1.05) drop-shadow(0 6px 24px rgba(0,0,0,0.55)); }
+.shine-bar{ position:absolute; top:-10%; bottom:-10%; width:18%; background: linear-gradient(100deg, transparent 0%, rgba(255,244,214,0.55) 48%, transparent 100%); filter: blur(3px); mix-blend-mode: screen; left:-20%; animation: shineMove 1.3s cubic-bezier(0.5,0,0.25,1) 0.55s forwards; opacity:0; visibility:hidden; }
+@keyframes shineMove{ 0%{ left:-22%; opacity:0; visibility:visible; } 8%{ opacity:1; } 92%{ opacity:1; } 99%{ visibility:visible; } 100%{ left:104%; opacity:0; visibility:hidden; } }
+.mark-halo{ position:absolute; inset:-22%; border-radius:50%; background:radial-gradient(circle, rgba(232,197,122,0.30) 0%, rgba(232,197,122,0) 68%); opacity:0; filter:blur(8px); animation: haloPulse 1.2s ease-out 1.55s forwards; }
+@keyframes haloPulse{ 0%{ opacity:0; transform:scale(0.85); } 40%{ opacity:1; transform:scale(1.04); } 100%{ opacity:0; transform:scale(1.14); } }
+
+/* wordmark */
+.word-wrap{ overflow:hidden; height:44px; }
+.loader-wordmark{ font-family:'Agrandir', sans-serif; font-weight:800; font-size:32px; letter-spacing:7px; color:var(--white); text-align:center; transform:translateY(110%); animation: wordRise 0.85s cubic-bezier(0.16,1,0.3,1) 1.55s forwards; }
+@keyframes wordRise{ to{ transform:translateY(0); } }
+.loader-wordmark .accent{ color:var(--bronze); }
+.loader-tagline{ font-size:10.5px; letter-spacing:3px; text-transform:uppercase; color:rgba(245,232,199,0.45); text-align:center; margin-top:6px; opacity:0; animation: tagFade 0.8s ease 2.05s forwards; }
+@keyframes tagFade{ to{ opacity:1; } }
+.progress-rail{ width:130px; height:1px; background:rgba(201,154,74,0.18); margin-top:6px; position:relative; overflow:hidden; }
+.progress-fill{ position:absolute; left:0; top:0; height:100%; width:0%; background:linear-gradient(90deg, var(--bronze-dim), var(--bronze-light)); animation: fillProg 2.5s cubic-bezier(0.65,0,0.35,1) 0.05s forwards; }
+@keyframes fillProg{ to{ width:100%; } }
+
+/* --- STICKY NAVIGATION BAR --- */
+.h-nav{position:fixed;top:0;left:0;width:100%;z-index:100;background:rgba(10,2,2,0.6);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);transition:var(--tr);}
+.h-nav.scrolled{background:rgba(27,4,4,0.92);box-shadow:0 10px 30px rgba(0,0,0,0.5);}
+.nav-cont{max-width:1400px;margin:0 auto;padding:0 24px;height:84px;display:flex;align-items:center;justify-content:space-between;}
+
+.logo-wrapper{display:flex;align-items:center;gap:12px;}
+.logo-icon{width:32px;height:32px;border:2px solid var(--bronze);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Agrandir',sans-serif;font-weight:800;font-size:14px;color:var(--bronze);background:var(--nakconel-red);box-shadow:0 0 10px rgba(201,154,74,0.3);}
+.logo{font-family:'Agrandir',sans-serif;font-weight:800;font-size:24px;letter-spacing:-0.5px;color:var(--white);}
+.logo span{color:var(--bronze);}
+
+.nav-links{display:flex;gap:32px;align-items:center;}
+.nav-links a{font-size:14px;font-weight:500;color:var(--muted);letter-spacing:0.5px;cursor:pointer;}
+.nav-links a:hover, .nav-links a.active{color:var(--bronze-light);}
+
+.menu-tg{display:none;background:none;border:none;cursor:pointer;flex-direction:column;gap:6px;padding:4px;z-index:110;}
+.menu-tg span{width:24px;height:2px;background:var(--cream);transition:var(--tr);transform-origin:center;}
+
+/* --- ABOUT DROPDOWN BUTTON --- */
+.about-dd-wrap { position: relative; }
+.about-dd-btn {
+  background: none; border: none; cursor: pointer;
+  font-family: 'Poppins', sans-serif; font-size: 14px; font-weight: 500;
+  color: var(--muted); letter-spacing: 0.5px;
+  display: flex; align-items: center; gap: 5px;
+  padding: 6px 10px; border-radius: 6px;
+  transition: var(--tr); position: relative;
+}
+.about-dd-btn:hover, .about-dd-btn.active { color: var(--bronze-light); }
+.about-dd-btn.open { color: var(--bronze-light); background: rgba(201,154,74,0.07); }
+.dd-arrow { font-size: 11px; transition: transform 0.3s ease; display: inline-block; }
+.about-dd-btn.open .dd-arrow { transform: rotate(180deg); }
+
+.about-dd-menu {
+  position: absolute; top: calc(100% + 12px); left: 50%; transform: translateX(-50%) translateY(-8px);
+  min-width: 240px; background: linear-gradient(160deg, rgba(27,4,4,0.97) 0%, rgba(10,2,2,0.99) 100%);
+  border: 1px solid rgba(201,154,74,0.25); border-radius: 14px;
+  padding: 8px; box-shadow: 0 20px 50px rgba(0,0,0,0.7), 0 0 0 1px rgba(201,154,74,0.05);
+  opacity: 0; visibility: hidden; pointer-events: none;
+  transition: opacity 0.28s ease, transform 0.28s ease, visibility 0.28s;
+  z-index: 200;
+  backdrop-filter: blur(20px);
+}
+.about-dd-menu::before {
+  content: ''; position: absolute; top: -6px; left: 50%; transform: translateX(-50%);
+  width: 10px; height: 10px; background: rgba(27,4,4,0.97);
+  border-left: 1px solid rgba(201,154,74,0.25); border-top: 1px solid rgba(201,154,74,0.25);
+  transform: translateX(-50%) rotate(45deg);
+}
+.about-dd-menu.open {
+  opacity: 1; visibility: visible; pointer-events: auto;
+  transform: translateX(-50%) translateY(0);
+}
+.dd-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 11px 14px; border-radius: 9px; cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+  color: var(--white); text-decoration: none;
+}
+.dd-item:hover { background: rgba(201,154,74,0.1); transform: translateX(2px); }
+.dd-icon {
+  width: 30px; height: 30px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--bronze); font-size: 15px;
+  background: rgba(201,154,74,0.08); border-radius: 7px;
+  border: 1px solid rgba(201,154,74,0.12);
+}
+.dd-text { display: flex; flex-direction: column; gap: 1px; }
+.dd-text strong { font-size: 13px; font-weight: 600; color: var(--white); }
+.dd-text small { font-size: 11px; color: var(--muted); font-weight: 400; }
+.dd-divider { height: 1px; background: rgba(201,154,74,0.12); margin: 6px 8px; }
+.dd-cta .dd-icon { color: var(--bronze-light); background: rgba(117,16,8,0.3); border-color: rgba(201,154,74,0.2); }
+.dd-cta .dd-text strong { color: var(--bronze-light); }
+
+/* --- HERO AREA --- */
+.hero{ position:relative; min-height: 100vh; min-height: 100svh; display: flex; align-items: center; overflow: hidden; padding: 120px 24px 60px 24px; }
+.hero-bg-slides{ position:absolute; inset:0; width:100%; height:100%; z-index:0; }
+.hero-bg-slide{ position:absolute; inset:0; width:100%; height:100%; opacity:0; transform:scale(1.06); transition: opacity 1.6s cubic-bezier(0.4,0,0.2,1), transform 7s cubic-bezier(0.4,0,0.2,1); z-index:1; }
+.hero-bg-slide.active{ opacity:1; transform:scale(1); z-index:2; }
+.hero-bg-slide img{ width:100%; height:100%; object-fit:cover; }
+.hero-bg-overlay{ position:absolute; inset:0; z-index:3; pointer-events:none;
+  background: linear-gradient(to top, rgba(10,2,2,0.92) 0%, rgba(10,2,2,0.55) 45%, rgba(27,4,4,0.35) 100%),
+              linear-gradient(100deg, rgba(10,2,2,0.85) 0%, rgba(10,2,2,0.4) 55%, rgba(10,2,2,0.2) 100%);
+}
+.hero-cont{ position:relative; max-width:1400px; margin:0 auto; width:100%; display:grid; grid-template-columns: 1fr; gap: 48px; align-items: center; z-index: 4; }
+.hero-txt h1{ font-family:'Agrandir',sans-serif; font-size: clamp(38px, 5vw, 64px); line-height: 1.1; font-weight: 800; margin-bottom: 24px; color: var(--white); }
+.hero-txt h1 span{ color: var(--bronze-light); background: linear-gradient(135deg, var(--white) 30%, var(--bronze-light) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.hero-txt p{ font-size: clamp(15px, 1.8vw, 18px); color: var(--muted); line-height: 1.6; margin-bottom: 40px; max-width: 580px; }
+.hero-btns{display:flex;gap:16px;flex-wrap:wrap;}
+.sec-btn{border:1px solid var(--border);background:rgba(255,255,255,0.03);color:var(--cream);font-weight:500;padding:12px 24px;border-radius:var(--rs); cursor: pointer;}
+.sec-btn:hover{background:var(--border);color:var(--white);}
+.hero-cta{background:linear-gradient(135deg,var(--bronze),var(--bronze-dim));color:var(--wine-deep);font-weight:600;padding:12px 24px;border-radius:var(--rs);box-shadow:0 4px 15px rgba(201,154,74,0.25);display:inline-flex;align-items:center;gap:8px;}
+.hero-cta:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(201,154,74,0.4);color:var(--wine-deep);}
+
+/* --- HERO BACKGROUND SLIDESHOW INDICATORS --- */
+.hero-indicators { position: absolute; bottom: 32px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; z-index: 5; }
+.hind-dot { width: 24px; height: 3px; background: rgba(255,255,255,0.25); border-radius: 2px; overflow: hidden; position: relative; }
+.hind-dot::after { content: ''; position: absolute; top: 0; left: 0; height: 100%; width: 0; background: var(--bronze-light); }
+.hind-dot.active::after { width: 100%; transition: width 5s linear; }
+
+/* --- CORE PILLARS SPLIT LAYOUT --- */
+.sec{padding:120px 24px;max-width:1400px;margin:0 auto;}
+.sec-head{margin-bottom:64px;max-width:650px;}
+.tag{color:var(--bronze);text-transform:uppercase;font-size:12px;font-weight:600;letter-spacing:2px;display:inline-block;margin-bottom:12px;}
+.sec-title{font-family:'Agrandir',sans-serif;font-size:clamp(28px,4vw,42px);font-weight:800;line-height:1.2;color:var(--white);}
+
+.pillars-stack { display: flex; flex-direction: column; gap: 40px; }
+.pillar-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  align-items: center;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  overflow: hidden;
+  backdrop-filter: blur(8px);
+  transition: border-color 0.4s ease;
+}
+.pillar-row:hover { border-color: rgba(201,154,74,0.35); }
+
+/* Alternating splits */
+.pillar-row:nth-child(even) .pillar-img-frame { order: 2; }
+
+.pillar-img-frame { width: 100%; height: 100%; min-height: 400px; position: relative; overflow: hidden; }
+.pillar-img-frame img { width: 100%; height: 100%; object-fit: cover; position: absolute; inset: 0; transition: transform 0.6s ease; }
+.pillar-row:hover .pillar-img-frame img { transform: scale(1.03); }
+
+.pillar-content-box { padding: 48px; display: flex; flex-direction: column; gap: 20px; }
+.pillar-icon-badge { width: 48px; height: 48px; border-radius: var(--rs); background: rgba(117,16,8,0.4); border: 1px solid rgba(201,154,74,0.3); display: flex; align-items: center; justify-content: center; color: var(--bronze-light); font-size: 20px; }
+.pillar-icon-badge h3 { font-family: 'Agrandir', sans-serif; font-size: 24px; font-weight: 800; color: var(--white); }
+.pillar-content-box p { color: var(--muted); font-size: 15px; line-height: 1.6; }
+.training-badge { align-self: flex-start; background: rgba(92,99,47,0.3); color: var(--warm-cream); border: 1px solid var(--olive-green); padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+.campaign-badge { align-self: flex-start; background: rgba(201,154,74,0.15); color: var(--bronze-light); border: 1px solid var(--bronze-dim); padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+.explore-btn { align-self: flex-start; background: linear-gradient(135deg,var(--bronze),var(--bronze-dim)); color: var(--wine-deep); font-weight: 600; padding: 12px 22px; border-radius: var(--rs); display: inline-flex; align-items: center; gap: 8px; margin-top: 8px; box-shadow: 0 4px 15px rgba(201,154,74,0.2); transition: var(--tr); }
+.explore-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(201,154,74,0.35); color: var(--wine-deep); }
+.campaign-block { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; background: var(--card); backdrop-filter: blur(8px); transition: border-color 0.4s ease; }
+.campaign-block:hover { border-color: rgba(201,154,74,0.35); }
+.campaign-full-img { width: 100%; height: 100%; object-fit: contain; object-position: center; display: block; background: rgba(0,0,0,0.2); }
+.campaign-info { padding: 48px; display: flex; flex-direction: column; gap: 20px; justify-content: center; }
+.campaign-info h3 { font-family: 'Agrandir', sans-serif; font-size: clamp(22px, 2.5vw, 32px); font-weight: 800; color: var(--white); }
+.campaign-info p { color: var(--muted); font-size: 15px; line-height: 1.6; }
+@media (max-width: 768px) { .campaign-block { grid-template-columns: 1fr; } .campaign-full-img { height: 320px; } }
+
+/* --- CULTURAL GEOGRAPHY GLOBAL GRID --- */
+.market-section{background:rgba(27,4,4,0.4);border-top:1px solid var(--border);border-bottom:1px solid var(--border);position:relative;}
+.market-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:24px;margin-top:40px;}
+.market-card{border-left:2px solid var(--olive-green);padding-left:20px;transition:var(--tr);}
+.market-card:hover{border-left-color:var(--bronze);}
+.market-card h4{font-family:'Agrandir',sans-serif;font-size:18px;margin-bottom:8px;color:var(--white);}
+.market-card p{font-size:13px;color:var(--muted);line-height:1.5;}
+
+/* --- SHOWCASE SLIDER --- */
+.car-win{position:relative;overflow:hidden;margin-top:40px;}
+.car-track{display:flex;gap:24px;transition:transform 0.6s cubic-bezier(0.25,1,0.5,1);will-change:transform;}
+.car-item{flex:0 0 calc(33.333% - 16px);min-width:300px;background:var(--card);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;transition:var(--tr);backdrop-filter:blur(8px);}
+.car-img{width:100%;aspect-ratio:16/10;background:#2d1b1b;overflow:hidden;}
+.car-img img{width:100%;height:100%;object-fit:cover;transition:var(--tr);}
+.car-item:hover .car-img img{transform:scale(1.05);}
+.car-body{padding:24px;}
+.car-body h4{font-family:'Agrandir',sans-serif;font-size:18px;margin-bottom:8px;}
+.car-body p{color:var(--muted);font-size:13px;line-height:1.5;}
+.car-ctrls{display:flex;justify-content:space-between;align-items:center;margin-top:40px;gap:16px;}
+.car-dots{display:flex;gap:8px;align-items:center;}
+.car-dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.15);border:none;cursor:pointer;padding:0;transition:var(--tr);}
+.car-dot.on{background:var(--bronze);width:24px;border-radius:4px;}
+.car-btns{display:flex;gap:12px;}
+.car-b{width:48px;height:48px;border-radius:50%;border:1px solid var(--border);background:var(--card);color:var(--white);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:var(--tr);}
+.car-b:hover{background:var(--bronze);color:var(--wine-deep);border-color:var(--bronze);}
+
+/* --- CONSOLE HUB CONNECT FORM --- */
+.ct-box{display:grid;grid-template-columns:1fr 1.2fr;gap:64px;background:linear-gradient(135deg,var(--nakconel-red),rgba(10,2,2,0.6));border:1px solid var(--border);border-radius:var(--r);padding:64px;backdrop-filter:blur(8px);}
+.ct-info h3{font-family:'Agrandir',sans-serif;font-size:32px;margin-bottom:16px;}
+.ct-info p{color:var(--muted);margin-bottom:40px;line-height:1.6;}
+.ct-lines{display:flex;flex-direction:column;gap:24px;}
+.ct-l{display:flex;align-items:center;gap:16px;}
+.ct-l span{width:40px;height:40px;border-radius:var(--rs);background:rgba(201,154,74,0.1);display:flex;align-items:center;justify-content:center;color:var(--bronze);font-size:16px;}
+.ct-form{display:flex;flex-direction:column;gap:20px;}
+.form-g{display:flex;flex-direction:column;gap:8px;}
+.form-g label{font-size:12px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:1px;}
+.form-g input,.form-g textarea{background:rgba(10,2,2,0.6);border:1px solid var(--border);border-radius:var(--rs);padding:16px;color:var(--white);font-family:inherit;font-size:14px;transition:var(--tr);}
+.form-g input:focus,.form-g textarea:focus{outline:none;border-color:var(--bronze);background:rgba(61,10,10,0.3);}
+.submit-btn{background:var(--bronze);color:var(--wine-deep);border:none;border-radius:var(--rs);padding:16px;font-weight:600;cursor:pointer;transition:var(--tr);display:flex;align-items:center;justify-content:center;gap:10px;}
+.submit-btn:hover{background:var(--bronze-light);transform:translateY(-2px);}
+
+footer{border-top:1px solid var(--border);padding:80px 24px 40px 24px;position:relative;z-index:2;}
+.ft-main{max-width:1400px;margin:0 auto;display:grid;grid-template-columns:1.5fr repeat(3,1fr);gap:48px;margin-bottom:60px;}
+.ft-desc{color:var(--muted);font-size:14px;line-height:1.6;margin:16px 0 24px 0;max-width:320px;}
+.ft-col h5{font-family:'Agrandir',sans-serif;font-size:16px;margin-bottom:24px;color:var(--white);}
+.ft-col ul{display:flex;flex-direction:column;gap:12px;}
+.ft-col a{font-size:14px;color:var(--muted);}
+.ft-col a:hover{color:var(--bronze-light);padding-left:4px;}
+.ft-btm{max-width:1400px;margin:0 auto;padding-top:40px;border-top:1px solid rgba(255,255,255,0.05);display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-size:13px;}
+
+/* --- FLOATING AI CHAT BUTTON (premium animated) --- */
+.ai-chat-fab{
+  position:fixed; bottom:28px; right:28px; z-index:500;
+  width:66px; height:66px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  background:radial-gradient(circle at 35% 30%, var(--bronze-light) 0%, var(--bronze) 45%, var(--bronze-dim) 100%);
+  box-shadow:0 10px 30px rgba(201,154,74,0.4), 0 0 0 1px rgba(201,154,74,0.3), inset 0 1px 1px rgba(255,255,255,0.35);
+  text-decoration:none; cursor:pointer;
+  animation: fabGlow 3.6s ease-in-out infinite;
+  transition: transform 0.35s cubic-bezier(0.25,1,0.5,1);
+}
+.ai-chat-fab:hover{ transform:scale(1.06); }
+@keyframes fabGlow{
+  0%,100%{ box-shadow:0 10px 30px rgba(201,154,74,0.4), 0 0 0 1px rgba(201,154,74,0.3), inset 0 1px 1px rgba(255,255,255,0.35); }
+  50%{ box-shadow:0 10px 42px rgba(232,197,122,0.65), 0 0 0 1px rgba(232,197,122,0.45), inset 0 1px 1px rgba(255,255,255,0.5); }
+}
+
+/* rotating gradient halo behind the button */
+.ai-chat-fab::before{
+  content:''; position:absolute; inset:-9px; border-radius:50%; z-index:-1;
+  background: conic-gradient(from 0deg, transparent 0%, var(--bronze-light) 18%, transparent 38%, transparent 60%, var(--bronze-light) 80%, transparent 100%);
+  filter: blur(1.5px);
+  opacity:0.75;
+  animation: fabRotate 4.5s linear infinite;
+}
+@keyframes fabRotate{ to{ transform: rotate(360deg); } }
+
+/* soft expanding pulse rings */
+.ai-chat-fab-ring{
+  position:absolute; inset:-8px; border-radius:50%;
+  border:1.5px solid rgba(232,197,122,0.6);
+  animation: fabPulse 2.6s cubic-bezier(0.25,1,0.5,1) infinite;
+  pointer-events:none;
+}
+.ai-chat-fab-ring.ring2{ animation-delay:1.3s; }
+@keyframes fabPulse{
+  0%{ transform:scale(0.85); opacity:0.9; }
+  100%{ transform:scale(1.75); opacity:0; }
+}
+
+/* diagonal shine sweep across the button face */
+.ai-chat-fab-shine{
+  position:absolute; inset:2px; border-radius:50%; overflow:hidden; pointer-events:none;
+}
+.ai-chat-fab-shine::before{
+  content:''; position:absolute; top:-60%; left:-70%; width:38%; height:220%;
+  background: linear-gradient(115deg, transparent 0%, rgba(255,255,255,0.65) 50%, transparent 100%);
+  transform: rotate(18deg);
+  animation: fabShine 3.4s ease-in-out infinite;
+}
+@keyframes fabShine{
+  0%{ left:-70%; }
+  35%{ left:150%; }
+  100%{ left:150%; }
+}
+
+.ai-chat-fab-icon{
+  position:relative; width:64%; height:64%; object-fit:contain;
+  filter:drop-shadow(0 3px 8px rgba(0,0,0,0.45));
+  animation: fabBob 2.8s ease-in-out infinite;
+}
+@keyframes fabBob{
+  0%,100%{ transform:translateY(0) rotate(0deg); }
+  50%{ transform:translateY(-4px) rotate(-3deg); }
+}
+.ai-chat-fab-badge{
+  position:absolute; top:-2px; right:-2px; width:16px; height:16px;
+  border-radius:50%; background:#4ADE80; border:2px solid var(--ground);
+  box-shadow:0 0 8px rgba(74,222,128,0.7);
+  animation: fabBlink 1.8s ease-in-out infinite;
+}
+@keyframes fabBlink{ 0%,100%{ opacity:1; } 50%{ opacity:0.4; } }
+.ai-chat-fab-tip{
+  position:absolute; right:calc(100% + 14px); top:50%; transform:translateY(-50%) translateX(6px);
+  white-space:nowrap; background:rgba(10,2,2,0.94); color:var(--white);
+  font-size:13px; font-weight:500; padding:9px 16px; border-radius:10px;
+  border:1px solid var(--border); opacity:0; pointer-events:none;
+  box-shadow:0 8px 24px rgba(0,0,0,0.4);
+  transition:opacity 0.3s ease, transform 0.3s ease;
+}
+.ai-chat-fab-tip::after{
+  content:''; position:absolute; top:50%; left:100%; transform:translateY(-50%);
+  border:6px solid transparent; border-left-color:rgba(10,2,2,0.94);
+}
+.ai-chat-fab:hover .ai-chat-fab-tip, .ai-chat-fab.show-tip .ai-chat-fab-tip{
+  opacity:1; transform:translateY(-50%) translateX(0);
+}
+@media (max-width:768px){
+  .ai-chat-fab{ width:58px; height:58px; bottom:20px; right:20px; }
+}
+
+/* --- RESPONSIVE BREAKPOINTS --- */
+@media (max-width: 1024px) {
+  .hero{padding-top: 140px; min-height: auto;}
+  .hero-cont{text-align: center;}
+  .hero-txt p{margin-left: auto; margin-right: auto;}
+  .hero-btns{justify-content: center;}
+  
+  .pillar-row { grid-template-columns: 1fr; gap: 0; }
+  .pillar-row:nth-child(even) .pillar-img-frame { order: 0; }
+  .pillar-img-frame { min-height: 280px; }
+  .pillar-content-box { padding: 32px; }
+  
+  .ct-box{grid-template-columns:1fr;gap:48px;padding:40px 24px;}
+}
+@media (max-width: 768px) {
+  .menu-tg{display:flex;}
+  .nav-links{position:fixed;top:84px;left:-100%;width:100%;height:calc(100vh - 84px);background:rgba(27,4,4,0.98);backdrop-filter:blur(24px);flex-direction:column;justify-content:center;gap:35px;transition:var(--tr);padding:40px;border-top:1px solid var(--border);}
+  .nav-links.open{left:0;}
+  .car-item{flex:0 0 calc(50% - 12px);}
+  .ft-main{grid-template-columns:1fr 1fr;gap:32px;}
+}
+@media (max-width: 480px) {
+  .car-item{flex:0 0 100%;}
+  .ft-main{grid-template-columns:1fr;}
+  .ft-btm{flex-direction:column;gap:16px;text-align:center;}
+}
+</style>
+</head>
+<body class="loading-active">
+
+<div id="loader-container">
+  <div class="loader-stage">
+    <div class="mark-wrap">
+      <div class="mark-halo"></div>
+      <img class="mark-img mark-base" src="/static/image/logo.png" alt="NAKCONEL">
+      <div class="mark-sweep-wrap">
+        <img class="mark-img" src="/static/image/logo.png" alt="">
+        <div class="shine-bar"></div>
+      </div>
+    </div>
+    <div class="word-wrap">
+      <div class="loader-wordmark">NAK<span class="accent">CON</span>EL</div>
+    </div>
+    <div class="loader-tagline">Brand Management &amp; AI Strategy</div>
+    <div class="progress-rail"><div class="progress-fill"></div></div>
+  </div>
+</div>
+
+
+<header class="h-nav" id="navbar">
+  <div class="nav-cont">
+    <div class="logo-wrapper">
+      <a href="#"><img src="/static/image/logo.png" alt="NAKCONEL Logo" style="height:72px;width:auto;object-fit:contain;"></a>
+    </div>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="/home" class="active">Home</a></li>
+      <li class="about-dd-wrap">
+        <button class="about-dd-btn" id="aboutDropBtn" aria-expanded="false" aria-haspopup="true">
+          About <span class="dd-arrow">▾</span>
+        </button>
+        <div class="about-dd-menu" id="aboutDropMenu" role="menu">
+          <a class="dd-item" href="/about" role="menuitem">
+            <span class="dd-icon">◈</span>
+            <span class="dd-text"><strong>About Nakconel</strong><small>Our story &amp; direction</small></span>
+          </a>
+          <a class="dd-item" href="/meet-the-team" role="menuitem">
+            <span class="dd-icon">◉</span>
+            <span class="dd-text"><strong>Meet the Team</strong><small>The people behind the brand</small></span>
+          </a>
+          <a class="dd-item" href="/about#vision-mission" role="menuitem">
+            <span class="dd-icon">◎</span>
+            <span class="dd-text"><strong>Vision &amp; Mission</strong><small>Where we are going</small></span>
+          </a>
+          <a class="dd-item" href="/voice" role="menuitem">
+            <span class="dd-icon">◇</span>
+            <span class="dd-text"><strong>Brand Voice</strong><small>How we speak &amp; show up</small></span>
+          </a>
+          <div class="dd-divider"></div>
+          <a class="dd-item dd-cta" href="#contact" role="menuitem">
+            <span class="dd-icon">↗</span>
+            <span class="dd-text"><strong>Work With Us</strong><small>Book a strategy call</small></span>
+          </a>
+        </div>
+      </li>
+      <li><a href="#services">Pillars</a></li>
+      <li><a href="#markets">Global Footprints</a></li>
+      <li><a href="#work">Showcase</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+    <button class="menu-tg" id="menuToggle" aria-label="Toggle Menu">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="hero-bg-slides" id="slideshowContainer">
+    <div class="hero-bg-slide active"><img src="/static/image/bg1.png"></div>
+    <div class="hero-bg-slide"><img src="/static/image/bg2 .png"></div>
+    <div class="hero-bg-slide"><img src="/static/image/bg3.png"></div>
+    <div class="hero-bg-slide"><img src="/static/image/bg4.png"></div>
+  </div>
+  <div class="hero-bg-overlay"></div>
+
+  <div class="hero-cont">
+    <div class="hero-txt">
+      <span class="tag">Brand Management & AI Strategy</span>
+      <h1>Elevating Brands With <span>AI</span></h1>
+      <p>Strategy, content, design, technology, and training for businesses ready to lead in an AI-driven global marketplace.</p>
+      <div class="hero-btns">
+        <a href="#contact" class="hero-cta">Book Strategy Call ↗</a>
+        <a href="/register" class="hero-cta" style="background:transparent;border:1px solid var(--bronze);color:var(--bronze-light);box-shadow:none;">Get Started ↗</a>
+        <a href="/about" class="sec-btn" id="heroAboutBtn" style="text-decoration:none;display:inline-flex;align-items:center;justify-content:center;">About Our Identity</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="services">
+  <div class="sec-head">
+    <span class="tag">Brand Activation Campaign</span>
+    <h2 class="sec-title">We turn brand identity into market authority.</h2>
+  </div>
+  
+  <div class="campaign-block">
+    <img src="/static/image/activation-campaign.jpeg" alt="Nakconel Future Brand Movement Activation Campaign" class="campaign-full-img">
+    <div class="campaign-info">
+      <span class="campaign-badge">Brand Activation Campaign</span>
+      <h3>Brand Activation Campaign</h3>
+      <p>Your appearance is your first communication. Book a brand intelligence consultation, share your business challenge, and receive personalized AI tools, brand strategy, and content direction — plus limited Nakconel merch when you qualify.</p>
+      <a href="/campaign" class="explore-btn">Explore It ↗</a>
+    </div>
+  </div>
+</section>
+
+<section class="sec market-section" id="markets">
+  <div class="sec-head">
+    <span class="tag">Cultural Intelligence</span>
+    <h2 class="sec-title">Market-aware systems built for global acceleration.</h2>
+  </div>
+  <div class="market-grid">
+    <div class="market-card">
+      <h4>Africa</h4>
+      <p>Textile-inspired geometric rhythms and growth-grid structures matching localized industrial workflows.</p>
+    </div>
+    <div class="market-card">
+      <h4>Gulf Countries</h4>
+      <p>Architectural line systems and clean gold alignments tailored for Kuwait, Dubai, Qatar, and surrounding regions.</p>
+    </div>
+    <div class="market-card">
+      <h4>United States</h4>
+      <p>Structured operational lines centered on corporate scale setups, enterprise pipelines, and deployment grids.</p>
+    </div>
+    <div class="market-card">
+      <h4>Australia</h4>
+      <p>Abstract terrain contours and coastal geography tracking collaborative system lines and active training hubs.</p>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="work">
+  <div class="sec-head">
+    <span class="tag">Case Showcases</span>
+    <h2 class="sec-title">Selected Strategic Deliveries</h2>
+  </div>
+  <div class="car-win">
+    <div class="car-track" id="cTrack">
+      <div class="car-item">
+        <div class="car-img"><img src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=600&q=80" alt="Fintech Blueprint Dashboard"></div>
+        <div class="car-body">
+          <h4>Vortex Fintech Identity</h4>
+          <p>Complete global design blueprint alignment and asset management mapping metrics.</p>
+        </div>
+      </div>
+      <div class="car-item">
+        <div class="car-img"><img src="https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?auto=format&fit=crop&w=600&q=80" alt="E-Commerce Architecture Platform"></div>
+        <div class="car-body">
+          <h4>Aura Retail Systems</h4>
+          <p>Headless web design frameworks optimized for global response speed and interactive content catalogs.</p>
+        </div>
+      </div>
+      <div class="car-item">
+        <div class="car-img"><img src="https://images.unsplash.com/photo-1551434678-e076c223a692?auto=format&fit=crop&w=600&q=80" alt="Enterprise Analytics Panels"></div>
+        <div class="car-body">
+          <h4>Zenith Business Portal</h4>
+          <p>Complex brand performance indicators tracking interfaces utilizing lightning-fast server visualization models.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="car-ctrls">
+    <div class="car-dots" id="cDots"></div>
+    <div class="car-btns">
+      <button class="car-b" id="cPrev" aria-label="Previous Project">←</button>
+      <button class="car-b" id="cNext" aria-label="Next Project">→</button>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="our-services" style="border-top:1px solid var(--border);">
+  <div class="sec-head">
+    <span class="tag">Our Services</span>
+    <h2 class="sec-title">Everything your brand needs to grow.</h2>
+  </div>
+  <div class="pillars-stack">
+    <div class="pillar-row">
+      <div class="pillar-img-frame">
+        <img src="/static/image/content.png">
+      </div>
+      <div class="pillar-content-box">
+        <div class="pillar-icon-badge">❖</div>
+        <h3>Content & Design</h3>
+        <p>Premium visual identity systems, responsive campaign architectures, social media asset designs, comprehensive layout adjustments, and corporate brand storytelling manuals.</p>
+      </div>
+    </div>
+
+    <div class="pillar-row">
+      <div class="pillar-img-frame">
+        <img src="/static/image/it & technology.png">
+      </div>
+      <div class="pillar-content-box">
+        <div class="pillar-icon-badge">▲</div>
+        <h3>IT & Technology</h3>
+        <p>Web configuration structures, secure partner portals, custom business applications, workspace workflow optimizations, and enterprise transformation frameworks.</p>
+        <div style="border-top:1px solid var(--border);margin-top:20px;padding-top:20px;display:flex;flex-direction:column;gap:12px;">
+          <div class="pillar-icon-badge">◈</div>
+          <h3>AI Enablement</h3>
+          <span class="training-badge">Corporate Framework</span>
+          <p>AI training, AI adoption roadmaps, prompt systems, AI content workflows, brand intelligence dashboards, and clean business automation models.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="contact" style="border-top:1px solid var(--border);">
+  <div class="ct-box">
+    <div class="ct-info">
+      <span class="tag">Strategy Session</span>
+      <h3>Let's clarify your market path.</h3>
+      <p>Schedule a consult call with our strategy partners to review positioning pipelines, technology configurations, and corporate AI alignment models.</p>
+      <div class="ct-lines">
+        <div class="ct-l"><span>✉</span> nakconelcompany@gmail.com</div>
+        <div class="ct-l"><span>⚲</span> Remote / Global Systems Desk</div>
+      </div>
+    </div>
+    <form class="ct-form" id="cForm">
+      <div class="form-g">
+        <label for="usrName">Contact Name</label>
+        <input type="text" id="usrName" name="from_name" placeholder="e.g., Katherine Vance" required>
+      </div>
+      <div class="form-g">
+        <label for="usrEmail">Corporate Email</label>
+        <input type="email" id="usrEmail" name="from_email" placeholder="kvance@enterprise.com" required>
+      </div>
+      <div class="form-g">
+        <label for="usrMsg">Operational Focus</label>
+        <textarea id="usrMsg" name="message" rows="4" placeholder="Which brand pillars are you looking to enhance or scale?..." required></textarea>
+      </div>
+      <button type="submit" class="submit-btn" id="sendBtn">Book Strategy Call ↗</button>
+    </form>
+  </div>
+</section>
+
+<footer>
+  <div class="ft-main">
+    <div>
+      <div class="logo-wrapper" style="margin-bottom:16px;">
+        <a href="#"><img src="/static/image/logo.png" alt="NAKCONEL Logo" style="height:72px;width:auto;object-fit:contain;"></a>
+      </div>
+      <p class="ft-desc">Combining brand strategy, content design, and enterprise technology with deep cultural intelligence.</p>
+    </div>
+    <div class="ft-col">
+      <h5>Pillars</h5>
+      <ul>
+        <li><a href="#services">Brand Strategy</a></li>
+        <li><a href="#services">Content & Design</a></li>
+        <li><a href="#services">IT & Tech Systems</a></li>
+      </ul>
+    </div>
+    <div class="ft-col">
+      <h5>Enablement</h5>
+      <ul>
+        <li><a href="/about">About Identity</a></li>
+        <li><a href="#contact">Strategy Support Desk</a></li>
+      </ul>
+    </div>
+    <div class="ft-col">
+      <h5>Footprints</h5>
+      <ul>
+        <li><a href="#markets">Africa & Gulf Regions</a></li>
+        <li><a href="#markets">United States & Australia</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="ft-btm">
+    <p>&copy; 2026 NAKCONEL Studio Inc. All rights reserved.</p>
+    <p>Culture gives meaning. Intelligence gives movement.</p>
+  </div>
+</footer>
+
+<a href="/ai-chat" class="ai-chat-fab" id="aiChatFab" aria-label="Chat with our AI">
+  <span class="ai-chat-fab-ring"></span>
+  <span class="ai-chat-fab-ring ring2"></span>
+  <span class="ai-chat-fab-shine"></span>
+  <img src="/static/image/logo.png" alt="" class="ai-chat-fab-icon">
+  <span class="ai-chat-fab-badge"></span>
+  <span class="ai-chat-fab-tip">Chat with our AI ↗</span>
+</a>
+
+<script>
+// Briefly reveal the "Chat with our AI" tooltip a couple seconds after load,
+// then let hover/tap control it as usual.
+window.addEventListener('load', () => {
+  const fab = document.getElementById('aiChatFab');
+  if (!fab) return;
+  setTimeout(() => {
+    fab.classList.add('show-tip');
+    setTimeout(() => fab.classList.remove('show-tip'), 3200);
+  }, 1800);
+});
+</script>
+
+<script>
+// UNLOCK CONTEXT LOADER
+const loaderContainer = document.getElementById('loader-container');
+function clearAndDeactivateLoader() {
+  if (loaderContainer && !loaderContainer.classList.contains('fade-out')) {
+    loaderContainer.classList.add('fade-out');
+    document.body.classList.remove('loading-active');
+  }
+}
+window.addEventListener('load', () => { setTimeout(clearAndDeactivateLoader, 2700); });
+setTimeout(clearAndDeactivateLoader, 3400);
+
+// ABOUT DROPDOWN LOGIC (links inside now navigate to their own pages)
+const aboutDropBtn = document.getElementById('aboutDropBtn');
+const aboutDropMenu = document.getElementById('aboutDropMenu');
+
+function openDropdown() {
+  aboutDropBtn.classList.add('open');
+  aboutDropMenu.classList.add('open');
+  aboutDropBtn.setAttribute('aria-expanded', 'true');
+}
+function closeDropdown() {
+  aboutDropBtn.classList.remove('open');
+  aboutDropMenu.classList.remove('open');
+  aboutDropBtn.setAttribute('aria-expanded', 'false');
+}
+
+aboutDropBtn.addEventListener('click', (e) => {
+  e.stopPropagation();
+  aboutDropMenu.classList.contains('open') ? closeDropdown() : openDropdown();
+});
+
+document.addEventListener('click', () => closeDropdown());
+aboutDropMenu.addEventListener('click', (e) => e.stopPropagation());
+
+// NAVBAR SCROLL BACKGROUND
+window.addEventListener('scroll', () => {
+  const nav = document.getElementById('navbar');
+  if(window.scrollY > 50) { nav.classList.add('scrolled'); } else { nav.classList.remove('scrolled'); }
+}, {passive: true});
+
+// MOBILE MENU ENGINE
+const menuToggle = document.getElementById('menuToggle');
+const navLinks = document.getElementById('navLinks');
+menuToggle.addEventListener('click', () => {
+  navLinks.classList.toggle('open');
+  const spans = menuToggle.querySelectorAll('span');
+  if(navLinks.classList.contains('open')) {
+    spans[0].style.transform = 'rotate(45deg) translate(5px, 5px)';
+    spans[1].style.opacity = '0';
+    spans[2].style.transform = 'rotate(-45deg) translate(6px, -6px)';
+  } else {
+    spans[0].style.transform = 'none'; spans[1].style.opacity = '1'; spans[2].style.transform = 'none';
+  }
+});
+
+document.querySelectorAll('.nav-links a').forEach(link => {
+  link.addEventListener('click', () => {
+    navLinks.classList.remove('open');
+    const spans = menuToggle.querySelectorAll('span');
+    spans[0].style.transform = 'none'; spans[1].style.opacity = '1'; spans[2].style.transform = 'none';
+  });
+});
+
+// HERO BACKGROUND SLIDESHOW ROTATOR
+const slides = document.querySelectorAll('.hero-bg-slide');
+let currentSlideIndex = 0;
+
+function switchSlide() {
+  slides[currentSlideIndex].classList.remove('active');
+  currentSlideIndex = (currentSlideIndex + 1) % slides.length;
+  slides[currentSlideIndex].classList.add('active');
+}
+setInterval(switchSlide, 5000);
+
+// SHOWCASE CAROUSEL VIEWS
+const track = document.getElementById('cTrack');
+const cards = document.querySelectorAll('.car-item');
+const cDots = document.getElementById('cDots');
+let cur = 0;
+
+function getVis(){
+  if(window.innerWidth > 1024) return 3;
+  if(window.innerWidth > 480) return 2;
+  return 1;
+}
+function goTo(idx){
+  const vis = getVis();
+  const max = Math.max(0, cards.length - vis);
+  cur = Math.max(0, Math.min(idx, max));
+  const w = cards[0].offsetWidth + 24;
+  track.style.transform = `translateX(-${cur * w}px)`;
+  document.querySelectorAll('.car-dot').forEach((d, i) => { d.classList.toggle('on', i === cur); });
+}
+function buildDots(){
+  const vis = getVis();
+  const tot = Math.max(1, cards.length - vis + 1);
+  cDots.innerHTML = '';
+  for(let i = 0; i < tot; i++){
+    const d = document.createElement('button');
+    d.className = `car-dot${i === 0 ? ' on' : ''}`;
+    d.addEventListener('click', () => goTo(i));
+    cDots.appendChild(d);
+  }
+}
+document.getElementById('cNext').addEventListener('click', () => goTo(cur + 1));
+document.getElementById('cPrev').addEventListener('click', () => goTo(cur - 1));
+buildDots();
+window.addEventListener('resize', () => { buildDots(); goTo(0); }, {passive: true});
+
+// DISPATCH FORM ACTIONS
+emailjs.init('YOUR_PUBLIC_KEY');
+document.getElementById('cForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const b = document.getElementById('sendBtn');
+  b.textContent = 'Sending…'; b.disabled = true;
+  emailjs.sendForm('YOUR_SERVICE_ID', 'YOUR_TEMPLATE_ID', e.target)
+    .then(() => {
+      b.textContent = 'Call Booked ✓'; b.style.background = '#5c632f';
+      setTimeout(() => { b.textContent = 'Book Strategy Call ↗'; b.disabled = false; b.style.background = ''; e.target.reset(); }, 2500);
+    })
+    .catch(() => {
+      b.textContent = 'Failed — Try Again';
+      setTimeout(() => { b.textContent = 'Book Strategy Call ↗'; b.disabled = false; }, 2500);
+    });
+});
+</script>
+</body>
+</html>

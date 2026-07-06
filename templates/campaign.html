@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Brand Activation Campaign — NAKCONEL</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+@font-face{font-family:'Agrandir';src:url('https://fonts.cdnfonts.com/s/15785/Agrandir-GrandHeavy.woff') format('woff');font-weight:800;font-display:swap;}
+:root{
+  --wine-deep:#1B0404;--wine-mid:#3D0A0A;--ground:#0A0202;
+  --nakconel-red:#751008;--muted-rose:#a9443b;
+  --bronze:#C99A4A;--bronze-light:#E8C57A;--bronze-dim:#8B6A2E;
+  --olive-green:#5c632f;--warm-cream:#FDFBF7;
+  --cream:#F5E8C7;--white:#FDFAF4;--muted:rgba(245,232,199,0.52);
+  --border:rgba(201,154,74,0.15);--card:rgba(61,10,10,0.42);
+  --r:16px;--rs:8px;--tr:0.42s cubic-bezier(0.25,1,0.5,1);
+}
+*{margin:0;padding:0;box-sizing:border-box;scroll-behavior:smooth;}
+html, body { overflow-x: hidden; width: 100%; }
+body{
+  background: var(--ground);
+  background: radial-gradient(ellipse 60% 50% at 50% 40%, var(--wine-mid) 0%, transparent 70%),
+              radial-gradient(ellipse 130% 110% at 50% 50%, var(--wine-deep) 0%, var(--ground) 100%);
+  background-attachment: fixed;
+  color:var(--white);
+  font-family:'Poppins',sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+a{text-decoration:none;color:inherit;transition:var(--tr);}
+ul{list-style:none;}
+img{max-width:100%;height:auto;display:block;}
+
+/* --- STICKY NAVIGATION BAR --- */
+.h-nav{position:fixed;top:0;left:0;width:100%;z-index:100;background:rgba(10,2,2,0.6);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);transition:var(--tr);}
+.h-nav.scrolled{background:rgba(27,4,4,0.92);box-shadow:0 10px 30px rgba(0,0,0,0.5);}
+.nav-cont{max-width:1400px;margin:0 auto;padding:0 24px;height:84px;display:flex;align-items:center;justify-content:space-between;}
+.logo-wrapper{display:flex;align-items:center;gap:12px;}
+.nav-links{display:flex;gap:32px;align-items:center;}
+.nav-links a{font-size:14px;font-weight:500;color:var(--muted);letter-spacing:0.5px;cursor:pointer;}
+.nav-links a:hover, .nav-links a.active{color:var(--bronze-light);}
+.menu-tg{display:none;background:none;border:none;cursor:pointer;flex-direction:column;gap:6px;padding:4px;z-index:110;}
+.menu-tg span{width:24px;height:2px;background:var(--cream);transition:var(--tr);transform-origin:center;}
+
+/* --- ABOUT DROPDOWN --- */
+.about-dd-wrap { position: relative; }
+.about-dd-btn { background: none; border: none; cursor: pointer; font-family: 'Poppins', sans-serif; font-size: 14px; font-weight: 500; color: var(--muted); letter-spacing: 0.5px; display: flex; align-items: center; gap: 5px; padding: 6px 10px; border-radius: 6px; transition: var(--tr); position: relative; }
+.about-dd-btn:hover, .about-dd-btn.active { color: var(--bronze-light); }
+.about-dd-btn.open { color: var(--bronze-light); background: rgba(201,154,74,0.07); }
+.dd-arrow { font-size: 11px; transition: transform 0.3s ease; display: inline-block; }
+.about-dd-btn.open .dd-arrow { transform: rotate(180deg); }
+.about-dd-menu { position: absolute; top: calc(100% + 12px); left: 50%; transform: translateX(-50%) translateY(-8px); min-width: 240px; background: linear-gradient(160deg, rgba(27,4,4,0.97) 0%, rgba(10,2,2,0.99) 100%); border: 1px solid rgba(201,154,74,0.25); border-radius: 14px; padding: 8px; box-shadow: 0 20px 50px rgba(0,0,0,0.7), 0 0 0 1px rgba(201,154,74,0.05); opacity: 0; visibility: hidden; pointer-events: none; transition: opacity 0.28s ease, transform 0.28s ease, visibility 0.28s; z-index: 200; backdrop-filter: blur(20px); }
+.about-dd-menu::before { content: ''; position: absolute; top: -6px; left: 50%; transform: translateX(-50%); width: 10px; height: 10px; background: rgba(27,4,4,0.97); border-left: 1px solid rgba(201,154,74,0.25); border-top: 1px solid rgba(201,154,74,0.25); transform: translateX(-50%) rotate(45deg); }
+.about-dd-menu.open { opacity: 1; visibility: visible; pointer-events: auto; transform: translateX(-50%) translateY(0); }
+.dd-item { display: flex; align-items: center; gap: 12px; padding: 11px 14px; border-radius: 9px; cursor: pointer; transition: background 0.2s ease, transform 0.2s ease; color: var(--white); text-decoration: none; }
+.dd-item:hover { background: rgba(201,154,74,0.1); transform: translateX(2px); }
+.dd-icon { width: 30px; height: 30px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: var(--bronze); font-size: 15px; background: rgba(201,154,74,0.08); border-radius: 7px; border: 1px solid rgba(201,154,74,0.12); }
+.dd-text { display: flex; flex-direction: column; gap: 1px; }
+.dd-text strong { font-size: 13px; font-weight: 600; color: var(--white); }
+.dd-text small { font-size: 11px; color: var(--muted); font-weight: 400; }
+.dd-divider { height: 1px; background: rgba(201,154,74,0.12); margin: 6px 8px; }
+.dd-cta .dd-icon { color: var(--bronze-light); background: rgba(117,16,8,0.3); border-color: rgba(201,154,74,0.2); }
+.dd-cta .dd-text strong { color: var(--bronze-light); }
+
+/* --- CAMPAIGN HERO --- */
+.camp-hero{ position:relative; min-height: 92vh; min-height: 92svh; display: flex; align-items: center; overflow: hidden; padding: 140px 24px 60px 24px; }
+.camp-hero-cont{ position:relative; max-width:1400px; margin:0 auto; width:100%; display:grid; grid-template-columns: 1.05fr 0.95fr; gap: 56px; align-items: center; z-index: 4; }
+.camp-badge{ display:inline-block; background:rgba(201,154,74,0.15); color:var(--bronze-light); border:1px solid var(--bronze-dim); padding:6px 14px; border-radius:6px; font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:1.5px; margin-bottom:20px; }
+.camp-hero h1{ font-family:'Agrandir',sans-serif; font-size: clamp(34px, 5vw, 58px); line-height: 1.08; font-weight: 800; margin-bottom: 20px; color: var(--white); }
+.camp-hero h1 .accent{ color: var(--bronze-light); background: linear-gradient(135deg, var(--white) 30%, var(--bronze-light) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.camp-hero-sub{ font-size: 14px; letter-spacing:0.5px; color: var(--muted); margin-bottom: 14px; text-transform:uppercase; font-weight:600; }
+.camp-hero p.lead{ font-size: clamp(15px, 1.6vw, 17px); color: var(--muted); line-height: 1.65; margin-bottom: 36px; max-width: 540px; }
+.camp-hero-btns{display:flex;gap:16px;flex-wrap:wrap;}
+.hero-cta{background:linear-gradient(135deg,var(--bronze),var(--bronze-dim));color:var(--wine-deep);font-weight:600;padding:13px 26px;border-radius:var(--rs);box-shadow:0 4px 15px rgba(201,154,74,0.25);display:inline-flex;align-items:center;gap:8px;border:none;cursor:pointer;font-size:15px;}
+.hero-cta:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(201,154,74,0.4);color:var(--wine-deep);}
+.sec-btn{border:1px solid var(--border);background:rgba(255,255,255,0.03);color:var(--cream);font-weight:500;padding:13px 26px;border-radius:var(--rs); cursor: pointer;display:inline-flex;align-items:center;}
+.sec-btn:hover{background:var(--border);color:var(--white);}
+
+.camp-img-frame{ position:relative; width:100%; aspect-ratio: 4/5; max-height:600px; border-radius: var(--r); border: 1px solid var(--border); background: var(--wine-deep); box-shadow: 0 20px 50px rgba(0,0,0,0.6); overflow:hidden; }
+.camp-img-frame img{ width:100%; height:100%; object-fit:cover; }
+.camp-img-glow{ position:absolute; inset:-1px; border-radius:var(--r); box-shadow: 0 0 0 1px rgba(201,154,74,0.25) inset; pointer-events:none; }
+
+/* --- QUALIFY STEPS --- */
+.sec{padding:100px 24px;max-width:1400px;margin:0 auto;}
+.sec-head{margin-bottom:56px;max-width:680px;}
+.sec-head.center{margin-left:auto;margin-right:auto;text-align:center;}
+.tag{color:var(--bronze);text-transform:uppercase;font-size:12px;font-weight:600;letter-spacing:2px;display:inline-block;margin-bottom:12px;}
+.sec-title{font-family:'Agrandir',sans-serif;font-size:clamp(26px,3.6vw,40px);font-weight:800;line-height:1.25;color:var(--white);}
+.sec-title .accent{color:var(--bronze-light);}
+
+.qualify-section{background:rgba(27,4,4,0.4);border-top:1px solid var(--border);border-bottom:1px solid var(--border);}
+.qualify-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;margin-top:8px;}
+.qualify-card{position:relative;background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:36px 24px 28px;display:flex;flex-direction:column;gap:16px;backdrop-filter:blur(8px);transition:var(--tr);}
+.qualify-card:hover{border-color:rgba(201,154,74,0.4);transform:translateY(-3px);}
+.qualify-num{position:absolute;top:-16px;left:24px;width:36px;height:36px;border-radius:50%;background:var(--warm-cream);color:var(--wine-deep);font-family:'Agrandir',sans-serif;font-weight:800;font-size:14px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(0,0,0,0.4);}
+.qualify-icon{color:var(--bronze-light);font-size:28px;margin-top:12px;}
+.qualify-card h4{font-family:'Agrandir',sans-serif;font-size:16px;font-weight:800;color:var(--white);line-height:1.35;}
+.qualify-list{display:flex;flex-direction:column;gap:8px;margin-top:-4px;}
+.qualify-list li{font-size:13px;color:var(--muted);display:flex;align-items:flex-start;gap:6px;line-height:1.4;}
+.qualify-list li::before{content:'✓';color:var(--bronze-light);font-weight:700;flex-shrink:0;}
+
+/* --- LEAD FORM --- */
+.ct-box{display:grid;grid-template-columns:1fr 1.2fr;gap:64px;background:linear-gradient(135deg,var(--nakconel-red),rgba(10,2,2,0.6));border:1px solid var(--border);border-radius:var(--r);padding:64px;backdrop-filter:blur(8px);}
+.ct-info h3{font-family:'Agrandir',sans-serif;font-size:30px;margin-bottom:16px;line-height:1.25;}
+.ct-info p{color:var(--muted);margin-bottom:32px;line-height:1.6;}
+.ct-perks{display:flex;flex-direction:column;gap:14px;}
+.ct-perks li{font-size:14px;color:var(--cream);display:flex;align-items:flex-start;gap:10px;line-height:1.4;}
+.ct-perks li::before{content:'★';color:var(--bronze-light);flex-shrink:0;}
+.ct-form{display:flex;flex-direction:column;gap:20px;}
+.form-g{display:flex;flex-direction:column;gap:8px;}
+.form-g label{font-size:12px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:1px;}
+.form-g input,.form-g textarea{background:rgba(10,2,2,0.6);border:1px solid var(--border);border-radius:var(--rs);padding:16px;color:var(--white);font-family:inherit;font-size:14px;transition:var(--tr);}
+.form-g input:focus,.form-g textarea:focus{outline:none;border-color:var(--bronze);background:rgba(61,10,10,0.3);}
+.submit-btn{background:var(--bronze);color:var(--wine-deep);border:none;border-radius:var(--rs);padding:16px;font-weight:600;cursor:pointer;transition:var(--tr);display:flex;align-items:center;justify-content:center;gap:10px;}
+.submit-btn:hover{background:var(--bronze-light);transform:translateY(-2px);}
+.submit-btn:disabled{opacity:0.7;cursor:not-allowed;transform:none;}
+.form-err{font-size:13px;color:#e8a0a0;min-height:18px;}
+.form-success{display:none;text-align:center;padding:40px 20px;}
+.form-success.show{display:block;}
+.form-success .icon{font-size:48px;color:var(--bronze-light);margin-bottom:16px;}
+.form-success h4{font-family:'Agrandir',sans-serif;font-size:22px;margin-bottom:10px;color:var(--white);}
+.form-success p{color:var(--muted);font-size:14px;line-height:1.6;}
+
+footer{border-top:1px solid var(--border);padding:80px 24px 40px 24px;position:relative;z-index:2;}
+.ft-main{max-width:1400px;margin:0 auto;display:grid;grid-template-columns:1.5fr repeat(3,1fr);gap:48px;margin-bottom:60px;}
+.ft-desc{color:var(--muted);font-size:14px;line-height:1.6;margin:16px 0 24px 0;max-width:320px;}
+.ft-col h5{font-family:'Agrandir',sans-serif;font-size:16px;margin-bottom:24px;color:var(--white);}
+.ft-col ul{display:flex;flex-direction:column;gap:12px;}
+.ft-col a{font-size:14px;color:var(--muted);}
+.ft-col a:hover{color:var(--bronze-light);padding-left:4px;}
+.ft-btm{max-width:1400px;margin:0 auto;padding-top:40px;border-top:1px solid rgba(255,255,255,0.05);display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-size:13px;}
+
+/* --- RESPONSIVE --- */
+@media (max-width: 1024px) {
+  .camp-hero{padding-top:140px;min-height:auto;}
+  .camp-hero-cont{grid-template-columns:1fr;gap:40px;text-align:center;}
+  .camp-hero p.lead{margin-left:auto;margin-right:auto;}
+  .camp-hero-btns{justify-content:center;}
+  .camp-img-frame{max-width:480px;margin:0 auto;aspect-ratio:1/1;}
+  .qualify-grid{grid-template-columns:1fr 1fr;}
+  .ct-box{grid-template-columns:1fr;gap:48px;padding:40px 24px;}
+}
+@media (max-width: 768px) {
+  .menu-tg{display:flex;}
+  .nav-links{position:fixed;top:84px;left:-100%;width:100%;height:calc(100vh - 84px);background:rgba(27,4,4,0.98);backdrop-filter:blur(24px);flex-direction:column;justify-content:center;gap:35px;transition:var(--tr);padding:40px;border-top:1px solid var(--border);}
+  .nav-links.open{left:0;}
+  .ft-main{grid-template-columns:1fr 1fr;gap:32px;}
+}
+@media (max-width: 560px) {
+  .qualify-grid{grid-template-columns:1fr;}
+}
+@media (max-width: 480px) {
+  .ft-main{grid-template-columns:1fr;}
+  .ft-btm{flex-direction:column;gap:16px;text-align:center;}
+}
+</style>
+<style>
+/* =====================================================================
+   SHARED AUTH MODAL — auth-modal.css
+   Used by campaign.html and contact.html. Blurs the page behind it,
+   pops up a card with Google sign-in + email/password, then (for
+   first-time users) a profile-completion step with photo upload.
+   ===================================================================== */
+
+.auth-modal-overlay{
+  position:fixed; inset:0; z-index:1000;
+  background:rgba(5,1,1,0.55);
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+  display:none;
+  align-items:center; justify-content:center;
+  padding:24px;
+  opacity:0;
+  transition:opacity 0.3s ease;
+}
+.auth-modal-overlay.show{ display:flex; opacity:1; }
+body.auth-modal-open > *:not(.auth-modal-overlay){ filter:blur(6px); transition:filter 0.3s ease; }
+
+.auth-modal-card{
+  width:100%; max-width:440px;
+  background:linear-gradient(160deg, rgba(27,4,4,0.98) 0%, rgba(10,2,2,0.99) 100%);
+  border:1px solid rgba(201,154,74,0.25);
+  border-radius:16px;
+  padding:40px;
+  box-shadow:0 30px 70px rgba(0,0,0,0.6);
+  transform:scale(0.96) translateY(10px);
+  transition:transform 0.3s cubic-bezier(0.25,1,0.5,1);
+  max-height:88vh;
+  overflow-y:auto;
+  position:relative;
+}
+.auth-modal-overlay.show .auth-modal-card{ transform:scale(1) translateY(0); }
+
+.auth-modal-close{
+  position:absolute; top:16px; right:16px;
+  width:32px; height:32px; border-radius:50%;
+  background:rgba(201,154,74,0.08); border:1px solid rgba(201,154,74,0.15);
+  color:#F5E8C7; font-size:16px; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+}
+.auth-modal-close:hover{ background:rgba(201,154,74,0.18); }
+
+.auth-modal-head{ text-align:center; margin-bottom:24px; }
+.auth-modal-tag{ color:#C99A4A; text-transform:uppercase; font-size:11px; font-weight:600; letter-spacing:2px; display:block; margin-bottom:10px; }
+.auth-modal-title{ font-family:'Agrandir',sans-serif; font-size:24px; font-weight:800; color:#FDFAF4; line-height:1.3; }
+.auth-modal-sub{ color:rgba(245,232,199,0.52); font-size:13px; margin-top:8px; line-height:1.5; }
+
+.am-google-btn{
+  width:100%; background:#FDFBF7; color:#1B0404; border:none; border-radius:8px;
+  padding:14px; font-weight:600; font-size:14px; cursor:pointer;
+  display:flex; align-items:center; justify-content:center; gap:10px;
+  transition:0.3s ease; font-family:'Poppins',sans-serif;
+}
+.am-google-btn:hover{ background:#fff; transform:translateY(-2px); box-shadow:0 6px 20px rgba(0,0,0,0.25); }
+.am-google-btn:disabled{ opacity:0.6; cursor:not-allowed; transform:none; }
+.am-google-icon{ width:18px; height:18px; flex-shrink:0; }
+
+.am-divider{ display:flex; align-items:center; gap:12px; margin:22px 0; color:rgba(245,232,199,0.52); font-size:11px; text-transform:uppercase; letter-spacing:1px; }
+.am-divider::before,.am-divider::after{ content:''; flex:1; height:1px; background:rgba(201,154,74,0.15); }
+
+.am-tabs{ display:flex; gap:8px; margin-bottom:20px; background:rgba(10,2,2,0.4); border-radius:8px; padding:4px; }
+.am-tab{ flex:1; text-align:center; padding:9px; border-radius:6px; font-size:13px; font-weight:600; color:rgba(245,232,199,0.52); cursor:pointer; transition:0.25s ease; }
+.am-tab.active{ background:#C99A4A; color:#1B0404; }
+
+.am-form{ display:flex; flex-direction:column; gap:16px; }
+.am-g{ display:flex; flex-direction:column; gap:7px; }
+.am-g label{ font-size:11px; font-weight:500; color:rgba(245,232,199,0.52); text-transform:uppercase; letter-spacing:1px; }
+.am-g input, .am-g textarea{
+  background:rgba(10,2,2,0.6); border:1px solid rgba(201,154,74,0.15); border-radius:8px;
+  padding:14px; color:#FDFAF4; font-family:'Poppins',sans-serif; font-size:14px; transition:0.3s ease; width:100%;
+}
+.am-g input:focus, .am-g textarea:focus{ outline:none; border-color:#C99A4A; background:rgba(61,10,10,0.3); }
+
+.am-submit{
+  background:#C99A4A; color:#1B0404; border:none; border-radius:8px; padding:15px;
+  font-weight:600; font-size:14px; cursor:pointer; transition:0.3s ease;
+  display:flex; align-items:center; justify-content:center; gap:8px; font-family:'Poppins',sans-serif;
+}
+.am-submit:hover{ background:#E8C57A; transform:translateY(-2px); }
+.am-submit:disabled{ opacity:0.7; cursor:not-allowed; transform:none; }
+
+.am-err{ font-size:12.5px; color:#e8a0a0; min-height:16px; }
+.am-switch-line{ text-align:center; font-size:13px; color:rgba(245,232,199,0.52); margin-top:18px; }
+.am-switch-line a{ color:#E8C57A; cursor:pointer; font-weight:600; }
+.am-switch-line a:hover{ text-decoration:underline; }
+
+/* --- Avatar upload (profile completion step) --- */
+.am-avatar-upload{ display:flex; flex-direction:column; align-items:center; gap:12px; margin-bottom:8px; }
+.am-avatar-circle{
+  width:88px; height:88px; border-radius:50%; border:2px dashed rgba(201,154,74,0.4);
+  background:rgba(201,154,74,0.06); display:flex; align-items:center; justify-content:center;
+  cursor:pointer; overflow:hidden; position:relative; transition:0.3s ease; flex-shrink:0;
+}
+.am-avatar-circle:hover{ border-color:#C99A4A; background:rgba(201,154,74,0.12); }
+.am-avatar-circle img{ width:100%; height:100%; object-fit:cover; }
+.am-avatar-circle .plus-icon{ font-size:28px; color:#C99A4A; }
+.am-avatar-hint{ font-size:12px; color:rgba(245,232,199,0.52); }
+
+.am-screen{ display:none; }
+.am-screen.active{ display:block; }
+
+.am-step-track{ display:flex; gap:6px; justify-content:center; margin-bottom:22px; }
+.am-step-dot{ width:26px; height:3px; border-radius:2px; background:rgba(255,255,255,0.15); }
+.am-step-dot.done{ background:#E8C57A; }
+
+@media (max-width:560px){
+  .auth-modal-card{ padding:28px 22px; }
+}
+
+</style>
+</head>
+<body>
+
+<header class="h-nav" id="navbar">
+  <div class="nav-cont">
+    <div class="logo-wrapper">
+      <a href="/home"><img src="/static/image/logo.png" alt="NAKCONEL Logo" style="height:72px;width:auto;object-fit:contain;"></a>
+    </div>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="/home">Home</a></li>
+      <li class="about-dd-wrap">
+        <button class="about-dd-btn" id="aboutDropBtn" aria-expanded="false" aria-haspopup="true">
+          About <span class="dd-arrow">▾</span>
+        </button>
+        <div class="about-dd-menu" id="aboutDropMenu" role="menu">
+          <a class="dd-item" href="/about" role="menuitem">
+            <span class="dd-icon">◈</span>
+            <span class="dd-text"><strong>About Nakconel</strong><small>Our story &amp; direction</small></span>
+          </a>
+          <a class="dd-item" href="/meet-the-team" role="menuitem">
+            <span class="dd-icon">◉</span>
+            <span class="dd-text"><strong>Meet the Team</strong><small>The people behind the brand</small></span>
+          </a>
+          <a class="dd-item" href="/about#vision-mission" role="menuitem">
+            <span class="dd-icon">◎</span>
+            <span class="dd-text"><strong>Vision &amp; Mission</strong><small>Where we are going</small></span>
+          </a>
+          <a class="dd-item" href="/voice" role="menuitem">
+            <span class="dd-icon">◇</span>
+            <span class="dd-text"><strong>Brand Voice</strong><small>How we speak &amp; show up</small></span>
+          </a>
+          <div class="dd-divider"></div>
+          <a class="dd-item dd-cta" href="/contact" role="menuitem">
+            <span class="dd-icon">↗</span>
+            <span class="dd-text"><strong>Work With Us</strong><small>Book a strategy call</small></span>
+          </a>
+        </div>
+      </li>
+      <li><a href="/#services">Pillars</a></li>
+      <li><a href="/#markets">Global Footprints</a></li>
+      <li><a href="/campaign" class="active">Campaign</a></li>
+      <li><a href="/contact">Contact</a></li>
+    </ul>
+    <button class="menu-tg" id="menuToggle" aria-label="Toggle Menu">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+  </div>
+</header>
+
+<section class="camp-hero">
+  <div class="camp-hero-cont">
+    <div class="camp-hero-txt">
+      <span class="camp-badge">Brand Activation Campaign</span>
+      <div class="camp-hero-sub">Nakconel Future Brand Movement</div>
+      <h1>Your Appearance Is <span class="accent">Your First Communication</span></h1>
+      <p class="lead">Book a brand intelligence consultation, bring your business idea or challenge, and walk away with personalized AI tools, brand strategy direction, and growth recommendations — plus a limited Nakconel merch package when you qualify.</p>
+      <div class="camp-hero-btns">
+        <button type="button" class="hero-cta" style="font-family:inherit;border:none;" onclick="AuthModal.open({onComplete: campaignAuthComplete})">Get Started ↗</button>
+        <a href="#qualify" class="sec-btn">See How It Works</a>
+      </div>
+    </div>
+    <div class="camp-img-frame">
+      <img src="/static/image/brand-activation-campaign.png" alt="Nakconel Future Brand Movement Merch — t-shirt, cap, notebook, bottle">
+      <div class="camp-img-glow"></div>
+    </div>
+  </div>
+</section>
+
+<section class="sec qualify-section" id="qualify">
+  <div class="sec-head center">
+    <span class="tag">How It Works</span>
+    <h2 class="sec-title">To Qualify, <span class="accent">You Must</span></h2>
+  </div>
+  <div class="qualify-grid">
+    <div class="qualify-card">
+      <div class="qualify-num">01</div>
+      <div class="qualify-icon">▤</div>
+      <h4>Book a Brand Intelligence Consultation</h4>
+    </div>
+    <div class="qualify-card">
+      <div class="qualify-num">02</div>
+      <div class="qualify-icon">◉</div>
+      <h4>Bring Your Business Idea or Challenge</h4>
+    </div>
+    <div class="qualify-card">
+      <div class="qualify-num">03</div>
+      <div class="qualify-icon">◎</div>
+      <h4>Receive Personalized Recommendations</h4>
+      <ul class="qualify-list">
+        <li>Best AI tools for your business</li>
+        <li>Brand improvement strategy</li>
+        <li>Content direction</li>
+        <li>Growth opportunities</li>
+      </ul>
+    </div>
+    <div class="qualify-card">
+      <div class="qualify-num">04</div>
+      <div class="qualify-icon">◈</div>
+      <h4>Get Your Limited Nakconel Merch Package</h4>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="qualify-form">
+  <div class="ct-box" style="grid-template-columns:1fr;text-align:center;align-items:center;">
+    <div class="ct-info" style="max-width:560px;margin:0 auto;">
+      <span class="tag">Join the Movement</span>
+      <h3>Claim your spot in the Future Brand Movement.</h3>
+      <p>Sign in with Google to get started — we'll ask a few quick questions about your business so we can follow up and schedule your consultation.</p>
+      <ul class="ct-perks" style="text-align:left;display:inline-block;">
+        <li>Free brand intelligence consultation</li>
+        <li>Personalized AI &amp; strategy recommendations</li>
+        <li>Limited-edition Nakconel merch package</li>
+      </ul>
+      <div style="margin-top:32px;">
+        <button type="button" class="hero-cta" style="font-family:inherit;border:none;" onclick="AuthModal.open({onComplete: campaignAuthComplete})">Get Started ↗</button>
+      </div>
+      <div id="campaignSuccessMsg" style="display:none;margin-top:28px;padding:20px;background:rgba(201,154,74,0.1);border:1px solid var(--border);border-radius:var(--rs);">
+        <strong style="color:var(--bronze-light);">You're in! ✓</strong>
+        <p style="margin-top:6px;color:var(--muted);font-size:14px;">Thanks for joining the Nakconel Future Brand Movement. Our team will reach out shortly to schedule your consultation.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="ft-main">
+    <div>
+      <div class="logo-wrapper" style="margin-bottom:16px;">
+        <a href="/home"><img src="/static/image/logo.png" alt="NAKCONEL Logo" style="height:72px;width:auto;object-fit:contain;"></a>
+      </div>
+      <p class="ft-desc">Combining brand strategy, content design, and enterprise technology with deep cultural intelligence.</p>
+    </div>
+    <div class="ft-col">
+      <h5>Pillars</h5>
+      <ul>
+        <li><a href="/#services">Brand Activation Campaign</a></li>
+        <li><a href="/#services">Content & Design</a></li>
+        <li><a href="/#services">IT & Tech Systems</a></li>
+      </ul>
+    </div>
+    <div class="ft-col">
+      <h5>Enablement</h5>
+      <ul>
+        <li><a href="/about">About Identity</a></li>
+        <li><a href="/contact">Strategy Support Desk</a></li>
+      </ul>
+    </div>
+    <div class="ft-col">
+      <h5>Footprints</h5>
+      <ul>
+        <li><a href="/#markets">Africa & Gulf Regions</a></li>
+        <li><a href="/#markets">United States & Australia</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="ft-btm">
+    <p>&copy; 2026 NAKCONEL Studio Inc. All rights reserved.</p>
+    <p>Culture gives meaning. Intelligence gives movement.</p>
+  </div>
+</footer>
+
+<script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-auth-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+// =====================================================================
+// SHARED CONFIG — read by auth-modal.js. Same values used in contact.html.
+// Replace the Firebase placeholders with your real project config
+// (Firebase Console → Project Settings → General → Your apps → Web app).
+// =====================================================================
+window.firebaseConfig = {
+  apiKey: "AIzaSyC9I9bp2OnZnGXuf6KxyJKF4fUe6_TCz4I",
+  authDomain: "nakconel.firebaseapp.com",
+  projectId: "nakconel",
+  storageBucket: "nakconel.firebasestorage.app",
+  messagingSenderId: "231520414230",
+  appId: "1:231520414230:web:bdf249f098f33fe42f2337"
+};
+window.SUPABASE_URL = 'https://isyjausvvnposzkglgws.supabase.co';
+window.SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlzeWphdXN2dm5wb3N6a2dsZ3dzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI1ODk5MjUsImV4cCI6MjA5ODE2NTkyNX0.1c0Naw_dNorPhzDNtVZEP8kOKtJaXVOKsgH0abXoTRg';
+</script>
+<script>
+/* =====================================================================
+   SHARED AUTH MODAL — auth-modal.js
+   Used by campaign.html and contact.html.
+
+   HOW TO USE ON A PAGE:
+   1. Include auth-modal.css in <head>.
+   2. Include the Firebase + Supabase SDK <script> tags, then this file,
+      before </body>.
+   3. Make sure `firebaseConfig`, `SUPABASE_URL`, `SUPABASE_ANON_KEY` are
+      defined as globals (window.firebaseConfig, window.SUPABASE_URL,
+      window.SUPABASE_ANON_KEY) before this script runs.
+   4. Call AuthModal.open({ onComplete: (profile) => { ... } }) from a
+      button click. onComplete fires once the person is authenticated
+      AND has a complete profile (existing returning users skip straight
+      to onComplete; first-time users go through profile completion
+      first).
+   5. AuthModal.currentUser() / AuthModal.currentProfile() are available
+      any time after onComplete has fired once.
+
+   NOTE ON FIREBASE EMAIL/PASSWORD + SUPABASE:
+   Supabase's signInWithIdToken natively verifies Google ID tokens out of
+   the box. Verifying a generic Firebase (non-Google) ID token requires
+   Supabase to be configured with Firebase as a custom OIDC provider
+   (Authentication → Sign In / Providers → add provider → use your
+   Firebase project's issuer URL: https://securetoken.google.com/YOUR_PROJECT_ID).
+   Until that's configured, Google sign-in will work immediately; email/
+   password sign-in will show a clear error from Supabase until you add
+   that provider. See the chat reply for the exact steps.
+   ===================================================================== */
+
+const AuthModal = (function(){
+  try {
+
+  let onCompleteCallback = null;
+  let _supaUser = null;
+  let _profile = null;
+  let avatarFile = null;
+  let avatarDataUrl = null;
+  let _pendingFallbackEmail = '';
+  let _pendingExistingProfile = null;
+
+  // ---- Sanity checks up front, with visible errors instead of silent failure ----
+  if(typeof firebase === 'undefined'){
+    console.error('AuthModal: the Firebase SDK script tags did not load (firebase is undefined). Check the <script src> tags for firebase-app-compat.js and firebase-auth-compat.js are present and load BEFORE auth-modal.js.');
+  }
+  if(typeof window.supabase === 'undefined'){
+    console.error('AuthModal: the Supabase SDK script tag did not load (window.supabase is undefined). Check the <script src> tag for supabase-js is present and loads BEFORE auth-modal.js.');
+  }
+  if(!window.firebaseConfig){
+    console.error('AuthModal: window.firebaseConfig is not set. Make sure the config block runs BEFORE auth-modal.js loads.');
+  }
+
+  // ---- Firebase + Supabase init (shared across pages) ----
+  if(typeof firebase !== 'undefined' && (!firebase.apps || !firebase.apps.length) && window.firebaseConfig){
+    firebase.initializeApp(window.firebaseConfig);
+  }
+  const fbAuth = (typeof firebase !== 'undefined') ? firebase.auth() : null;
+  const googleProvider = (typeof firebase !== 'undefined') ? new firebase.auth.GoogleAuthProvider() : null;
+
+  let sb = null;
+  try {
+    sb = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+  } catch(e){
+    console.error('Supabase failed to load:', e);
+  }
+
+  // ---- Build modal DOM once ----
+  const overlay = document.createElement('div');
+  overlay.className = 'auth-modal-overlay';
+  overlay.innerHTML = `
+    <div class="auth-modal-card">
+      <button class="auth-modal-close" id="amClose" aria-label="Close">✕</button>
+
+      <!-- SCREEN: Google + Email/Password choice -->
+      <div class="am-screen active" id="amScreenAuth">
+        <div class="auth-modal-head">
+          <span class="auth-modal-tag">Nakconel</span>
+          <h3 class="auth-modal-title">Sign in to continue</h3>
+          <p class="auth-modal-sub">Join the conversation or claim your spot in the campaign.</p>
+        </div>
+
+        <button type="button" class="am-google-btn" id="amGoogleBtn">
+          <svg class="am-google-icon" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.6 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 8 3l5.7-5.7C34.6 6.5 29.6 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.7-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.5 16 18.9 13 24 13c3.1 0 5.8 1.1 8 3l5.7-5.7C34.6 6.5 29.6 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.5 0 10.5-2.1 14-5.6l-6.5-5.3C29.5 35 26.9 36 24 36c-5.3 0-9.7-3.4-11.3-8.1l-6.6 5.1C9.6 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.3-4.2 5.7l6.5 5.3C41.5 36.4 44 30.8 44 24c0-1.3-.1-2.7-.4-3.5z"/></svg>
+          Continue with Google
+        </button>
+        <p class="am-err" id="amGoogleErr" style="text-align:center;margin-top:10px;"></p>
+
+        <div class="am-divider">or use email</div>
+
+        <div class="am-tabs">
+          <div class="am-tab active" id="amTabSignup">Sign Up</div>
+          <div class="am-tab" id="amTabLogin">Log In</div>
+        </div>
+
+        <form class="am-form" id="amEmailForm">
+          <div class="am-g" id="amNameField">
+            <label for="amName">Full Name</label>
+            <input type="text" id="amName" placeholder="e.g., Katherine Vance">
+          </div>
+          <div class="am-g">
+            <label for="amEmail">Email</label>
+            <input type="email" id="amEmail" placeholder="kvance@enterprise.com" required>
+          </div>
+          <div class="am-g">
+            <label for="amPassword">Password</label>
+            <input type="password" id="amPassword" placeholder="••••••••" required minlength="6">
+          </div>
+          <p class="am-err" id="amEmailErr"></p>
+          <button type="submit" class="am-submit" id="amEmailSubmitBtn">Sign Up ↗</button>
+        </form>
+
+        <p class="am-switch-line" id="amSwitchLine">Already have an account? <a id="amSwitchToLogin">Log in</a></p>
+      </div>
+
+      <!-- SCREEN: Profile completion (first-time users only) -->
+      <div class="am-screen" id="amScreenProfile">
+        <div class="am-step-track"><div class="am-step-dot done"></div><div class="am-step-dot"></div></div>
+        <div class="auth-modal-head">
+          <h3 class="auth-modal-title">Complete Your Profile</h3>
+          <p class="auth-modal-sub">Just a couple quick things before you're in.</p>
+        </div>
+
+        <div class="am-avatar-upload">
+          <div class="am-avatar-circle" id="amAvatarCircle">
+            <span class="plus-icon">+</span>
+          </div>
+          <span class="am-avatar-hint">Add a profile photo (optional)</span>
+          <input type="file" id="amAvatarInput" accept="image/*" style="display:none;">
+        </div>
+
+        <form class="am-form" id="amProfileForm">
+          <div class="am-g" id="amProfileNameField">
+            <label for="amProfileName">Full Name</label>
+            <input type="text" id="amProfileName" placeholder="e.g., Katherine Vance" required>
+          </div>
+          <div class="am-g">
+            <label for="amProfilePhone">Phone</label>
+            <input type="tel" id="amProfilePhone" placeholder="+1 (555) 000-0000" required>
+          </div>
+          <div class="am-g" id="amBizField">
+            <label for="amProfileBiz">Your Business Idea or Challenge</label>
+            <textarea id="amProfileBiz" rows="3" placeholder="Tell us what you're building or what you're stuck on..."></textarea>
+          </div>
+          <p class="am-err" id="amProfileErr"></p>
+          <button type="submit" class="am-submit" id="amProfileSubmitBtn">Continue ↗</button>
+        </form>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+
+  const screens = {
+    auth: overlay.querySelector('#amScreenAuth'),
+    profile: overlay.querySelector('#amScreenProfile')
+  };
+  function showScreen(name){
+    Object.values(screens).forEach(s => s.classList.remove('active'));
+    screens[name].classList.add('active');
+  }
+
+  // ---- Open / close ----
+  function open(opts){
+    opts = opts || {};
+    onCompleteCallback = opts.onComplete || null;
+
+    // Already authenticated this session with a complete profile — just fire the callback.
+    if(_supaUser && _profile){
+      if(onCompleteCallback) onCompleteCallback(_profile);
+      return;
+    }
+    showScreen('auth');
+    setMode('signup');
+    document.getElementById('amGoogleErr').textContent = '';
+    document.getElementById('amEmailErr').textContent = '';
+    overlay.classList.add('show');
+    document.body.classList.add('auth-modal-open');
+  }
+  function close(){
+    overlay.classList.remove('show');
+    document.body.classList.remove('auth-modal-open');
+  }
+  overlay.querySelector('#amClose').addEventListener('click', close);
+  overlay.addEventListener('click', (e) => { if(e.target === overlay) close(); });
+
+  // ---- Sign Up / Log In tab toggle ----
+  let mode = 'signup';
+  function setMode(m){
+    mode = m;
+    document.getElementById('amTabSignup').classList.toggle('active', m === 'signup');
+    document.getElementById('amTabLogin').classList.toggle('active', m === 'login');
+    document.getElementById('amNameField').style.display = m === 'signup' ? 'flex' : 'none';
+    document.getElementById('amEmailSubmitBtn').textContent = m === 'signup' ? 'Sign Up ↗' : 'Log In ↗';
+    document.getElementById('amSwitchLine').innerHTML = m === 'signup'
+      ? 'Already have an account? <a id="amSwitchToLogin">Log in</a>'
+      : "Don't have an account? <a id=\"amSwitchToLogin\">Sign up</a>";
+    document.getElementById('amEmailErr').textContent = '';
+    bindSwitchLink();
+  }
+  function bindSwitchLink(){
+    const link = document.getElementById('amSwitchToLogin');
+    if(link) link.addEventListener('click', () => setMode(mode === 'signup' ? 'login' : 'signup'));
+  }
+  document.getElementById('amTabSignup').addEventListener('click', () => setMode('signup'));
+  document.getElementById('amTabLogin').addEventListener('click', () => setMode('login'));
+  bindSwitchLink();
+
+  // ---- Shared: after we have a Supabase user, check/create profile ----
+  async function handlePostAuth(supaUserObj, fallbackName, fallbackEmail, fallbackPhoto){
+    _supaUser = supaUserObj;
+
+    const { data: existingProfile } = await sb.from('profiles').select('*').eq('id', supaUserObj.id).maybeSingle();
+
+    if(existingProfile && existingProfile.name && existingProfile.phone){
+      // Returning user with a complete profile — done.
+      _profile = existingProfile;
+      close();
+      if(onCompleteCallback) onCompleteCallback(_profile);
+      return;
+    }
+
+    // First-time user, or a profile that's missing required fields — collect them.
+    document.getElementById('amProfileName').value = (existingProfile && existingProfile.name) || fallbackName || '';
+    document.getElementById('amProfilePhone').value = (existingProfile && existingProfile.phone) || '';
+    document.getElementById('amProfileBiz').value = (existingProfile && existingProfile.business_idea) || '';
+    if(fallbackPhoto){
+      document.getElementById('amAvatarCircle').innerHTML = `<img src="${fallbackPhoto}" alt="">`;
+    }
+    _pendingFallbackEmail = (existingProfile && existingProfile.email) || fallbackEmail || '';
+    _pendingExistingProfile = existingProfile || null;
+
+    showScreen('profile');
+  }
+
+  // ---- Google sign-in ----
+  document.getElementById('amGoogleBtn').addEventListener('click', async () => {
+    const btn = document.getElementById('amGoogleBtn');
+    const err = document.getElementById('amGoogleErr');
+    err.textContent = '';
+
+    if(!sb){
+      err.textContent = 'Could not connect to the server. Please check your connection and try again.';
+      return;
+    }
+
+    btn.disabled = true;
+    try {
+      const result = await fbAuth.signInWithPopup(googleProvider);
+      const idToken = await result.user.getIdToken();
+
+      const { data, error } = await sb.auth.signInWithIdToken({ provider: 'google', token: idToken });
+      if(error){
+        err.textContent = error.message || 'Google sign-in failed. Please try again.';
+        return;
+      }
+
+      await handlePostAuth(data.user, result.user.displayName, result.user.email, result.user.photoURL);
+    } catch(ex){
+      console.error('Google sign-in failed:', ex);
+      err.textContent = 'Could not sign in with Google. Please try again.';
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  // ---- Email/password sign-up or log-in ----
+  document.getElementById('amEmailForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const err = document.getElementById('amEmailErr');
+    const btn = document.getElementById('amEmailSubmitBtn');
+    err.textContent = '';
+
+    const name = document.getElementById('amName').value.trim();
+    const email = document.getElementById('amEmail').value.trim();
+    const password = document.getElementById('amPassword').value;
+
+    if(mode === 'signup' && !name){
+      err.textContent = 'Please enter your name.';
+      return;
+    }
+    if(!email || !password){
+      err.textContent = 'Please fill in every field.';
+      return;
+    }
+    if(!sb){
+      err.textContent = 'Could not connect to the server. Please check your connection and try again.';
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = mode === 'signup' ? 'Signing up…' : 'Logging in…';
+
+    try {
+      let fbUser;
+      if(mode === 'signup'){
+        const cred = await fbAuth.createUserWithEmailAndPassword(email, password);
+        fbUser = cred.user;
+        await fbUser.updateProfile({ displayName: name });
+      } else {
+        const cred = await fbAuth.signInWithEmailAndPassword(email, password);
+        fbUser = cred.user;
+      }
+
+      const idToken = await fbUser.getIdToken();
+      const { data, error } = await sb.auth.signInWithIdToken({ provider: 'firebase', token: idToken });
+
+      if(error){
+        // Supabase's signInWithIdToken natively verifies Google tokens. A generic
+        // Firebase (email/password) token needs Firebase added as a custom OIDC
+        // provider in Supabase — see the note at the top of this file.
+        err.textContent = error.message || 'Sign-in failed. Please try again.';
+        btn.disabled = false;
+        btn.textContent = mode === 'signup' ? 'Sign Up ↗' : 'Log In ↗';
+        return;
+      }
+
+      await handlePostAuth(data.user, name || fbUser.displayName, email, null);
+    } catch(ex){
+      console.error('Email auth failed:', ex);
+      err.textContent = (ex && ex.message) ? ex.message : 'Something went wrong. Please try again.';
+    } finally {
+      btn.disabled = false;
+      btn.textContent = mode === 'signup' ? 'Sign Up ↗' : 'Log In ↗';
+    }
+  });
+
+  // ---- Avatar picker (profile completion step) ----
+  document.getElementById('amAvatarCircle').addEventListener('click', () => {
+    document.getElementById('amAvatarInput').click();
+  });
+  document.getElementById('amAvatarInput').addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if(!file) return;
+    avatarFile = file;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      avatarDataUrl = ev.target.result;
+      document.getElementById('amAvatarCircle').innerHTML = `<img src="${avatarDataUrl}" alt="">`;
+    };
+    reader.readAsDataURL(file);
+  });
+
+  // ---- Profile completion submit ----
+  document.getElementById('amProfileForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const err = document.getElementById('amProfileErr');
+    const btn = document.getElementById('amProfileSubmitBtn');
+    err.textContent = '';
+
+    const name = document.getElementById('amProfileName').value.trim();
+    const phone = document.getElementById('amProfilePhone').value.trim();
+    const business_idea = document.getElementById('amProfileBiz').value.trim();
+
+    if(!name || !phone){
+      err.textContent = 'Please fill in your name and phone.';
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Saving…';
+
+    try {
+      let avatarUrl = (_pendingExistingProfile && _pendingExistingProfile.avatar_url) || null;
+
+      if(avatarFile || avatarDataUrl){
+        try {
+          let uploadBlob = avatarFile;
+          let ext = avatarFile ? (avatarFile.name.split('.').pop() || 'jpg').toLowerCase() : 'jpg';
+          if(!uploadBlob && avatarDataUrl){
+            const res = await fetch(avatarDataUrl);
+            uploadBlob = await res.blob();
+            ext = (uploadBlob.type || 'image/jpeg').split('/')[1] || 'jpg';
+          }
+          const storagePath = _supaUser.id + '.' + ext;
+          const { error: uploadErr } = await sb.storage.from('avatars').upload(storagePath, uploadBlob, { upsert: true, contentType: uploadBlob.type || 'image/jpeg' });
+          if(!uploadErr){
+            const { data: pub } = sb.storage.from('avatars').getPublicUrl(storagePath);
+            avatarUrl = pub.publicUrl;
+          } else {
+            console.warn('Avatar upload failed:', uploadErr.message);
+          }
+        } catch(uploadEx){
+          console.warn('Avatar upload exception:', uploadEx);
+        }
+      }
+
+      const profileRow = {
+        id: _supaUser.id,
+        name,
+        phone,
+        email: _pendingFallbackEmail,
+        avatar_url: avatarUrl,
+        business_idea: business_idea || null
+      };
+
+      const { error: upsertErr } = await sb.from('profiles').upsert(profileRow);
+      if(upsertErr){
+        err.textContent = upsertErr.message;
+        btn.disabled = false;
+        btn.textContent = 'Continue ↗';
+        return;
+      }
+
+      const { data: savedProfile } = await sb.from('profiles').select('*').eq('id', _supaUser.id).maybeSingle();
+      _profile = savedProfile || profileRow;
+
+      avatarFile = null;
+      avatarDataUrl = null;
+      close();
+      if(onCompleteCallback) onCompleteCallback(_profile);
+    } catch(ex){
+      console.error('Profile save failed:', ex);
+      err.textContent = 'Something went wrong saving your profile. Please try again.';
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Continue ↗';
+    }
+  });
+
+  return {
+    open,
+    close,
+    currentUser: () => _supaUser,
+    currentProfile: () => _profile,
+    supabaseClient: () => sb
+  };
+
+  } catch(buildError){
+    // If anything above failed to build (missing SDK, bad config, etc.), AuthModal
+    // still exists, but open() shows a visible alert instead of doing nothing —
+    // so a broken setup is obvious instead of a dead button.
+    console.error('AuthModal failed to initialize:', buildError);
+    return {
+      open: () => alert('Sign-in is not set up correctly on this page yet (' + buildError.message + '). Check the browser console for details.'),
+      close: () => {},
+      currentUser: () => null,
+      currentProfile: () => null,
+      supabaseClient: () => null
+    };
+  }
+})();
+
+</script>
+
+<script>
+// What happens after sign-in + profile completion on the campaign page:
+// just show the success message inline (their info is already saved to
+// the shared `profiles` table by the auth modal — name, phone, business idea).
+function campaignAuthComplete(profile){
+  document.getElementById('campaignSuccessMsg').style.display = 'block';
+  document.getElementById('campaignSuccessMsg').scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+// ===== ABOUT DROPDOWN =====
+const aboutDropBtn = document.getElementById('aboutDropBtn');
+const aboutDropMenu = document.getElementById('aboutDropMenu');
+function openDropdown() { aboutDropBtn.classList.add('open'); aboutDropMenu.classList.add('open'); aboutDropBtn.setAttribute('aria-expanded', 'true'); }
+function closeDropdown() { aboutDropBtn.classList.remove('open'); aboutDropMenu.classList.remove('open'); aboutDropBtn.setAttribute('aria-expanded', 'false'); }
+aboutDropBtn.addEventListener('click', (e) => { e.stopPropagation(); aboutDropMenu.classList.contains('open') ? closeDropdown() : openDropdown(); });
+document.addEventListener('click', () => closeDropdown());
+aboutDropMenu.addEventListener('click', (e) => e.stopPropagation());
+
+// ===== NAVBAR SCROLL =====
+window.addEventListener('scroll', () => {
+  const nav = document.getElementById('navbar');
+  if(window.scrollY > 50) { nav.classList.add('scrolled'); } else { nav.classList.remove('scrolled'); }
+}, {passive: true});
+
+// ===== MOBILE MENU =====
+const menuToggle = document.getElementById('menuToggle');
+const navLinks = document.getElementById('navLinks');
+menuToggle.addEventListener('click', () => {
+  navLinks.classList.toggle('open');
+  const spans = menuToggle.querySelectorAll('span');
+  if(navLinks.classList.contains('open')) {
+    spans[0].style.transform = 'rotate(45deg) translate(5px, 5px)';
+    spans[1].style.opacity = '0';
+    spans[2].style.transform = 'rotate(-45deg) translate(6px, -6px)';
+  } else {
+    spans[0].style.transform = 'none'; spans[1].style.opacity = '1'; spans[2].style.transform = 'none';
+  }
+});
+document.querySelectorAll('.nav-links a').forEach(link => {
+  link.addEventListener('click', () => {
+    navLinks.classList.remove('open');
+    const spans = menuToggle.querySelectorAll('span');
+    spans[0].style.transform = 'none'; spans[1].style.opacity = '1'; spans[2].style.transform = 'none';
+  });
+});
+</script>
+</body>
+</html>

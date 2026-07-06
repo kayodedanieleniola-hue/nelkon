@@ -1,0 +1,1353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contact — NAKCONEL</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+@font-face{font-family:'Agrandir';src:url('https://fonts.cdnfonts.com/s/15785/Agrandir-GrandHeavy.woff') format('woff');font-weight:800;font-display:swap;}
+:root{
+  --wine-deep:#1B0404;--wine-mid:#3D0A0A;--ground:#0A0202;
+  --nakconel-red:#751008;--muted-rose:#a9443b;
+  --bronze:#C99A4A;--bronze-light:#E8C57A;--bronze-dim:#8B6A2E;
+  --olive-green:#5c632f;--warm-cream:#FDFBF7;
+  --cream:#F5E8C7;--white:#FDFAF4;--muted:rgba(245,232,199,0.52);
+  --border:rgba(201,154,74,0.15);--card:rgba(61,10,10,0.42);
+  --r:16px;--rs:8px;--tr:0.42s cubic-bezier(0.25,1,0.5,1);
+}
+*{margin:0;padding:0;box-sizing:border-box;scroll-behavior:smooth;}
+
+html, body { overflow-x: hidden; width: 100%; }
+
+body{
+  background: var(--ground);
+  background: radial-gradient(ellipse 60% 50% at 50% 40%, var(--wine-mid) 0%, transparent 70%),
+              radial-gradient(ellipse 130% 110% at 50% 50%, var(--wine-deep) 0%, var(--ground) 100%);
+  background-attachment: fixed;
+  color:var(--white);
+  font-family:'Poppins',sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+a{text-decoration:none;color:inherit;transition:var(--tr);}
+ul{list-style:none;}
+img{max-width:100%;height:auto;display:block;}
+
+
+/* --- STICKY NAVIGATION BAR --- */
+.h-nav{position:fixed;top:0;left:0;width:100%;z-index:100;background:rgba(10,2,2,0.6);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);transition:var(--tr);}
+.h-nav.scrolled{background:rgba(27,4,4,0.92);box-shadow:0 10px 30px rgba(0,0,0,0.5);}
+.nav-cont{max-width:1400px;margin:0 auto;padding:0 24px;height:84px;display:flex;align-items:center;justify-content:space-between;}
+
+.logo-wrapper{display:flex;align-items:center;gap:12px;}
+.logo-icon{width:32px;height:32px;border:2px solid var(--bronze);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Agrandir',sans-serif;font-weight:800;font-size:14px;color:var(--bronze);background:var(--nakconel-red);box-shadow:0 0 10px rgba(201,154,74,0.3);}
+.logo{font-family:'Agrandir',sans-serif;font-weight:800;font-size:24px;letter-spacing:-0.5px;color:var(--white);}
+.logo span{color:var(--bronze);}
+
+.nav-links{display:flex;gap:32px;align-items:center;}
+.nav-links a{font-size:14px;font-weight:500;color:var(--muted);letter-spacing:0.5px;cursor:pointer;}
+.nav-links a:hover, .nav-links a.active{color:var(--bronze-light);}
+
+.menu-tg{display:none;background:none;border:none;cursor:pointer;flex-direction:column;gap:6px;padding:4px;z-index:110;}
+.menu-tg span{width:24px;height:2px;background:var(--cream);transition:var(--tr);transform-origin:center;}
+
+/* --- ABOUT DROPDOWN BUTTON --- */
+.about-dd-wrap { position: relative; }
+.about-dd-btn {
+  background: none; border: none; cursor: pointer;
+  font-family: 'Poppins', sans-serif; font-size: 14px; font-weight: 500;
+  color: var(--muted); letter-spacing: 0.5px;
+  display: flex; align-items: center; gap: 5px;
+  padding: 6px 10px; border-radius: 6px;
+  transition: var(--tr); position: relative;
+}
+.about-dd-btn:hover, .about-dd-btn.active { color: var(--bronze-light); }
+.about-dd-btn.open { color: var(--bronze-light); background: rgba(201,154,74,0.07); }
+.dd-arrow { font-size: 11px; transition: transform 0.3s ease; display: inline-block; }
+.about-dd-btn.open .dd-arrow { transform: rotate(180deg); }
+
+.about-dd-menu {
+  position: absolute; top: calc(100% + 12px); left: 50%; transform: translateX(-50%) translateY(-8px);
+  min-width: 240px; background: linear-gradient(160deg, rgba(27,4,4,0.97) 0%, rgba(10,2,2,0.99) 100%);
+  border: 1px solid rgba(201,154,74,0.25); border-radius: 14px;
+  padding: 8px; box-shadow: 0 20px 50px rgba(0,0,0,0.7), 0 0 0 1px rgba(201,154,74,0.05);
+  opacity: 0; visibility: hidden; pointer-events: none;
+  transition: opacity 0.28s ease, transform 0.28s ease, visibility 0.28s;
+  z-index: 200;
+  backdrop-filter: blur(20px);
+}
+.about-dd-menu::before {
+  content: ''; position: absolute; top: -6px; left: 50%; transform: translateX(-50%);
+  width: 10px; height: 10px; background: rgba(27,4,4,0.97);
+  border-left: 1px solid rgba(201,154,74,0.25); border-top: 1px solid rgba(201,154,74,0.25);
+  transform: translateX(-50%) rotate(45deg);
+}
+.about-dd-menu.open {
+  opacity: 1; visibility: visible; pointer-events: auto;
+  transform: translateX(-50%) translateY(0);
+}
+.dd-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 11px 14px; border-radius: 9px; cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+  color: var(--white); text-decoration: none;
+}
+.dd-item:hover { background: rgba(201,154,74,0.1); transform: translateX(2px); }
+.dd-icon {
+  width: 30px; height: 30px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--bronze); font-size: 15px;
+  background: rgba(201,154,74,0.08); border-radius: 7px;
+  border: 1px solid rgba(201,154,74,0.12);
+}
+.dd-text { display: flex; flex-direction: column; gap: 1px; }
+.dd-text strong { font-size: 13px; font-weight: 600; color: var(--white); }
+.dd-text small { font-size: 11px; color: var(--muted); font-weight: 400; }
+.dd-divider { height: 1px; background: rgba(201,154,74,0.12); margin: 6px 8px; }
+.dd-cta .dd-icon { color: var(--bronze-light); background: rgba(117,16,8,0.3); border-color: rgba(201,154,74,0.2); }
+.dd-cta .dd-text strong { color: var(--bronze-light); }
+
+/* --- HERO AREA --- */
+.hero{ position:relative; min-height: 100vh; min-height: 100svh; display: flex; align-items: center; overflow: hidden; padding: 120px 24px 60px 24px; }
+.hero-cont{ max-width:1400px; margin:0 auto; width:100%; display:grid; grid-template-columns: 1.1fr 0.9fr; gap: 48px; align-items: center; z-index: 2; }
+.hero-txt h1{ font-family:'Agrandir',sans-serif; font-size: clamp(38px, 5vw, 64px); line-height: 1.1; font-weight: 800; margin-bottom: 24px; color: var(--white); }
+.hero-txt h1 span{ color: var(--bronze-light); background: linear-gradient(135deg, var(--white) 30%, var(--bronze-light) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.hero-txt p{ font-size: clamp(15px, 1.8vw, 18px); color: var(--muted); line-height: 1.6; margin-bottom: 40px; max-width: 580px; }
+.hero-btns{display:flex;gap:16px;flex-wrap:wrap;}
+.sec-btn{border:1px solid var(--border);background:rgba(255,255,255,0.03);color:var(--cream);font-weight:500;padding:12px 24px;border-radius:var(--rs); cursor: pointer;}
+.sec-btn:hover{background:var(--border);color:var(--white);}
+.hero-cta{background:linear-gradient(135deg,var(--bronze),var(--bronze-dim));color:var(--wine-deep);font-weight:600;padding:12px 24px;border-radius:var(--rs);box-shadow:0 4px 15px rgba(201,154,74,0.25);display:inline-flex;align-items:center;gap:8px;}
+.hero-cta:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(201,154,74,0.4);color:var(--wine-deep);}
+
+/* --- HOME HERO SLIDESHOW --- */
+.hero-gallery{ position: relative; width: 100%; aspect-ratio: 4 / 5; max-height: 580px; border-radius: var(--r); border: 1px solid var(--border); background: var(--wine-deep); box-shadow: 0 20px 50px rgba(0,0,0,0.6); overflow: hidden; }
+.slide-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+.hero-slide { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; transform: scale(1.06); transition: opacity 1.2s cubic-bezier(0.4, 0, 0.2, 1), transform 1.4s cubic-bezier(0.4, 0, 0.2, 1); z-index: 1; }
+.hero-slide.active { opacity: 1; transform: scale(1); z-index: 2; }
+.hero-slide img { width: 100%; height: 100%; object-fit: cover; }
+.gallery-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(10,2,2,0.85) 0%, transparent 40%); z-index: 3; pointer-events: none; }
+.slide-indicators { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; z-index: 4; }
+.ind-dot { width: 24px; height: 3px; background: rgba(255,255,255,0.2); border-radius: 2px; overflow: hidden; position: relative; }
+.ind-dot::after { content: ''; position: absolute; top: 0; left: 0; height: 100%; width: 0; background: var(--bronze-light); }
+.ind-dot.active::after { width: 100%; transition: width 5s linear; }
+
+/* --- CORE PILLARS SPLIT LAYOUT --- */
+.sec{padding:120px 24px;max-width:1400px;margin:0 auto;}
+.sec-head{margin-bottom:64px;max-width:650px;}
+.tag{color:var(--bronze);text-transform:uppercase;font-size:12px;font-weight:600;letter-spacing:2px;display:inline-block;margin-bottom:12px;}
+.sec-title{font-family:'Agrandir',sans-serif;font-size:clamp(28px,4vw,42px);font-weight:800;line-height:1.2;color:var(--white);}
+
+.pillars-stack { display: flex; flex-direction: column; gap: 40px; }
+.pillar-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  align-items: center;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  overflow: hidden;
+  backdrop-filter: blur(8px);
+  transition: border-color 0.4s ease;
+}
+.pillar-row:hover { border-color: rgba(201,154,74,0.35); }
+
+/* Alternating splits */
+.pillar-row:nth-child(even) .pillar-img-frame { order: 2; }
+
+.pillar-img-frame { width: 100%; height: 100%; min-height: 380px; position: relative; overflow: hidden; }
+.pillar-img-frame img { width: 100%; height: 100%; object-fit: cover; position: absolute; inset: 0; transition: transform 0.6s ease; }
+.pillar-row:hover .pillar-img-frame img { transform: scale(1.03); }
+
+.pillar-content-box { padding: 48px; display: flex; flex-direction: column; gap: 20px; }
+.pillar-icon-badge { width: 48px; height: 48px; border-radius: var(--rs); background: rgba(117,16,8,0.4); border: 1px solid rgba(201,154,74,0.3); display: flex; align-items: center; justify-content: center; color: var(--bronze-light); font-size: 20px; }
+.pillar-icon-badge h3 { font-family: 'Agrandir', sans-serif; font-size: 24px; font-weight: 800; color: var(--white); }
+.pillar-content-box p { color: var(--muted); font-size: 15px; line-height: 1.6; }
+.training-badge { align-self: flex-start; background: rgba(92,99,47,0.3); color: var(--warm-cream); border: 1px solid var(--olive-green); padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+
+/* --- CULTURAL GEOGRAPHY GLOBAL GRID --- */
+.market-section{background:rgba(27,4,4,0.4);border-top:1px solid var(--border);border-bottom:1px solid var(--border);position:relative;}
+.market-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:24px;margin-top:40px;}
+.market-card{border-left:2px solid var(--olive-green);padding-left:20px;transition:var(--tr);}
+.market-card:hover{border-left-color:var(--bronze);}
+.market-card h4{font-family:'Agrandir',sans-serif;font-size:18px;margin-bottom:8px;color:var(--white);}
+.market-card p{font-size:13px;color:var(--muted);line-height:1.5;}
+
+/* --- SHOWCASE SLIDER --- */
+.car-win{position:relative;overflow:hidden;margin-top:40px;}
+.car-track{display:flex;gap:24px;transition:transform 0.6s cubic-bezier(0.25,1,0.5,1);will-change:transform;}
+.car-item{flex:0 0 calc(33.333% - 16px);min-width:300px;background:var(--card);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;transition:var(--tr);backdrop-filter:blur(8px);}
+.car-img{width:100%;aspect-ratio:16/10;background:#2d1b1b;overflow:hidden;}
+.car-img img{width:100%;height:100%;object-fit:cover;transition:var(--tr);}
+.car-item:hover .car-img img{transform:scale(1.05);}
+.car-body{padding:24px;}
+.car-body h4{font-family:'Agrandir',sans-serif;font-size:18px;margin-bottom:8px;}
+.car-body p{color:var(--muted);font-size:13px;line-height:1.5;}
+.car-ctrls{display:flex;justify-content:space-between;align-items:center;margin-top:40px;gap:16px;}
+.car-dots{display:flex;gap:8px;align-items:center;}
+.car-dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.15);border:none;cursor:pointer;padding:0;transition:var(--tr);}
+.car-dot.on{background:var(--bronze);width:24px;border-radius:4px;}
+.car-btns{display:flex;gap:12px;}
+.car-b{width:48px;height:48px;border-radius:50%;border:1px solid var(--border);background:var(--card);color:var(--white);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:var(--tr);}
+.car-b:hover{background:var(--bronze);color:var(--wine-deep);border-color:var(--bronze);}
+
+/* --- CONSOLE HUB CONNECT FORM --- */
+.ct-box{display:grid;grid-template-columns:1fr 1.2fr;gap:64px;background:linear-gradient(135deg,var(--nakconel-red),rgba(10,2,2,0.6));border:1px solid var(--border);border-radius:var(--r);padding:64px;backdrop-filter:blur(8px);}
+.ct-info h3{font-family:'Agrandir',sans-serif;font-size:32px;margin-bottom:16px;}
+.ct-info p{color:var(--muted);margin-bottom:40px;line-height:1.6;}
+.ct-lines{display:flex;flex-direction:column;gap:24px;}
+.ct-l{display:flex;align-items:center;gap:16px;}
+.ct-l span{width:40px;height:40px;border-radius:var(--rs);background:rgba(201,154,74,0.1);display:flex;align-items:center;justify-content:center;color:var(--bronze);font-size:16px;}
+.ct-form{display:flex;flex-direction:column;gap:20px;}
+.form-g{display:flex;flex-direction:column;gap:8px;}
+.form-g label{font-size:12px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:1px;}
+.form-g input,.form-g textarea{background:rgba(10,2,2,0.6);border:1px solid var(--border);border-radius:var(--rs);padding:16px;color:var(--white);font-family:inherit;font-size:14px;transition:var(--tr);}
+.form-g input:focus,.form-g textarea:focus{outline:none;border-color:var(--bronze);background:rgba(61,10,10,0.3);}
+.submit-btn{background:var(--bronze);color:var(--wine-deep);border:none;border-radius:var(--rs);padding:16px;font-weight:600;cursor:pointer;transition:var(--tr);display:flex;align-items:center;justify-content:center;gap:10px;}
+.submit-btn:hover{background:var(--bronze-light);transform:translateY(-2px);}
+
+footer{border-top:1px solid var(--border);padding:80px 24px 40px 24px;position:relative;z-index:2;}
+.ft-main{max-width:1400px;margin:0 auto;display:grid;grid-template-columns:1.5fr repeat(3,1fr);gap:48px;margin-bottom:60px;}
+.ft-desc{color:var(--muted);font-size:14px;line-height:1.6;margin:16px 0 24px 0;max-width:320px;}
+.ft-col h5{font-family:'Agrandir',sans-serif;font-size:16px;margin-bottom:24px;color:var(--white);}
+.ft-col ul{display:flex;flex-direction:column;gap:12px;}
+.ft-col a{font-size:14px;color:var(--muted);}
+.ft-col a:hover{color:var(--bronze-light);padding-left:4px;}
+.ft-btm{max-width:1400px;margin:0 auto;padding-top:40px;border-top:1px solid rgba(255,255,255,0.05);display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-size:13px;}
+
+/* --- ACCOUNT APP: SIGNUP / LOGIN / CONTACT LIST --- */
+.app-card{max-width:480px;margin:0 auto;background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:48px;backdrop-filter:blur(8px);}
+.list-screen{max-width:600px;margin:0 auto;}
+.switch-line{text-align:center;margin-top:24px;font-size:13px;color:var(--muted);}
+.switch-line a{color:var(--bronze-light);font-weight:600;cursor:pointer;}
+.switch-line a:hover{text-decoration:underline;}
+.form-err{font-size:13px;color:var(--muted-rose);min-height:18px;margin-top:-4px;}
+
+.google-btn{width:100%;background:var(--warm-cream);color:var(--wine-deep);border:none;border-radius:var(--rs);padding:14px;font-weight:600;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:var(--tr);}
+.google-btn:hover{background:var(--white);transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,0.25);}
+.google-btn:disabled{opacity:0.6;cursor:not-allowed;transform:none;}
+.google-icon{width:18px;height:18px;flex-shrink:0;}
+.divider-line{display:flex;align-items:center;gap:12px;margin:24px 0;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:1px;}
+.divider-line::before,.divider-line::after{content:'';flex:1;height:1px;background:var(--border);}
+
+.demo-otp-banner{background:rgba(92,99,47,0.18);border:1px dashed var(--olive-green);border-radius:var(--rs);padding:12px 16px;font-size:13px;color:var(--warm-cream);margin-bottom:20px;text-align:center;letter-spacing:0.5px;}
+.demo-otp-banner strong{color:var(--bronze-light);font-size:16px;letter-spacing:3px;}
+.otp-row{display:flex;gap:10px;justify-content:center;margin-bottom:4px;}
+.otp-box{width:46px;height:54px;text-align:center;font-size:20px;font-weight:600;background:rgba(10,2,2,0.6);border:1px solid var(--border);border-radius:var(--rs);color:var(--white);font-family:inherit;}
+.otp-box:focus{outline:none;border-color:var(--bronze);background:rgba(61,10,10,0.3);}
+
+.avatar-pick{display:flex;flex-direction:column;align-items:center;gap:10px;margin-bottom:8px;cursor:pointer;}
+.avatar-circle{width:84px;height:84px;border-radius:50%;border:2px dashed var(--border);display:flex;align-items:center;justify-content:center;font-size:28px;color:var(--bronze);background:rgba(10,2,2,0.4);overflow:hidden;transition:var(--tr);}
+.avatar-pick:hover .avatar-circle{border-color:var(--bronze);color:var(--bronze-light);}
+.avatar-circle img{width:100%;height:100%;object-fit:cover;}
+.avatar-label{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;}
+
+.list-back{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);margin-bottom:20px;cursor:pointer;transition:var(--tr);}
+.list-back:hover{color:var(--bronze-light);}
+.list-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:32px;padding-bottom:24px;border-bottom:1px solid var(--border);}
+.list-me{display:flex;align-items:center;gap:14px;font-size:14px;color:var(--cream);}
+.list-me .mini-avatar{width:44px;height:44px;border-radius:50%;object-fit:cover;border:2px solid var(--bronze);}
+.list-me strong{display:block;color:var(--white);font-size:15px;}
+
+.contact-list{display:flex;flex-direction:column;}
+.contact-row{position:relative;display:flex;align-items:center;gap:16px;padding:14px 6px;border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.2s ease;}
+.contact-row:hover{background:rgba(201,154,74,0.05);}
+.contact-row.locked{cursor:not-allowed;}
+.contact-row.locked:hover{background:none;}
+.contact-avatar{flex-shrink:0;width:54px;height:54px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;background:rgba(201,154,74,0.12);color:var(--bronze-light);border:1px solid rgba(201,154,74,0.25);overflow:hidden;}
+.contact-row.owner .contact-avatar{background:linear-gradient(135deg,var(--bronze),var(--bronze-dim));color:var(--wine-deep);}
+.contact-row.ai .contact-avatar{background:linear-gradient(135deg,var(--nakconel-red),var(--muted-rose));color:var(--bronze-light);}
+.contact-row.locked .contact-avatar{background:rgba(255,255,255,0.06);color:var(--muted);border-color:var(--border);}
+.contact-mid{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;}
+.contact-name{font-size:15.5px;font-weight:600;color:var(--white);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.contact-preview{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:5px;}
+.contact-row.locked .contact-name, .contact-row.locked .contact-preview{color:var(--muted);}
+.contact-side{flex-shrink:0;display:flex;flex-direction:column;align-items:flex-end;gap:6px;min-width:46px;}
+.contact-time{font-size:12px;color:var(--muted);}
+.contact-side .contact-padlock{position:static;font-size:14px;}
+
+.toast{position:fixed;bottom:32px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--wine-deep);border:1px solid var(--bronze);color:var(--cream);padding:14px 22px;border-radius:var(--rs);font-size:13px;box-shadow:0 10px 30px rgba(0,0,0,0.5);opacity:0;pointer-events:none;transition:opacity 0.3s ease, transform 0.3s ease;z-index:500;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* --- CHAT SCREEN --- */
+.chat-screen{position:fixed;inset:0;z-index:300;display:flex;flex-direction:column;background:var(--ground);background:radial-gradient(ellipse 60% 50% at 50% 40%, var(--wine-mid) 0%, transparent 70%), radial-gradient(ellipse 130% 110% at 50% 50%, var(--wine-deep) 0%, var(--ground) 100%);}
+.chat-header{flex-shrink:0;display:flex;align-items:center;gap:14px;padding:18px 20px;border-bottom:1px solid var(--border);background:rgba(10,2,2,0.55);backdrop-filter:blur(14px);}
+.chat-back{background:none;border:none;color:var(--cream);font-size:20px;cursor:pointer;padding:4px 6px;line-height:1;}
+.chat-back:hover{color:var(--bronze-light);}
+.chat-avatar{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.chat-avatar.owner{background:linear-gradient(135deg,var(--bronze),var(--bronze-dim));color:var(--wine-deep);}
+.chat-avatar.ai{background:linear-gradient(135deg,var(--nakconel-red),var(--muted-rose));color:var(--bronze-light);}
+.chat-who{display:flex;flex-direction:column;gap:1px;}
+.chat-who strong{font-size:15px;color:var(--white);}
+.chat-who span{font-size:12px;color:var(--olive-green);}
+
+.chat-messages{flex:1;overflow-y:auto;padding:24px 18px;display:flex;flex-direction:column;gap:12px;}
+.msg-row{display:flex;max-width:78%;}
+.msg-row.them{align-self:flex-start;}
+.msg-row.me{align-self:flex-end;}
+.msg-bubble{padding:10px 14px;border-radius:14px;font-size:14px;line-height:1.5;word-wrap:break-word;}
+.msg-row.them .msg-bubble{background:rgba(201,154,74,0.12);border:1px solid rgba(201,154,74,0.2);color:var(--white);border-bottom-left-radius:4px;}
+.msg-row.me .msg-bubble{background:linear-gradient(135deg,var(--bronze),var(--bronze-dim));color:var(--wine-deep);border-bottom-right-radius:4px;}
+.msg-time{display:block;font-size:10px;margin-top:4px;opacity:0.6;text-align:right;}
+.msg-attach-img{display:block;max-width:220px;border-radius:10px;margin-bottom:6px;}
+.msg-attach-file{display:flex;align-items:center;gap:6px;font-size:13px;margin-bottom:6px;}
+
+.chat-input-bar{flex-shrink:0;display:flex;gap:10px;align-items:center;padding:14px 16px;border-top:1px solid var(--border);background:rgba(10,2,2,0.55);backdrop-filter:blur(14px);}
+.chat-input-bar input{flex:1;background:rgba(10,2,2,0.6);border:1px solid var(--border);border-radius:22px;padding:12px 18px;color:var(--white);font-family:inherit;font-size:14px;}
+.chat-input-bar input:focus{outline:none;border-color:var(--bronze);}
+.chat-attach-btn{width:38px;height:38px;border-radius:50%;border:1px solid var(--border);background:rgba(10,2,2,0.4);color:var(--bronze-light);font-size:16px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:var(--tr);}
+.chat-attach-btn:hover{background:rgba(201,154,74,0.12);border-color:var(--bronze);}
+.chat-send-btn{width:42px;height:42px;border-radius:50%;border:none;background:var(--bronze);color:var(--wine-deep);font-size:16px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:var(--tr);}
+.chat-send-btn:hover{background:var(--bronze-light);}
+
+/* --- RESPONSIVE BREAKPOINTS --- */
+@media (max-width: 1024px) {
+  .hero{padding-top: 140px; min-height: auto;}
+  .hero-cont{grid-template-columns: 1fr; gap: 48px; text-align: center;}
+  .hero-txt p{margin-left: auto; margin-right: auto;}
+  .hero-btns{justify-content: center;}
+  .hero-gallery{max-width: 480px; margin: 0 auto; aspect-ratio: 1 / 1;}
+  
+  .pillar-row { grid-template-columns: 1fr; gap: 0; }
+  .pillar-row:nth-child(even) .pillar-img-frame { order: 0; }
+  .pillar-img-frame { min-height: 280px; }
+  .pillar-content-box { padding: 32px; }
+  
+  .ct-box{grid-template-columns:1fr;gap:48px;padding:40px 24px;}
+}
+@media (max-width: 768px) {
+  .menu-tg{display:flex;}
+  .nav-links{position:fixed;top:84px;left:-100%;width:100%;height:calc(100vh - 84px);background:rgba(27,4,4,0.98);backdrop-filter:blur(24px);flex-direction:column;justify-content:center;gap:35px;transition:var(--tr);padding:40px;border-top:1px solid var(--border);}
+  .nav-links.open{left:0;}
+  .car-item{flex:0 0 calc(50% - 12px);}
+  .ft-main{grid-template-columns:1fr 1fr;gap:32px;}
+  .app-card{padding:32px 24px;}
+  .list-screen{padding:0 16px;}
+}
+@media (max-width: 480px) {
+  .car-item{flex:0 0 100%;}
+  .ft-main{grid-template-columns:1fr;}
+  .ft-btm{flex-direction:column;gap:16px;text-align:center;}
+}
+</style>
+<script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-auth-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<style>
+/* =====================================================================
+   SHARED AUTH MODAL — auth-modal.css
+   Used by campaign.html and contact.html. Blurs the page behind it,
+   pops up a card with Google sign-in + email/password, then (for
+   first-time users) a profile-completion step with photo upload.
+   ===================================================================== */
+
+.auth-modal-overlay{
+  position:fixed; inset:0; z-index:1000;
+  background:rgba(5,1,1,0.55);
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+  display:none;
+  align-items:center; justify-content:center;
+  padding:24px;
+  opacity:0;
+  transition:opacity 0.3s ease;
+}
+.auth-modal-overlay.show{ display:flex; opacity:1; }
+body.auth-modal-open > *:not(.auth-modal-overlay){ filter:blur(6px); transition:filter 0.3s ease; }
+
+.auth-modal-card{
+  width:100%; max-width:440px;
+  background:linear-gradient(160deg, rgba(27,4,4,0.98) 0%, rgba(10,2,2,0.99) 100%);
+  border:1px solid rgba(201,154,74,0.25);
+  border-radius:16px;
+  padding:40px;
+  box-shadow:0 30px 70px rgba(0,0,0,0.6);
+  transform:scale(0.96) translateY(10px);
+  transition:transform 0.3s cubic-bezier(0.25,1,0.5,1);
+  max-height:88vh;
+  overflow-y:auto;
+  position:relative;
+}
+.auth-modal-overlay.show .auth-modal-card{ transform:scale(1) translateY(0); }
+
+.auth-modal-close{
+  position:absolute; top:16px; right:16px;
+  width:32px; height:32px; border-radius:50%;
+  background:rgba(201,154,74,0.08); border:1px solid rgba(201,154,74,0.15);
+  color:#F5E8C7; font-size:16px; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+}
+.auth-modal-close:hover{ background:rgba(201,154,74,0.18); }
+
+.auth-modal-head{ text-align:center; margin-bottom:24px; }
+.auth-modal-tag{ color:#C99A4A; text-transform:uppercase; font-size:11px; font-weight:600; letter-spacing:2px; display:block; margin-bottom:10px; }
+.auth-modal-title{ font-family:'Agrandir',sans-serif; font-size:24px; font-weight:800; color:#FDFAF4; line-height:1.3; }
+.auth-modal-sub{ color:rgba(245,232,199,0.52); font-size:13px; margin-top:8px; line-height:1.5; }
+
+.am-google-btn{
+  width:100%; background:#FDFBF7; color:#1B0404; border:none; border-radius:8px;
+  padding:14px; font-weight:600; font-size:14px; cursor:pointer;
+  display:flex; align-items:center; justify-content:center; gap:10px;
+  transition:0.3s ease; font-family:'Poppins',sans-serif;
+}
+.am-google-btn:hover{ background:#fff; transform:translateY(-2px); box-shadow:0 6px 20px rgba(0,0,0,0.25); }
+.am-google-btn:disabled{ opacity:0.6; cursor:not-allowed; transform:none; }
+.am-google-icon{ width:18px; height:18px; flex-shrink:0; }
+
+.am-divider{ display:flex; align-items:center; gap:12px; margin:22px 0; color:rgba(245,232,199,0.52); font-size:11px; text-transform:uppercase; letter-spacing:1px; }
+.am-divider::before,.am-divider::after{ content:''; flex:1; height:1px; background:rgba(201,154,74,0.15); }
+
+.am-tabs{ display:flex; gap:8px; margin-bottom:20px; background:rgba(10,2,2,0.4); border-radius:8px; padding:4px; }
+.am-tab{ flex:1; text-align:center; padding:9px; border-radius:6px; font-size:13px; font-weight:600; color:rgba(245,232,199,0.52); cursor:pointer; transition:0.25s ease; }
+.am-tab.active{ background:#C99A4A; color:#1B0404; }
+
+.am-form{ display:flex; flex-direction:column; gap:16px; }
+.am-g{ display:flex; flex-direction:column; gap:7px; }
+.am-g label{ font-size:11px; font-weight:500; color:rgba(245,232,199,0.52); text-transform:uppercase; letter-spacing:1px; }
+.am-g input, .am-g textarea{
+  background:rgba(10,2,2,0.6); border:1px solid rgba(201,154,74,0.15); border-radius:8px;
+  padding:14px; color:#FDFAF4; font-family:'Poppins',sans-serif; font-size:14px; transition:0.3s ease; width:100%;
+}
+.am-g input:focus, .am-g textarea:focus{ outline:none; border-color:#C99A4A; background:rgba(61,10,10,0.3); }
+
+.am-submit{
+  background:#C99A4A; color:#1B0404; border:none; border-radius:8px; padding:15px;
+  font-weight:600; font-size:14px; cursor:pointer; transition:0.3s ease;
+  display:flex; align-items:center; justify-content:center; gap:8px; font-family:'Poppins',sans-serif;
+}
+.am-submit:hover{ background:#E8C57A; transform:translateY(-2px); }
+.am-submit:disabled{ opacity:0.7; cursor:not-allowed; transform:none; }
+
+.am-err{ font-size:12.5px; color:#e8a0a0; min-height:16px; }
+.am-switch-line{ text-align:center; font-size:13px; color:rgba(245,232,199,0.52); margin-top:18px; }
+.am-switch-line a{ color:#E8C57A; cursor:pointer; font-weight:600; }
+.am-switch-line a:hover{ text-decoration:underline; }
+
+/* --- Avatar upload (profile completion step) --- */
+.am-avatar-upload{ display:flex; flex-direction:column; align-items:center; gap:12px; margin-bottom:8px; }
+.am-avatar-circle{
+  width:88px; height:88px; border-radius:50%; border:2px dashed rgba(201,154,74,0.4);
+  background:rgba(201,154,74,0.06); display:flex; align-items:center; justify-content:center;
+  cursor:pointer; overflow:hidden; position:relative; transition:0.3s ease; flex-shrink:0;
+}
+.am-avatar-circle:hover{ border-color:#C99A4A; background:rgba(201,154,74,0.12); }
+.am-avatar-circle img{ width:100%; height:100%; object-fit:cover; }
+.am-avatar-circle .plus-icon{ font-size:28px; color:#C99A4A; }
+.am-avatar-hint{ font-size:12px; color:rgba(245,232,199,0.52); }
+
+.am-screen{ display:none; }
+.am-screen.active{ display:block; }
+
+.am-step-track{ display:flex; gap:6px; justify-content:center; margin-bottom:22px; }
+.am-step-dot{ width:26px; height:3px; border-radius:2px; background:rgba(255,255,255,0.15); }
+.am-step-dot.done{ background:#E8C57A; }
+
+@media (max-width:560px){
+  .auth-modal-card{ padding:28px 22px; }
+}
+
+</style>
+</head>
+<body>
+
+
+<header class="h-nav" id="navbar">
+  <div class="nav-cont">
+    <div class="logo-wrapper">
+      <a href="#"><img src="/static/image/logo.png" alt="NAKCONEL Logo" style="height:72px;width:auto;object-fit:contain;"></a>
+    </div>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="/home">Home</a></li>
+      <li class="about-dd-wrap">
+        <button class="about-dd-btn" id="aboutDropBtn" aria-expanded="false" aria-haspopup="true">
+          About <span class="dd-arrow">▾</span>
+        </button>
+        <div class="about-dd-menu" id="aboutDropMenu" role="menu">
+          <a class="dd-item" href="/about" role="menuitem">
+            <span class="dd-icon">◈</span>
+            <span class="dd-text"><strong>About Nakconel</strong><small>Our story &amp; direction</small></span>
+          </a>
+          <a class="dd-item" href="/meet-the-team" role="menuitem">
+            <span class="dd-icon">◉</span>
+            <span class="dd-text"><strong>Meet the Team</strong><small>The people behind the brand</small></span>
+          </a>
+          <a class="dd-item" href="/about#vision-mission" role="menuitem">
+            <span class="dd-icon">◎</span>
+            <span class="dd-text"><strong>Vision &amp; Mission</strong><small>Where we are going</small></span>
+          </a>
+          <a class="dd-item" href="/voice" role="menuitem">
+            <span class="dd-icon">◇</span>
+            <span class="dd-text"><strong>Brand Voice</strong><small>How we speak &amp; show up</small></span>
+          </a>
+          <div class="dd-divider"></div>
+          <a class="dd-item dd-cta" href="/contact" role="menuitem">
+            <span class="dd-icon">↗</span>
+            <span class="dd-text"><strong>Work With Us</strong><small>Book a strategy call</small></span>
+          </a>
+        </div>
+      </li>
+      <li><a href="#services">Pillars</a></li>
+      <li><a href="#markets">Global Footprints</a></li>
+      <li><a href="#work">Showcase</a></li>
+      <li><a href="/contact" class="active">Contact</a></li>
+    </ul>
+    <button class="menu-tg" id="menuToggle" aria-label="Toggle Menu">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+  </div>
+</header>
+
+<section class="sec" id="contact" style="padding-top:160px; min-height:80vh;">
+
+  <!-- SIGN-IN GATE -->
+  <div class="app-card" id="screenGate">
+    <div class="sec-head" style="margin-bottom:32px;">
+      <span class="tag">Nakconel Network</span>
+      <h2 class="sec-title">Join the Conversation</h2>
+      <p style="color:var(--muted);font-size:14px;margin-top:10px;">Sign in to chat with the brand team — it only takes a few seconds.</p>
+    </div>
+    <button type="button" class="hero-cta" style="width:100%;justify-content:center;font-family:inherit;border:none;" onclick="AuthModal.open({onComplete: contactAuthComplete})">Sign In to Continue ↗</button>
+  </div>
+
+  <!-- CONTACT LIST SCREEN -->
+  <div class="list-screen" id="screenList" style="display:none;">
+    <a href="/home" class="list-back" id="listBackBtn">← Back to Home</a>
+    <div class="list-header">
+      <div class="list-me" id="listMe"></div>
+      <button class="sec-btn" id="logoutBtn">Log Out</button>
+    </div>
+    <div class="sec-head" style="margin-bottom:24px;">
+      <span class="tag">Your Network</span>
+      <h2 class="sec-title">Who do you want to talk to?</h2>
+    </div>
+    <div class="contact-list" id="contactGrid"></div>
+  </div>
+
+  <div class="toast" id="lockToast">🔒 Referral required — ask the Owner to unlock this chat.</div>
+
+  <!-- CHAT SCREEN -->
+  <div class="chat-screen" id="screenChat" style="display:none;">
+    <div class="chat-header">
+      <button class="chat-back" id="chatBack">←</button>
+      <div class="chat-avatar" id="chatAvatar"></div>
+      <div class="chat-who">
+        <strong id="chatName"></strong>
+        <span id="chatStatus">Online</span>
+      </div>
+    </div>
+    <div class="chat-messages" id="chatMessages"></div>
+    <form class="chat-input-bar" id="chatInputForm">
+      <button type="button" class="chat-attach-btn" id="chatAttachBtn" aria-label="Attach file">📎</button>
+      <input type="file" id="chatFileInput" hidden>
+      <input type="text" id="chatInput" placeholder="Type a message…" autocomplete="off">
+      <button type="submit" class="chat-send-btn" aria-label="Send">➤</button>
+    </form>
+  </div>
+
+</section>
+
+<footer>
+  <div class="ft-main">
+    <div>
+      <div class="logo-wrapper" style="margin-bottom:16px;">
+        <a href="#"><img src="/static/image/logo.png" alt="NAKCONEL Logo" style="height:72px;width:auto;object-fit:contain;"></a>
+      </div>
+      <p class="ft-desc">Combining brand strategy, content design, and enterprise technology with deep cultural intelligence.</p>
+    </div>
+    <div class="ft-col">
+      <h5>Pillars</h5>
+      <ul>
+        <li><a href="#services">Brand Strategy</a></li>
+        <li><a href="#services">Content & Design</a></li>
+        <li><a href="#services">IT & Tech Systems</a></li>
+      </ul>
+    </div>
+    <div class="ft-col">
+      <h5>Enablement</h5>
+      <ul>
+        <li><a href="/about">About Identity</a></li>
+        <li><a href="/contact">Strategy Support Desk</a></li>
+      </ul>
+    </div>
+    <div class="ft-col">
+      <h5>Footprints</h5>
+      <ul>
+        <li><a href="#markets">Africa & Gulf Regions</a></li>
+        <li><a href="#markets">United States & Australia</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="ft-btm">
+    <p>&copy; 2026 NAKCONEL Studio Inc. All rights reserved.</p>
+    <p>Culture gives meaning. Intelligence gives movement.</p>
+  </div>
+</footer>
+<script>
+// ===== TEMPORARY ON-PAGE ERROR BANNER (for diagnosing issues without dev tools) =====
+function showDebugError(msg){
+  let banner = document.getElementById('debugErrorBanner');
+  if(!banner){
+    banner = document.createElement('div');
+    banner.id = 'debugErrorBanner';
+    banner.style.cssText = 'position:fixed;top:84px;left:0;right:0;background:#b00020;color:#fff;padding:14px;font-size:13px;z-index:99999;font-family:monospace;white-space:pre-wrap;max-height:40vh;overflow:auto;';
+    document.body.prepend(banner);
+  }
+  const line = document.createElement('div');
+  line.style.marginBottom = '8px';
+  line.textContent = msg;
+  banner.appendChild(line);
+}
+window.addEventListener('error', function(e){
+  showDebugError('JS ERROR: ' + e.message + ' (line ' + e.lineno + ')');
+});
+window.addEventListener('unhandledrejection', function(e){
+  showDebugError('ASYNC ERROR: ' + (e.reason && e.reason.message ? e.reason.message : String(e.reason)));
+});
+
+// =====================================================================
+// SHARED CONFIG — read by auth-modal.js (same values used on campaign.html).
+// Replace the Firebase placeholders with your real project config
+// (Firebase Console → Project Settings → General → Your apps → Web app).
+// =====================================================================
+window.firebaseConfig = {
+  apiKey: "AIzaSyC9I9bp2OnZnGXuf6KxyJKF4fUe6_TCz4I",
+  authDomain: "nakconel.firebaseapp.com",
+  projectId: "nakconel",
+  storageBucket: "nakconel.firebasestorage.app",
+  messagingSenderId: "231520414230",
+  appId: "1:231520414230:web:bdf249f098f33fe42f2337"
+};
+window.SUPABASE_URL = 'https://isyjausvvnposzkglgws.supabase.co';
+window.SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlzeWphdXN2dm5wb3N6a2dsZ3dzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI1ODk5MjUsImV4cCI6MjA5ODE2NTkyNX0.1c0Naw_dNorPhzDNtVZEP8kOKtJaXVOKsgH0abXoTRg';
+</script>
+<script>
+/* =====================================================================
+   SHARED AUTH MODAL — auth-modal.js
+   Used by campaign.html and contact.html.
+
+   HOW TO USE ON A PAGE:
+   1. Include auth-modal.css in <head>.
+   2. Include the Firebase + Supabase SDK <script> tags, then this file,
+      before </body>.
+   3. Make sure `firebaseConfig`, `SUPABASE_URL`, `SUPABASE_ANON_KEY` are
+      defined as globals (window.firebaseConfig, window.SUPABASE_URL,
+      window.SUPABASE_ANON_KEY) before this script runs.
+   4. Call AuthModal.open({ onComplete: (profile) => { ... } }) from a
+      button click. onComplete fires once the person is authenticated
+      AND has a complete profile (existing returning users skip straight
+      to onComplete; first-time users go through profile completion
+      first).
+   5. AuthModal.currentUser() / AuthModal.currentProfile() are available
+      any time after onComplete has fired once.
+
+   NOTE ON FIREBASE EMAIL/PASSWORD + SUPABASE:
+   Supabase's signInWithIdToken natively verifies Google ID tokens out of
+   the box. Verifying a generic Firebase (non-Google) ID token requires
+   Supabase to be configured with Firebase as a custom OIDC provider
+   (Authentication → Sign In / Providers → add provider → use your
+   Firebase project's issuer URL: https://securetoken.google.com/YOUR_PROJECT_ID).
+   Until that's configured, Google sign-in will work immediately; email/
+   password sign-in will show a clear error from Supabase until you add
+   that provider. See the chat reply for the exact steps.
+   ===================================================================== */
+
+const AuthModal = (function(){
+  try {
+
+  let onCompleteCallback = null;
+  let _supaUser = null;
+  let _profile = null;
+  let avatarFile = null;
+  let avatarDataUrl = null;
+  let _pendingFallbackEmail = '';
+  let _pendingExistingProfile = null;
+
+  // ---- Sanity checks up front, with visible errors instead of silent failure ----
+  if(typeof firebase === 'undefined'){
+    console.error('AuthModal: the Firebase SDK script tags did not load (firebase is undefined). Check the <script src> tags for firebase-app-compat.js and firebase-auth-compat.js are present and load BEFORE auth-modal.js.');
+  }
+  if(typeof window.supabase === 'undefined'){
+    console.error('AuthModal: the Supabase SDK script tag did not load (window.supabase is undefined). Check the <script src> tag for supabase-js is present and loads BEFORE auth-modal.js.');
+  }
+  if(!window.firebaseConfig){
+    console.error('AuthModal: window.firebaseConfig is not set. Make sure the config block runs BEFORE auth-modal.js loads.');
+  }
+
+  // ---- Firebase + Supabase init (shared across pages) ----
+  if(typeof firebase !== 'undefined' && (!firebase.apps || !firebase.apps.length) && window.firebaseConfig){
+    firebase.initializeApp(window.firebaseConfig);
+  }
+  const fbAuth = (typeof firebase !== 'undefined') ? firebase.auth() : null;
+  const googleProvider = (typeof firebase !== 'undefined') ? new firebase.auth.GoogleAuthProvider() : null;
+
+  let sb = null;
+  try {
+    sb = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+  } catch(e){
+    console.error('Supabase failed to load:', e);
+  }
+
+  // ---- Build modal DOM once ----
+  const overlay = document.createElement('div');
+  overlay.className = 'auth-modal-overlay';
+  overlay.innerHTML = `
+    <div class="auth-modal-card">
+      <button class="auth-modal-close" id="amClose" aria-label="Close">✕</button>
+
+      <!-- SCREEN: Google + Email/Password choice -->
+      <div class="am-screen active" id="amScreenAuth">
+        <div class="auth-modal-head">
+          <span class="auth-modal-tag">Nakconel</span>
+          <h3 class="auth-modal-title">Sign in to continue</h3>
+          <p class="auth-modal-sub">Join the conversation or claim your spot in the campaign.</p>
+        </div>
+
+        <button type="button" class="am-google-btn" id="amGoogleBtn">
+          <svg class="am-google-icon" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.6 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 8 3l5.7-5.7C34.6 6.5 29.6 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.7-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.5 16 18.9 13 24 13c3.1 0 5.8 1.1 8 3l5.7-5.7C34.6 6.5 29.6 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.5 0 10.5-2.1 14-5.6l-6.5-5.3C29.5 35 26.9 36 24 36c-5.3 0-9.7-3.4-11.3-8.1l-6.6 5.1C9.6 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.3-4.2 5.7l6.5 5.3C41.5 36.4 44 30.8 44 24c0-1.3-.1-2.7-.4-3.5z"/></svg>
+          Continue with Google
+        </button>
+        <p class="am-err" id="amGoogleErr" style="text-align:center;margin-top:10px;"></p>
+
+        <div class="am-divider">or use email</div>
+
+        <div class="am-tabs">
+          <div class="am-tab active" id="amTabSignup">Sign Up</div>
+          <div class="am-tab" id="amTabLogin">Log In</div>
+        </div>
+
+        <form class="am-form" id="amEmailForm">
+          <div class="am-g" id="amNameField">
+            <label for="amName">Full Name</label>
+            <input type="text" id="amName" placeholder="e.g., Katherine Vance">
+          </div>
+          <div class="am-g">
+            <label for="amEmail">Email</label>
+            <input type="email" id="amEmail" placeholder="kvance@enterprise.com" required>
+          </div>
+          <div class="am-g">
+            <label for="amPassword">Password</label>
+            <input type="password" id="amPassword" placeholder="••••••••" required minlength="6">
+          </div>
+          <p class="am-err" id="amEmailErr"></p>
+          <button type="submit" class="am-submit" id="amEmailSubmitBtn">Sign Up ↗</button>
+        </form>
+
+        <p class="am-switch-line" id="amSwitchLine">Already have an account? <a id="amSwitchToLogin">Log in</a></p>
+      </div>
+
+      <!-- SCREEN: Profile completion (first-time users only) -->
+      <div class="am-screen" id="amScreenProfile">
+        <div class="am-step-track"><div class="am-step-dot done"></div><div class="am-step-dot"></div></div>
+        <div class="auth-modal-head">
+          <h3 class="auth-modal-title">Complete Your Profile</h3>
+          <p class="auth-modal-sub">Just a couple quick things before you're in.</p>
+        </div>
+
+        <div class="am-avatar-upload">
+          <div class="am-avatar-circle" id="amAvatarCircle">
+            <span class="plus-icon">+</span>
+          </div>
+          <span class="am-avatar-hint">Add a profile photo (optional)</span>
+          <input type="file" id="amAvatarInput" accept="image/*" style="display:none;">
+        </div>
+
+        <form class="am-form" id="amProfileForm">
+          <div class="am-g" id="amProfileNameField">
+            <label for="amProfileName">Full Name</label>
+            <input type="text" id="amProfileName" placeholder="e.g., Katherine Vance" required>
+          </div>
+          <div class="am-g">
+            <label for="amProfilePhone">Phone</label>
+            <input type="tel" id="amProfilePhone" placeholder="+1 (555) 000-0000" required>
+          </div>
+          <div class="am-g" id="amBizField">
+            <label for="amProfileBiz">Your Business Idea or Challenge</label>
+            <textarea id="amProfileBiz" rows="3" placeholder="Tell us what you're building or what you're stuck on..."></textarea>
+          </div>
+          <p class="am-err" id="amProfileErr"></p>
+          <button type="submit" class="am-submit" id="amProfileSubmitBtn">Continue ↗</button>
+        </form>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+
+  const screens = {
+    auth: overlay.querySelector('#amScreenAuth'),
+    profile: overlay.querySelector('#amScreenProfile')
+  };
+  function showScreen(name){
+    Object.values(screens).forEach(s => s.classList.remove('active'));
+    screens[name].classList.add('active');
+  }
+
+  // ---- Open / close ----
+  function open(opts){
+    opts = opts || {};
+    onCompleteCallback = opts.onComplete || null;
+
+    // Already authenticated this session with a complete profile — just fire the callback.
+    if(_supaUser && _profile){
+      if(onCompleteCallback) onCompleteCallback(_profile);
+      return;
+    }
+    showScreen('auth');
+    setMode('signup');
+    document.getElementById('amGoogleErr').textContent = '';
+    document.getElementById('amEmailErr').textContent = '';
+    overlay.classList.add('show');
+    document.body.classList.add('auth-modal-open');
+  }
+  function close(){
+    overlay.classList.remove('show');
+    document.body.classList.remove('auth-modal-open');
+  }
+  overlay.querySelector('#amClose').addEventListener('click', close);
+  overlay.addEventListener('click', (e) => { if(e.target === overlay) close(); });
+
+  // ---- Sign Up / Log In tab toggle ----
+  let mode = 'signup';
+  function setMode(m){
+    mode = m;
+    document.getElementById('amTabSignup').classList.toggle('active', m === 'signup');
+    document.getElementById('amTabLogin').classList.toggle('active', m === 'login');
+    document.getElementById('amNameField').style.display = m === 'signup' ? 'flex' : 'none';
+    document.getElementById('amEmailSubmitBtn').textContent = m === 'signup' ? 'Sign Up ↗' : 'Log In ↗';
+    document.getElementById('amSwitchLine').innerHTML = m === 'signup'
+      ? 'Already have an account? <a id="amSwitchToLogin">Log in</a>'
+      : "Don't have an account? <a id=\"amSwitchToLogin\">Sign up</a>";
+    document.getElementById('amEmailErr').textContent = '';
+    bindSwitchLink();
+  }
+  function bindSwitchLink(){
+    const link = document.getElementById('amSwitchToLogin');
+    if(link) link.addEventListener('click', () => setMode(mode === 'signup' ? 'login' : 'signup'));
+  }
+  document.getElementById('amTabSignup').addEventListener('click', () => setMode('signup'));
+  document.getElementById('amTabLogin').addEventListener('click', () => setMode('login'));
+  bindSwitchLink();
+
+  // ---- Shared: after we have a Supabase user, check/create profile ----
+  async function handlePostAuth(supaUserObj, fallbackName, fallbackEmail, fallbackPhoto){
+    _supaUser = supaUserObj;
+
+    const { data: existingProfile } = await sb.from('profiles').select('*').eq('id', supaUserObj.id).maybeSingle();
+
+    if(existingProfile && existingProfile.name && existingProfile.phone){
+      // Returning user with a complete profile — done.
+      _profile = existingProfile;
+      close();
+      if(onCompleteCallback) onCompleteCallback(_profile);
+      return;
+    }
+
+    // First-time user, or a profile that's missing required fields — collect them.
+    document.getElementById('amProfileName').value = (existingProfile && existingProfile.name) || fallbackName || '';
+    document.getElementById('amProfilePhone').value = (existingProfile && existingProfile.phone) || '';
+    document.getElementById('amProfileBiz').value = (existingProfile && existingProfile.business_idea) || '';
+    if(fallbackPhoto){
+      document.getElementById('amAvatarCircle').innerHTML = `<img src="${fallbackPhoto}" alt="">`;
+    }
+    _pendingFallbackEmail = (existingProfile && existingProfile.email) || fallbackEmail || '';
+    _pendingExistingProfile = existingProfile || null;
+
+    showScreen('profile');
+  }
+
+  // ---- Google sign-in ----
+  document.getElementById('amGoogleBtn').addEventListener('click', async () => {
+    const btn = document.getElementById('amGoogleBtn');
+    const err = document.getElementById('amGoogleErr');
+    err.textContent = '';
+
+    if(!sb){
+      err.textContent = 'Could not connect to the server. Please check your connection and try again.';
+      return;
+    }
+
+    btn.disabled = true;
+    try {
+      const result = await fbAuth.signInWithPopup(googleProvider);
+      const idToken = await result.user.getIdToken();
+
+      const { data, error } = await sb.auth.signInWithIdToken({ provider: 'google', token: idToken });
+      if(error){
+        err.textContent = error.message || 'Google sign-in failed. Please try again.';
+        return;
+      }
+
+      await handlePostAuth(data.user, result.user.displayName, result.user.email, result.user.photoURL);
+    } catch(ex){
+      console.error('Google sign-in failed:', ex);
+      err.textContent = 'Could not sign in with Google. Please try again.';
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  // ---- Email/password sign-up or log-in ----
+  document.getElementById('amEmailForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const err = document.getElementById('amEmailErr');
+    const btn = document.getElementById('amEmailSubmitBtn');
+    err.textContent = '';
+
+    const name = document.getElementById('amName').value.trim();
+    const email = document.getElementById('amEmail').value.trim();
+    const password = document.getElementById('amPassword').value;
+
+    if(mode === 'signup' && !name){
+      err.textContent = 'Please enter your name.';
+      return;
+    }
+    if(!email || !password){
+      err.textContent = 'Please fill in every field.';
+      return;
+    }
+    if(!sb){
+      err.textContent = 'Could not connect to the server. Please check your connection and try again.';
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = mode === 'signup' ? 'Signing up…' : 'Logging in…';
+
+    try {
+      let fbUser;
+      if(mode === 'signup'){
+        const cred = await fbAuth.createUserWithEmailAndPassword(email, password);
+        fbUser = cred.user;
+        await fbUser.updateProfile({ displayName: name });
+      } else {
+        const cred = await fbAuth.signInWithEmailAndPassword(email, password);
+        fbUser = cred.user;
+      }
+
+      const idToken = await fbUser.getIdToken();
+      const { data, error } = await sb.auth.signInWithIdToken({ provider: 'firebase', token: idToken });
+
+      if(error){
+        // Supabase's signInWithIdToken natively verifies Google tokens. A generic
+        // Firebase (email/password) token needs Firebase added as a custom OIDC
+        // provider in Supabase — see the note at the top of this file.
+        err.textContent = error.message || 'Sign-in failed. Please try again.';
+        btn.disabled = false;
+        btn.textContent = mode === 'signup' ? 'Sign Up ↗' : 'Log In ↗';
+        return;
+      }
+
+      await handlePostAuth(data.user, name || fbUser.displayName, email, null);
+    } catch(ex){
+      console.error('Email auth failed:', ex);
+      err.textContent = (ex && ex.message) ? ex.message : 'Something went wrong. Please try again.';
+    } finally {
+      btn.disabled = false;
+      btn.textContent = mode === 'signup' ? 'Sign Up ↗' : 'Log In ↗';
+    }
+  });
+
+  // ---- Avatar picker (profile completion step) ----
+  document.getElementById('amAvatarCircle').addEventListener('click', () => {
+    document.getElementById('amAvatarInput').click();
+  });
+  document.getElementById('amAvatarInput').addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if(!file) return;
+    avatarFile = file;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      avatarDataUrl = ev.target.result;
+      document.getElementById('amAvatarCircle').innerHTML = `<img src="${avatarDataUrl}" alt="">`;
+    };
+    reader.readAsDataURL(file);
+  });
+
+  // ---- Profile completion submit ----
+  document.getElementById('amProfileForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const err = document.getElementById('amProfileErr');
+    const btn = document.getElementById('amProfileSubmitBtn');
+    err.textContent = '';
+
+    const name = document.getElementById('amProfileName').value.trim();
+    const phone = document.getElementById('amProfilePhone').value.trim();
+    const business_idea = document.getElementById('amProfileBiz').value.trim();
+
+    if(!name || !phone){
+      err.textContent = 'Please fill in your name and phone.';
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Saving…';
+
+    try {
+      let avatarUrl = (_pendingExistingProfile && _pendingExistingProfile.avatar_url) || null;
+
+      if(avatarFile || avatarDataUrl){
+        try {
+          let uploadBlob = avatarFile;
+          let ext = avatarFile ? (avatarFile.name.split('.').pop() || 'jpg').toLowerCase() : 'jpg';
+          if(!uploadBlob && avatarDataUrl){
+            const res = await fetch(avatarDataUrl);
+            uploadBlob = await res.blob();
+            ext = (uploadBlob.type || 'image/jpeg').split('/')[1] || 'jpg';
+          }
+          const storagePath = _supaUser.id + '.' + ext;
+          const { error: uploadErr } = await sb.storage.from('avatars').upload(storagePath, uploadBlob, { upsert: true, contentType: uploadBlob.type || 'image/jpeg' });
+          if(!uploadErr){
+            const { data: pub } = sb.storage.from('avatars').getPublicUrl(storagePath);
+            avatarUrl = pub.publicUrl;
+          } else {
+            console.warn('Avatar upload failed:', uploadErr.message);
+          }
+        } catch(uploadEx){
+          console.warn('Avatar upload exception:', uploadEx);
+        }
+      }
+
+      const profileRow = {
+        id: _supaUser.id,
+        name,
+        phone,
+        email: _pendingFallbackEmail,
+        avatar_url: avatarUrl,
+        business_idea: business_idea || null
+      };
+
+      const { error: upsertErr } = await sb.from('profiles').upsert(profileRow);
+      if(upsertErr){
+        err.textContent = upsertErr.message;
+        btn.disabled = false;
+        btn.textContent = 'Continue ↗';
+        return;
+      }
+
+      const { data: savedProfile } = await sb.from('profiles').select('*').eq('id', _supaUser.id).maybeSingle();
+      _profile = savedProfile || profileRow;
+
+      avatarFile = null;
+      avatarDataUrl = null;
+      close();
+      if(onCompleteCallback) onCompleteCallback(_profile);
+    } catch(ex){
+      console.error('Profile save failed:', ex);
+      err.textContent = 'Something went wrong saving your profile. Please try again.';
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Continue ↗';
+    }
+  });
+
+  return {
+    open,
+    close,
+    currentUser: () => _supaUser,
+    currentProfile: () => _profile,
+    supabaseClient: () => sb
+  };
+
+  } catch(buildError){
+    // If anything above failed to build (missing SDK, bad config, etc.), AuthModal
+    // still exists, but open() shows a visible alert instead of doing nothing —
+    // so a broken setup is obvious instead of a dead button.
+    console.error('AuthModal failed to initialize:', buildError);
+    return {
+      open: () => alert('Sign-in is not set up correctly on this page yet (' + buildError.message + '). Check the browser console for details.'),
+      close: () => {},
+      currentUser: () => null,
+      currentProfile: () => null,
+      supabaseClient: () => null
+    };
+  }
+})();
+
+</script>
+<script>
+// supabase here refers to the client created inside auth-modal.js and exposed
+// via AuthModal.supabaseClient() — used by enterApp()/chat code below for all
+// reads/writes (profiles, messages) once a person has signed in through the modal.
+let supabase = null;
+
+// ABOUT DROPDOWN LOGIC (links inside now navigate to their own pages)
+const aboutDropBtn = document.getElementById('aboutDropBtn');
+const aboutDropMenu = document.getElementById('aboutDropMenu');
+
+function openDropdown() {
+  aboutDropBtn.classList.add('open');
+  aboutDropMenu.classList.add('open');
+  aboutDropBtn.setAttribute('aria-expanded', 'true');
+}
+function closeDropdown() {
+  aboutDropBtn.classList.remove('open');
+  aboutDropMenu.classList.remove('open');
+  aboutDropBtn.setAttribute('aria-expanded', 'false');
+}
+
+aboutDropBtn.addEventListener('click', (e) => {
+  e.stopPropagation();
+  aboutDropMenu.classList.contains('open') ? closeDropdown() : openDropdown();
+});
+
+document.addEventListener('click', () => closeDropdown());
+aboutDropMenu.addEventListener('click', (e) => e.stopPropagation());
+
+// NAVBAR SCROLL BACKGROUND
+window.addEventListener('scroll', () => {
+  const nav = document.getElementById('navbar');
+  if(window.scrollY > 50) { nav.classList.add('scrolled'); } else { nav.classList.remove('scrolled'); }
+}, {passive: true});
+
+// MOBILE MENU ENGINE
+const menuToggle = document.getElementById('menuToggle');
+const navLinks = document.getElementById('navLinks');
+menuToggle.addEventListener('click', () => {
+  navLinks.classList.toggle('open');
+  const spans = menuToggle.querySelectorAll('span');
+  if(navLinks.classList.contains('open')) {
+    spans[0].style.transform = 'rotate(45deg) translate(5px, 5px)';
+    spans[1].style.opacity = '0';
+    spans[2].style.transform = 'rotate(-45deg) translate(6px, -6px)';
+  } else {
+    spans[0].style.transform = 'none'; spans[1].style.opacity = '1'; spans[2].style.transform = 'none';
+  }
+});
+
+document.querySelectorAll('.nav-links a').forEach(link => {
+  link.addEventListener('click', () => {
+    navLinks.classList.remove('open');
+    const spans = menuToggle.querySelectorAll('span');
+    spans[0].style.transform = 'none'; spans[1].style.opacity = '1'; spans[2].style.transform = 'none';
+  });
+});
+
+// ===== ACCOUNT APP: SIGNUP / LOGIN / CONTACT LIST =====
+const LOCKED_CONTACTS = [
+  { name: 'Marketing Lead', preview: 'Locked — referral required' },
+  { name: 'Creative Director', preview: 'Locked — referral required' },
+  { name: 'IT Systems Lead', preview: 'Locked — referral required' },
+  { name: 'AI Strategy Lead', preview: 'Locked — referral required' },
+  { name: 'Content Manager', preview: 'Locked — referral required' },
+  { name: 'Cultural Markets Lead', preview: 'Locked — referral required' },
+  { name: 'Client Success Lead', preview: 'Locked — referral required' },
+  { name: 'Finance Desk', preview: 'Locked — referral required' },
+  { name: 'Partnerships Lead', preview: 'Locked — referral required' }
+];
+
+const screenGate = document.getElementById('screenGate');
+const screenList = document.getElementById('screenList');
+const screenChat = document.getElementById('screenChat');
+const toast = document.getElementById('lockToast');
+
+function showScreen(name){
+  screenGate.style.display = name === 'gate' ? 'block' : 'none';
+  screenList.style.display = name === 'list' ? 'block' : 'none';
+  screenChat.style.display = name === 'chat' ? 'flex' : 'none';
+}
+
+// LOG OUT — sign out of both Firebase and Supabase, return to the sign-in gate.
+document.getElementById('logoutBtn').addEventListener('click', async () => {
+  try { await firebase.auth().signOut(); } catch(e){ /* ignore */ }
+  if(supabase) await supabase.auth.signOut();
+  showScreen('gate');
+});
+
+// ENTER CONTACT LIST — called by AuthModal once sign-in + profile completion finish.
+// `profile` is the row AuthModal already fetched/saved, so no extra round-trip is needed.
+async function contactAuthComplete(profile){
+  supabase = AuthModal.supabaseClient();
+
+  const listMe = document.getElementById('listMe');
+  const displayName = (profile && (profile.name || profile.email)) || 'You';
+  const avatarUrl = profile ? profile.avatar_url : null;
+
+  listMe.innerHTML = `
+    ${avatarUrl ? `<img class="mini-avatar" src="${avatarUrl}" alt="">` : '<div class="mini-avatar" style="display:flex;align-items:center;justify-content:center;background:rgba(201,154,74,0.15);color:var(--bronze);">' + (displayName ? displayName[0].toUpperCase() : '?') + '</div>'}
+    <div><strong>${displayName}</strong></div>
+  `;
+  await renderContacts();
+  showScreen('list');
+}
+
+// On page load: default to the sign-in gate. If there's already a logged-in
+// Supabase session (the AuthModal client persists sessions in localStorage,
+// same as plain Supabase Auth does), skip straight to the contact list.
+showScreen('gate');
+(async () => {
+  supabase = AuthModal.supabaseClient();
+  if(!supabase) return;
+  const { data } = await supabase.auth.getSession();
+  if(data.session){
+    const { data: existingProfile } = await supabase.from('profiles').select('*').eq('id', data.session.user.id).maybeSingle();
+    if(existingProfile && existingProfile.name && existingProfile.phone){
+      contactAuthComplete(existingProfile);
+    }
+  }
+})();
+
+async function renderContacts(){
+  const list = document.getElementById('contactGrid');
+  list.innerHTML = '';
+
+  const owner = document.createElement('div');
+  owner.className = 'contact-row owner';
+  owner.innerHTML = `
+    <div class="contact-avatar">★</div>
+    <div class="contact-mid">
+      <div class="contact-name">Owner of the Brand</div>
+      <div class="contact-preview">Tap to start chatting</div>
+    </div>
+    <div class="contact-side"><span class="contact-time">Online</span></div>
+  `;
+  owner.addEventListener('click', () => openChat('owner'));
+  list.appendChild(owner);
+
+  const ai = document.createElement('div');
+  ai.className = 'contact-row ai';
+  ai.innerHTML = `
+    <div class="contact-avatar">◈</div>
+    <div class="contact-mid">
+      <div class="contact-name">Nakconel AI</div>
+      <div class="contact-preview">Ask me anything about the brand</div>
+    </div>
+    <div class="contact-side"><span class="contact-time">Online</span></div>
+  `;
+  ai.addEventListener('click', () => openChat('ai'));
+  list.appendChild(ai);
+
+  LOCKED_CONTACTS.forEach(c => {
+    const row = document.createElement('div');
+    row.className = 'contact-row locked';
+    row.innerHTML = `
+      <div class="contact-avatar">${c.name[0]}</div>
+      <div class="contact-mid">
+        <div class="contact-name">${c.name}</div>
+        <div class="contact-preview">🔒 ${c.preview}</div>
+      </div>
+      <div class="contact-side"><span class="contact-padlock">🔒</span></div>
+    `;
+    row.addEventListener('click', showLockToast);
+    list.appendChild(row);
+  });
+}
+
+let toastTimer = null;
+function showLockToast(){
+  toast.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.remove('show'), 5000);
+}
+
+// ===== CHAT SCREEN =====
+const CHAT_PROFILES = {
+  owner: {
+    name: 'Owner of the Brand',
+    avatarClass: 'owner',
+    avatarChar: '★',
+    opener: "Hey! Thanks for reaching out — I'm the owner here. What's on your mind?"
+  },
+  ai: {
+    name: 'Nakconel AI',
+    avatarClass: 'ai',
+    avatarChar: '◈',
+    opener: "Hi, I'm Nakconel AI. Ask me anything about our brand strategy, services, or how we can help your business."
+  }
+};
+
+let activeChat = null;
+const chatMessages = document.getElementById('chatMessages');
+
+function timeNow(){
+  return new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+}
+
+function addMessage(text, who, attachment){
+  const row = document.createElement('div');
+  row.className = `msg-row ${who}`;
+  let attachHtml = '';
+  if(attachment){
+    if(attachment.isImage){
+      attachHtml = `<img class="msg-attach-img" src="${attachment.url}" alt="${attachment.name}">`;
+    } else {
+      attachHtml = `<div class="msg-attach-file">📄 ${attachment.name}</div>`;
+    }
+  }
+  row.innerHTML = `<div class="msg-bubble">${attachHtml}${text ? text : ''}<span class="msg-time">${timeNow()}</span></div>`;
+  chatMessages.appendChild(row);
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+function openChat(key){
+  activeChat = key;
+  const profile = CHAT_PROFILES[key];
+
+  document.getElementById('chatAvatar').className = `chat-avatar ${profile.avatarClass}`;
+  document.getElementById('chatAvatar').textContent = profile.avatarChar;
+  document.getElementById('chatName').textContent = profile.name;
+  document.getElementById('chatStatus').textContent = 'Online';
+
+  chatMessages.innerHTML = '';
+  addMessage(profile.opener, 'them');
+
+  showScreen('chat');
+  document.getElementById('chatInput').focus();
+}
+
+document.getElementById('chatBack').addEventListener('click', () => {
+  activeChat = null;
+  showScreen('list');
+});
+
+document.getElementById('chatAttachBtn').addEventListener('click', () => {
+  document.getElementById('chatFileInput').click();
+});
+
+document.getElementById('chatFileInput').addEventListener('change', () => {
+  const fileInput = document.getElementById('chatFileInput');
+  const file = fileInput.files[0];
+  if(!file) return;
+
+  const isImage = file.type.startsWith('image/');
+
+  if(isImage){
+    const reader = new FileReader();
+    reader.onload = () => {
+      addMessage('', 'me', { isImage: true, url: reader.result, name: file.name });
+      fileInput.value = '';
+      sendPlaceholderReply();
+    };
+    reader.readAsDataURL(file);
+  } else {
+    addMessage('', 'me', { isImage: false, name: file.name });
+    fileInput.value = '';
+    sendPlaceholderReply();
+  }
+});
+
+function sendPlaceholderReply(){
+  setTimeout(() => {
+    const reply = activeChat === 'ai'
+      ? "Got your file! Real AI-powered responses will go live once the backend is connected."
+      : "Got it — the Owner will review this once messaging is connected to a real backend.";
+    addMessage(reply, 'them');
+  }, 700);
+}
+
+document.getElementById('chatInputForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if(!text) return;
+
+  addMessage(text, 'me');
+  input.value = '';
+
+  // Placeholder auto-reply so the chat feels alive in this prototype.
+  // Real responses (from the Owner or a real AI model) come later once a backend exists.
+  sendPlaceholderReply();
+});
+
+
+</script>
