@@ -144,7 +144,13 @@
                 showAlert('Account ready! Redirecting…', 'success');
                 setTimeout(() => window.location.href = '/', 1200);
             } catch (err) {
-                showAlert('Google sign-up failed: ' + (err.code || err.message), 'error');
+                const messages = {
+                    'auth/operation-not-allowed': 'Google sign-up is not enabled. Please contact support.',
+                    'auth/popup-blocked': 'Popup was blocked. Allow popups for this site.',
+                    'auth/popup-closed-by-user': 'Sign-in popup was closed.',
+                    'auth/network-request-failed': 'Network error. Check your connection.'
+                };
+                showAlert(messages[err.code] || `Google error (${err.code}): ${err.message}`, 'error');
             }
         });
 
@@ -222,9 +228,11 @@
                 const messages = {
                     'auth/email-already-in-use': 'An account with this email already exists.',
                     'auth/invalid-email': 'Invalid email address.',
-                    'auth/weak-password': 'Password is too weak.'
+                    'auth/weak-password': 'Password is too weak.',
+                    'auth/operation-not-allowed': 'Email/password sign-up is not enabled. Please contact support.',
+                    'auth/network-request-failed': 'Network error. Check your connection.'
                 };
-                showAlert(messages[err.code] || 'Registration failed. Please try again.', 'error');
+                showAlert(messages[err.code] || `Error (${err.code}): ${err.message}`, 'error');
                 btn.disabled = false; btn.textContent = 'Create Account';
             }
         });

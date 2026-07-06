@@ -40,6 +40,10 @@ def login_page():
 def register_page():
     return render_template("register.html")
 
+@app.route("/account")
+def account_page():
+    return render_template("account.html")
+
 @app.route("/api/chat", methods=["POST"])
 def chat():
     GROQ_KEY = os.environ.get("GROQ_API_KEY")

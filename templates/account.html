@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Account — NAKCONEL</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+@font-face{font-family:'Agrandir';src:url('https://fonts.cdnfonts.com/s/15785/Agrandir-GrandHeavy.woff') format('woff');font-weight:800;font-display:swap;}
+:root{
+  --wine-deep:#1B0404;--wine-mid:#3D0A0A;--ground:#0A0202;
+  --bronze:#C99A4A;--bronze-light:#E8C57A;--bronze-dim:#8B6A2E;
+  --white:#FDFAF4;--muted:rgba(245,232,199,0.52);
+  --border:rgba(201,154,74,0.15);--card:rgba(61,10,10,0.42);
+  --r:16px;--rs:8px;--tr:0.42s cubic-bezier(0.25,1,0.5,1);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+  font-family:'Poppins',sans-serif;
+  background:radial-gradient(ellipse 60% 50% at 50% 40%,var(--wine-mid) 0%,transparent 70%),
+             radial-gradient(ellipse 130% 110% at 50% 50%,var(--wine-deep) 0%,var(--ground) 100%);
+  min-height:100vh;color:var(--white);-webkit-font-smoothing:antialiased;
+}
+a{text-decoration:none;color:inherit;}
+
+/* NAV */
+.h-nav{position:fixed;top:0;left:0;width:100%;z-index:100;background:rgba(10,2,2,0.6);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);}
+.nav-cont{max-width:1400px;margin:0 auto;padding:0 24px;height:84px;display:flex;align-items:center;justify-content:space-between;}
+
+/* MAIN */
+.page{max-width:680px;margin:0 auto;padding:120px 24px 60px;}
+.page-title{font-family:'Agrandir',sans-serif;font-size:32px;font-weight:800;margin-bottom:8px;}
+.page-sub{color:var(--muted);font-size:14px;margin-bottom:40px;}
+
+/* PROFILE CARD */
+.profile-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:36px;display:flex;align-items:center;gap:28px;margin-bottom:24px;backdrop-filter:blur(8px);}
+.profile-avatar{width:88px;height:88px;border-radius:50%;border:3px solid var(--bronze);overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:var(--wine-mid);}
+.profile-avatar img{width:100%;height:100%;object-fit:cover;}
+.profile-avatar-initials{font-family:'Agrandir',sans-serif;font-size:32px;font-weight:800;color:var(--bronze-light);}
+.profile-info h2{font-family:'Agrandir',sans-serif;font-size:22px;font-weight:800;margin-bottom:4px;}
+.profile-info p{color:var(--muted);font-size:14px;}
+.profile-info .badge{display:inline-block;margin-top:8px;background:rgba(201,154,74,0.15);color:var(--bronze-light);border:1px solid var(--bronze-dim);padding:3px 10px;border-radius:4px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1px;}
+
+/* INFO ROWS */
+.info-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:24px;backdrop-filter:blur(8px);}
+.info-row{display:flex;align-items:center;justify-content:space-between;padding:18px 24px;border-bottom:1px solid var(--border);}
+.info-row:last-child{border-bottom:none;}
+.info-label{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1px;}
+.info-value{font-size:14px;color:var(--white);}
+
+/* ACTIONS */
+.actions{display:flex;flex-direction:column;gap:12px;}
+.btn{width:100%;padding:14px;border:none;border-radius:var(--rs);font-size:14px;font-weight:600;cursor:pointer;transition:var(--tr);display:flex;align-items:center;justify-content:center;gap:8px;font-family:'Poppins',sans-serif;}
+.btn-primary{background:linear-gradient(135deg,var(--bronze),var(--bronze-dim));color:var(--wine-deep);}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(201,154,74,0.4);}
+.btn-danger{background:rgba(244,67,54,0.1);color:#e8a0a0;border:1px solid rgba(244,67,54,0.2);}
+.btn-danger:hover{background:rgba(244,67,54,0.2);}
+
+/* LOADING STATE */
+#loadingState{text-align:center;padding:80px 20px;color:var(--muted);}
+#accountContent{display:none;}
+</style>
+</head>
+<body>
+
+<header class="h-nav">
+  <div class="nav-cont">
+    <a href="/home"><img src="/static/image/logo.png" alt="NAKCONEL" style="height:64px;width:auto;object-fit:contain;"></a>
+    <a href="/home" style="color:var(--muted);font-size:14px;">← Back to Home</a>
+  </div>
+</header>
+
+<div class="page">
+  <div id="loadingState">Loading your account…</div>
+
+  <div id="accountContent">
+    <h1 class="page-title">My Account</h1>
+    <p class="page-sub">Manage your Nakconel profile</p>
+
+    <div class="profile-card">
+      <div class="profile-avatar" id="avatarEl">
+        <span class="profile-avatar-initials" id="avatarInitials"></span>
+      </div>
+      <div class="profile-info">
+        <h2 id="displayName">—</h2>
+        <p id="userEmail">—</p>
+        <span class="badge">Member</span>
+      </div>
+    </div>
+
+    <div class="info-card">
+      <div class="info-row">
+        <span class="info-label">Display Name</span>
+        <span class="info-value" id="infoName">—</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Email</span>
+        <span class="info-value" id="infoEmail">—</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Account ID</span>
+        <span class="info-value" id="infoUid" style="font-size:12px;color:var(--muted);"></span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Sign-in Method</span>
+        <span class="info-value" id="infoProvider">—</span>
+      </div>
+    </div>
+
+    <div class="actions">
+      <a href="/ai-chat" class="btn btn-primary">◈ &nbsp;Open AI Chat</a>
+      <button class="btn btn-danger" onclick="nakSignOut()">↩ &nbsp;Sign Out</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+  import { auth } from '/static/js/firebase-config.js';
+
+  onAuthStateChanged(auth, (user) => {
+    document.getElementById('loadingState').style.display = 'none';
+    if (!user) { window.location.href = '/login'; return; }
+
+    document.getElementById('accountContent').style.display = 'block';
+
+    const name = user.displayName || 'Account';
+    const email = user.email || '';
+    const provider = user.providerData[0]?.providerId === 'google.com' ? 'Google' : 'Email / Password';
+
+    document.getElementById('displayName').textContent = name;
+    document.getElementById('userEmail').textContent = email;
+    document.getElementById('infoName').textContent = name;
+    document.getElementById('infoEmail').textContent = email;
+    document.getElementById('infoUid').textContent = user.uid;
+    document.getElementById('infoProvider').textContent = provider;
+
+    const avatarEl = document.getElementById('avatarEl');
+    if (user.photoURL) {
+      avatarEl.innerHTML = `<img src="${user.photoURL}" alt="${name}">`;
+    } else {
+      document.getElementById('avatarInitials').textContent = name.charAt(0).toUpperCase();
+    }
+  });
+
+  window.nakSignOut = async () => {
+    await signOut(auth);
+    window.location.href = '/login';
+  };
+</script>
+</body>
+</html>
