@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Dashboard - NAKCONEL</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+@font-face{font-family:'Agrandir';src:url('https://fonts.cdnfonts.com/s/15785/Agrandir-GrandHeavy.woff') format('woff');font-weight:800;font-display:swap}
+:root{--wine-deep:#1B0404;--wine-mid:#3D0A0A;--ground:#0A0202;--bronze:#C99A4A;--bronze-light:#E8C57A;--bronze-dim:#8B6A2E;--cream:#F5E8C7;--white:#FDFAF4;--muted:rgba(245,232,199,.58);--border:rgba(201,154,74,.16);--card:rgba(61,10,10,.48);--good:#91d99b;--bad:#e8a0a0}
+*{box-sizing:border-box;margin:0;padding:0}body{font-family:Poppins,sans-serif;background:radial-gradient(ellipse 70% 50% at 50% 25%,var(--wine-mid),transparent 72%),radial-gradient(ellipse 130% 110% at 50% 50%,var(--wine-deep),var(--ground));color:var(--white);min-height:100vh}a{color:inherit;text-decoration:none}button{font:inherit}
+.topbar{position:sticky;top:0;z-index:20;background:rgba(10,2,2,.78);backdrop-filter:blur(16px);border-bottom:1px solid var(--border)}.topbar-in{max-width:1400px;margin:0 auto;height:76px;padding:0 24px;display:flex;align-items:center;justify-content:space-between;gap:18px}.brand{display:flex;align-items:center;gap:12px}.brand img{height:56px;width:auto}.brand strong{font-family:Agrandir,sans-serif;font-size:20px}.brand span{color:var(--bronze-light)}.nav-actions{display:flex;align-items:center;gap:10px}.btn{border:1px solid var(--border);background:rgba(255,255,255,.03);color:var(--cream);padding:10px 14px;border-radius:8px;cursor:pointer}.btn.primary{background:linear-gradient(135deg,var(--bronze),var(--bronze-dim));color:var(--wine-deep);border-color:transparent;font-weight:700}.btn:hover{border-color:rgba(201,154,74,.35)}
+.page{max-width:1400px;margin:0 auto;padding:36px 24px 80px}.hero{display:flex;justify-content:space-between;gap:24px;align-items:flex-end;margin-bottom:26px}.eyebrow{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--bronze-light);font-weight:700}.hero h1{font-family:Agrandir,sans-serif;font-size:clamp(30px,5vw,48px);margin:8px 0}.hero p{color:var(--muted);max-width:720px;line-height:1.7}.status{font-size:13px;color:var(--muted)}
+.gate{max-width:520px;margin:90px auto;border:1px solid var(--border);background:var(--card);border-radius:12px;padding:34px;text-align:center}.gate h1{font-family:Agrandir,sans-serif;margin-bottom:10px}.gate p{color:var(--muted);line-height:1.7;margin-bottom:22px}.error{display:none;color:var(--bad);background:rgba(232,160,160,.1);border:1px solid rgba(232,160,160,.22);border-radius:8px;padding:12px;margin-top:14px;font-size:13px}.error.show{display:block}
+.dashboard{display:none}.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:22px}.card{border:1px solid var(--border);background:var(--card);border-radius:10px;padding:20px}.card small{display:block;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:1px}.card b{display:block;font-family:Agrandir,sans-serif;font-size:30px;margin-top:8px;color:var(--bronze-light)}
+.grid{display:grid;grid-template-columns:2fr 1fr;gap:18px}.panel{border:1px solid var(--border);background:rgba(10,2,2,.34);border-radius:10px;overflow:hidden}.panel-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px 20px;border-bottom:1px solid var(--border)}.panel-head h2{font-size:17px}.panel-head span{color:var(--muted);font-size:12px}.table-wrap{overflow:auto}.data-table{width:100%;border-collapse:collapse;min-width:760px}.data-table th,.data-table td{padding:14px 16px;border-bottom:1px solid rgba(201,154,74,.1);text-align:left;font-size:13px;vertical-align:top}.data-table th{color:var(--bronze-light);font-size:11px;text-transform:uppercase;letter-spacing:1px;background:rgba(201,154,74,.04)}.data-table td{color:var(--cream)}.muted{color:var(--muted)}.chip{display:inline-flex;border:1px solid rgba(201,154,74,.28);background:rgba(201,154,74,.08);color:var(--bronze-light);padding:4px 8px;border-radius:999px;font-size:11px}
+.side-stack{display:flex;flex-direction:column;gap:18px}.team-list,.user-list{display:flex;flex-direction:column}.team-row,.user-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 16px;border-bottom:1px solid rgba(201,154,74,.1)}.team-row:last-child,.user-row:last-child{border-bottom:0}.team-row strong,.user-row strong{font-size:13px}.team-row span,.user-row span{font-size:12px;color:var(--muted)}.chat-placeholder{padding:22px}.chat-placeholder p{color:var(--muted);font-size:13px;line-height:1.7;margin-top:8px}
+@media(max-width:980px){.cards{grid-template-columns:1fr 1fr}.grid{grid-template-columns:1fr}.hero{display:block}.nav-actions{flex-wrap:wrap;justify-content:flex-end}}@media(max-width:560px){.cards{grid-template-columns:1fr}.topbar-in{height:auto;padding:12px 18px;align-items:flex-start}.brand img{height:46px}.page{padding:28px 16px 60px}}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-in">
+    <a class="brand" href="/home"><img src="/static/image/logo.png" alt="NAKCONEL"><strong>Admin <span>Dashboard</span></strong></a>
+    <div class="nav-actions">
+      <a class="btn" href="/home">Home</a>
+      <button class="btn" id="refreshBtn" type="button">Refresh</button>
+      <button class="btn primary" id="signOutBtn" type="button">Sign Out</button>
+    </div>
+  </div>
+</header>
+
+<main class="page">
+  <section class="gate" id="gate">
+    <h1>Admin Access</h1>
+    <p>Sign in with an approved admin email to view campaign submissions, signup stats, and the admin chat area.</p>
+    <a class="btn primary" href="/login">Sign In</a>
+    <div class="error" id="gateError"></div>
+  </section>
+
+  <section class="dashboard" id="dashboard">
+    <div class="hero">
+      <div>
+        <div class="eyebrow">NAKCONEL Control Center</div>
+        <h1>Everything Comes Here</h1>
+        <p>Monitor campaign entries, see how many people have signed up, and keep the admin chat space ready for the next build.</p>
+      </div>
+      <div class="status" id="adminStatus">Loading...</div>
+    </div>
+
+    <div class="cards">
+      <div class="card"><small>Campaign Submissions</small><b id="campaignCount">0</b></div>
+      <div class="card"><small>Registered Users</small><b id="userCount">0</b></div>
+      <div class="card"><small>Revenue NGN</small><b id="revenueCount">0</b></div>
+      <div class="card"><small>Configured Admins</small><b id="adminCount">0</b></div>
+    </div>
+
+    <div class="grid">
+      <section class="panel">
+        <div class="panel-head"><h2>Campaign Submissions</h2><span id="campaignMeta">Newest first</span></div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead><tr><th>Name</th><th>Business / Challenge</th><th>Package</th><th>Payment</th><th>Date</th></tr></thead>
+            <tbody id="campaignRows"><tr><td colspan="5" class="muted">Loading submissions...</td></tr></tbody>
+          </table>
+        </div>
+      </section>
+
+      <aside class="side-stack">
+        <section class="panel">
+          <div class="panel-head"><h2>Admin Team</h2><span>7 people</span></div>
+          <div class="team-list" id="teamRows">
+            {% for member in admin_team %}
+            <div class="team-row"><div><strong>{{ member.name }}</strong><br><span>{{ member.role }}</span></div><span class="chip">Admin</span></div>
+            {% endfor %}
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head"><h2>Recent Signups</h2><span id="usersMeta">Firebase users</span></div>
+          <div class="user-list" id="userRows"><div class="user-row"><span>Loading users...</span></div></div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head"><h2>Admin Chat</h2><span>Coming next</span></div>
+          <div class="chat-placeholder">
+            <strong>Chat area reserved</strong>
+            <p>This section is ready for the admin chat design once you show me the chat side. We can connect live team conversations, campaign follow-ups, or support inboxes here.</p>
+          </div>
+        </section>
+      </aside>
+    </div>
+  </section>
+</main>
+
+<script type="module">
+import { auth, onAuthStateChanged, nakSignOut } from '/static/js/nak-auth.js';
+
+const gate = document.getElementById('gate');
+const dashboard = document.getElementById('dashboard');
+const gateError = document.getElementById('gateError');
+
+function fmtNgn(value){ return Number(value || 0).toLocaleString('en-NG'); }
+function fmtDate(value){
+  if(!value) return '-';
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? value : date.toLocaleString();
+}
+function esc(value){
+  return String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+}
+async function adminFetch(url){
+  const user = auth.currentUser;
+  if(!user) throw new Error('Please sign in first.');
+  const token = await user.getIdToken();
+  const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+  const data = await res.json();
+  if(!res.ok) throw new Error(data.error || 'Admin request failed.');
+  return data;
+}
+function showError(message){
+  gate.style.display = 'block';
+  dashboard.style.display = 'none';
+  gateError.textContent = message;
+  gateError.classList.add('show');
+}
+async function loadAdmin(){
+  try{
+    const me = await adminFetch('/api/admin/me');
+    gate.style.display = 'none';
+    dashboard.style.display = 'block';
+    document.getElementById('adminStatus').textContent = `Signed in as ${me.user.email}`;
+    document.getElementById('adminCount').textContent = me.configuredAdmins;
+
+    const [summary, registrations, users] = await Promise.all([
+      adminFetch('/api/admin/summary'),
+      adminFetch('/api/admin/campaign-registrations'),
+      adminFetch('/api/admin/users')
+    ]);
+
+    document.getElementById('campaignCount').textContent = summary.campaignRegistrations;
+    document.getElementById('userCount').textContent = summary.registeredUsers;
+    document.getElementById('revenueCount').textContent = fmtNgn(summary.totalRevenueNgn);
+
+    const rows = registrations.registrations || [];
+    document.getElementById('campaignMeta').textContent = `${rows.length} total`;
+    document.getElementById('campaignRows').innerHTML = rows.length ? rows.map(item => {
+      const q = item.questions || {};
+      const pkg = item.package || {};
+      const pay = item.payment || {};
+      return `<tr>
+        <td><strong>${esc(q.fullName || item.email || 'Unknown')}</strong><br><span class="muted">${esc(item.email || '')}</span></td>
+        <td><strong>${esc(q.business || '-')}</strong><br><span class="muted">${esc(q.challenge || '-')}</span></td>
+        <td><span class="chip">${esc(pkg.name || '-')}</span><br><span class="muted">NGN ${fmtNgn(pkg.ngn)}</span></td>
+        <td><strong>${esc(pay.reference || item.id || '-')}</strong><br><span class="muted">${esc(pay.currency || 'NGN')} ${fmtNgn(pay.amount ? pay.amount / 100 : pkg.ngn)}</span></td>
+        <td>${esc(fmtDate(item.createdAt || pay.paidAt))}</td>
+      </tr>`;
+    }).join('') : '<tr><td colspan="5" class="muted">No campaign submissions yet.</td></tr>';
+
+    const userRows = users.users || [];
+    document.getElementById('usersMeta').textContent = `${userRows.length} total`;
+    document.getElementById('userRows').innerHTML = userRows.length ? userRows.slice(0, 8).map(user => (
+      `<div class="user-row"><div><strong>${esc(user.username || user.email || 'Unknown')}</strong><br><span>${esc(user.email || user.uid)}</span></div></div>`
+    )).join('') : '<div class="user-row"><span>No users yet.</span></div>';
+  }catch(err){
+    showError(err.message);
+  }
+}
+
+onAuthStateChanged(auth, user => {
+  if(!user){
+    showError('You need to sign in with an approved admin account.');
+    return;
+  }
+  loadAdmin();
+});
+document.getElementById('refreshBtn').addEventListener('click', loadAdmin);
+document.getElementById('signOutBtn').addEventListener('click', async () => {
+  await nakSignOut();
+  window.location.href = '/login';
+});
+</script>
+</body>
+</html>

@@ -97,22 +97,15 @@
     </div>
 
     <script type="module">
-        import { signInWithEmailAndPassword, signInWithPopup } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
-        import { auth, googleProvider } from '/static/js/firebase-config.js';
+        import { getErrorMessage, signInWithEmail, signInWithGoogle } from '/static/js/nak-auth.js';
 
         document.getElementById('googleBtn').addEventListener('click', async () => {
             try {
-                await signInWithPopup(auth, googleProvider);
+                await signInWithGoogle();
                 showAlert('Login successful! Redirecting…', 'success');
                 setTimeout(() => window.location.href = '/', 1200);
             } catch (err) {
-                const messages = {
-                    'auth/operation-not-allowed': 'Google sign-in is not enabled. Please contact support.',
-                    'auth/popup-blocked': 'Popup was blocked. Allow popups for this site.',
-                    'auth/popup-closed-by-user': 'Sign-in popup was closed.',
-                    'auth/network-request-failed': 'Network error. Check your connection.'
-                };
-                showAlert(messages[err.code] || `Google error (${err.code}): ${err.message}`, 'error');
+                showAlert(getErrorMessage(err.code), 'error');
             }
         });
 
@@ -131,22 +124,11 @@
             btn.disabled = true; btn.textContent = 'Signing in…';
 
             try {
-                await signInWithEmailAndPassword(auth, email, password);
+                await signInWithEmail(email, password);
                 showAlert('Login successful! Redirecting…', 'success');
                 setTimeout(() => window.location.href = '/', 1200);
             } catch (err) {
-                const messages = {
-                    'auth/user-not-found': 'No account found with that email.',
-                    'auth/wrong-password': 'Incorrect password.',
-                    'auth/invalid-email': 'Invalid email address.',
-                    'auth/invalid-credential': 'Incorrect email or password.',
-                    'auth/operation-not-allowed': 'Email/password sign-in is not enabled. Please contact support.',
-                    'auth/too-many-requests': 'Too many attempts. Try again later.',
-                    'auth/network-request-failed': 'Network error. Check your connection.',
-                    'auth/popup-blocked': 'Popup was blocked. Allow popups for this site.',
-                    'auth/popup-closed-by-user': 'Sign-in popup was closed.'
-                };
-                showAlert(messages[err.code] || `Error (${err.code}): ${err.message}`, 'error');
+                showAlert(getErrorMessage(err.code), 'error');
                 btn.disabled = false; btn.textContent = 'Sign In';
             }
         });

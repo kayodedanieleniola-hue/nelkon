@@ -129,28 +129,19 @@
     </div>
 
     <script type="module">
-        import { createUserWithEmailAndPassword, signInWithPopup } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
-        import { doc, setDoc } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
-        import { auth, db, googleProvider } from '/static/js/firebase-config.js';
+        import { getErrorMessage, signInWithGoogle, signUpWithEmail } from '/static/js/nak-auth.js';
+
+        const params = new URLSearchParams(window.location.search);
+        const nextUrl = params.get('next') || '/login';
+        const safeNextUrl = nextUrl.startsWith('/') && !nextUrl.startsWith('//') ? nextUrl : '/login';
 
         document.getElementById('googleBtn').addEventListener('click', async () => {
             try {
-                const cred = await signInWithPopup(auth, googleProvider);
-                await setDoc(doc(db, 'users', cred.user.uid), {
-                    username: cred.user.displayName,
-                    email: cred.user.email,
-                    createdAt: new Date().toISOString()
-                }, { merge: true });
+                await signInWithGoogle();
                 showAlert('Account ready! Redirecting…', 'success');
-                setTimeout(() => window.location.href = '/', 1200);
+                setTimeout(() => window.location.href = safeNextUrl, 1200);
             } catch (err) {
-                const messages = {
-                    'auth/operation-not-allowed': 'Google sign-up is not enabled. Please contact support.',
-                    'auth/popup-blocked': 'Popup was blocked. Allow popups for this site.',
-                    'auth/popup-closed-by-user': 'Sign-in popup was closed.',
-                    'auth/network-request-failed': 'Network error. Check your connection.'
-                };
-                showAlert(messages[err.code] || `Google error (${err.code}): ${err.message}`, 'error');
+                showAlert(getErrorMessage(err.code), 'error');
             }
         });
 
@@ -213,26 +204,14 @@
             btn.disabled = true; btn.textContent = 'Creating account…';
 
             try {
-                const cred = await createUserWithEmailAndPassword(auth, email, password);
-                await setDoc(doc(db, 'users', cred.user.uid), {
-                    username,
-                    email,
-                    createdAt: new Date().toISOString()
-                });
-                showAlert('Account created! You can now sign in.', 'success');
+                await signUpWithEmail(email, password, username);
+                showAlert('Account created! Redirecting...', 'success');
                 this.reset();
                 strengthFill.style.width = '0%';
                 btn.textContent = 'Account Created ✓';
-                setTimeout(() => window.location.href = '/login', 2000);
+                setTimeout(() => window.location.href = safeNextUrl, 2000);
             } catch (err) {
-                const messages = {
-                    'auth/email-already-in-use': 'An account with this email already exists.',
-                    'auth/invalid-email': 'Invalid email address.',
-                    'auth/weak-password': 'Password is too weak.',
-                    'auth/operation-not-allowed': 'Email/password sign-up is not enabled. Please contact support.',
-                    'auth/network-request-failed': 'Network error. Check your connection.'
-                };
-                showAlert(messages[err.code] || `Error (${err.code}): ${err.message}`, 'error');
+                showAlert(getErrorMessage(err.code), 'error');
                 btn.disabled = false; btn.textContent = 'Create Account';
             }
         });

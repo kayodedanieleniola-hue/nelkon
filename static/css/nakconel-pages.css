@@ -1,0 +1,185 @@
+/* =====================================================================
+   NAKCONEL PAGE STYLES
+   Shared page-specific styles (hero sections, content layouts)
+   ===================================================================== */
+
+/* ---- PAGE HERO ---- */
+.page-hero {
+  padding: 160px 24px 70px 24px;
+  text-align: center;
+  position: relative;
+}
+.page-hero::before {
+  content: '';
+  position: absolute;
+  top: 120px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 1px;
+  height: 48px;
+  background: linear-gradient(to bottom, transparent, var(--bronze));
+}
+.eyebrow {
+  font-size: 12px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--bronze);
+  font-weight: 600;
+}
+.page-hero h1 {
+  font-family: 'Agrandir', sans-serif;
+  font-size: clamp(34px, 5vw, 58px);
+  margin: 18px 0 18px;
+  color: var(--white);
+}
+.page-hero h1 span { color: var(--bronze-light); }
+.page-hero p {
+  max-width: 640px;
+  margin: 0 auto;
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+/* ---- STORY SECTION ---- */
+.story-section {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 0 24px 60px 24px;
+}
+.story-section p {
+  color: var(--cream);
+  font-size: 16px;
+  line-height: 1.85;
+  margin-bottom: 22px;
+}
+.story-section p:first-of-type {
+  font-size: 19px;
+  color: var(--white);
+}
+
+/* ---- VISION & MISSION ---- */
+.vm-section {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 60px 24px 120px 24px;
+}
+.vm-heading { text-align: center; margin-bottom: 40px; }
+.vm-heading h2 {
+  font-family: 'Agrandir', sans-serif;
+  font-size: clamp(26px, 3vw, 36px);
+  color: var(--white);
+}
+.vm-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+.meta-block {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border);
+  padding: 32px;
+  border-radius: var(--r);
+  transition: var(--tr);
+}
+.meta-block:hover {
+  border-color: rgba(201, 154, 74, 0.35);
+  background: rgba(117, 16, 8, 0.08);
+}
+.meta-block h4 {
+  font-family: 'Agrandir', sans-serif;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--bronze);
+  margin-bottom: 14px;
+}
+.meta-block p {
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1.75;
+  margin: 0;
+}
+
+/* ---- TEAM GRID ---- */
+.team-section {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 40px 24px 100px 24px;
+}
+.team-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 32px;
+  margin-top: 48px;
+}
+.team-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  overflow: hidden;
+  transition: var(--tr);
+}
+.team-card:hover {
+  border-color: rgba(201, 154, 74, 0.35);
+  transform: translateY(-4px);
+}
+.team-card img {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-bottom: 1px solid var(--border);
+}
+.team-info { padding: 24px; }
+.team-info h3 {
+  font-family: 'Agrandir', sans-serif;
+  font-size: 18px;
+  color: var(--white);
+  margin-bottom: 4px;
+}
+.team-info .role {
+  font-size: 13px;
+  color: var(--bronze-light);
+  margin-bottom: 12px;
+}
+.team-info p {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+/* ---- CONTENT SECTIONS ---- */
+.content-section {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 40px 24px 80px 24px;
+}
+.content-section h2 {
+  font-family: 'Agrandir', sans-serif;
+  font-size: clamp(24px, 3vw, 32px);
+  color: var(--white);
+  margin-bottom: 24px;
+}
+.content-section p {
+  color: var(--cream);
+  font-size: 15px;
+  line-height: 1.8;
+  margin-bottom: 20px;
+}
+.content-section ul {
+  list-style: disc;
+  padding-left: 24px;
+  margin-bottom: 20px;
+}
+.content-section li {
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1.7;
+  margin-bottom: 8px;
+}
+
+/* ---- RESPONSIVE ---- */
+@media (max-width: 768px) {
+  .vm-grid { grid-template-columns: 1fr; }
+  .team-grid { grid-template-columns: 1fr; }
+}

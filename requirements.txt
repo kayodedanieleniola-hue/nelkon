@@ -1,3 +1,8 @@
 flask
 requests
 gunicorn
+firebase-admin
+PyJWT>=2.6.0
+cryptography>=3.4.0
+python-dotenv
+

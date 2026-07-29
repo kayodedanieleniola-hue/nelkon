@@ -1,5 +1,4 @@
-import { onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
-import { auth } from '/static/js/firebase-config.js';
+import { getDisplayName, getUserInitials, nakSignOut, onAuthStateChanged, auth } from '/static/js/nak-auth.js';
 
 onAuthStateChanged(auth, (user) => {
   const authBtn = document.getElementById('navAuthBtn');
@@ -15,7 +14,7 @@ onAuthStateChanged(auth, (user) => {
     const nameEl = avatarWrap.querySelector('.nav-dd-name');
     const emailEl = avatarWrap.querySelector('.nav-dd-email');
 
-    if (nameEl) nameEl.textContent = user.displayName || 'Account';
+    if (nameEl) nameEl.textContent = getDisplayName(user);
     if (emailEl) emailEl.textContent = user.email || '';
 
     if (user.photoURL) {
@@ -25,8 +24,7 @@ onAuthStateChanged(auth, (user) => {
     } else {
       img.style.display = 'none';
       if (initials) {
-        const name = user.displayName || user.email || '?';
-        initials.textContent = name.charAt(0).toUpperCase();
+        initials.textContent = getUserInitials(user);
         initials.style.display = 'flex';
       }
     }
@@ -48,6 +46,6 @@ document.addEventListener('click', (e) => {
 });
 
 window.nakSignOut = async () => {
-  await signOut(auth);
+  await nakSignOut();
   window.location.href = '/login';
 };

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Nakconel AI — Brand Intelligence Assistant</title>
+<title>Nakconel AI â€” Brand Intelligence Assistant</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet"/>
 <style>
 @font-face{font-family:'Agrandir';src:url('https://fonts.cdnfonts.com/s/15785/Agrandir-GrandHeavy.woff') format('woff');font-weight:800;font-display:swap;}
@@ -349,27 +349,27 @@ body.dark .send-btn{background:#f0f0f0;color:#0d0d0d;}
   <div class="voice-transcript" id="voice-transcript">Say something...</div>
   <div class="voice-wave"><div class="vw-bar"></div><div class="vw-bar"></div><div class="vw-bar"></div><div class="vw-bar"></div><div class="vw-bar"></div><div class="vw-bar"></div><div class="vw-bar"></div><div class="vw-bar"></div></div>
   <div class="voice-actions">
-    <button class="voice-cancel" onclick="cancelVoice()">✕</button>
-    <button class="voice-stop" id="voice-stop-btn" onclick="stopVoice()">⏹</button>
-    <button class="voice-send show" id="voice-send-btn" onclick="sendVoice()" style="display:none">Send →</button>
+    <button class="voice-cancel" onclick="cancelVoice()">âœ•</button>
+    <button class="voice-stop" id="voice-stop-btn" onclick="stopVoice()">â¹</button>
+    <button class="voice-send show" id="voice-send-btn" onclick="sendVoice()" style="display:none">Send â†’</button>
   </div>
 </div>
 
 <!-- LIGHTBOX -->
 <div class="lightbox" id="lightbox" onclick="closeLightbox()">
-  <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+  <button class="lightbox-close" onclick="closeLightbox()">âœ•</button>
   <img id="lightbox-img" src="" alt=""/>
 </div>
 
 <!-- UPGRADE MODAL -->
 <div class="modal-ov" id="up-modal">
   <div class="up-modal">
-    <div class="up-head"><h2>⭐ Upgrade Nakconel AI</h2><p>Unlock unlimited power</p></div>
+    <div class="up-head"><h2>â­ Upgrade Nakconel AI</h2><p>Unlock unlimited power</p></div>
     <div class="up-plans">
-      <div class="plan-card"><div class="plan-name">Weekly</div><div class="plan-price">₦2,500 / $2.99</div><div class="plan-info">✓ Unlimited · 7 days</div><button class="plan-buy" onclick="buyPlan()">Get Weekly →</button></div>
-      <div class="plan-card pop"><div class="plan-badge">MOST POPULAR</div><div class="plan-name">Monthly</div><div class="plan-price">₦7,500 / $7.99</div><div class="plan-info">✓ Unlimited · 30 days</div><button class="plan-buy" onclick="buyPlan()">Get Monthly →</button></div>
-      <div class="plan-card"><div class="plan-name">6 Months</div><div class="plan-price">₦40,000 / $39.99</div><div class="plan-info">✓ Best value · 180 days</div><button class="plan-buy" onclick="buyPlan()">Get 6-Month →</button></div>
-      <div class="plan-card"><div class="plan-name">Yearly</div><div class="plan-price">₦70,000 / $69.99</div><div class="plan-info">✓ Max savings · 365 days</div><button class="plan-buy" onclick="buyPlan()">Get Yearly →</button></div>
+      <div class="plan-card"><div class="plan-name">Weekly</div><div class="plan-price">â‚¦2,500 / $2.99</div><div class="plan-info">âœ“ Unlimited Â· 7 days</div><button class="plan-buy" onclick="buyPlan('weekly')">Get Weekly â†’</button></div>
+      <div class="plan-card pop"><div class="plan-badge">MOST POPULAR</div><div class="plan-name">Monthly</div><div class="plan-price">â‚¦7,500 / $7.99</div><div class="plan-info">âœ“ Unlimited Â· 30 days</div><button class="plan-buy" onclick="buyPlan('monthly')">Get Monthly â†’</button></div>
+      <div class="plan-card"><div class="plan-name">6 Months</div><div class="plan-price">â‚¦40,000 / $39.99</div><div class="plan-info">âœ“ Best value Â· 180 days</div><button class="plan-buy" onclick="buyPlan('six_months')">Get 6-Month â†’</button></div>
+      <div class="plan-card"><div class="plan-name">Yearly</div><div class="plan-price">â‚¦70,000 / $69.99</div><div class="plan-info">âœ“ Max savings Â· 365 days</div><button class="plan-buy" onclick="buyPlan('yearly')">Get Yearly â†’</button></div>
     </div>
     <button class="modal-close" onclick="closeUpgrade()">Maybe later</button>
   </div>
@@ -388,7 +388,7 @@ body.dark .send-btn{background:#f0f0f0;color:#0d0d0d;}
 </div>
 
 <!-- WELCOME / ONBOARDING -->
-<div id="onboard-screen" class="screen active">
+<div id="onboard-screen" class="screen">
   <div class="ob-brand">NAK<span>CON</span>EL <span style="font-size:16px;font-weight:400;-webkit-text-fill-color:rgba(245,232,199,.5);">AI</span></div>
   <div class="ob-brandtag">Brand Intelligence Assistant</div>
 
@@ -399,52 +399,52 @@ body.dark .send-btn{background:#f0f0f0;color:#0d0d0d;}
     <input type="text" class="ob-name-inp" id="ob-name" placeholder="Your first name (optional)"/>
     <div class="ob-q" style="font-size:19px;margin-top:6px;">Which pillar brings you here?</div>
     <div class="ob-grid">
-      <div class="ob-chip" onclick="selChip(this)">✦ Brand Strategy</div><div class="ob-chip" onclick="selChip(this)">❖ Content &amp; Design</div>
-      <div class="ob-chip" onclick="selChip(this)">▲ IT &amp; Technology</div><div class="ob-chip" onclick="selChip(this)">◈ AI Enablement</div>
-      <div class="ob-chip" onclick="selChip(this)" style="grid-column:span 2">🌍 Global / Cultural Markets</div>
+      <div class="ob-chip" onclick="selChip(this)">âœ¦ Brand Strategy</div><div class="ob-chip" onclick="selChip(this)">â– Content &amp; Design</div>
+      <div class="ob-chip" onclick="selChip(this)">â–² IT &amp; Technology</div><div class="ob-chip" onclick="selChip(this)">â—ˆ AI Enablement</div>
+      <div class="ob-chip" onclick="selChip(this)" style="grid-column:span 2">ðŸŒ Global / Cultural Markets</div>
     </div>
-    <div class="ob-actions"><button class="skip-btn" onclick="goStep2()">Skip</button><button class="next-btn" onclick="goStep2()">Continue →</button></div>
+    <div class="ob-actions"><button class="skip-btn" onclick="goStep2()">Skip</button><button class="next-btn" onclick="goStep2()">Continue â†’</button></div>
   </div>
   <div class="ob-step" id="step2">
     <div class="ob-label">Step 2 of 2</div>
     <div class="ob-q">What do you need first?</div>
     <div class="ob-sub">Nakconel AI can help with this right away.</div>
     <div class="ob-grid">
-      <div class="ob-chip" onclick="selChip(this)">📐 Brand Audit</div><div class="ob-chip" onclick="selChip(this)">📝 Brand Messaging</div>
-      <div class="ob-chip" onclick="selChip(this)">🎨 Design Brief</div><div class="ob-chip" onclick="selChip(this)">📅 Content Plan</div>
-      <div class="ob-chip" onclick="selChip(this)">🤖 AI Workflow</div><div class="ob-chip" onclick="selChip(this)">✨ Just Exploring</div>
+      <div class="ob-chip" onclick="selChip(this)">ðŸ“ Brand Audit</div><div class="ob-chip" onclick="selChip(this)">ðŸ“ Brand Messaging</div>
+      <div class="ob-chip" onclick="selChip(this)">ðŸŽ¨ Design Brief</div><div class="ob-chip" onclick="selChip(this)">ðŸ“… Content Plan</div>
+      <div class="ob-chip" onclick="selChip(this)">ðŸ¤– AI Workflow</div><div class="ob-chip" onclick="selChip(this)">âœ¨ Just Exploring</div>
     </div>
-    <div class="ob-actions"><button class="skip-btn" onclick="enterChat()">Skip</button><button class="next-btn" onclick="enterChat()">Enter Studio →</button></div>
+    <div class="ob-actions"><button class="skip-btn" onclick="enterChat()">Skip</button><button class="next-btn" onclick="enterChat()">Enter Studio â†’</button></div>
   </div>
 </div>
 
 <!-- CHAT SCREEN -->
-<div id="chat-screen" class="screen">
+<div id="chat-screen" class="screen active">
   <div class="sb-overlay" id="sb-overlay" onclick="closeSidebar()"></div>
 
   <!-- SIDEBAR -->
   <div class="sidebar" id="sidebar">
     <div class="sb-top">
-      <div class="sb-head"><div class="sb-title">🤖 Nakconel AI</div><button class="sb-close" onclick="closeSidebar()">✖</button></div>
-      <div class="sb-search"><span>🔍</span><input type="text" placeholder="Search chats..." oninput="filterChats(this.value)"/></div>
-      <button class="sb-new" onclick="newChat()">✨ + New Chat</button>
+      <div class="sb-head"><div class="sb-title">ðŸ¤– Nakconel AI</div><button class="sb-close" onclick="closeSidebar()">âœ–</button></div>
+      <div class="sb-search"><span>ðŸ”</span><input type="text" placeholder="Search chats..." oninput="filterChats(this.value)"/></div>
+      <button class="sb-new" onclick="newChat()">âœ¨ + New Chat</button>
     </div>
-    <div class="sb-list" id="sb-list"><div class="sb-empty">💬<br/>No chats yet.<br/>Start a conversation!</div></div>
+    <div class="sb-list" id="sb-list"><div class="sb-empty">ðŸ’¬<br/>No chats yet.<br/>Start a conversation!</div></div>
     <div class="sb-upgrade">
-      <button class="sb-up-btn" onclick="openUpgrade()">⭐ UPGRADE PLAN</button>
-      <div class="sb-up-info">Free Plan · <span id="sb-count">40</span> messages left</div>
+      <button class="sb-up-btn" onclick="openUpgrade()">â­ UPGRADE PLAN</button>
+      <div class="sb-up-info">Free Plan Â· <span id="sb-count">40</span> messages left</div>
     </div>
     <div class="sb-boost">
-      <div class="sb-boost-head">🎁 Daily Boost</div>
+      <div class="sb-boost-head">ðŸŽ Daily Boost</div>
       <div class="sb-boost-sub">+5 extra messages per day</div>
-      <button class="sb-boost-btn" id="boost-btn" onclick="claimBoost()">Watch Ad → Claim</button>
+      <button class="sb-boost-btn" id="boost-btn" onclick="claimBoost()">Watch Ad â†’ Claim</button>
       <div class="sb-boost-claimed" id="boost-claimed" style="display:none"></div>
     </div>
     <div class="sb-bottom">
-      <div class="sb-btn"><span>👤</span><div><div class="sb-uname" id="sb-uname">User</div><div class="sb-uemail" id="sb-uemail"></div></div></div>
-      <button class="sb-btn" onclick="showToast('Settings coming soon!')"><span>⚙️</span><span>Settings</span></button>
-      <button class="dark-pill" onclick="toggleDark()"><div style="display:flex;align-items:center;gap:10px;"><span>🌙</span><span style="font-size:13px;color:var(--text2)">Dark Mode</span></div><div class="tog-sw" id="dark-sw"><div class="tog-knob"></div></div></button>
-      <button class="sb-btn danger" onclick="startOver()"><span>🔄</span><span>Start Over</span></button>
+      <div class="sb-btn"><span>ðŸ‘¤</span><div><div class="sb-uname" id="sb-uname">User</div><div class="sb-uemail" id="sb-uemail"></div></div></div>
+      <button class="sb-btn" onclick="showToast('Settings coming soon!')"><span>âš™ï¸</span><span>Settings</span></button>
+      <button class="dark-pill" onclick="toggleDark()"><div style="display:flex;align-items:center;gap:10px;"><span>ðŸŒ™</span><span style="font-size:13px;color:var(--text2)">Dark Mode</span></div><div class="tog-sw" id="dark-sw"><div class="tog-knob"></div></div></button>
+      <button class="sb-btn danger" onclick="startOver()"><span>ðŸ”„</span><span>Start Over</span></button>
     </div>
   </div>
 
@@ -452,49 +452,49 @@ body.dark .send-btn{background:#f0f0f0;color:#0d0d0d;}
   <div class="chat-main">
     <div class="topbar">
       <div class="topbar-l">
-        <button class="mob-toggle" onclick="toggleSidebar()">☰</button>
+        <button class="mob-toggle" onclick="toggleSidebar()">â˜°</button>
         <div class="topbar-logo">Nakconel <span style="font-weight:400;font-size:12px;-webkit-text-fill-color:var(--text3)">AI</span></div>
       </div>
       <div class="topbar-r">
-        <button class="tb-btn" onclick="showToast('No new notifications')">🔔<span class="notif-dot"></span></button>
+        <button class="tb-btn" onclick="showToast('No new notifications')">ðŸ””<span class="notif-dot"></span></button>
         <div class="av-wrap">
           <button class="av-btn" id="av-btn" onclick="toggleAvMenu()">N</button>
           <div class="av-dd" id="av-dd">
             <div class="av-dd-name" id="av-name">User</div>
             <div class="av-dd-email" id="av-email"></div>
             <div class="av-dd-div"></div>
-            <button class="av-dd-item" onclick="showToast('Settings coming soon!')">⚙️ Settings</button>
-            <button class="av-dd-item danger" onclick="startOver()">🔄 Start Over</button>
+            <button class="av-dd-item" onclick="showToast('Settings coming soon!')">âš™ï¸ Settings</button>
+            <button class="av-dd-item danger" onclick="startOver()">ðŸ”„ Start Over</button>
           </div>
         </div>
       </div>
     </div>
 
     <!-- WARNINGS -->
-    <div class="lim-warn" id="warn10">⚠️ Only <b>10 messages</b> left!<div class="lim-warn-acts"><button class="w-btn s" onclick="claimBoost()">🎁 Boost</button><button class="w-btn p" onclick="openUpgrade()">⭐ Upgrade</button></div></div>
-    <div class="lim-warn danger" id="warn5">🔴 Only <b>5 messages</b> left! Resets <span id="warn-timer">--:--:--</span><div class="lim-warn-acts"><button class="w-btn p" onclick="openUpgrade()">⭐ Upgrade Now</button></div></div>
+    <div class="lim-warn" id="warn10">âš ï¸ Only <b>10 messages</b> left!<div class="lim-warn-acts"><button class="w-btn s" onclick="claimBoost()">ðŸŽ Boost</button><button class="w-btn p" onclick="openUpgrade()">â­ Upgrade</button></div></div>
+    <div class="lim-warn danger" id="warn5">ðŸ”´ Only <b>5 messages</b> left! Resets <span id="warn-timer">--:--:--</span><div class="lim-warn-acts"><button class="w-btn p" onclick="openUpgrade()">â­ Upgrade Now</button></div></div>
 
     <div class="limit-bar">
       <div class="limit-l">
-        <div class="limit-lbl">Free · <b id="msg-count">40</b>/40</div>
+        <div class="limit-lbl">Free Â· <b id="msg-count">40</b>/40</div>
         <div class="limit-prog"><div class="limit-fill" id="lim-fill" style="width:100%"></div></div>
         <div class="limit-timer">Resets <span id="reset-timer">--:--:--</span></div>
       </div>
-      <button class="up-pill" onclick="openUpgrade()">⭐ UPGRADE</button>
+      <button class="up-pill" onclick="openUpgrade()">â­ UPGRADE</button>
     </div>
 
     <div class="chat-area" id="chat-area">
       <div class="empty-state" id="empty-state">
         <div class="empty-logo">Nakconel</div>
-        <div class="empty-greet">Hi, <span id="greet-name">there</span> 👋</div>
-        <div class="empty-sub">Your brand intelligence partner — what should we build today?</div>
+        <div class="empty-greet">Hi, <span id="greet-name">there</span> ðŸ‘‹</div>
+        <div class="empty-sub">Your brand intelligence partner â€” what should we build today?</div>
         <div class="sug-grid">
-          <div class="sug-card" onclick="useSug('Audit my brand identity and tell me what to improve')"><span class="sc-icon">📐</span><span class="sc-text">Audit my brand identity</span></div>
-          <div class="sug-card" onclick="useSug('Write brand messaging and a tagline for my business')"><span class="sc-icon">📝</span><span class="sc-text">Write brand messaging</span></div>
-          <div class="sug-card" onclick="useSug('Plan a content calendar for my brand')"><span class="sc-icon">📅</span><span class="sc-text">Plan a content calendar</span></div>
-          <div class="sug-card" onclick="useSug('Generate a logo concept image for my brand')"><span class="sc-icon">🎨</span><span class="sc-text">Generate a design concept</span></div>
-          <div class="sug-card" onclick="useSug('Build an AI adoption roadmap for my team')"><span class="sc-icon">🤖</span><span class="sc-text">Build an AI workflow</span></div>
-          <div class="sug-card" onclick="useSug('Help me expand my brand into a new market')"><span class="sc-icon">🌍</span><span class="sc-text">Plan market expansion</span></div>
+          <div class="sug-card" onclick="useSug('Audit my brand identity and tell me what to improve')"><span class="sc-icon">ðŸ“</span><span class="sc-text">Audit my brand identity</span></div>
+          <div class="sug-card" onclick="useSug('Write brand messaging and a tagline for my business')"><span class="sc-icon">ðŸ“</span><span class="sc-text">Write brand messaging</span></div>
+          <div class="sug-card" onclick="useSug('Plan a content calendar for my brand')"><span class="sc-icon">ðŸ“…</span><span class="sc-text">Plan a content calendar</span></div>
+          <div class="sug-card" onclick="useSug('Generate a logo concept image for my brand')"><span class="sc-icon">ðŸŽ¨</span><span class="sc-text">Generate a design concept</span></div>
+          <div class="sug-card" onclick="useSug('Build an AI adoption roadmap for my team')"><span class="sc-icon">ðŸ¤–</span><span class="sc-text">Build an AI workflow</span></div>
+          <div class="sug-card" onclick="useSug('Help me expand my brand into a new market')"><span class="sc-icon">ðŸŒ</span><span class="sc-text">Plan market expansion</span></div>
         </div>
       </div>
     </div>
@@ -506,24 +506,24 @@ body.dark .send-btn{background:#f0f0f0;color:#0d0d0d;}
         <div class="plus-wrap">
           <button class="plus-btn" id="plus-btn" onclick="togglePlus()">+</button>
           <div class="plus-menu" id="plus-menu">
-            <div class="pm-item" onclick="triggerUpload('image/*')">📷 Upload Image</div>
-            <div class="pm-item" onclick="openCamera()">📸 Take Photo</div>
-            <div class="pm-item" onclick="triggerUpload('.pdf,.txt,.docx,.doc')">📄 Upload Document</div>
-            <div class="pm-item" onclick="getLocation()">📍 Share Location</div>
-            <div class="pm-item" onclick="pasteLink()">🔗 Paste Link</div>
+            <div class="pm-item" onclick="triggerUpload('image/*')">ðŸ“· Upload Image</div>
+            <div class="pm-item" onclick="openCamera()">ðŸ“¸ Take Photo</div>
+            <div class="pm-item" onclick="triggerUpload('.pdf,.txt,.docx,.doc')">ðŸ“„ Upload Document</div>
+            <div class="pm-item" onclick="getLocation()">ðŸ“ Share Location</div>
+            <div class="pm-item" onclick="pasteLink()">ðŸ”— Paste Link</div>
           </div>
         </div>
         <input type="file" id="file-inp" style="display:none" onchange="handleFile(event)"/>
         <input type="file" id="cam-inp" accept="image/*" capture="environment" style="display:none" onchange="handleFile(event)"/>
         <div class="input-pill">
           <textarea class="chat-ta" id="chat-input" placeholder="Ask Nakconel AI about your brand..." onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
-          <button class="mic-btn" id="mic-btn" onclick="startVoice()">🎤</button>
+          <button class="mic-btn" id="mic-btn" onclick="startVoice()">ðŸŽ¤</button>
           <button class="send-btn" id="send-btn" onclick="sendMessage()">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
           </button>
         </div>
       </div>
-      <div class="input-hint">Nakconel AI · Brand Intelligence Assistant · 40 msgs/day</div>
+      <div class="input-hint">Nakconel AI Â· Brand Intelligence Assistant Â· 40 msgs/day</div>
     </div>
   </div>
 </div>
@@ -532,9 +532,30 @@ body.dark .send-btn{background:#f0f0f0;color:#0d0d0d;}
 
 <!-- SESSION INIT (no account required) -->
 <script>
+// AUTO-INIT: Skip onboarding and go straight to chat with default values
+window._name='there';window._email='';window._user=null;
+let sbOpen=window.innerWidth>768;
+
+document.addEventListener('DOMContentLoaded',()=>{
+  // Set default values for the UI
+  document.getElementById('greet-name').textContent='there';
+  document.getElementById('av-btn').textContent='U';
+  document.getElementById('sb-uname').textContent='User';
+  document.getElementById('sb-uemail').textContent='Brand workspace';
+  document.getElementById('av-name').textContent='User';
+  document.getElementById('av-email').textContent='Nakconel AI Â· Brand workspace';
+  curChatId='chat_'+Date.now();
+  refreshQuota();
+  verifySubscriptionCallback();
+  if(localStorage.getItem('nak_dark')==='1'){isDark=true;document.body.classList.add('dark');document.getElementById('dark-sw').classList.add('on');}
+  renderSidebar();
+  if(window.innerWidth<=768){document.getElementById('sidebar').classList.remove('open');}
+});
+</script>
+
+<script>
 window.doSignOut=undefined;
 window.startOver=function(){
-  localStorage.removeItem('nak_mc');localStorage.removeItem('nak_mcd');
   document.getElementById('av-dd')?.classList.remove('show');
   document.getElementById('ob-name')&&(document.getElementById('ob-name').value='');
   document.querySelectorAll('.ob-chip.sel').forEach(c=>c.classList.remove('sel'));
@@ -547,10 +568,57 @@ showLoad(false);
 
 <script>
 const MAX=40;
-let msgCount=MAX,isDark=false,isTyping=false,recog=null,curTTS=null;
+let msgCount=MAX,quotaLimit=MAX,quotaResetAt=null,isDark=false,isTyping=false,recog=null,curTTS=null;
 let history=[],curChatId=null,pendingDelId=null,attachments=[];
+function getClientId(){
+  let id=localStorage.getItem('nak_client_id');
+  if(!id){
+    id=(window.crypto&&crypto.randomUUID&&crypto.randomUUID())||('nak_'+Date.now()+'_'+Math.random().toString(36).slice(2));
+    localStorage.setItem('nak_client_id',id);
+  }
+  return id;
+}
+function quotaHeaders(extra){return Object.assign({'Content-Type':'application/json','X-NAK-Client-Id':getClientId()},extra||{});}
+function applyQuota(q){
+  if(!q)return;
+  quotaLimit=q.limit||MAX;
+  msgCount=Number.isFinite(q.remaining)?q.remaining:msgCount;
+  quotaResetAt=q.resetAt||quotaResetAt;
+  updateLimitUI();
+  checkBoost(q);
+}
+async function verifySubscriptionCallback(){
+  const params=new URLSearchParams(window.location.search);
+  const reference=params.get('reference')||params.get('trxref');
+  if(!reference)return;
+  try{
+    showToast('Verifying payment...');
+    const res=await fetch('/api/ai/subscription/verify',{method:'POST',headers:quotaHeaders(),body:JSON.stringify({reference})});
+    const data=await res.json();
+    if(data.quota)applyQuota(data.quota);
+    if(res.ok){
+      showToast('Subscription activated!');
+      window.history.replaceState({},document.title,window.location.pathname);
+      closeUpgrade();
+    }else{
+      showToast(data.error||'Payment could not be verified.');
+    }
+  }catch(err){
+    showToast('Could not verify payment. Please refresh and try again.');
+  }
+}
+async function refreshQuota(){
+  try{
+    const res=await fetch('/api/ai/quota',{headers:{'X-NAK-Client-Id':getClientId()}});
+    const data=await res.json();
+    applyQuota(data);
+  }catch(err){
+    console.error('Quota refresh failed:',err);
+    updateLimitUI();checkBoost();
+  }
+}
 
-// ── PERSISTENT MEMORY (carries context across new chats, not just within one) ──
+// â”€â”€ PERSISTENT MEMORY (carries context across new chats, not just within one) â”€â”€
 function getMemory(){try{return JSON.parse(localStorage.getItem('nak_memory')||'[]');}catch{return[];}}
 function addToMemory(role,content){
   if(!content)return;
@@ -564,25 +632,28 @@ let sbOpen=window.innerWidth>768;
 
 // TIMER
 function updateTimer(){
-  const now=new Date(),mid=new Date();mid.setHours(24,0,0,0);
-  const diff=mid-now,h=Math.floor(diff/3600000),m=Math.floor((diff%3600000)/60000),s=Math.floor((diff%60000)/1000);
+  const now=new Date(),reset=quotaResetAt?new Date(quotaResetAt):new Date();
+  if(!quotaResetAt)reset.setHours(24,0,0,0);
+  const diff=Math.max(reset-now,0),h=Math.floor(diff/3600000),m=Math.floor((diff%3600000)/60000),s=Math.floor((diff%60000)/1000);
   const str=`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
   ['reset-timer','warn-timer'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=str;});
-  if(h===0&&m===0&&s===0){msgCount=MAX;updateLimitUI();if('Notification'in window&&Notification.permission==='granted')new Notification('✨ Nakconel AI',{body:'Your 40 messages have been refreshed!'});}
+  if(diff===0){refreshQuota();if('Notification'in window&&Notification.permission==='granted')new Notification('Nakconel AI',{body:'Your messages have been refreshed!'});}
 }
 setInterval(updateTimer,1000);updateTimer();
 if('Notification'in window&&Notification.permission==='default')setTimeout(()=>Notification.requestPermission(),3000);
 
 function updateLimitUI(){
-  const pct=(msgCount/MAX)*100;
+  const pct=(msgCount/quotaLimit)*100;
   const fill=document.getElementById('lim-fill');
-  ['msg-count','sb-count'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=msgCount;});
+  ['msg-count','sb-count'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=quotaLimit>=999999?'Unlimited':msgCount;});
+  const lbl=document.querySelector('.limit-lbl');
+  if(lbl)lbl.innerHTML=quotaLimit>=999999?'Pro · <b id="msg-count">Unlimited</b>':`Free · <b id="msg-count">${msgCount}</b>/${quotaLimit}`;
   if(fill){fill.style.width=pct+'%';fill.className='limit-fill'+(msgCount<=5?' danger':msgCount<=10?' warn':'');}
   document.getElementById('warn10')?.classList.toggle('show',msgCount<=10&&msgCount>5);
   document.getElementById('warn5')?.classList.toggle('show',msgCount<=5&&msgCount>0);
   const sb=document.getElementById('send-btn'),ta=document.getElementById('chat-input');
   if(sb)sb.disabled=msgCount<=0;
-  if(ta&&msgCount<=0)ta.placeholder='Daily limit reached. Upgrade or wait for reset.';
+  if(ta)ta.placeholder=msgCount<=0?'Daily limit reached. Upgrade or wait for reset.':'Message Nakconel AI...';
 }
 
 // SIDEBAR
@@ -601,7 +672,7 @@ function getLocation(){
   showToast('Getting your location...');
   navigator.geolocation.getCurrentPosition(pos=>{
     const {latitude:lat,longitude:lng}=pos.coords;
-    const locText=`📍 My location: ${lat.toFixed(6)}, ${lng.toFixed(6)} (https://maps.google.com/?q=${lat},${lng})`;
+    const locText=`ðŸ“ My location: ${lat.toFixed(6)}, ${lng.toFixed(6)} (https://maps.google.com/?q=${lat},${lng})`;
     document.getElementById('chat-input').value+=locText;
     showToast('Location added!');
   },()=>showToast('Location access denied'));
@@ -629,10 +700,10 @@ function renderAttachments(){
   if(!attachments.length){el.innerHTML='';return;}
   el.innerHTML=attachments.map((a,i)=>{
     if(a.type.startsWith('image/')&&a.dataUrl){
-      return `<div class="attach-img"><img src="${a.dataUrl}" onclick="openLightbox('${a.dataUrl}')"/><button class="attach-img-rm" onclick="rmAttach(${i})">✕</button></div>`;
+      return `<div class="attach-img"><img src="${a.dataUrl}" onclick="openLightbox('${a.dataUrl}')"/><button class="attach-img-rm" onclick="rmAttach(${i})">âœ•</button></div>`;
     }
-    const icon=a.type.includes('pdf')?'📄':a.type.includes('doc')?'📝':'📄';
-    return `<div class="attach-file"><div class="attach-file-icon">${icon}</div><div class="attach-file-info"><div class="attach-file-name">${a.name}</div><div class="attach-file-size">${(a.size/1024).toFixed(1)} KB</div></div><button class="attach-rm" onclick="rmAttach(${i})">✕</button></div>`;
+    const icon=a.type.includes('pdf')?'ðŸ“„':a.type.includes('doc')?'ðŸ“':'ðŸ“„';
+    return `<div class="attach-file"><div class="attach-file-icon">${icon}</div><div class="attach-file-info"><div class="attach-file-name">${a.name}</div><div class="attach-file-size">${(a.size/1024).toFixed(1)} KB</div></div><button class="attach-rm" onclick="rmAttach(${i})">âœ•</button></div>`;
   }).join('');
 }
 function rmAttach(i){attachments.splice(i,1);renderAttachments();}
@@ -668,11 +739,11 @@ function groupChats(chats){
 
 function chatItem(c){
   return `<div class="sb-item ${c.id===curChatId?'active':''}" onclick="loadChat('${c.id}')">
-    <span>💬</span><span class="sb-item-title">${esc(c.title)}</span>
-    <span class="sb-arrow" onclick="event.stopPropagation();toggleDD('${c.id}')">▼
+    <span>ðŸ’¬</span><span class="sb-item-title">${esc(c.title)}</span>
+    <span class="sb-arrow" onclick="event.stopPropagation();toggleDD('${c.id}')">â–¼
       <div class="sb-dd" id="dd-${c.id}">
-        <div class="sb-dd-item" onclick="event.stopPropagation();shareChat('${c.id}')">📤 Share</div>
-        <div class="sb-dd-item danger" onclick="event.stopPropagation();confDelete('${c.id}')">🗑️ Delete</div>
+        <div class="sb-dd-item" onclick="event.stopPropagation();shareChat('${c.id}')">ðŸ“¤ Share</div>
+        <div class="sb-dd-item danger" onclick="event.stopPropagation();confDelete('${c.id}')">ðŸ—‘ï¸ Delete</div>
       </div>
     </span>
   </div>`;
@@ -682,12 +753,12 @@ function renderSidebar(filter=''){
   const list=document.getElementById('sb-list');
   let chats=getChats();
   if(filter)chats=chats.filter(c=>c.title.toLowerCase().includes(filter.toLowerCase()));
-  if(!chats.length){list.innerHTML=`<div class="sb-empty">${filter?'🔍<br/>No chats found':'💬<br/>No chats yet.<br/>Start a conversation!'}</div>`;return;}
+  if(!chats.length){list.innerHTML=`<div class="sb-empty">${filter?'ðŸ”<br/>No chats found':'ðŸ’¬<br/>No chats yet.<br/>Start a conversation!'}</div>`;return;}
   const g=groupChats(chats);let html='';
-  if(g.today.length){html+='<div class="sb-sec">📅 TODAY</div>';g.today.forEach(c=>html+=chatItem(c));}
-  if(g.yesterday.length){html+='<div class="sb-sec">📅 YESTERDAY</div>';g.yesterday.forEach(c=>html+=chatItem(c));}
-  if(g.week.length){html+='<div class="sb-sec">📅 LAST 7 DAYS</div>';g.week.forEach(c=>html+=chatItem(c));}
-  if(g.older.length){html+='<div class="sb-sec">📂 OLDER</div>';g.older.forEach(c=>html+=chatItem(c));}
+  if(g.today.length){html+='<div class="sb-sec">ðŸ“… TODAY</div>';g.today.forEach(c=>html+=chatItem(c));}
+  if(g.yesterday.length){html+='<div class="sb-sec">ðŸ“… YESTERDAY</div>';g.yesterday.forEach(c=>html+=chatItem(c));}
+  if(g.week.length){html+='<div class="sb-sec">ðŸ“… LAST 7 DAYS</div>';g.week.forEach(c=>html+=chatItem(c));}
+  if(g.older.length){html+='<div class="sb-sec">ðŸ“‚ OLDER</div>';g.older.forEach(c=>html+=chatItem(c));}
   list.innerHTML=html;
 }
 function filterChats(v){renderSidebar(v);}
@@ -737,26 +808,44 @@ function saveChatHistory(chatId,msgs){
 }
 
 // DAILY BOOST
-function checkBoost(){
-  const last=localStorage.getItem('nak_boost'),today=new Date().toDateString();
+function checkBoost(q){
   const btn=document.getElementById('boost-btn'),cl=document.getElementById('boost-claimed');
-  if(last===today){
+  if(q&&q.boostClaimed){
     btn.style.display='none';cl.style.display='block';
-    const tmr=new Date();tmr.setDate(tmr.getDate()+1);tmr.setHours(0,0,0,0);
+    const tmr=q.resetAt?new Date(q.resetAt):new Date();if(!q.resetAt){tmr.setDate(tmr.getDate()+1);tmr.setHours(0,0,0,0);}
     const diff=tmr-new Date(),h=Math.floor(diff/3600000),m=Math.floor((diff%3600000)/60000);
-    cl.textContent=`✅ Claimed · Come back in ${h}h ${m}m`;
+    cl.textContent=`Claimed · Come back in ${h}h ${m}m`;
   }else{btn.style.display='block';cl.style.display='none';}
 }
-window.claimBoost=()=>{
-  if(localStorage.getItem('nak_boost')===new Date().toDateString()){showToast('Already claimed today!');return;}
-  localStorage.setItem('nak_boost',new Date().toDateString());
-  msgCount=Math.min(msgCount+5,MAX+5);updateLimitUI();checkBoost();showToast('🎁 +5 messages claimed!');
+window.claimBoost=async()=>{
+  try{
+    const res=await fetch('/api/ai/boost',{method:'POST',headers:quotaHeaders()});
+    const data=await res.json();
+    if(data.quota)applyQuota(data.quota);
+    showToast(res.ok?'+5 messages claimed!':(data.error||'Already claimed today!'));
+  }catch(err){
+    showToast('Could not claim boost. Please try again.');
+  }
 };
 
 // UPGRADE
 window.openUpgrade=()=>document.getElementById('up-modal').classList.add('show');
 window.closeUpgrade=()=>document.getElementById('up-modal').classList.remove('show');
-window.buyPlan=()=>{showToast('Payment coming soon! 🚀');closeUpgrade();};
+window.buyPlan=async(planId)=>{
+  try{
+    showToast('Opening secure checkout...');
+    const res=await fetch('/api/ai/subscription/initialize',{
+      method:'POST',
+      headers:quotaHeaders(),
+      body:JSON.stringify({planId,email:window._email||''})
+    });
+    const data=await res.json();
+    if(!res.ok)throw new Error(data.error||'Payment could not be started.');
+    window.location.href=data.authorizationUrl;
+  }catch(err){
+    showToast(err.message||'Payment could not be started.');
+  }
+};
 
 // UI
 function showLoad(s){document.getElementById('load-ov').classList.toggle('show',s);}
@@ -777,13 +866,9 @@ function enterChat(){
   document.getElementById('sb-uname').textContent=n;
   document.getElementById('sb-uemail').textContent='Brand workspace';
   document.getElementById('av-name').textContent=n;
-  document.getElementById('av-email').textContent='Nakconel AI · Brand workspace';
+  document.getElementById('av-email').textContent='Nakconel AI Â· Brand workspace';
   curChatId='chat_'+Date.now();
-  // Restore msg count
-  const sd=localStorage.getItem('nak_mcd'),sc=parseInt(localStorage.getItem('nak_mc')||'0');
-  if(sd===new Date().toDateString()&&sc>=0&&sc<=MAX)msgCount=sc;
-  else{msgCount=MAX;localStorage.setItem('nak_mcd',new Date().toDateString());localStorage.setItem('nak_mc',MAX);}
-  updateLimitUI();checkBoost();
+  refreshQuota();
   if(localStorage.getItem('nak_dark')==='1'){isDark=true;document.body.classList.add('dark');document.getElementById('dark-sw').classList.add('on');}
   renderSidebar();switchScreen('chat-screen');
   if(window.innerWidth<=768){document.getElementById('sidebar').classList.remove('open');}
@@ -806,7 +891,7 @@ function formatAIMsg(text){
   // Code blocks
   html=html.replace(/```(\w*)\n?([\s\S]*?)```/g,(m,lang,code)=>{
     const l=lang||'code';
-    return `</p><div class="code-block"><div class="code-header"><span class="code-lang">${esc(l)}</span><button class="code-copy-btn" onclick="copyCode(this)">📋 Copy</button></div><div class="code-content">${code.trim()}</div></div><p>`;
+    return `</p><div class="code-block"><div class="code-header"><span class="code-lang">${esc(l)}</span><button class="code-copy-btn" onclick="copyCode(this)">ðŸ“‹ Copy</button></div><div class="code-content">${code.trim()}</div></div><p>`;
   });
   // Inline code
   html=html.replace(/`([^`]+)`/g,'<span class="inline-code">$1</span>');
@@ -824,7 +909,7 @@ function detectGen(text){
   const t=text.toLowerCase();
   if(t.match(/\b(generate|make|create|write|compose)\b.*\b(song|music|lyrics)\b/)||t.match(/\b(song|music)\b.*\bfor me\b/))return'song';
   if(t.match(/\b(generate|make|create)\b.*\b(video|clip|animation)\b/)||t.includes('make a video')||t.includes('create a video'))return'video';
-  // Image/design/logo detection — catches both direct commands ("generate a logo")
+  // Image/design/logo detection â€” catches both direct commands ("generate a logo")
   // and natural conversational phrasing ("put the logo on a cup", "show me a design", "I want an image of...")
   const imageNouns=/(image|picture|photo|drawing|logo|icon|artwork|illustration|graphic|poster|banner|design|mockup|mock-up|mock up|sketch|render|visual|wallpaper|cover|badge|emblem|avatar|thumbnail)/;
   const imageVerbs=/\b(generate|make|create|draw|design|render|show me|give me|put|place|print|show|paint|visualize|mock up|mockup)\b/;
@@ -849,7 +934,7 @@ function addMessage(role,text,imgData,animate=true){
       content+=`<div class="user-img-preview"><img src="${imgData}" onclick="openLightbox('${imgData}')"/></div>`;
     }
     if(text)content+=`<div>${esc(text)}</div>`;
-    wrap.innerHTML=`<div><div class="user-bubble">${content}</div><div class="msg-time user-time">${relTime(ts)}</div><div class="msg-acts" style="justify-content:flex-end;"><button class="act-btn" onclick="copyTxt('${esc(text).replace(/'/g,"\\'")}')">📋</button></div></div>`;
+    wrap.innerHTML=`<div><div class="user-bubble">${content}</div><div class="msg-time user-time">${relTime(ts)}</div><div class="msg-acts" style="justify-content:flex-end;"><button class="act-btn" onclick="copyTxt('${esc(text).replace(/'/g,"\\'")}')">ðŸ“‹</button></div></div>`;
   }else{
     wrap.className='ai-msg-wrap';
     const formatted=formatAIMsg(text);
@@ -857,12 +942,12 @@ function addMessage(role,text,imgData,animate=true){
     wrap.innerHTML=`<div class="ai-bubble">${formatted}</div>
     <div class="msg-time">${relTime(ts)}</div>
     <div class="msg-acts">
-      <button class="act-btn" onclick="readAloud(this,${t})">🔊</button>
-      <button class="act-btn" onclick="copyTxt(${t})">📋</button>
-      <button class="act-btn" onclick="likeMsg(this)">👍</button>
-      <button class="act-btn" onclick="dislikeMsg(this)">👎</button>
-      <button class="act-btn" onclick="regenMsg(this)">↻</button>
-      <button class="act-btn" onclick="shareMsg(${t})">📤</button>
+      <button class="act-btn" onclick="readAloud(this,${t})">ðŸ”Š</button>
+      <button class="act-btn" onclick="copyTxt(${t})">ðŸ“‹</button>
+      <button class="act-btn" onclick="likeMsg(this)">ðŸ‘</button>
+      <button class="act-btn" onclick="dislikeMsg(this)">ðŸ‘Ž</button>
+      <button class="act-btn" onclick="regenMsg(this)">â†»</button>
+      <button class="act-btn" onclick="shareMsg(${t})">ðŸ“¤</button>
     </div>`;
   }
   area.appendChild(wrap);area.scrollTop=area.scrollHeight;
@@ -882,18 +967,18 @@ function addMediaMsg(type,prompt,refPhoto){
   if(type==='song'){
     const cid='song-'+Date.now();
     html=`<div id="${cid}" style="background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:16px;max-width:320px;">
-      <div style="font-weight:700;color:var(--text);margin-bottom:12px;">🎵 AI Generated Song</div>
+      <div style="font-weight:700;color:var(--text);margin-bottom:12px;">ðŸŽµ AI Generated Song</div>
       <div id="${cid}-body" style="text-align:center;padding:16px 0;">
-        <div style="font-size:28px;margin-bottom:8px;">🎶</div>
+        <div style="font-size:28px;margin-bottom:8px;">ðŸŽ¶</div>
         <div style="font-weight:600;font-size:14px;">Composing your song...</div>
-        <div style="font-size:12px;color:var(--text3);margin-top:4px;">This takes 30–60 seconds</div>
+        <div style="font-size:12px;color:var(--text3);margin-top:4px;">This takes 30â€“60 seconds</div>
       </div>
     </div>`;
     setTimeout(()=>generateRealSong(prompt,cid),100);
   }else if(type==='image'){
     const cid='img-'+Date.now();
     html=`<div id="${cid}" style="background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:16px;max-width:320px;">
-      <div style="font-weight:700;color:var(--text);margin-bottom:12px;">🖼️ Generated Image</div>
+      <div style="font-weight:700;color:var(--text);margin-bottom:12px;">ðŸ–¼ï¸ Generated Image</div>
       <div id="${cid}-body" style="width:100%;height:200px;border-radius:12px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;background:linear-gradient(100deg,rgba(201,154,74,.10) 30%,rgba(201,154,74,.25) 50%,rgba(201,154,74,.10) 70%);background-size:200% 100%;animation:shimmerMove 1.6s ease-in-out infinite;">
         <span class="gen-status" style="font-size:13px;color:var(--text2);font-weight:600;">Sketching the concept...</span>
       </div>
@@ -902,14 +987,14 @@ function addMediaMsg(type,prompt,refPhoto){
     setTimeout(()=>generateRealImage(prompt,cid,refPhoto),100);
   }else{
     html=`<div style="background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:16px;max-width:320px;">
-      <div style="font-weight:700;color:var(--text);margin-bottom:12px;">🎬 Generated Video</div>
+      <div style="font-weight:700;color:var(--text);margin-bottom:12px;">ðŸŽ¬ Generated Video</div>
       <div style="width:100%;height:180px;background:linear-gradient(135deg,rgba(239,68,68,.1),rgba(245,158,11,.1));border-radius:12px;display:flex;align-items:center;justify-content:center;">
-        <span style="font-size:70px">🎬</span>
+        <span style="font-size:70px">ðŸŽ¬</span>
       </div>
-      <div style="font-size:12px;color:var(--text3);margin-top:8px;">Video clip · 5 seconds · HD</div>
+      <div style="font-size:12px;color:var(--text3);margin-top:8px;">Video clip Â· 5 seconds Â· HD</div>
       <div style="display:flex;gap:6px;margin-top:10px;">
-        <button onclick="showToast('Video liked!')" style="flex:1;padding:7px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text2);font-size:12px;cursor:pointer;">❤️ Like</button>
-        <button onclick="showToast('Downloading...')" style="flex:1;padding:7px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text2);font-size:12px;cursor:pointer;">⬇️ Save</button>
+        <button onclick="showToast('Video liked!')" style="flex:1;padding:7px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text2);font-size:12px;cursor:pointer;">â¤ï¸ Like</button>
+        <button onclick="showToast('Downloading...')" style="flex:1;padding:7px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text2);font-size:12px;cursor:pointer;">â¬‡ï¸ Save</button>
       </div>
     </div>`;
   }
@@ -946,7 +1031,7 @@ async function sendMessage(){
   history.push({role:'user',content:aiContent||'[Image uploaded]'});
   input.value='';autoResize(input);
   const prevAttachments=[...attachments];attachments=[];renderAttachments();
-  msgCount--;localStorage.setItem('nak_mc',msgCount);updateLimitUI();
+  
   isTyping=true;
 
   const genCmd=detectGen(text);
@@ -977,8 +1062,10 @@ async function sendMessage(){
     }else{
       body=JSON.stringify({messages:history,userName:window._name||'there',hasImage:false,memoryContext});
     }
-    const res=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body});
+    const res=await fetch('/api/chat',{method:'POST',headers:quotaHeaders(),body});
     const data=await res.json();
+    if(data.quota)applyQuota(data.quota);
+    if(res.status===429){loader.remove();isTyping=false;openUpgrade();addMessage('ai',data.reply||'Daily message limit reached. Upgrade or wait for reset.');return;}
     const reply=data.reply||"I'm having trouble responding. Please try again.";
     history.push({role:'assistant',content:reply});
     addToMemory('user',aiContent);
@@ -987,7 +1074,7 @@ async function sendMessage(){
     saveChatHistory(curChatId,history);
   }catch(err){
     loader.remove();isTyping=false;
-    addMessage('ai','⚠️ Connection error: '+( err.message||'Please check your network and try again.'));
+    addMessage('ai','âš ï¸ Connection error: '+( err.message||'Please check your network and try again.'));
     console.error('Chat error:',err);
   }
 }
@@ -1016,7 +1103,7 @@ function regenMsg(btn){
 }
 function shareMsg(text){if(navigator.share)navigator.share({title:'Nakconel AI',text});else{navigator.clipboard?.writeText(text);showToast('Copied to share!');}}
 
-// VOICE INPUT - ChatGPT style full screen
+// VOICE INPUT
 let voiceTranscript='';
 function startVoice(){
   if(!('webkitSpeechRecognition'in window||'SpeechRecognition'in window)){showToast('Voice not supported in this browser');return;}
@@ -1055,44 +1142,32 @@ window.toggleDark=toggleDark;window.useSug=useSug;window.sendMessage=sendMessage
 window.copyTxt=copyTxt;window.copyCode=copyCode;window.readAloud=readAloud;
 window.likeMsg=likeMsg;window.dislikeMsg=dislikeMsg;window.regenMsg=regenMsg;window.shareMsg=shareMsg;
 window.handleKey=handleKey;window.autoResize=autoResize;window.showToast=showToast;
-</script>
 
-<script>
-// ── REAL SONG GENERATION (Hugging Face MusicGen) ──────────────────────────
+// REAL SONG GENERATION
 async function generateRealSong(prompt,cid){
   const card=document.getElementById(cid);
   const getBody=()=>card?card.querySelector('#'+cid+'-body'):null;
   const setStatus=(msg)=>{const b=getBody();if(b){const el=b.querySelector('div:nth-child(2)');if(el)el.textContent=msg;}};
   try{
-    let result=null;
-    const msgs=['Composing your song...','Still working on it...','Almost ready...','Finalizing audio...','One more moment...'];
-    for(let i=0;i<8;i++){
-      setStatus(msgs[Math.min(i,msgs.length-1)]);
-      if(i>0) await new Promise(r=>setTimeout(r,12000));
-      try{
-        const res=await fetch('/api/music',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt:prompt||'upbeat energetic pop modern'})});
-        const data=await res.json();
-        if(data.loading){await new Promise(r=>setTimeout(r,15000));continue;}
-        if(data.error)throw new Error(data.error);
-        if(data.success&&data.audio_base64){result=data;break;}
-      }catch(fetchErr){
-        if(i<7){await new Promise(r=>setTimeout(r,10000));continue;}
-        throw fetchErr;
-      }
-    }
-    if(!result)throw new Error('Generation timed out — please try again');
-    const src='data:'+result.format+';base64,'+result.audio_base64;
+    const res=await fetch('/api/music',{method:'POST',headers:quotaHeaders(),body:JSON.stringify({prompt:prompt||'upbeat energetic pop modern'})});
+    const data=await res.json();
+    if(data.quota)applyQuota(data.quota);
+    if(res.status===429){openUpgrade();}
+    if(data.error)throw new Error(data.error);
+    if(!res.ok)throw new Error(data.error||'Music generation request failed.');
+    if(!data.success||!data.audio_base64)throw new Error(data.error||'Music generation failed.');
+    const src='data:'+data.format+';base64,'+data.audio_base64;
     const bars=Array(6).fill(0).map((_,i)=>'<div class="audio-bar" style="position:absolute;left:'+(i*12+4)+'px;width:3px;background:rgba(201,154,74,.7);border-radius:2px;bottom:0;animation:audioWave '+(0.8+i*0.1)+'s ease-in-out '+(i*0.08)+'s infinite;height:'+(20+Math.random()*60)+'%"></div>').join('');
     const b=getBody();
     if(b)b.innerHTML=
       '<audio id="aud-'+cid+'" src="'+src+'" style="display:none;" preload="auto"></audio>'
       +'<div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--surface);border-radius:10px;border:1px solid var(--border);">'
-      +'<button onclick="tsp(\''+cid+'\')" id="pb-'+cid+'" style="width:36px;height:36px;border-radius:50%;background:var(--grad);border:none;color:#fff;font-size:14px;cursor:pointer;">▶</button>'
+      +"<button onclick=\"tsp('"+cid+"')\" id=\"pb-"+cid+'" style="width:36px;height:36px;border-radius:50%;background:var(--grad);border:none;color:#fff;font-size:14px;cursor:pointer;">▶</button>'
       +'<div style="flex:1;height:30px;background:rgba(201,154,74,.1);border-radius:6px;position:relative;overflow:hidden;">'+bars+'</div>'
       +'<span style="font-size:11px;color:var(--text3);">MusicGen</span></div>'
       +'<div style="display:flex;gap:6px;margin-top:10px;">'
-      +'<button onclick="dlSong(\''+cid+'\')" style="flex:1;padding:7px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text2);font-size:12px;cursor:pointer;">⬇️ Download</button>'
-      +'<button onclick="showToast(\'Saved! ❤️\')" style="flex:1;padding:7px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text2);font-size:12px;cursor:pointer;">💾 Save</button></div>';
+      +"<button onclick=\"dlSong('"+cid+"')\" style=\"flex:1;padding:7px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text2);font-size:12px;cursor:pointer;\">⬇️ Download</button>"
+      +"<button onclick=\"showToast('Saved! ❤️')\" style=\"flex:1;padding:7px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text2);font-size:12px;cursor:pointer;\">💾 Save</button></div>";
   }catch(err){
     const b=getBody();
     if(b)b.innerHTML='<div style="color:#ef4444;font-size:13px;text-align:center;padding:10px;">⚠️ '+(err.message||'Song generation failed')+'</div>';
@@ -1100,6 +1175,7 @@ async function generateRealSong(prompt,cid){
 }
 function tsp(id){const a=document.getElementById('aud-'+id),b=document.getElementById('pb-'+id);if(!a)return;if(a.paused){a.play();if(b)b.textContent='⏸';}else{a.pause();if(b)b.textContent='▶';}a.onended=()=>{if(b)b.textContent='▶';};}
 function dlSong(id){const a=document.getElementById('aud-'+id);if(!a)return;const l=document.createElement('a');l.href=a.src;l.download='nakconel-ai-song.wav';document.body.appendChild(l);l.click();document.body.removeChild(l);showToast('⬇️ Downloading...');}
+
 async function generateRealImage(prompt,cid,refPhoto){
   const card=document.getElementById(cid);
   const getBody=()=>card?card.querySelector('#'+cid+'-body'):null;
@@ -1113,9 +1189,11 @@ async function generateRealImage(prompt,cid,refPhoto){
       payload.imageData=refPhoto.dataUrl.split(',')[1];
       payload.imageType=refPhoto.type;
     }
-    const res=await fetch('/api/generate-image',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    const res=await fetch('/api/generate-image',{method:'POST',headers:quotaHeaders(),body:JSON.stringify(payload)});
     const data=await res.json();
     clearInterval(statusTimer);
+    if(data.quota)applyQuota(data.quota);
+    if(res.status===429){openUpgrade();}
     if(data.error)throw new Error(data.error);
     if(!data.image)throw new Error('No image returned — please try again');
     const b=getBody();
@@ -1126,8 +1204,8 @@ async function generateRealImage(prompt,cid,refPhoto){
       const actions=document.createElement('div');
       actions.style.cssText='display:flex;gap:6px;margin-top:10px;';
       actions.innerHTML=
-        '<button onclick="dlImage(\''+cid+'\')" style="flex:1;padding:7px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text2);font-size:12px;cursor:pointer;">⬇️ Save</button>'
-        +'<button onclick="showToast(\'Liked! ❤️\')" style="flex:1;padding:7px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text2);font-size:12px;cursor:pointer;">❤️ Like</button>';
+        "<button onclick=\"dlImage('"+cid+"')\" style=\"flex:1;padding:7px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text2);font-size:12px;cursor:pointer;\">⬇️ Save</button>"
+        +"<button onclick=\"showToast('Liked! ❤️')\" style=\"flex:1;padding:7px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text2);font-size:12px;cursor:pointer;\">❤️ Like</button>";
       card2.appendChild(actions);
     }
   }catch(err){

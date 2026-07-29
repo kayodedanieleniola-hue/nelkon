@@ -115,18 +115,17 @@ a{text-decoration:none;color:inherit;}
 </div>
 
 <script type="module">
-  import { onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
-  import { auth } from '/static/js/firebase-config.js';
+  import { getDisplayName, getProviderLabel, getUserInitials, nakSignOut, requireAuth } from '/static/js/nak-auth.js';
 
-  onAuthStateChanged(auth, (user) => {
+  requireAuth('/login').then((user) => {
     document.getElementById('loadingState').style.display = 'none';
-    if (!user) { window.location.href = '/login'; return; }
+    if (!user) return;
 
     document.getElementById('accountContent').style.display = 'block';
 
-    const name = user.displayName || 'Account';
+    const name = getDisplayName(user);
     const email = user.email || '';
-    const provider = user.providerData[0]?.providerId === 'google.com' ? 'Google' : 'Email / Password';
+    const provider = getProviderLabel(user);
 
     document.getElementById('displayName').textContent = name;
     document.getElementById('userEmail').textContent = email;
@@ -139,12 +138,12 @@ a{text-decoration:none;color:inherit;}
     if (user.photoURL) {
       avatarEl.innerHTML = `<img src="${user.photoURL}" alt="${name}">`;
     } else {
-      document.getElementById('avatarInitials').textContent = name.charAt(0).toUpperCase();
+      document.getElementById('avatarInitials').textContent = getUserInitials(user);
     }
   });
 
   window.nakSignOut = async () => {
-    await signOut(auth);
+    await nakSignOut();
     window.location.href = '/login';
   };
 </script>

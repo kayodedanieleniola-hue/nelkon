@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NAKCONEL Campaign</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=JetBrains+Mono:wght@400;600;700&family=Work+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://js.paystack.co/v1/inline.js"></script>
+<style>
+:root{--deep:#100405;--wine:#2b090d;--card:#3b1015;--gold:#c99a4a;--gold2:#efd28b;--olive:#4e5a31;--cream:#f7efe1;--muted:#c8baa3;--line:rgba(201,154,74,.25);--err:#f08b78;--ease:cubic-bezier(.22,1,.36,1)}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(circle at 50% -10%,rgba(201,154,74,.18),transparent 38%),radial-gradient(circle at 100% 42%,rgba(78,90,49,.18),transparent 34%),linear-gradient(135deg,#100405,#2a080c 58%,#070202);color:var(--cream);font-family:"Work Sans",sans-serif;-webkit-font-smoothing:antialiased}a{color:inherit;text-decoration:none}button,input,textarea{font:inherit}.page{max-width:980px;margin:0 auto;padding:34px 22px 80px}.topbar{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:30px}.brand{display:flex;align-items:center;gap:14px}.brand img{width:62px;height:62px;object-fit:contain}.brand-name{font-family:"Anton",sans-serif;letter-spacing:.17em;color:var(--gold2);font-size:15px}.brand-tag{font-family:"JetBrains Mono",monospace;color:var(--muted);font-size:10px;letter-spacing:.18em;text-transform:uppercase}.home-link{border:1px solid var(--line);border-radius:8px;padding:10px 14px;color:var(--muted);font-size:13px}
+.rail{margin:18px 0 36px}.rail-track{height:2px;background:var(--line)}.rail-fill{height:100%;width:0;background:linear-gradient(90deg,var(--gold),var(--gold2));transition:width .45s var(--ease)}.rail-dots{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}.rail-dot{text-align:center;color:var(--muted);font-family:"JetBrains Mono",monospace;font-size:10px;text-transform:uppercase;letter-spacing:.08em}.rail-dot span{display:grid;place-items:center;width:28px;height:28px;margin:0 auto 7px;border-radius:50%;border:1px solid var(--line);background:var(--deep);color:var(--muted);font-weight:700}.rail-dot.active span{background:var(--gold);color:var(--deep);border-color:var(--gold2);box-shadow:0 0 0 6px rgba(201,154,74,.12)}.rail-dot.done span{color:var(--gold2);border-color:var(--gold)}
+.panel{display:none;animation:rise .45s var(--ease) both}.panel.active{display:block}@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}.panel-head{text-align:center;margin:0 auto 28px;max-width:640px}.kicker{font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--gold2);letter-spacing:.22em;text-transform:uppercase;margin-bottom:12px}.panel h2{font-family:"Anton",sans-serif;font-weight:400;text-transform:uppercase;line-height:1.02;margin:0 0 14px;font-size:clamp(30px,5vw,48px)}.panel p{color:var(--muted);line-height:1.7;margin:0}.shell{border:1px solid var(--line);background:linear-gradient(150deg,rgba(59,16,21,.9),rgba(16,4,5,.72));border-radius:8px;padding:30px;box-shadow:0 30px 80px rgba(0,0,0,.38)}
+.field{margin-bottom:16px}.field label{display:block;margin-bottom:8px;color:var(--gold2);font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase}.field input,.field textarea{width:100%;border:1px solid var(--line);border-radius:6px;background:rgba(0,0,0,.25);color:var(--cream);padding:14px}.field textarea{min-height:126px;resize:vertical}.field input:focus,.field textarea:focus{outline:none;border-color:var(--gold);background:rgba(0,0,0,.36)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;width:100%;border:1px solid var(--gold);border-radius:8px;background:linear-gradient(180deg,var(--gold2),var(--gold));color:#210c04;padding:15px 18px;font-family:"JetBrains Mono",monospace;font-weight:700;font-size:12px;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:transform .25s var(--ease),filter .25s ease}.btn:hover{transform:translateY(-2px);filter:brightness(1.05)}.btn:disabled{opacity:.55;cursor:not-allowed;transform:none}.alert{display:none;margin-bottom:18px;border-radius:6px;padding:12px 14px;font-size:13px}.alert.show{display:block}.alert.error{color:var(--err);background:rgba(240,139,120,.12);border:1px solid rgba(240,139,120,.28)}
+.packages{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.pkg{text-align:left;color:var(--cream);border:1px solid var(--line);background:linear-gradient(150deg,var(--card),rgba(16,4,5,.86));border-radius:8px;padding:22px;cursor:pointer;transition:transform .28s var(--ease),border-color .28s ease}.pkg:hover,.pkg.selected{transform:translateY(-3px);border-color:var(--gold)}.pkg.selected{box-shadow:0 0 0 1px var(--gold)}.pkg.featured{background:linear-gradient(150deg,var(--olive),#263016)}.pkg-time{font-family:"JetBrains Mono",monospace;color:var(--gold2);font-size:10px;letter-spacing:.12em;text-transform:uppercase}.pkg h3{font-family:"Anton",sans-serif;font-weight:400;text-transform:uppercase;font-size:21px;line-height:1.1;margin:14px 0 12px}.pkg p{font-size:13px;min-height:66px}.price{font-family:"Anton",sans-serif;font-size:29px;color:var(--gold2);margin-top:18px}.price small{display:block;color:var(--muted);font-family:"JetBrains Mono",monospace;font-size:10px;margin-top:5px}
+.summary{display:grid;grid-template-columns:1fr auto;gap:18px;align-items:center;margin-top:24px;padding:18px;border:1px solid var(--line);border-radius:8px;background:rgba(0,0,0,.18)}.summary strong{display:block;color:var(--gold2);font-family:"Anton",sans-serif;font-weight:400;text-transform:uppercase;font-size:20px}.summary span{color:var(--muted);font-size:13px}.summary b{font-family:"Anton",sans-serif;font-weight:400;font-size:28px;color:var(--gold2)}
+.success-box{text-align:center}.check{width:78px;height:78px;border-radius:50%;display:grid;place-items:center;margin:0 auto 22px;background:var(--gold);color:var(--deep);font-size:38px;font-weight:700}.chat{margin-top:28px;border:1px solid var(--line);border-radius:8px;padding:24px;text-align:left;background:rgba(0,0,0,.16)}.chat h3{font-family:"Anton",sans-serif;font-weight:400;text-transform:uppercase;margin:0 0 8px;font-size:24px}.chat .btn{margin-top:18px;max-width:260px}.footer{text-align:center;margin-top:44px;color:rgba(247,239,225,.45);font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase}
+@media(max-width:780px){.packages{grid-template-columns:1fr}.shell{padding:24px}.summary{grid-template-columns:1fr}.home-link{display:none}.rail-dot{font-size:8px}}
+</style>
+</head>
+<body>
+<main class="page">
+  <header class="topbar">
+    <a class="brand" href="/home"><img src="/static/image/logo.png" alt="NAKCONEL Logo"><span><span class="brand-name">NAKCONEL</span><br><span class="brand-tag">Future Brand Movement</span></span></a>
+    <a class="home-link" href="/campaign">Back to Campaign</a>
+  </header>
+  <section class="rail" aria-label="Campaign progress"><div class="rail-track"><div class="rail-fill" id="railFill"></div></div><div class="rail-dots" id="railDots"></div></section>
+
+  <section class="panel active" data-step="1">
+    <div class="panel-head"><div class="kicker">Step 1 / Questions</div><h2>Bring The Brand Context</h2><p>Tell us who you are, what you are building, and the challenge you want the team to help you solve.</p></div>
+    <form id="questionsForm" class="shell">
+      <div class="field"><label for="fullName">Name</label><input id="fullName" type="text" required></div>
+      <div class="field"><label for="business">Business</label><input id="business" type="text" required></div>
+      <div class="field"><label for="challenge">Brand challenge</label><textarea id="challenge" required></textarea></div>
+      <div id="questionsAlert" class="alert"></div>
+      <button class="btn" type="submit">Continue To Packages</button>
+    </form>
+  </section>
+
+  <section class="panel" data-step="2">
+    <div class="panel-head"><div class="kicker">Step 2 / Package + Payment</div><h2>Secure Your Session</h2><p>USD package values are converted at approximately NGN 1,600 per USD and charged through Paystack in NGN.</p></div>
+    <div class="packages" id="packages">
+      <button class="pkg" type="button" data-name="Brand AI Discovery Session" data-usd="20" data-ngn="32000" data-time="30 minutes"><span class="pkg-time">30 minutes</span><h3>Brand AI Discovery</h3><p>AI tool recommendations, quick business analysis, and growth suggestions.</p><div class="price">NGN 32,000<small>Approx. USD 20</small></div></button>
+      <button class="pkg featured" type="button" data-name="Brand Evolution Session" data-usd="60" data-ngn="96000" data-time="60 minutes"><span class="pkg-time">60 minutes</span><h3>Brand Evolution</h3><p>Brand audit, strategy direction, content guidance, and AI workflow setup.</p><div class="price">NGN 96,000<small>Approx. USD 60</small></div></button>
+      <button class="pkg" type="button" data-name="Premium Brand Transformation" data-usd="250" data-ngn="400000" data-time="Custom session"><span class="pkg-time">Custom</span><h3>Premium Transformation</h3><p>Full brand strategy, identity direction, AI implementation, and growth system.</p><div class="price">NGN 400,000<small>Approx. USD 250</small></div></button>
+    </div>
+    <div class="summary" id="summary" hidden><div><strong id="summaryName"></strong><span id="summaryMeta"></span></div><b id="summaryAmount"></b><button class="btn" id="payBtn" type="button">Pay With Paystack</button></div>
+    <div id="paymentAlert" class="alert"></div>
+  </section>
+
+  <section class="panel" data-step="3">
+    <div class="shell success-box"><div class="check">✓</div><div class="kicker">Step 3 / Success</div><h2>Campaign Spot Confirmed</h2><p id="successCopy">Your registration and payment are confirmed. The Nakconel team will use your answers to prepare your consultation.</p><div class="chat"><h3>Chat With Team</h3><p>Send the team a follow-up note, share extra brand material, or ask what to prepare before your session.</p><a class="btn" href="/contact">Contact Team</a></div></div>
+  </section>
+  <div class="footer">NAKCONEL Studio Inc. / Culture gives meaning. Intelligence gives movement.</div>
+</main>
+
+<script type="module">
+import { onAuthStateChanged, auth } from '/static/js/nak-auth.js';
+
+const PAYSTACK_KEY = 'pk_test_9598cef90f885db2106496dcfed11fbbbf828963';
+const state = { step: 1, user: null, questions: {}, package: null };
+const labels = ['Questions', 'Package', 'Success'];
+const panels = document.querySelectorAll('.panel');
+const railDots = document.getElementById('railDots');
+const railFill = document.getElementById('railFill');
+
+function showAlert(id, message) {
+  const el = document.getElementById(id);
+  el.textContent = message;
+  el.className = 'alert show error';
+}
+function clearAlert(id) {
+  const el = document.getElementById(id);
+  el.textContent = '';
+  el.className = 'alert';
+}
+function renderRail() {
+  railDots.innerHTML = labels.map((label, index) => {
+    const step = index + 1;
+    const status = step === state.step ? 'active' : step < state.step ? 'done' : '';
+    return `<div class="rail-dot ${status}"><span>${step < state.step ? '✓' : step}</span>${label}</div>`;
+  }).join('');
+  railFill.style.width = `${((state.step - 1) / (labels.length - 1)) * 100}%`;
+}
+function goTo(step) {
+  state.step = step;
+  panels.forEach(panel => panel.classList.toggle('active', Number(panel.dataset.step) === step));
+  renderRail();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+document.getElementById('questionsForm').addEventListener('submit', event => {
+  event.preventDefault();
+  clearAlert('questionsAlert');
+  if (!state.user) {
+    window.location.href = '/register?next=/nakconel-campaign.html';
+    return;
+  }
+  const fullName = document.getElementById('fullName').value.trim();
+  const business = document.getElementById('business').value.trim();
+  const challenge = document.getElementById('challenge').value.trim();
+  if (!fullName || !business || !challenge) {
+    showAlert('questionsAlert', 'Please answer all three questions.');
+    return;
+  }
+  state.questions = { fullName, business, challenge };
+  goTo(2);
+});
+
+document.querySelectorAll('.pkg').forEach(card => {
+  card.addEventListener('click', () => {
+    document.querySelectorAll('.pkg').forEach(item => item.classList.remove('selected'));
+    card.classList.add('selected');
+    state.package = { name: card.dataset.name, usd: Number(card.dataset.usd), ngn: Number(card.dataset.ngn), time: card.dataset.time };
+    document.getElementById('summaryName').textContent = state.package.name;
+    document.getElementById('summaryMeta').textContent = `${state.package.time} / approx. USD ${state.package.usd}`;
+    document.getElementById('summaryAmount').textContent = `NGN ${state.package.ngn.toLocaleString()}`;
+    document.getElementById('summary').hidden = false;
+  });
+});
+
+async function verifyPayment(reference) {
+  const response = await fetch('/api/paystack/verify', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ reference, expectedAmount: state.package.ngn, currency: 'NGN' })
+  });
+  const data = await response.json();
+  if (!response.ok || !data.verified) throw new Error(data.error || 'Payment verification failed.');
+  return data;
+}
+
+async function saveCampaignRegistration(verifiedPayment) {
+  const response = await fetch('/api/campaign/register', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      uid: state.user.uid,
+      email: state.user.email,
+      questions: state.questions,
+      package: state.package,
+      paymentReference: verifiedPayment.reference
+    })
+  });
+  const data = await response.json();
+  if (!response.ok || !data.saved) throw new Error(data.error || 'Campaign registration could not be saved.');
+  return data;
+}
+
+document.getElementById('payBtn').addEventListener('click', () => {
+  clearAlert('paymentAlert');
+  if (!state.user || !state.package) {
+    showAlert('paymentAlert', 'Please register and choose a package before payment.');
+    return;
+  }
+  const payButton = document.getElementById('payBtn');
+  PaystackPop.setup({
+    key: PAYSTACK_KEY,
+    email: state.user.email,
+    amount: state.package.ngn * 100,
+    currency: 'NGN',
+    ref: `NKC-${Date.now()}`,
+    metadata: { custom_fields: [
+      { display_name: 'Name', variable_name: 'name', value: state.questions.fullName },
+      { display_name: 'Business', variable_name: 'business', value: state.questions.business },
+      { display_name: 'Package', variable_name: 'package', value: state.package.name }
+    ] },
+    callback: async response => {
+      payButton.disabled = true;
+      payButton.textContent = 'Verifying Payment...';
+      try {
+        const verifiedPayment = await verifyPayment(response.reference);
+        await saveCampaignRegistration(verifiedPayment);
+        document.getElementById('successCopy').textContent = `Payment reference ${verifiedPayment.reference} is confirmed for ${state.package.name}.`;
+        goTo(3);
+      } catch (err) {
+        showAlert('paymentAlert', err.message || 'Payment verification failed.');
+      } finally {
+        payButton.disabled = false;
+        payButton.textContent = 'Pay With Paystack';
+      }
+    },
+    onClose: () => showAlert('paymentAlert', 'Payment window closed. You can reopen Paystack when ready.')
+  }).openIframe();
+});
+
+onAuthStateChanged(auth, user => {
+  if (!user) {
+    window.location.href = '/register?next=/nakconel-campaign.html';
+    return;
+  }
+  state.user = user;
+  document.getElementById('fullName').value = user.displayName || user.email?.split('@')[0] || '';
+});
+
+renderRail();
+</script>
+</body>
+</html>

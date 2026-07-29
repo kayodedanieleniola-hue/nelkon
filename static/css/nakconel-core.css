@@ -1,0 +1,292 @@
+/* =====================================================================
+   NAKCONEL CORE STYLES
+   Shared CSS variables, fonts, and base styles used across all pages
+   ===================================================================== */
+
+/* ---- FONTS ---- */
+@font-face {
+  font-family: 'Agrandir';
+  src: url('https://fonts.cdnfonts.com/s/15785/Agrandir-GrandHeavy.woff') format('woff');
+  font-weight: 800;
+  font-display: swap;
+}
+
+/* ---- CSS VARIABLES ---- */
+:root {
+  --wine-deep: #1B0404;
+  --wine-mid: #3D0A0A;
+  --ground: #0A0202;
+  --nakconel-red: #751008;
+  --muted-rose: #a9443b;
+  --bronze: #C99A4A;
+  --bronze-light: #E8C57A;
+  --bronze-dim: #8B6A2E;
+  --olive-green: #5c632f;
+  --warm-cream: #FDFBF7;
+  --cream: #F5E8C7;
+  --white: #FDFAF4;
+  --muted: rgba(245, 232, 199, 0.52);
+  --border: rgba(201, 154, 74, 0.15);
+  --card: rgba(61, 10, 10, 0.42);
+  --r: 16px;
+  --rs: 8px;
+  --tr: 0.42s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+/* ---- RESET & BASE ---- */
+* { margin: 0; padding: 0; box-sizing: border-box; scroll-behavior: smooth; }
+html, body { overflow-x: hidden; width: 100%; }
+
+body {
+  background: var(--ground);
+  background: radial-gradient(ellipse 60% 50% at 50% 40%, var(--wine-mid) 0%, transparent 70%),
+              radial-gradient(ellipse 130% 110% at 50% 50%, var(--wine-deep) 0%, var(--ground) 100%);
+  background-attachment: fixed;
+  color: var(--white);
+  font-family: 'Poppins', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+a { text-decoration: none; color: inherit; transition: var(--tr); }
+ul { list-style: none; }
+img { max-width: 100%; height: auto; display: block; }
+
+/* ---- NAVIGATION ---- */
+.h-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 100;
+  background: rgba(10, 2, 2, 0.6);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  transition: var(--tr);
+}
+.h-nav.scrolled {
+  background: rgba(27, 4, 4, 0.92);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.nav-cont {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 24px;
+  height: 84px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.logo-wrapper { display: flex; align-items: center; gap: 12px; }
+.logo-icon {
+  width: 32px;
+  height: 32px;
+  border: 2px solid var(--bronze);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Agrandir', sans-serif;
+  font-weight: 800;
+  font-size: 14px;
+  color: var(--bronze);
+  background: var(--nakconel-red);
+  box-shadow: 0 0 10px rgba(201, 154, 74, 0.3);
+}
+
+.nav-links { display: flex; gap: 32px; align-items: center; }
+.nav-links a {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--muted);
+  letter-spacing: 0.5px;
+  cursor: pointer;
+}
+.nav-links a:hover, .nav-links a.active { color: var(--bronze-light); }
+
+.menu-tg {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  flex-direction: column;
+  gap: 6px;
+  padding: 4px;
+  z-index: 110;
+}
+.menu-tg span {
+  width: 24px;
+  height: 2px;
+  background: var(--cream);
+  transition: var(--tr);
+  transform-origin: center;
+}
+
+/* ---- ABOUT DROPDOWN ---- */
+.about-dd-wrap { position: relative; }
+.about-dd-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--muted);
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  transition: var(--tr);
+  position: relative;
+}
+.about-dd-btn:hover, .about-dd-btn.active { color: var(--bronze-light); }
+.about-dd-btn.open { color: var(--bronze-light); background: rgba(201, 154, 74, 0.07); }
+.dd-arrow { font-size: 11px; transition: transform 0.3s ease; display: inline-block; }
+.about-dd-btn.open .dd-arrow { transform: rotate(180deg); }
+
+.about-dd-menu {
+  position: absolute;
+  top: calc(100% + 12px);
+  left: 50%;
+  transform: translateX(-50%) translateY(-8px);
+  min-width: 240px;
+  background: linear-gradient(160deg, rgba(27, 4, 4, 0.97) 0%, rgba(10, 2, 2, 0.99) 100%);
+  border: 1px solid rgba(201, 154, 74, 0.25);
+  border-radius: 14px;
+  padding: 8px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(201, 154, 74, 0.05);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.28s ease, transform 0.28s ease, visibility 0.28s;
+  z-index: 200;
+  backdrop-filter: blur(20px);
+}
+.about-dd-menu::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 10px;
+  height: 10px;
+  background: rgba(27, 4, 4, 0.97);
+  border-left: 1px solid rgba(201, 154, 74, 0.25);
+  border-top: 1px solid rgba(201, 154, 74, 0.25);
+  transform: translateX(-50%) rotate(45deg);
+}
+.about-dd-menu.open {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateX(-50%) translateY(0);
+}
+
+.dd-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 14px;
+  border-radius: 9px;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+  color: var(--white);
+  text-decoration: none;
+}
+.dd-item:hover { background: rgba(201, 154, 74, 0.1); transform: translateX(2px); }
+.dd-icon {
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--bronze);
+  font-size: 15px;
+  background: rgba(201, 154, 74, 0.08);
+  border-radius: 7px;
+  border: 1px solid rgba(201, 154, 74, 0.12);
+}
+.dd-text { display: flex; flex-direction: column; gap: 1px; }
+.dd-text strong { font-size: 13px; font-weight: 600; color: var(--white); }
+.dd-text small { font-size: 11px; color: var(--muted); font-weight: 400; }
+.dd-divider { height: 1px; background: rgba(201, 154, 74, 0.12); margin: 6px 8px; }
+.dd-cta .dd-icon { color: var(--bronze-light); background: rgba(117, 16, 8, 0.3); border-color: rgba(201, 154, 74, 0.2); }
+.dd-cta .dd-text strong { color: var(--bronze-light); }
+
+/* ---- AUTH NAV BUTTON ---- */
+.nav-auth-btn {
+  background: linear-gradient(135deg, var(--bronze), var(--bronze-dim));
+  color: var(--wine-deep);
+  font-weight: 600;
+  padding: 9px 20px;
+  border-radius: var(--rs);
+  font-size: 13px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+.nav-auth-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(201, 154, 74, 0.35); color: var(--wine-deep); }
+
+/* ---- FOOTER ---- */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 80px 24px 40px 24px;
+  position: relative;
+  z-index: 2;
+}
+.ft-main {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1.5fr repeat(3, 1fr);
+  gap: 48px;
+  margin-bottom: 60px;
+}
+.ft-desc { color: var(--muted); font-size: 14px; line-height: 1.6; margin: 16px 0 24px 0; max-width: 320px; }
+.ft-col h5 { font-family: 'Agrandir', sans-serif; font-size: 16px; margin-bottom: 24px; color: var(--white); }
+.ft-col ul { display: flex; flex-direction: column; gap: 12px; }
+.ft-col a { font-size: 14px; color: var(--muted); }
+.ft-col a:hover { color: var(--bronze-light); padding-left: 4px; }
+.ft-btm {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding-top: 40px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+/* ---- RESPONSIVE ---- */
+@media (max-width: 768px) {
+  .menu-tg { display: flex; }
+  .nav-links {
+    position: fixed;
+    top: 84px;
+    left: -100%;
+    width: 100%;
+    height: calc(100vh - 84px);
+    background: rgba(27, 4, 4, 0.98);
+    backdrop-filter: blur(24px);
+    flex-direction: column;
+    justify-content: center;
+    gap: 35px;
+    transition: var(--tr);
+    padding: 40px;
+    border-top: 1px solid var(--border);
+  }
+  .nav-links.open { left: 0; }
+  .ft-main { grid-template-columns: 1fr 1fr; gap: 32px; }
+}
+
+@media (max-width: 480px) {
+  .ft-main { grid-template-columns: 1fr; }
+  .ft-btm { flex-direction: column; gap: 16px; text-align: center; }
+}
