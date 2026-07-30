@@ -172,7 +172,6 @@ def check_rate_limit(client_key, max_requests=15, window_seconds=60):
     return True, 0
 
 
-
 def get_quota_db():
     db_dir = os.path.dirname(AI_QUOTA_DB_PATH)
     if db_dir:
@@ -579,13 +578,35 @@ def admin_users():
     users.sort(key=lambda item: item.get("createdAt") or item.get("updatedAt") or "", reverse=True)
     return jsonify({"users": users})
 
+def call_gemini_text(gemini_key, sys_prompt, messages):
+    try:
+        contents = []
+        for m in messages:
+            if m.get("content"):
+                role = "model" if m.get("role") == "assistant" else "user"
+                contents.append({"role": role, "parts": [{"text": m["content"]}]})
+        if not contents:
+            contents.append({"role": "user", "parts": [{"text": "Hello"}]})
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={gemini_key}"
+        payload = {
+            "system_instruction": {"parts": [{"text": sys_prompt}]},
+            "contents": contents,
+            "generationConfig": {"maxOutputTokens": 1024, "temperature": 0.7}
+        }
+        r = requests.post(url, json=payload, timeout=20)
+        if r.ok:
+            d = r.json()
+            return d.get("candidates", [{}])[0].get("content", {}).get("parts", [{}])[0].get("text")
+    except Exception as exc:
+        print(f"Gemini call exception: {exc}")
+    return None
+
+
 @app.route("/api/chat", methods=["POST"])
 @optional_auth
 def chat():
     GROQ_KEY = os.environ.get("GROQ_API_KEY")
     GEMINI_KEY = os.environ.get("GEMINI_API_KEY")
-    if not GROQ_KEY:
-        return jsonify({"reply": "Server configuration error."}), 500
 
     # Identify client (authenticated user gets higher rate limits)
     user = getattr(request, '_user', None)
@@ -644,8 +665,7 @@ Your job is to help people build stronger brands. You specialize in Nakconel's f
 
 Only use code blocks for genuine programming help, not design mockups. User's name: {user_name}.{memory_note}"""
 
-
-
+    # Image Vision Chat via Gemini
     if has_image and image_data and GEMINI_KEY:
         last_msg = messages[-1]["content"] if messages else "What is in this image?"
         contents = []
@@ -657,7 +677,8 @@ Only use code blocks for genuine programming help, not design mockups. User's na
             try:
                 r = requests.post(
                     f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={GEMINI_KEY}",
-                    json={"system_instruction": {"parts": [{"text": sys_prompt}]}, "contents": contents, "generationConfig": {"maxOutputTokens": 1000, "temperature": 0.7}}
+                    json={"system_instruction": {"parts": [{"text": sys_prompt}]}, "contents": contents, "generationConfig": {"maxOutputTokens": 1000, "temperature": 0.7}},
+                    timeout=20
                 )
                 d = r.json()
                 if d.get("error", {}).get("code") == 429:
@@ -667,16 +688,42 @@ Only use code blocks for genuine programming help, not design mockups. User's na
                     return jsonify({"reply": reply, "model": "gemini-vision", "quota": quota})
             except Exception:
                 continue
-        return jsonify({"reply": "Image analysis quota reached. Try again later."})
+        return jsonify({"reply": "Image analysis is temporarily unavailable. Please try again.", "quota": quota})
 
-    r = requests.post(
-        "https://api.groq.com/openai/v1/chat/completions",
-        headers={"Content-Type": "application/json", "Authorization": f"Bearer {GROQ_KEY}"},
-        json={"model": "llama-3.3-70b-versatile", "max_tokens": 1024, "messages": [{"role": "system", "content": sys_prompt}] + messages}
-    )
-    d = r.json()
-    reply = d.get("choices", [{}])[0].get("message", {}).get("content", "I'm having trouble responding. Please try again.")
-    return jsonify({"reply": reply, "model": "groq", "quota": quota})
+    # Primary Text Chat via Groq
+    if GROQ_KEY:
+        try:
+            r = requests.post(
+                "https://api.groq.com/openai/v1/chat/completions",
+                headers={"Content-Type": "application/json", "Authorization": f"Bearer {GROQ_KEY}"},
+                json={"model": "llama-3.3-70b-versatile", "max_tokens": 1024, "messages": [{"role": "system", "content": sys_prompt}] + messages},
+                timeout=20
+            )
+            if r.ok:
+                d = r.json()
+                reply = d.get("choices", [{}])[0].get("message", {}).get("content")
+                if reply:
+                    return jsonify({"reply": reply, "model": "groq", "quota": quota})
+        except Exception as e:
+            print(f"Groq API call error: {e}")
+
+    # Fallback Text Chat via Gemini
+    if GEMINI_KEY:
+        gemini_reply = call_gemini_text(GEMINI_KEY, sys_prompt, messages)
+        if gemini_reply:
+            return jsonify({"reply": gemini_reply, "model": "gemini", "quota": quota})
+
+    if not GROQ_KEY and not GEMINI_KEY:
+        return jsonify({
+            "reply": "AI service environment key is missing. Please add GROQ_API_KEY or GEMINI_API_KEY under Vercel Project Settings → Environment Variables.",
+            "error": "Missing GROQ_API_KEY / GEMINI_API_KEY",
+            "quota": quota
+        }), 500
+
+    return jsonify({
+        "reply": "AI service is currently experiencing high demand. Please try again in a moment.",
+        "quota": quota
+    })
 
 
 @app.route("/api/generate-image", methods=["POST"])
@@ -741,11 +788,9 @@ def generate_image():
 @app.route("/api/music", methods=["POST"])
 @optional_auth
 def generate_music():
-    # Identify client (authenticated user gets higher rate limits)
     user = getattr(request, '_user', None)
     client_key = user.get('uid') if user else get_client_key()
     
-    # Rate limiting: authenticated users get higher limits
     max_requests = 20 if user else 10
     allowed, retry_after = check_rate_limit(client_key, max_requests=max_requests, window_seconds=60)
     if not allowed:
@@ -767,12 +812,10 @@ def generate_music():
             "quota": quota
         }), 503
 
-    # External provider call placeholder when key is configured
     return jsonify({
         "error": "Music generation provider connection pending. Please try again later.",
         "quota": quota
     }), 503
-
 
 
 def verify_paystack_reference(reference, expected_amount, expected_currency="NGN"):

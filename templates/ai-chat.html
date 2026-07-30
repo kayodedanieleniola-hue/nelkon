@@ -6,7 +6,7 @@
 <title>Nakconel AI â€” Brand Intelligence Assistant</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet"/>
 <style>
-@font-face{font-family:'Agrandir';src:url('https://fonts.cdnfonts.com/s/15785/Agrandir-GrandHeavy.woff') format('woff');font-weight:800;font-display:swap;}
+
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 :root{
   --wine-deep:#1B0404;--wine-mid:#3D0A0A;--ground:#0A0202;
@@ -34,13 +34,13 @@ body{font-family:'Poppins',sans-serif;background:var(--bg);color:var(--text);hei
     radial-gradient(ellipse 130% 110% at 50% 50%, var(--wine-deep) 0%, var(--ground) 100%);
   align-items:center;justify-content:center;padding:32px 24px;color:var(--white,#FDFAF4);
 }
-.ob-brand{font-family:'Agrandir',sans-serif;font-size:30px;font-weight:800;letter-spacing:1px;color:#FDFAF4;margin-bottom:4px;text-align:center;}
+.ob-brand{font-family:'Poppins',sans-serif;font-weight:800;font-size:30px;font-weight:800;letter-spacing:1px;color:#FDFAF4;margin-bottom:4px;text-align:center;}
 .ob-brand span{color:var(--bronze-light);}
 .ob-brandtag{font-size:11px;letter-spacing:2.5px;text-transform:uppercase;color:rgba(245,232,199,.45);margin-bottom:36px;text-align:center;}
 .ob-step{display:none;flex-direction:column;align-items:center;width:100%;max-width:420px;}
 .ob-step.active{display:flex;}
 .ob-label{font-size:12px;color:rgba(245,232,199,.45);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:14px;}
-.ob-q{font-family:'Agrandir',sans-serif;font-size:26px;font-weight:700;color:#FDFAF4;text-align:center;margin-bottom:10px;line-height:1.3;}
+.ob-q{font-family:'Poppins',sans-serif;font-weight:800;font-size:26px;font-weight:700;color:#FDFAF4;text-align:center;margin-bottom:10px;line-height:1.3;}
 .ob-sub{font-size:13px;color:rgba(245,232,199,.55);text-align:center;margin-bottom:26px;line-height:1.6;}
 .ob-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;margin-bottom:28px;}
 .ob-chip{padding:14px;border-radius:14px;border:1.5px solid rgba(201,154,74,.25);background:rgba(255,255,255,.04);color:#FDFAF4;font-family:'Poppins',sans-serif;font-size:14px;font-weight:500;cursor:pointer;text-align:center;transition:all .2s;}
@@ -51,7 +51,7 @@ body{font-family:'Poppins',sans-serif;background:var(--bg);color:var(--text);hei
 .ob-name-inp:focus{border-color:var(--bronze-light);}
 .ob-actions{display:flex;gap:12px;width:100%;}
 .skip-btn{flex:1;padding:14px;border-radius:12px;border:1.5px solid rgba(201,154,74,.25);background:transparent;color:rgba(245,232,199,.6);font-family:'Poppins',sans-serif;font-size:14px;cursor:pointer;}
-.next-btn{flex:2;padding:14px;border-radius:12px;border:none;background:linear-gradient(135deg,var(--bronze),var(--bronze-light));color:var(--wine-deep);font-family:'Agrandir',sans-serif;font-size:14px;font-weight:700;cursor:pointer;}
+.next-btn{flex:2;padding:14px;border-radius:12px;border:none;background:linear-gradient(135deg,var(--bronze),var(--bronze-light));color:var(--wine-deep);font-family:'Poppins',sans-serif;font-weight:800;font-size:14px;font-weight:700;cursor:pointer;}
 
 /* CHAT SCREEN */
 #chat-screen{flex-direction:row !important;width:100%;height:100vh;}
@@ -69,13 +69,13 @@ body{font-family:'Poppins',sans-serif;background:var(--bg);color:var(--text);hei
 .sb-overlay.show{opacity:1;pointer-events:all;}
 .sb-top{padding:12px 12px 0;flex-shrink:0;}
 .sb-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
-.sb-title{font-family:'Agrandir',sans-serif;font-size:15px;font-weight:700;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.sb-title{font-family:'Poppins',sans-serif;font-weight:800;font-size:15px;font-weight:700;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
 .sb-close{display:none;width:28px;height:28px;border-radius:8px;background:var(--surface2);border:none;color:var(--text2);font-size:16px;cursor:pointer;align-items:center;justify-content:center;}
 @media(max-width:768px){.sb-close{display:flex;}}
 .sb-search{display:flex;align-items:center;gap:8px;padding:9px 12px;background:var(--surface2);border-radius:12px;border:1px solid var(--border);margin-bottom:8px;}
 .sb-search input{flex:1;border:none;background:transparent;color:var(--text);font-family:'Poppins',sans-serif;font-size:13px;outline:none;}
 .sb-search input::placeholder{color:var(--text3);}
-.sb-new{display:flex;align-items:center;justify-content:center;gap:8px;padding:10px;background:var(--grad);color:#fff;border:none;border-radius:12px;font-family:'Agrandir',sans-serif;font-size:13px;font-weight:700;cursor:pointer;width:100%;margin-bottom:4px;}
+.sb-new{display:flex;align-items:center;justify-content:center;gap:8px;padding:10px;background:var(--grad);color:#fff;border:none;border-radius:12px;font-family:'Poppins',sans-serif;font-weight:800;font-size:13px;font-weight:700;cursor:pointer;width:100%;margin-bottom:4px;}
 .sb-list{flex:1;overflow-y:auto;padding:4px 8px 0;min-height:0;}
 .sb-list::-webkit-scrollbar{width:3px;}
 .sb-list::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
@@ -93,12 +93,12 @@ body{font-family:'Poppins',sans-serif;background:var(--bg);color:var(--text);hei
 .sb-dd-item.danger:hover{background:#fee2e2;color:#ef4444;}
 .sb-empty{text-align:center;padding:28px 12px;color:var(--text3);font-size:13px;line-height:1.6;}
 .sb-upgrade{margin:8px;background:rgba(201,154,74,.08);border:1px solid rgba(201,154,74,.2);border-radius:14px;padding:12px;flex-shrink:0;}
-.sb-up-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;background:var(--grad);color:#fff;border:none;border-radius:10px;padding:9px;font-family:'Agrandir',sans-serif;font-size:13px;font-weight:700;cursor:pointer;}
+.sb-up-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;background:var(--grad);color:#fff;border:none;border-radius:10px;padding:9px;font-family:'Poppins',sans-serif;font-weight:800;font-size:13px;font-weight:700;cursor:pointer;}
 .sb-up-info{font-size:11px;color:var(--text3);margin-top:5px;text-align:center;}
 .sb-boost{margin:0 8px 8px;background:rgba(92,99,47,.1);border:1px solid rgba(92,99,47,.25);border-radius:14px;padding:11px;flex-shrink:0;}
 .sb-boost-head{font-size:13px;font-weight:600;color:var(--text);margin-bottom:3px;}
 .sb-boost-sub{font-size:12px;color:var(--text3);margin-bottom:7px;}
-.sb-boost-btn{width:100%;padding:7px;background:linear-gradient(135deg,var(--olive-green),var(--bronze-dim));color:#fff;border:none;border-radius:8px;font-family:'Agrandir',sans-serif;font-size:12px;font-weight:700;cursor:pointer;}
+.sb-boost-btn{width:100%;padding:7px;background:linear-gradient(135deg,var(--olive-green),var(--bronze-dim));color:#fff;border:none;border-radius:8px;font-family:'Poppins',sans-serif;font-weight:800;font-size:12px;font-weight:700;cursor:pointer;}
 .sb-boost-claimed{font-size:12px;color:var(--text3);text-align:center;padding:3px 0;}
 .sb-bottom{border-top:1px solid var(--border);padding:6px 6px 10px;flex-shrink:0;}
 .sb-btn{display:flex;align-items:center;gap:10px;padding:9px 8px;border-radius:10px;cursor:pointer;transition:background .2s;font-size:13px;color:var(--text2);border:none;background:transparent;width:100%;text-align:left;}
@@ -120,17 +120,17 @@ body{font-family:'Poppins',sans-serif;background:var(--bg);color:var(--text);hei
 .topbar-l{display:flex;align-items:center;gap:10px;}
 .mob-toggle{width:34px;height:34px;border-radius:9px;background:var(--surface2);border:1px solid var(--border);color:var(--text2);font-size:17px;cursor:pointer;display:none;align-items:center;justify-content:center;}
 .mob-toggle:hover{background:var(--grad);color:#fff;border-color:transparent;}
-.topbar-logo{font-family:'Agrandir',sans-serif;font-size:21px;font-weight:800;letter-spacing:-1px;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.topbar-logo{font-family:'Poppins',sans-serif;font-weight:800;font-size:21px;font-weight:800;letter-spacing:-1px;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
 .topbar-r{display:flex;align-items:center;gap:8px;}
 .tb-btn{width:34px;height:34px;border-radius:9px;background:var(--surface2);border:1px solid var(--border);color:var(--text2);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;position:relative;transition:all .2s;}
 .tb-btn:hover{background:var(--grad);color:#fff;border-color:transparent;}
 .notif-dot{position:absolute;top:5px;right:5px;width:7px;height:7px;background:#ef4444;border-radius:50%;border:1.5px solid var(--surface);}
 /* AVATAR DROPDOWN */
 .av-wrap{position:relative;}
-.av-btn{width:34px;height:34px;border-radius:50%;background:var(--grad);color:#fff;font-family:'Agrandir',sans-serif;font-weight:800;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;border:none;}
+.av-btn{width:34px;height:34px;border-radius:50%;background:var(--grad);color:#fff;font-family:'Poppins',sans-serif;font-weight:800;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;border:none;}
 .av-dd{position:absolute;top:calc(100% + 8px);right:0;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:8px;min-width:200px;box-shadow:0 8px 32px rgba(0,0,0,.2);display:none;z-index:99999;}
 .av-dd.show{display:block;}
-.av-dd-name{font-family:'Agrandir',sans-serif;font-weight:700;font-size:14px;color:var(--text);padding:6px 10px 2px;}
+.av-dd-name{font-family:'Poppins',sans-serif;font-weight:800;font-weight:700;font-size:14px;color:var(--text);padding:6px 10px 2px;}
 .av-dd-email{font-size:11px;color:var(--text3);padding:0 10px 8px;word-break:break-all;}
 .av-dd-div{height:1px;background:var(--border);margin:4px 0;}
 .av-dd-item{display:flex;align-items:center;gap:8px;width:100%;padding:9px 10px;border-radius:9px;border:none;background:transparent;color:var(--text2);font-family:'Poppins',sans-serif;font-size:13px;cursor:pointer;text-align:left;}
@@ -148,14 +148,14 @@ body{font-family:'Poppins',sans-serif;background:var(--bg);color:var(--text);hei
 .limit-fill.warn{background:linear-gradient(135deg,#f59e0b,#ef4444);}
 .limit-fill.danger{background:#ef4444;}
 .limit-timer{font-size:11px;color:var(--text3);}
-.up-pill{font-size:11px;font-family:'Agrandir',sans-serif;font-weight:700;padding:4px 12px;border-radius:20px;background:var(--grad);color:#fff;border:none;cursor:pointer;}
+.up-pill{font-size:11px;font-family:'Poppins',sans-serif;font-weight:800;font-weight:700;padding:4px 12px;border-radius:20px;background:var(--grad);color:#fff;border:none;cursor:pointer;}
 
 /* LIMIT WARNINGS */
 .lim-warn{display:none;padding:7px 16px;background:rgba(245,158,11,.1);border-bottom:1px solid rgba(245,158,11,.3);font-size:13px;color:#f59e0b;text-align:center;flex-shrink:0;}
 .lim-warn.danger{background:rgba(239,68,68,.1);border-color:rgba(239,68,68,.3);color:#ef4444;}
 .lim-warn.show{display:block;}
 .lim-warn-acts{display:flex;gap:8px;justify-content:center;margin-top:5px;}
-.w-btn{padding:4px 12px;border-radius:20px;border:none;font-family:'Agrandir',sans-serif;font-size:12px;font-weight:700;cursor:pointer;}
+.w-btn{padding:4px 12px;border-radius:20px;border:none;font-family:'Poppins',sans-serif;font-weight:800;font-size:12px;font-weight:700;cursor:pointer;}
 .w-btn.p{background:var(--grad);color:#fff;}
 .w-btn.s{background:var(--surface2);color:var(--text);border:1px solid var(--border);}
 
@@ -166,8 +166,8 @@ body{font-family:'Poppins',sans-serif;background:var(--bg);color:var(--text);hei
 
 /* EMPTY STATE */
 .empty-state{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 24px;text-align:center;}
-.empty-logo{font-family:'Agrandir',sans-serif;font-size:52px;font-weight:800;letter-spacing:-3px;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:4px;}
-.empty-greet{font-family:'Agrandir',sans-serif;font-size:22px;font-weight:700;color:var(--text);margin-bottom:6px;}
+.empty-logo{font-family:'Poppins',sans-serif;font-weight:800;font-size:52px;font-weight:800;letter-spacing:-3px;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:4px;}
+.empty-greet{font-family:'Poppins',sans-serif;font-weight:800;font-size:22px;font-weight:700;color:var(--text);margin-bottom:6px;}
 .empty-sub{font-size:14px;color:var(--text3);margin-bottom:32px;}
 .sug-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;max-width:460px;}
 .sug-card{padding:14px;border-radius:14px;border:1.5px solid var(--border);background:var(--surface);cursor:pointer;text-align:left;transition:all .2s;display:flex;flex-direction:column;gap:5px;}
@@ -214,7 +214,7 @@ body.dark .inline-code{background:rgba(201,154,74,.2);}
 
 /* NAKCONEL LOADER */
 .nak-loader{display:flex;align-items:center;gap:12px;padding:8px 0;}
-.loader-logo{font-family:'Agrandir',sans-serif;font-size:18px;font-weight:800;letter-spacing:-1px;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:logoPulse 1.2s ease-in-out infinite;}
+.loader-logo{font-family:'Poppins',sans-serif;font-weight:800;font-size:18px;font-weight:800;letter-spacing:-1px;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:logoPulse 1.2s ease-in-out infinite;}
 @keyframes logoPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.9)}}
 .loader-dots{display:flex;gap:4px;align-items:center;}
 .loader-dot{width:5px;height:5px;background:#C99A4A;border-radius:50%;animation:dotP 1.2s infinite;}
@@ -242,7 +242,7 @@ body.dark .inline-code{background:rgba(201,154,74,.2);}
 .voice-actions{display:flex;align-items:center;gap:20px;}
 .voice-cancel{width:48px;height:48px;border-radius:50%;background:var(--surface2);border:1.5px solid var(--border);color:var(--text2);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
 .voice-stop{width:64px;height:64px;border-radius:50%;background:#ef4444;border:none;color:#fff;font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(239,68,68,.35);}
-.voice-send{padding:12px 28px;border-radius:24px;background:var(--grad);border:none;color:#fff;font-family:'Agrandir',sans-serif;font-size:14px;font-weight:700;cursor:pointer;display:none;}
+.voice-send{padding:12px 28px;border-radius:24px;background:var(--grad);border:none;color:#fff;font-family:'Poppins',sans-serif;font-weight:800;font-size:14px;font-weight:700;cursor:pointer;display:none;}
 .voice-send.show{display:block;}
 
 /* INPUT AREA - ChatGPT style */
@@ -291,31 +291,31 @@ body.dark .send-btn{background:#f0f0f0;color:#0d0d0d;}
 .modal-ov.show{display:flex;}
 .up-modal{background:var(--surface);border-radius:24px;width:100%;max-width:440px;max-height:92vh;overflow-y:auto;border:1px solid var(--border);}
 .up-head{background:var(--grad);padding:28px 24px;text-align:center;position:sticky;top:0;}
-.up-head h2{font-family:'Agrandir',sans-serif;font-size:24px;font-weight:800;color:#fff;margin-bottom:4px;}
+.up-head h2{font-family:'Poppins',sans-serif;font-weight:800;font-size:24px;font-weight:800;color:#fff;margin-bottom:4px;}
 .up-head p{font-size:13px;color:rgba(255,255,255,.75);}
 .up-plans{padding:18px;}
 .plan-card{border:1.5px solid var(--border);border-radius:16px;padding:16px;margin-bottom:10px;transition:all .2s;position:relative;overflow:hidden;}
 .plan-card:hover{border-color:#C99A4A;transform:translateY(-1px);}
 .plan-card.pop{border-color:#C99A4A;background:rgba(201,154,74,.05);}
-.plan-badge{position:absolute;top:-8px;left:50%;transform:translateX(-50%);background:var(--grad);color:#fff;font-size:10px;font-weight:700;padding:2px 10px;border-radius:20px;font-family:'Agrandir',sans-serif;}
-.plan-name{font-family:'Agrandir',sans-serif;font-weight:700;font-size:15px;color:var(--text);}
+.plan-badge{position:absolute;top:-8px;left:50%;transform:translateX(-50%);background:var(--grad);color:#fff;font-size:10px;font-weight:700;padding:2px 10px;border-radius:20px;font-family:'Poppins',sans-serif;font-weight:800;}
+.plan-name{font-family:'Poppins',sans-serif;font-weight:800;font-weight:700;font-size:15px;color:var(--text);}
 .plan-price{font-size:22px;font-weight:800;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
 .plan-info{font-size:12px;color:var(--text3);margin-top:2px;}
-.plan-buy{width:100%;padding:11px;margin-top:12px;border-radius:12px;border:none;background:var(--grad);color:#fff;font-family:'Agrandir',sans-serif;font-size:14px;font-weight:700;cursor:pointer;}
+.plan-buy{width:100%;padding:11px;margin-top:12px;border-radius:12px;border:none;background:var(--grad);color:#fff;font-family:'Poppins',sans-serif;font-weight:800;font-size:14px;font-weight:700;cursor:pointer;}
 .modal-close{width:100%;padding:12px;border:none;background:var(--surface2);color:var(--text2);font-family:'Poppins',sans-serif;font-size:14px;cursor:pointer;border-top:1px solid var(--border);}
 .conf-ov{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:600;display:none;align-items:center;justify-content:center;padding:20px;}
 .conf-ov.show{display:flex;}
 .conf-box{background:var(--surface);border-radius:20px;padding:28px 24px;width:100%;max-width:320px;text-align:center;border:1px solid var(--border);}
-.conf-box h3{font-family:'Agrandir',sans-serif;font-size:18px;font-weight:700;color:var(--text);margin-bottom:8px;}
+.conf-box h3{font-family:'Poppins',sans-serif;font-weight:800;font-size:18px;font-weight:700;color:var(--text);margin-bottom:8px;}
 .conf-box p{font-size:14px;color:var(--text3);margin-bottom:20px;line-height:1.5;}
 .conf-acts{display:flex;gap:10px;}
 .conf-cancel{flex:1;padding:12px;border-radius:10px;border:1.5px solid var(--border);background:transparent;color:var(--text2);font-family:'Poppins',sans-serif;font-size:14px;cursor:pointer;}
-.conf-del{flex:1;padding:12px;border-radius:10px;border:none;background:#ef4444;color:#fff;font-family:'Agrandir',sans-serif;font-size:14px;font-weight:700;cursor:pointer;}
+.conf-del{flex:1;padding:12px;border-radius:10px;border:none;background:#ef4444;color:#fff;font-family:'Poppins',sans-serif;font-weight:800;font-size:14px;font-weight:700;cursor:pointer;}
 
 /* LOADING */
 .load-ov{position:fixed;inset:0;background:linear-gradient(135deg,var(--wine-deep),var(--ground));display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999;opacity:0;pointer-events:none;transition:opacity .3s;}
 .load-ov.show{opacity:1;pointer-events:all;}
-.load-logo{font-family:'Agrandir',sans-serif;font-size:52px;font-weight:800;letter-spacing:-3px;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:16px;}
+.load-logo{font-family:'Poppins',sans-serif;font-weight:800;font-size:52px;font-weight:800;letter-spacing:-3px;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:16px;}
 .load-dots{display:flex;gap:8px;}
 .ld{width:8px;height:8px;background:rgba(201,154,74,.5);border-radius:50%;animation:dotP 1.2s infinite;}
 .ld:nth-child(2){animation-delay:.2s;}.ld:nth-child(3){animation-delay:.4s;}
@@ -349,27 +349,27 @@ body.dark .send-btn{background:#f0f0f0;color:#0d0d0d;}
   <div class="voice-transcript" id="voice-transcript">Say something...</div>
   <div class="voice-wave"><div class="vw-bar"></div><div class="vw-bar"></div><div class="vw-bar"></div><div class="vw-bar"></div><div class="vw-bar"></div><div class="vw-bar"></div><div class="vw-bar"></div><div class="vw-bar"></div></div>
   <div class="voice-actions">
-    <button class="voice-cancel" onclick="cancelVoice()">âœ•</button>
+    <button class="voice-cancel" onclick="cancelVoice()">✕</button>
     <button class="voice-stop" id="voice-stop-btn" onclick="stopVoice()">â¹</button>
-    <button class="voice-send show" id="voice-send-btn" onclick="sendVoice()" style="display:none">Send â†’</button>
+    <button class="voice-send show" id="voice-send-btn" onclick="sendVoice()" style="display:none">Send →’</button>
   </div>
 </div>
 
 <!-- LIGHTBOX -->
 <div class="lightbox" id="lightbox" onclick="closeLightbox()">
-  <button class="lightbox-close" onclick="closeLightbox()">âœ•</button>
+  <button class="lightbox-close" onclick="closeLightbox()">✕</button>
   <img id="lightbox-img" src="" alt=""/>
 </div>
 
 <!-- UPGRADE MODAL -->
 <div class="modal-ov" id="up-modal">
   <div class="up-modal">
-    <div class="up-head"><h2>â­ Upgrade Nakconel AI</h2><p>Unlock unlimited power</p></div>
+    <div class="up-head"><h2>⭐ Upgrade Nakconel AI</h2><p>Unlock unlimited power</p></div>
     <div class="up-plans">
-      <div class="plan-card"><div class="plan-name">Weekly</div><div class="plan-price">â‚¦2,500 / $2.99</div><div class="plan-info">âœ“ Unlimited Â· 7 days</div><button class="plan-buy" onclick="buyPlan('weekly')">Get Weekly â†’</button></div>
-      <div class="plan-card pop"><div class="plan-badge">MOST POPULAR</div><div class="plan-name">Monthly</div><div class="plan-price">â‚¦7,500 / $7.99</div><div class="plan-info">âœ“ Unlimited Â· 30 days</div><button class="plan-buy" onclick="buyPlan('monthly')">Get Monthly â†’</button></div>
-      <div class="plan-card"><div class="plan-name">6 Months</div><div class="plan-price">â‚¦40,000 / $39.99</div><div class="plan-info">âœ“ Best value Â· 180 days</div><button class="plan-buy" onclick="buyPlan('six_months')">Get 6-Month â†’</button></div>
-      <div class="plan-card"><div class="plan-name">Yearly</div><div class="plan-price">â‚¦70,000 / $69.99</div><div class="plan-info">âœ“ Max savings Â· 365 days</div><button class="plan-buy" onclick="buyPlan('yearly')">Get Yearly â†’</button></div>
+      <div class="plan-card"><div class="plan-name">Weekly</div><div class="plan-price">â‚¦2,500 / $2.99</div><div class="plan-info">✓ Unlimited · 7 days</div><button class="plan-buy" onclick="buyPlan('weekly')">Get Weekly →’</button></div>
+      <div class="plan-card pop"><div class="plan-badge">MOST POPULAR</div><div class="plan-name">Monthly</div><div class="plan-price">â‚¦7,500 / $7.99</div><div class="plan-info">✓ Unlimited · 30 days</div><button class="plan-buy" onclick="buyPlan('monthly')">Get Monthly →’</button></div>
+      <div class="plan-card"><div class="plan-name">6 Months</div><div class="plan-price">â‚¦40,000 / $39.99</div><div class="plan-info">✓ Best value · 180 days</div><button class="plan-buy" onclick="buyPlan('six_months')">Get 6-Month →’</button></div>
+      <div class="plan-card"><div class="plan-name">Yearly</div><div class="plan-price">â‚¦70,000 / $69.99</div><div class="plan-info">✓ Max savings · 365 days</div><button class="plan-buy" onclick="buyPlan('yearly')">Get Yearly →’</button></div>
     </div>
     <button class="modal-close" onclick="closeUpgrade()">Maybe later</button>
   </div>
@@ -403,7 +403,7 @@ body.dark .send-btn{background:#f0f0f0;color:#0d0d0d;}
       <div class="ob-chip" onclick="selChip(this)">â–² IT &amp; Technology</div><div class="ob-chip" onclick="selChip(this)">â—ˆ AI Enablement</div>
       <div class="ob-chip" onclick="selChip(this)" style="grid-column:span 2">ðŸŒ Global / Cultural Markets</div>
     </div>
-    <div class="ob-actions"><button class="skip-btn" onclick="goStep2()">Skip</button><button class="next-btn" onclick="goStep2()">Continue â†’</button></div>
+    <div class="ob-actions"><button class="skip-btn" onclick="goStep2()">Skip</button><button class="next-btn" onclick="goStep2()">Continue →’</button></div>
   </div>
   <div class="ob-step" id="step2">
     <div class="ob-label">Step 2 of 2</div>
@@ -411,10 +411,10 @@ body.dark .send-btn{background:#f0f0f0;color:#0d0d0d;}
     <div class="ob-sub">Nakconel AI can help with this right away.</div>
     <div class="ob-grid">
       <div class="ob-chip" onclick="selChip(this)">ðŸ“ Brand Audit</div><div class="ob-chip" onclick="selChip(this)">ðŸ“ Brand Messaging</div>
-      <div class="ob-chip" onclick="selChip(this)">ðŸŽ¨ Design Brief</div><div class="ob-chip" onclick="selChip(this)">ðŸ“… Content Plan</div>
-      <div class="ob-chip" onclick="selChip(this)">ðŸ¤– AI Workflow</div><div class="ob-chip" onclick="selChip(this)">âœ¨ Just Exploring</div>
+      <div class="ob-chip" onclick="selChip(this)">🎨 Design Brief</div><div class="ob-chip" onclick="selChip(this)">📅 Content Plan</div>
+      <div class="ob-chip" onclick="selChip(this)">🤖 AI Workflow</div><div class="ob-chip" onclick="selChip(this)">✨ Just Exploring</div>
     </div>
-    <div class="ob-actions"><button class="skip-btn" onclick="enterChat()">Skip</button><button class="next-btn" onclick="enterChat()">Enter Studio â†’</button></div>
+    <div class="ob-actions"><button class="skip-btn" onclick="enterChat()">Skip</button><button class="next-btn" onclick="enterChat()">Enter Studio →’</button></div>
   </div>
 </div>
 
@@ -425,26 +425,26 @@ body.dark .send-btn{background:#f0f0f0;color:#0d0d0d;}
   <!-- SIDEBAR -->
   <div class="sidebar" id="sidebar">
     <div class="sb-top">
-      <div class="sb-head"><div class="sb-title">ðŸ¤– Nakconel AI</div><button class="sb-close" onclick="closeSidebar()">âœ–</button></div>
+      <div class="sb-head"><div class="sb-title">🤖 Nakconel AI</div><button class="sb-close" onclick="closeSidebar()">âœ–</button></div>
       <div class="sb-search"><span>ðŸ”</span><input type="text" placeholder="Search chats..." oninput="filterChats(this.value)"/></div>
-      <button class="sb-new" onclick="newChat()">âœ¨ + New Chat</button>
+      <button class="sb-new" onclick="newChat()">✨ + New Chat</button>
     </div>
     <div class="sb-list" id="sb-list"><div class="sb-empty">ðŸ’¬<br/>No chats yet.<br/>Start a conversation!</div></div>
     <div class="sb-upgrade">
-      <button class="sb-up-btn" onclick="openUpgrade()">â­ UPGRADE PLAN</button>
-      <div class="sb-up-info">Free Plan Â· <span id="sb-count">40</span> messages left</div>
+      <button class="sb-up-btn" onclick="openUpgrade()">⭐ UPGRADE PLAN</button>
+      <div class="sb-up-info">Free Plan · <span id="sb-count">40</span> messages left</div>
     </div>
     <div class="sb-boost">
       <div class="sb-boost-head">ðŸŽ Daily Boost</div>
       <div class="sb-boost-sub">+5 extra messages per day</div>
-      <button class="sb-boost-btn" id="boost-btn" onclick="claimBoost()">Watch Ad â†’ Claim</button>
+      <button class="sb-boost-btn" id="boost-btn" onclick="claimBoost()">Watch Ad →’ Claim</button>
       <div class="sb-boost-claimed" id="boost-claimed" style="display:none"></div>
     </div>
     <div class="sb-bottom">
-      <div class="sb-btn"><span>ðŸ‘¤</span><div><div class="sb-uname" id="sb-uname">User</div><div class="sb-uemail" id="sb-uemail"></div></div></div>
-      <button class="sb-btn" onclick="showToast('Settings coming soon!')"><span>âš™ï¸</span><span>Settings</span></button>
-      <button class="dark-pill" onclick="toggleDark()"><div style="display:flex;align-items:center;gap:10px;"><span>ðŸŒ™</span><span style="font-size:13px;color:var(--text2)">Dark Mode</span></div><div class="tog-sw" id="dark-sw"><div class="tog-knob"></div></div></button>
-      <button class="sb-btn danger" onclick="startOver()"><span>ðŸ”„</span><span>Start Over</span></button>
+      <div class="sb-btn"><span>👤</span><div><div class="sb-uname" id="sb-uname">User</div><div class="sb-uemail" id="sb-uemail"></div></div></div>
+      <button class="sb-btn" onclick="showToast('Settings coming soon!')"><span>⚙️</span><span>Settings</span></button>
+      <button class="dark-pill" onclick="toggleDark()"><div style="display:flex;align-items:center;gap:10px;"><span>🌙</span><span style="font-size:13px;color:var(--text2)">Dark Mode</span></div><div class="tog-sw" id="dark-sw"><div class="tog-knob"></div></div></button>
+      <button class="sb-btn danger" onclick="startOver()"><span>🔄</span><span>Start Over</span></button>
     </div>
   </div>
 
@@ -452,48 +452,48 @@ body.dark .send-btn{background:#f0f0f0;color:#0d0d0d;}
   <div class="chat-main">
     <div class="topbar">
       <div class="topbar-l">
-        <button class="mob-toggle" onclick="toggleSidebar()">â˜°</button>
+        <button class="mob-toggle" onclick="toggleSidebar()">☰</button>
         <div class="topbar-logo">Nakconel <span style="font-weight:400;font-size:12px;-webkit-text-fill-color:var(--text3)">AI</span></div>
       </div>
       <div class="topbar-r">
-        <button class="tb-btn" onclick="showToast('No new notifications')">ðŸ””<span class="notif-dot"></span></button>
+        <button class="tb-btn" onclick="showToast('No new notifications')">🔔<span class="notif-dot"></span></button>
         <div class="av-wrap">
           <button class="av-btn" id="av-btn" onclick="toggleAvMenu()">N</button>
           <div class="av-dd" id="av-dd">
             <div class="av-dd-name" id="av-name">User</div>
             <div class="av-dd-email" id="av-email"></div>
             <div class="av-dd-div"></div>
-            <button class="av-dd-item" onclick="showToast('Settings coming soon!')">âš™ï¸ Settings</button>
-            <button class="av-dd-item danger" onclick="startOver()">ðŸ”„ Start Over</button>
+            <button class="av-dd-item" onclick="showToast('Settings coming soon!')">⚙️ Settings</button>
+            <button class="av-dd-item danger" onclick="startOver()">🔄 Start Over</button>
           </div>
         </div>
       </div>
     </div>
 
     <!-- WARNINGS -->
-    <div class="lim-warn" id="warn10">âš ï¸ Only <b>10 messages</b> left!<div class="lim-warn-acts"><button class="w-btn s" onclick="claimBoost()">ðŸŽ Boost</button><button class="w-btn p" onclick="openUpgrade()">â­ Upgrade</button></div></div>
-    <div class="lim-warn danger" id="warn5">ðŸ”´ Only <b>5 messages</b> left! Resets <span id="warn-timer">--:--:--</span><div class="lim-warn-acts"><button class="w-btn p" onclick="openUpgrade()">â­ Upgrade Now</button></div></div>
+    <div class="lim-warn" id="warn10">⚠️  Only <b>10 messages</b> left!<div class="lim-warn-acts"><button class="w-btn s" onclick="claimBoost()">ðŸŽ Boost</button><button class="w-btn p" onclick="openUpgrade()">⭐ Upgrade</button></div></div>
+    <div class="lim-warn danger" id="warn5">🔴 Only <b>5 messages</b> left! Resets <span id="warn-timer">--:--:--</span><div class="lim-warn-acts"><button class="w-btn p" onclick="openUpgrade()">⭐ Upgrade Now</button></div></div>
 
     <div class="limit-bar">
       <div class="limit-l">
-        <div class="limit-lbl">Free Â· <b id="msg-count">40</b>/40</div>
+        <div class="limit-lbl">Free · <b id="msg-count">40</b>/40</div>
         <div class="limit-prog"><div class="limit-fill" id="lim-fill" style="width:100%"></div></div>
         <div class="limit-timer">Resets <span id="reset-timer">--:--:--</span></div>
       </div>
-      <button class="up-pill" onclick="openUpgrade()">â­ UPGRADE</button>
+      <button class="up-pill" onclick="openUpgrade()">⭐ UPGRADE</button>
     </div>
 
     <div class="chat-area" id="chat-area">
       <div class="empty-state" id="empty-state">
         <div class="empty-logo">Nakconel</div>
-        <div class="empty-greet">Hi, <span id="greet-name">there</span> ðŸ‘‹</div>
-        <div class="empty-sub">Your brand intelligence partner â€” what should we build today?</div>
+        <div class="empty-greet">Hi, <span id="greet-name">there</span> 👋</div>
+        <div class="empty-sub">Your brand intelligence partner — what should we build today?</div>
         <div class="sug-grid">
           <div class="sug-card" onclick="useSug('Audit my brand identity and tell me what to improve')"><span class="sc-icon">ðŸ“</span><span class="sc-text">Audit my brand identity</span></div>
           <div class="sug-card" onclick="useSug('Write brand messaging and a tagline for my business')"><span class="sc-icon">ðŸ“</span><span class="sc-text">Write brand messaging</span></div>
-          <div class="sug-card" onclick="useSug('Plan a content calendar for my brand')"><span class="sc-icon">ðŸ“…</span><span class="sc-text">Plan a content calendar</span></div>
-          <div class="sug-card" onclick="useSug('Generate a logo concept image for my brand')"><span class="sc-icon">ðŸŽ¨</span><span class="sc-text">Generate a design concept</span></div>
-          <div class="sug-card" onclick="useSug('Build an AI adoption roadmap for my team')"><span class="sc-icon">ðŸ¤–</span><span class="sc-text">Build an AI workflow</span></div>
+          <div class="sug-card" onclick="useSug('Plan a content calendar for my brand')"><span class="sc-icon">📅</span><span class="sc-text">Plan a content calendar</span></div>
+          <div class="sug-card" onclick="useSug('Generate a logo concept image for my brand')"><span class="sc-icon">🎨</span><span class="sc-text">Generate a design concept</span></div>
+          <div class="sug-card" onclick="useSug('Build an AI adoption roadmap for my team')"><span class="sc-icon">🤖</span><span class="sc-text">Build an AI workflow</span></div>
           <div class="sug-card" onclick="useSug('Help me expand my brand into a new market')"><span class="sc-icon">ðŸŒ</span><span class="sc-text">Plan market expansion</span></div>
         </div>
       </div>
@@ -506,24 +506,24 @@ body.dark .send-btn{background:#f0f0f0;color:#0d0d0d;}
         <div class="plus-wrap">
           <button class="plus-btn" id="plus-btn" onclick="togglePlus()">+</button>
           <div class="plus-menu" id="plus-menu">
-            <div class="pm-item" onclick="triggerUpload('image/*')">ðŸ“· Upload Image</div>
-            <div class="pm-item" onclick="openCamera()">ðŸ“¸ Take Photo</div>
-            <div class="pm-item" onclick="triggerUpload('.pdf,.txt,.docx,.doc')">ðŸ“„ Upload Document</div>
+            <div class="pm-item" onclick="triggerUpload('image/*')">📷 Upload Image</div>
+            <div class="pm-item" onclick="openCamera()">📸 Take Photo</div>
+            <div class="pm-item" onclick="triggerUpload('.pdf,.txt,.docx,.doc')">📄 Upload Document</div>
             <div class="pm-item" onclick="getLocation()">ðŸ“ Share Location</div>
-            <div class="pm-item" onclick="pasteLink()">ðŸ”— Paste Link</div>
+            <div class="pm-item" onclick="pasteLink()">🔗 Paste Link</div>
           </div>
         </div>
         <input type="file" id="file-inp" style="display:none" onchange="handleFile(event)"/>
         <input type="file" id="cam-inp" accept="image/*" capture="environment" style="display:none" onchange="handleFile(event)"/>
         <div class="input-pill">
           <textarea class="chat-ta" id="chat-input" placeholder="Ask Nakconel AI about your brand..." onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
-          <button class="mic-btn" id="mic-btn" onclick="startVoice()">ðŸŽ¤</button>
+          <button class="mic-btn" id="mic-btn" onclick="startVoice()">🎙️</button>
           <button class="send-btn" id="send-btn" onclick="sendMessage()">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
           </button>
         </div>
       </div>
-      <div class="input-hint">Nakconel AI Â· Brand Intelligence Assistant Â· 40 msgs/day</div>
+      <div class="input-hint">Nakconel AI · Brand Intelligence Assistant · 40 msgs/day</div>
     </div>
   </div>
 </div>
@@ -543,7 +543,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   document.getElementById('sb-uname').textContent='User';
   document.getElementById('sb-uemail').textContent='Brand workspace';
   document.getElementById('av-name').textContent='User';
-  document.getElementById('av-email').textContent='Nakconel AI Â· Brand workspace';
+  document.getElementById('av-email').textContent='Nakconel AI · Brand workspace';
   curChatId='chat_'+Date.now();
   refreshQuota();
   verifySubscriptionCallback();
@@ -627,8 +627,6 @@ function addToMemory(role,content){
   while(mem.length>16)mem.shift(); // keep only the most recent exchanges
   localStorage.setItem('nak_memory',JSON.stringify(mem));
 }
-window._name='there';window._email='';window._user=null;
-let sbOpen=window.innerWidth>768;
 
 // TIMER
 function updateTimer(){
@@ -700,10 +698,10 @@ function renderAttachments(){
   if(!attachments.length){el.innerHTML='';return;}
   el.innerHTML=attachments.map((a,i)=>{
     if(a.type.startsWith('image/')&&a.dataUrl){
-      return `<div class="attach-img"><img src="${a.dataUrl}" onclick="openLightbox('${a.dataUrl}')"/><button class="attach-img-rm" onclick="rmAttach(${i})">âœ•</button></div>`;
+      return `<div class="attach-img"><img src="${a.dataUrl}" onclick="openLightbox('${a.dataUrl}')"/><button class="attach-img-rm" onclick="rmAttach(${i})">✕</button></div>`;
     }
-    const icon=a.type.includes('pdf')?'ðŸ“„':a.type.includes('doc')?'ðŸ“':'ðŸ“„';
-    return `<div class="attach-file"><div class="attach-file-icon">${icon}</div><div class="attach-file-info"><div class="attach-file-name">${a.name}</div><div class="attach-file-size">${(a.size/1024).toFixed(1)} KB</div></div><button class="attach-rm" onclick="rmAttach(${i})">âœ•</button></div>`;
+    const icon=a.type.includes('pdf')?'📄':a.type.includes('doc')?'ðŸ“':'📄';
+    return `<div class="attach-file"><div class="attach-file-icon">${icon}</div><div class="attach-file-info"><div class="attach-file-name">${a.name}</div><div class="attach-file-size">${(a.size/1024).toFixed(1)} KB</div></div><button class="attach-rm" onclick="rmAttach(${i})">✕</button></div>`;
   }).join('');
 }
 function rmAttach(i){attachments.splice(i,1);renderAttachments();}
@@ -740,10 +738,10 @@ function groupChats(chats){
 function chatItem(c){
   return `<div class="sb-item ${c.id===curChatId?'active':''}" onclick="loadChat('${c.id}')">
     <span>ðŸ’¬</span><span class="sb-item-title">${esc(c.title)}</span>
-    <span class="sb-arrow" onclick="event.stopPropagation();toggleDD('${c.id}')">â–¼
+    <span class="sb-arrow" onclick="event.stopPropagation();toggleDD('${c.id}')">▼
       <div class="sb-dd" id="dd-${c.id}">
-        <div class="sb-dd-item" onclick="event.stopPropagation();shareChat('${c.id}')">ðŸ“¤ Share</div>
-        <div class="sb-dd-item danger" onclick="event.stopPropagation();confDelete('${c.id}')">ðŸ—‘ï¸ Delete</div>
+        <div class="sb-dd-item" onclick="event.stopPropagation();shareChat('${c.id}')">📤 Share</div>
+        <div class="sb-dd-item danger" onclick="event.stopPropagation();confDelete('${c.id}')">🗑️ Delete</div>
       </div>
     </span>
   </div>`;
@@ -755,10 +753,10 @@ function renderSidebar(filter=''){
   if(filter)chats=chats.filter(c=>c.title.toLowerCase().includes(filter.toLowerCase()));
   if(!chats.length){list.innerHTML=`<div class="sb-empty">${filter?'ðŸ”<br/>No chats found':'ðŸ’¬<br/>No chats yet.<br/>Start a conversation!'}</div>`;return;}
   const g=groupChats(chats);let html='';
-  if(g.today.length){html+='<div class="sb-sec">ðŸ“… TODAY</div>';g.today.forEach(c=>html+=chatItem(c));}
-  if(g.yesterday.length){html+='<div class="sb-sec">ðŸ“… YESTERDAY</div>';g.yesterday.forEach(c=>html+=chatItem(c));}
-  if(g.week.length){html+='<div class="sb-sec">ðŸ“… LAST 7 DAYS</div>';g.week.forEach(c=>html+=chatItem(c));}
-  if(g.older.length){html+='<div class="sb-sec">ðŸ“‚ OLDER</div>';g.older.forEach(c=>html+=chatItem(c));}
+  if(g.today.length){html+='<div class="sb-sec">📅 TODAY</div>';g.today.forEach(c=>html+=chatItem(c));}
+  if(g.yesterday.length){html+='<div class="sb-sec">📅 YESTERDAY</div>';g.yesterday.forEach(c=>html+=chatItem(c));}
+  if(g.week.length){html+='<div class="sb-sec">📅 LAST 7 DAYS</div>';g.week.forEach(c=>html+=chatItem(c));}
+  if(g.older.length){html+='<div class="sb-sec">📁 OLDER</div>';g.older.forEach(c=>html+=chatItem(c));}
   list.innerHTML=html;
 }
 function filterChats(v){renderSidebar(v);}
@@ -866,7 +864,7 @@ function enterChat(){
   document.getElementById('sb-uname').textContent=n;
   document.getElementById('sb-uemail').textContent='Brand workspace';
   document.getElementById('av-name').textContent=n;
-  document.getElementById('av-email').textContent='Nakconel AI Â· Brand workspace';
+  document.getElementById('av-email').textContent='Nakconel AI · Brand workspace';
   curChatId='chat_'+Date.now();
   refreshQuota();
   if(localStorage.getItem('nak_dark')==='1'){isDark=true;document.body.classList.add('dark');document.getElementById('dark-sw').classList.add('on');}
@@ -891,7 +889,7 @@ function formatAIMsg(text){
   // Code blocks
   html=html.replace(/```(\w*)\n?([\s\S]*?)```/g,(m,lang,code)=>{
     const l=lang||'code';
-    return `</p><div class="code-block"><div class="code-header"><span class="code-lang">${esc(l)}</span><button class="code-copy-btn" onclick="copyCode(this)">ðŸ“‹ Copy</button></div><div class="code-content">${code.trim()}</div></div><p>`;
+    return `</p><div class="code-block"><div class="code-header"><span class="code-lang">${esc(l)}</span><button class="code-copy-btn" onclick="copyCode(this)">📋 Copy</button></div><div class="code-content">${code.trim()}</div></div><p>`;
   });
   // Inline code
   html=html.replace(/`([^`]+)`/g,'<span class="inline-code">$1</span>');
@@ -909,7 +907,7 @@ function detectGen(text){
   const t=text.toLowerCase();
   if(t.match(/\b(generate|make|create|write|compose)\b.*\b(song|music|lyrics)\b/)||t.match(/\b(song|music)\b.*\bfor me\b/))return'song';
   if(t.match(/\b(generate|make|create)\b.*\b(video|clip|animation)\b/)||t.includes('make a video')||t.includes('create a video'))return'video';
-  // Image/design/logo detection â€” catches both direct commands ("generate a logo")
+  // Image/design/logo detection — catches both direct commands ("generate a logo")
   // and natural conversational phrasing ("put the logo on a cup", "show me a design", "I want an image of...")
   const imageNouns=/(image|picture|photo|drawing|logo|icon|artwork|illustration|graphic|poster|banner|design|mockup|mock-up|mock up|sketch|render|visual|wallpaper|cover|badge|emblem|avatar|thumbnail)/;
   const imageVerbs=/\b(generate|make|create|draw|design|render|show me|give me|put|place|print|show|paint|visualize|mock up|mockup)\b/;
@@ -934,7 +932,7 @@ function addMessage(role,text,imgData,animate=true){
       content+=`<div class="user-img-preview"><img src="${imgData}" onclick="openLightbox('${imgData}')"/></div>`;
     }
     if(text)content+=`<div>${esc(text)}</div>`;
-    wrap.innerHTML=`<div><div class="user-bubble">${content}</div><div class="msg-time user-time">${relTime(ts)}</div><div class="msg-acts" style="justify-content:flex-end;"><button class="act-btn" onclick="copyTxt('${esc(text).replace(/'/g,"\\'")}')">ðŸ“‹</button></div></div>`;
+    wrap.innerHTML=`<div><div class="user-bubble">${content}</div><div class="msg-time user-time">${relTime(ts)}</div><div class="msg-acts" style="justify-content:flex-end;"><button class="act-btn" onclick="copyTxt('${esc(text).replace(/'/g,"\\'")}')">📋</button></div></div>`;
   }else{
     wrap.className='ai-msg-wrap';
     const formatted=formatAIMsg(text);
@@ -942,12 +940,12 @@ function addMessage(role,text,imgData,animate=true){
     wrap.innerHTML=`<div class="ai-bubble">${formatted}</div>
     <div class="msg-time">${relTime(ts)}</div>
     <div class="msg-acts">
-      <button class="act-btn" onclick="readAloud(this,${t})">ðŸ”Š</button>
-      <button class="act-btn" onclick="copyTxt(${t})">ðŸ“‹</button>
-      <button class="act-btn" onclick="likeMsg(this)">ðŸ‘</button>
-      <button class="act-btn" onclick="dislikeMsg(this)">ðŸ‘Ž</button>
-      <button class="act-btn" onclick="regenMsg(this)">â†»</button>
-      <button class="act-btn" onclick="shareMsg(${t})">ðŸ“¤</button>
+      <button class="act-btn" onclick="readAloud(this,${t})">🔊</button>
+      <button class="act-btn" onclick="copyTxt(${t})">📋</button>
+      <button class="act-btn" onclick="likeMsg(this)">👍</button>
+      <button class="act-btn" onclick="dislikeMsg(this)">👎</button>
+      <button class="act-btn" onclick="regenMsg(this)">→»</button>
+      <button class="act-btn" onclick="shareMsg(${t})">📤</button>
     </div>`;
   }
   area.appendChild(wrap);area.scrollTop=area.scrollHeight;
@@ -967,18 +965,18 @@ function addMediaMsg(type,prompt,refPhoto){
   if(type==='song'){
     const cid='song-'+Date.now();
     html=`<div id="${cid}" style="background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:16px;max-width:320px;">
-      <div style="font-weight:700;color:var(--text);margin-bottom:12px;">ðŸŽµ AI Generated Song</div>
+      <div style="font-weight:700;color:var(--text);margin-bottom:12px;">🎵 AI Generated Song</div>
       <div id="${cid}-body" style="text-align:center;padding:16px 0;">
-        <div style="font-size:28px;margin-bottom:8px;">ðŸŽ¶</div>
+        <div style="font-size:28px;margin-bottom:8px;">🎶</div>
         <div style="font-weight:600;font-size:14px;">Composing your song...</div>
-        <div style="font-size:12px;color:var(--text3);margin-top:4px;">This takes 30â€“60 seconds</div>
+        <div style="font-size:12px;color:var(--text3);margin-top:4px;">This takes 30–60 seconds</div>
       </div>
     </div>`;
     setTimeout(()=>generateRealSong(prompt,cid),100);
   }else if(type==='image'){
     const cid='img-'+Date.now();
     html=`<div id="${cid}" style="background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:16px;max-width:320px;">
-      <div style="font-weight:700;color:var(--text);margin-bottom:12px;">ðŸ–¼ï¸ Generated Image</div>
+      <div style="font-weight:700;color:var(--text);margin-bottom:12px;">🖼️ Generated Image</div>
       <div id="${cid}-body" style="width:100%;height:200px;border-radius:12px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;background:linear-gradient(100deg,rgba(201,154,74,.10) 30%,rgba(201,154,74,.25) 50%,rgba(201,154,74,.10) 70%);background-size:200% 100%;animation:shimmerMove 1.6s ease-in-out infinite;">
         <span class="gen-status" style="font-size:13px;color:var(--text2);font-weight:600;">Sketching the concept...</span>
       </div>
@@ -987,14 +985,14 @@ function addMediaMsg(type,prompt,refPhoto){
     setTimeout(()=>generateRealImage(prompt,cid,refPhoto),100);
   }else{
     html=`<div style="background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:16px;max-width:320px;">
-      <div style="font-weight:700;color:var(--text);margin-bottom:12px;">ðŸŽ¬ Generated Video</div>
+      <div style="font-weight:700;color:var(--text);margin-bottom:12px;">🎬 Generated Video</div>
       <div style="width:100%;height:180px;background:linear-gradient(135deg,rgba(239,68,68,.1),rgba(245,158,11,.1));border-radius:12px;display:flex;align-items:center;justify-content:center;">
-        <span style="font-size:70px">ðŸŽ¬</span>
+        <span style="font-size:70px">🎬</span>
       </div>
-      <div style="font-size:12px;color:var(--text3);margin-top:8px;">Video clip Â· 5 seconds Â· HD</div>
+      <div style="font-size:12px;color:var(--text3);margin-top:8px;">Video clip · 5 seconds · HD</div>
       <div style="display:flex;gap:6px;margin-top:10px;">
-        <button onclick="showToast('Video liked!')" style="flex:1;padding:7px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text2);font-size:12px;cursor:pointer;">â¤ï¸ Like</button>
-        <button onclick="showToast('Downloading...')" style="flex:1;padding:7px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text2);font-size:12px;cursor:pointer;">â¬‡ï¸ Save</button>
+        <button onclick="showToast('Video liked!')" style="flex:1;padding:7px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text2);font-size:12px;cursor:pointer;">â¤ Like</button>
+        <button onclick="showToast('Downloading...')" style="flex:1;padding:7px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text2);font-size:12px;cursor:pointer;">⬇️ Save</button>
       </div>
     </div>`;
   }
@@ -1066,6 +1064,7 @@ async function sendMessage(){
     const data=await res.json();
     if(data.quota)applyQuota(data.quota);
     if(res.status===429){loader.remove();isTyping=false;openUpgrade();addMessage('ai',data.reply||'Daily message limit reached. Upgrade or wait for reset.');return;}
+    if(!res.ok){loader.remove();isTyping=false;addMessage('ai','⚠️ '+(data.reply||data.error||'Server error occurred. Please try again.'));return;}
     const reply=data.reply||"I'm having trouble responding. Please try again.";
     history.push({role:'assistant',content:reply});
     addToMemory('user',aiContent);
@@ -1074,7 +1073,7 @@ async function sendMessage(){
     saveChatHistory(curChatId,history);
   }catch(err){
     loader.remove();isTyping=false;
-    addMessage('ai','âš ï¸ Connection error: '+( err.message||'Please check your network and try again.'));
+    addMessage('ai','⚠️  Connection error: '+( err.message||'Please check your network and try again.'));
     console.error('Chat error:',err);
   }
 }

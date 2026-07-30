@@ -4,12 +4,17 @@
    ===================================================================== */
 
 /* ---- FONTS ---- */
-@font-face {
+/* Agrandir fallback: Using Lexend as a similar modern geometric sans-serif */
+@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@700;800&display=swap');
+
+/* Legacy font-face removed - cdnfonts URL was returning 404
+   Pages should use 'Lexend', 'Agrandir', system-ui fallback stack */
+/* @font-face {
   font-family: 'Agrandir';
   src: url('https://fonts.cdnfonts.com/s/15785/Agrandir-GrandHeavy.woff') format('woff');
   font-weight: 800;
   font-display: swap;
-}
+} */
 
 /* ---- CSS VARIABLES ---- */
 :root {
@@ -87,7 +92,7 @@ img { max-width: 100%; height: auto; display: block; }
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: 'Agrandir', sans-serif;
+  font-family: 'Lexend', 'Agrandir', sans-serif;
   font-weight: 800;
   font-size: 14px;
   color: var(--bronze);
@@ -248,7 +253,7 @@ footer {
   margin-bottom: 60px;
 }
 .ft-desc { color: var(--muted); font-size: 14px; line-height: 1.6; margin: 16px 0 24px 0; max-width: 320px; }
-.ft-col h5 { font-family: 'Agrandir', sans-serif; font-size: 16px; margin-bottom: 24px; color: var(--white); }
+.ft-col h5 { font-family: 'Lexend', 'Agrandir', sans-serif; font-size: 16px; margin-bottom: 24px; color: var(--white); }
 .ft-col ul { display: flex; flex-direction: column; gap: 12px; }
 .ft-col a { font-size: 14px; color: var(--muted); }
 .ft-col a:hover { color: var(--bronze-light); padding-left: 4px; }
