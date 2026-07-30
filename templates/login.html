@@ -99,13 +99,17 @@
     <script type="module">
         import { getErrorMessage, signInWithEmail, signInWithGoogle } from '/static/js/nak-auth.js';
 
+        const params = new URLSearchParams(window.location.search);
+        const nextUrl = params.get('next') || '/';
+        const safeNextUrl = nextUrl.startsWith('/') && !nextUrl.startsWith('//') ? nextUrl : '/';
+
         document.getElementById('googleBtn').addEventListener('click', async () => {
             try {
                 await signInWithGoogle();
                 showAlert('Login successful! Redirecting…', 'success');
-                setTimeout(() => window.location.href = '/', 1200);
+                setTimeout(() => window.location.href = safeNextUrl, 1200);
             } catch (err) {
-                showAlert(getErrorMessage(err.code), 'error');
+                showAlert(getErrorMessage(err.code || err.message), 'error');
             }
         });
 
@@ -117,7 +121,7 @@
             const email = document.getElementById('emailOrUsername').value.trim();
             const password = document.getElementById('password').value;
 
-            if (email.length < 3) { showFieldError('emailOrUsername', 'Enter your email'); return; }
+            if (email.length < 3) { showFieldError('emailOrUsername', 'Enter your email or username'); return; }
             if (password.length < 6) { showFieldError('password', 'Password must be at least 6 characters'); return; }
 
             const btn = document.getElementById('submitBtn');
@@ -126,9 +130,9 @@
             try {
                 await signInWithEmail(email, password);
                 showAlert('Login successful! Redirecting…', 'success');
-                setTimeout(() => window.location.href = '/', 1200);
+                setTimeout(() => window.location.href = safeNextUrl, 1200);
             } catch (err) {
-                showAlert(getErrorMessage(err.code), 'error');
+                showAlert(getErrorMessage(err.code || err.message), 'error');
                 btn.disabled = false; btn.textContent = 'Sign In';
             }
         });

@@ -141,7 +141,7 @@
                 showAlert('Account ready! Redirecting…', 'success');
                 setTimeout(() => window.location.href = safeNextUrl, 1200);
             } catch (err) {
-                showAlert(getErrorMessage(err.code), 'error');
+                showAlert(getErrorMessage(err.code || err.message), 'error');
             }
         });
 
@@ -211,7 +211,7 @@
                 btn.textContent = 'Account Created ✓';
                 setTimeout(() => window.location.href = safeNextUrl, 2000);
             } catch (err) {
-                showAlert(getErrorMessage(err.code), 'error');
+                showAlert(getErrorMessage(err.code || err.message), 'error');
                 btn.disabled = false; btn.textContent = 'Create Account';
             }
         });
