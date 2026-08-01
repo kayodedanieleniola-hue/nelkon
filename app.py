@@ -41,6 +41,17 @@ ADMIN_TEAM = [
     {"id": "marcus-tetteh", "email": "marcus@nakconel.com", "name": "Marcus Tetteh", "role": "DevOps Specialist"},
 ]
 
+# Admin Portal Credentials (username: password)
+ADMIN_CREDENTIALS = {
+    "samuel-akinomolafe": "AdminPass1!Samuel",
+    "oreoluwa-farodoye": "AdminPass2!Oreoluwa",
+    "kayode-daniel": "AdminPass3!Kayode",
+    "segun": "AdminPass4!Segun",
+    "samuel-design": "AdminPass5!Samuel",
+    "wonuola": "AdminPass6!Wonuola",
+    "marcus-tetteh": "AdminPass7!Marcus",
+}
+
 
 def get_admin_emails():
     emails = set()
@@ -515,9 +526,42 @@ def register_page():
 def account_page():
     return render_template("account.html")
 
+@app.route("/admin-login")
+def admin_login_page():
+    return render_template("admin-login.html")
+
 @app.route("/admin")
 def admin_page():
     return render_template("admin.html", admin_team=ADMIN_TEAM)
+
+@app.route("/api/admin-login", methods=["POST"])
+def api_admin_login():
+    """Admin portal login with username/password."""
+    try:
+        data = request.get_json() or {}
+        username = (data.get("username") or "").strip()
+        password = (data.get("password") or "").strip()
+
+        if not username or not password:
+            return jsonify({"error": "Username and password required"}), 400
+
+        # Check credentials
+        if username not in ADMIN_CREDENTIALS or ADMIN_CREDENTIALS[username] != password:
+            return jsonify({"error": "Invalid username or password"}), 401
+
+        # Generate a simple token (in production, use JWT)
+        import hashlib
+        token = hashlib.sha256(f"{username}{password}{time.time()}".encode()).hexdigest()
+        
+        # Store token in session or return it for client-side storage
+        return jsonify({
+            "token": token,
+            "username": username,
+            "message": "Login successful"
+        }), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 @app.route("/api/admin/me", methods=["GET"])
 @require_admin
