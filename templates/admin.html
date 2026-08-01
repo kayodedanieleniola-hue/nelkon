@@ -14,7 +14,8 @@
 .gate{max-width:520px;margin:90px auto;border:1px solid var(--border);background:var(--card);border-radius:12px;padding:34px;text-align:center}.gate h1{font-family:'Poppins',sans-serif;font-weight:800;margin-bottom:10px}.gate p{color:var(--muted);line-height:1.7;margin-bottom:22px}.error{display:none;color:var(--bad);background:rgba(232,160,160,.1);border:1px solid rgba(232,160,160,.22);border-radius:8px;padding:12px;margin-top:14px;font-size:13px}.error.show{display:block}
 .dashboard{display:none}.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:22px}.card{border:1px solid var(--border);background:var(--card);border-radius:10px;padding:20px}.card small{display:block;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:1px}.card b{display:block;font-family:'Poppins',sans-serif;font-weight:800;font-size:30px;margin-top:8px;color:var(--bronze-light)}
 .grid{display:grid;grid-template-columns:2fr 1fr;gap:18px}.panel{border:1px solid var(--border);background:rgba(10,2,2,.34);border-radius:10px;overflow:hidden}.panel-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px 20px;border-bottom:1px solid var(--border)}.panel-head h2{font-size:17px}.panel-head span{color:var(--muted);font-size:12px}.table-wrap{overflow:auto}.data-table{width:100%;border-collapse:collapse;min-width:760px}.data-table th,.data-table td{padding:14px 16px;border-bottom:1px solid rgba(201,154,74,.1);text-align:left;font-size:13px;vertical-align:top}.data-table th{color:var(--bronze-light);font-size:11px;text-transform:uppercase;letter-spacing:1px;background:rgba(201,154,74,.04)}.data-table td{color:var(--cream)}.muted{color:var(--muted)}.chip{display:inline-flex;border:1px solid rgba(201,154,74,.28);background:rgba(201,154,74,.08);color:var(--bronze-light);padding:4px 8px;border-radius:999px;font-size:11px}
-.side-stack{display:flex;flex-direction:column;gap:18px}.team-list,.user-list{display:flex;flex-direction:column}.team-row,.user-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 16px;border-bottom:1px solid rgba(201,154,74,.1)}.team-row:last-child,.user-row:last-child{border-bottom:0}.team-row strong,.user-row strong{font-size:13px}.team-row span,.user-row span{font-size:12px;color:var(--muted)}.chat-placeholder{padding:22px}.chat-placeholder p{color:var(--muted);font-size:13px;line-height:1.7;margin-top:8px}
+.side-stack{display:flex;flex-direction:column;gap:18px}.team-list,.user-list{display:flex;flex-direction:column}.team-row,.user-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 16px;border-bottom:1px solid rgba(201,154,74,.1)}.team-row:last-child,.user-row:last-child{border-bottom:0}.team-row strong,.user-row strong{font-size:13px}.team-row span,.user-row span{font-size:12px;color:var(--muted)}
+.admin-chat{display:grid;grid-template-columns:1fr;min-height:420px}.chat-list{max-height:260px;overflow:auto;border-bottom:1px solid var(--border)}.chat-row{padding:13px 16px;border-bottom:1px solid rgba(201,154,74,.1);cursor:pointer}.chat-row:hover,.chat-row.active{background:rgba(201,154,74,.08)}.chat-row strong{display:block;font-size:13px}.chat-row span{display:block;color:var(--muted);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.chat-thread{display:flex;flex-direction:column;min-height:280px}.chat-messages{flex:1;overflow:auto;padding:14px;display:flex;flex-direction:column;gap:8px;max-height:330px}.chat-msg{max-width:82%;padding:9px 11px;border-radius:12px;font-size:13px;line-height:1.5;white-space:pre-wrap}.chat-msg.visitor{align-self:flex-start;background:rgba(255,255,255,.06);border:1px solid var(--border);border-bottom-left-radius:4px}.chat-msg.team{align-self:flex-end;background:linear-gradient(135deg,var(--bronze),var(--bronze-dim));color:var(--wine-deep);border-bottom-right-radius:4px}.chat-msg small{display:block;font-size:10px;opacity:.68;margin-top:4px}.chat-reply{display:flex;gap:8px;padding:12px;border-top:1px solid var(--border)}.chat-reply textarea{flex:1;resize:none;min-height:42px;max-height:110px;border:1px solid var(--border);background:rgba(10,2,2,.58);color:var(--white);border-radius:8px;padding:10px;outline:none}.chat-empty{padding:18px;color:var(--muted);font-size:13px;line-height:1.7}
 @media(max-width:980px){.cards{grid-template-columns:1fr 1fr}.grid{grid-template-columns:1fr}.hero{display:block}.nav-actions{flex-wrap:wrap;justify-content:flex-end}}@media(max-width:560px){.cards{grid-template-columns:1fr}.topbar-in{height:auto;padding:12px 18px;align-items:flex-start}.brand img{height:46px}.page{padding:28px 16px 60px}}
 </style>
 </head>
@@ -82,10 +83,16 @@
         </section>
 
         <section class="panel">
-          <div class="panel-head"><h2>Admin Chat</h2><span>Coming next</span></div>
-          <div class="chat-placeholder">
-            <strong>Chat area reserved</strong>
-            <p>This section is ready for the admin chat design once you show me the chat side. We can connect live team conversations, campaign follow-ups, or support inboxes here.</p>
+          <div class="panel-head"><h2>Admin Chat</h2><span id="chatMeta">Team inbox</span></div>
+          <div class="admin-chat">
+            <div class="chat-list" id="chatRows"><div class="chat-empty">Loading conversations...</div></div>
+            <div class="chat-thread">
+              <div class="chat-messages" id="chatMessages"><div class="chat-empty">Select a conversation to reply.</div></div>
+              <form class="chat-reply" id="chatReplyForm">
+                <textarea id="chatReplyInput" placeholder="Reply to visitor..." disabled></textarea>
+                <button class="btn primary" type="submit" id="chatReplyBtn" disabled>Send</button>
+              </form>
+            </div>
           </div>
         </section>
       </aside>
@@ -99,6 +106,8 @@ import { auth, onAuthStateChanged, nakSignOut } from '/static/js/nak-auth.js';
 const gate = document.getElementById('gate');
 const dashboard = document.getElementById('dashboard');
 const gateError = document.getElementById('gateError');
+let activeChatId = null;
+let chatPollTimer = null;
 
 function fmtNgn(value){ return Number(value || 0).toLocaleString('en-NG'); }
 function fmtDate(value){
@@ -109,11 +118,16 @@ function fmtDate(value){
 function esc(value){
   return String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 }
-async function adminFetch(url){
+async function adminFetch(url, options = {}){
   const user = auth.currentUser;
   if(!user) throw new Error('Please sign in first.');
   const token = await user.getIdToken();
-  const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+  const headers = {
+    'Content-Type': 'application/json',
+    ...(options.headers || {}),
+    Authorization: `Bearer ${token}`
+  };
+  const res = await fetch(url, {...options, headers});
   const data = await res.json();
   if(!res.ok) throw new Error(data.error || 'Admin request failed.');
   return data;
@@ -123,6 +137,42 @@ function showError(message){
   dashboard.style.display = 'none';
   gateError.textContent = message;
   gateError.classList.add('show');
+}
+function fmtChatTime(value){
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? '' : date.toLocaleString();
+}
+async function loadAdminChats(){
+  const data = await adminFetch('/api/admin/chat/conversations');
+  const rows = data.conversations || [];
+  document.getElementById('chatMeta').textContent = `${rows.length} conversations`;
+  const list = document.getElementById('chatRows');
+  list.innerHTML = rows.length ? rows.map(item => `
+    <div class="chat-row ${item.id === activeChatId ? 'active' : ''}" data-id="${esc(item.id)}">
+      <strong>${esc(item.visitorName || item.visitorEmail || 'Website visitor')}</strong>
+      <span>${esc(item.teamMemberName || 'Team')} - ${esc(item.lastMessage || 'No messages yet')}</span>
+    </div>
+  `).join('') : '<div class="chat-empty">No team conversations yet.</div>';
+  list.querySelectorAll('.chat-row').forEach(row => row.addEventListener('click', () => openAdminChat(row.dataset.id)));
+}
+async function openAdminChat(id){
+  activeChatId = id;
+  await loadAdminChats();
+  document.getElementById('chatReplyInput').disabled = false;
+  document.getElementById('chatReplyBtn').disabled = false;
+  await loadAdminChatMessages();
+  clearInterval(chatPollTimer);
+  chatPollTimer = setInterval(loadAdminChatMessages, 4500);
+}
+async function loadAdminChatMessages(){
+  if(!activeChatId) return;
+  const data = await adminFetch(`/api/admin/chat/conversations/${encodeURIComponent(activeChatId)}/messages`);
+  const messages = data.messages || [];
+  document.getElementById('chatMessages').innerHTML = messages.length ? messages.map(msg => `
+    <div class="chat-msg ${msg.sender === 'team' ? 'team' : 'visitor'}">${esc(msg.text || '')}<small>${esc(msg.senderName || '')} ${esc(fmtChatTime(msg.time))}</small></div>
+  `).join('') : '<div class="chat-empty">No messages yet.</div>';
+  const box = document.getElementById('chatMessages');
+  box.scrollTop = box.scrollHeight;
 }
 async function loadAdmin(){
   try{
@@ -162,6 +212,8 @@ async function loadAdmin(){
     document.getElementById('userRows').innerHTML = userRows.length ? userRows.slice(0, 8).map(user => (
       `<div class="user-row"><div><strong>${esc(user.username || user.email || 'Unknown')}</strong><br><span>${esc(user.email || user.uid)}</span></div></div>`
     )).join('') : '<div class="user-row"><span>No users yet.</span></div>';
+
+    await loadAdminChats();
   }catch(err){
     showError(err.message);
   }
@@ -175,6 +227,24 @@ onAuthStateChanged(auth, user => {
   loadAdmin();
 });
 document.getElementById('refreshBtn').addEventListener('click', loadAdmin);
+document.getElementById('chatReplyForm').addEventListener('submit', async event => {
+  event.preventDefault();
+  const input = document.getElementById('chatReplyInput');
+  const text = input.value.trim();
+  if(!text || !activeChatId) return;
+  input.value = '';
+  try{
+    await adminFetch(`/api/admin/chat/conversations/${encodeURIComponent(activeChatId)}/messages`, {
+      method: 'POST',
+      body: JSON.stringify({text})
+    });
+    await loadAdminChatMessages();
+    await loadAdminChats();
+  }catch(err){
+    input.value = text;
+    showError(err.message);
+  }
+});
 document.getElementById('signOutBtn').addEventListener('click', async () => {
   await nakSignOut();
   window.location.href = '/login';

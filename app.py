@@ -32,13 +32,13 @@ AI_SUBSCRIPTION_PLANS = {
     "yearly": {"name": "Yearly", "amount": 70000, "days": 365},
 }
 ADMIN_TEAM = [
-    {"name": "Samuel Akinomolafe", "role": "Founder"},
-    {"name": "Oreoluwa Farodoye A", "role": "Project Manager - Nakconel"},
-    {"name": "Kayode Daniel E", "role": "Full-Stack Developer"},
-    {"name": "Segun", "role": "Content Designer"},
-    {"name": "Samuel", "role": "Content and Graphics Designer"},
-    {"name": "Wonuola", "role": "Intern-Content Design"},
-    {"name": "Marcus Tetteh", "role": "DevOps Specialist"},
+    {"id": "samuel-akinomolafe", "email": "samuel.akinomolafe@nakconel.com", "name": "Samuel Akinomolafe", "role": "Founder"},
+    {"id": "oreoluwa-farodoye", "email": "oreoluwa@nakconel.com", "name": "Oreoluwa Farodoye A", "role": "Project Manager - Nakconel"},
+    {"id": "kayode-daniel", "email": "kayode@nakconel.com", "name": "Kayode Daniel E", "role": "Full-Stack Developer"},
+    {"id": "segun", "email": "segun@nakconel.com", "name": "Segun", "role": "Content Designer"},
+    {"id": "samuel-design", "email": "samuel.d@nakconel.com", "name": "Samuel", "role": "Content and Graphics Designer"},
+    {"id": "wonuola", "email": "wonuola@nakconel.com", "name": "Wonuola", "role": "Intern-Content Design"},
+    {"id": "marcus-tetteh", "email": "marcus@nakconel.com", "name": "Marcus Tetteh", "role": "DevOps Specialist"},
 ]
 
 
@@ -50,6 +50,13 @@ def get_admin_emails():
 def is_admin_user(user):
     email = (user or {}).get("email", "").strip().lower()
     return bool(email and email in get_admin_emails())
+
+
+def get_team_member(member_id):
+    for member in ADMIN_TEAM:
+        if member["id"] == member_id:
+            return member
+    return None
 
 
 def require_admin(f):
@@ -467,6 +474,10 @@ def meet_the_team():
 def ai_chat():
     return render_template("ai-chat.html")
 
+@app.route("/chat")
+def team_chat():
+    return render_template("team-chat.html", admin_team=ADMIN_TEAM)
+
 @app.route("/campaign")
 def campaign():
     return render_template("campaign.html")
@@ -547,6 +558,195 @@ def json_safe(value):
     if isinstance(value, list):
         return [json_safe(item) for item in value]
     return value
+
+
+def conversation_id_for(uid, team_member_id):
+    cleaned_uid = re.sub(r"[^a-zA-Z0-9_\-]", "", str(uid or ""))[:80]
+    cleaned_member = re.sub(r"[^a-zA-Z0-9_\-]", "", str(team_member_id or ""))[:80]
+    return f"{cleaned_uid}__{cleaned_member}"
+
+
+def get_chat_message_payload(data, max_len=1200):
+    text = str((data or {}).get("text", "")).strip()
+    return text[:max_len]
+
+
+@app.route("/api/chat/team", methods=["GET"])
+def chat_team():
+    return jsonify({"team": ADMIN_TEAM})
+
+
+@app.route("/api/chat/conversations", methods=["GET"])
+@require_strict_auth
+def visitor_conversations():
+    user = request._user
+    try:
+        db = get_firestore_client()
+        docs = db.collection("teamConversations").where("visitorId", "==", user["uid"]).stream()
+        conversations = [json_safe({"id": doc.id, **doc.to_dict()}) for doc in docs]
+    except Exception as exc:
+        return jsonify({"error": str(exc)}), 500
+
+    conversations.sort(key=lambda item: item.get("lastUpdated", ""), reverse=True)
+    return jsonify({"conversations": conversations})
+
+
+@app.route("/api/chat/conversations", methods=["POST"])
+@require_strict_auth
+def start_visitor_conversation():
+    data = request.get_json(silent=True) or {}
+    member_id = str(data.get("teamMemberId", "")).strip()
+    member = get_team_member(member_id)
+    if not member:
+        return jsonify({"error": "Team member was not found."}), 404
+
+    user = request._user
+    conversation_id = conversation_id_for(user["uid"], member_id)
+    visitor_name = str(data.get("visitorName") or user.get("email") or "Website visitor").strip()[:80]
+    now = datetime.now(timezone.utc).isoformat()
+    conversation = {
+        "visitorId": user["uid"],
+        "visitorEmail": user.get("email"),
+        "visitorName": visitor_name,
+        "teamMemberId": member["id"],
+        "teamMemberName": member["name"],
+        "teamMemberRole": member["role"],
+        "status": "open",
+        "lastMessage": "",
+        "lastSender": "",
+        "lastUpdated": now,
+        "createdAt": now
+    }
+
+    try:
+        db = get_firestore_client()
+        doc_ref = db.collection("teamConversations").document(conversation_id)
+        existing = doc_ref.get()
+        if existing.exists:
+            doc_ref.set({
+                "visitorName": visitor_name,
+                "visitorEmail": user.get("email"),
+                "teamMemberName": member["name"],
+                "teamMemberRole": member["role"],
+                "lastUpdated": now
+            }, merge=True)
+            conversation = {"id": conversation_id, **existing.to_dict(), **conversation}
+        else:
+            doc_ref.set(conversation)
+            conversation["id"] = conversation_id
+    except Exception as exc:
+        return jsonify({"error": str(exc)}), 500
+
+    return jsonify({"conversation": json_safe(conversation)})
+
+
+@app.route("/api/chat/conversations/<conversation_id>/messages", methods=["GET"])
+@require_strict_auth
+def visitor_messages(conversation_id):
+    user = request._user
+    try:
+        db = get_firestore_client()
+        conv = db.collection("teamConversations").document(conversation_id).get()
+        if not conv.exists or conv.to_dict().get("visitorId") != user["uid"]:
+            return jsonify({"error": "Conversation was not found."}), 404
+        docs = db.collection("teamConversations").document(conversation_id).collection("messages").stream()
+        messages = [json_safe({"id": doc.id, **doc.to_dict()}) for doc in docs]
+    except Exception as exc:
+        return jsonify({"error": str(exc)}), 500
+
+    messages.sort(key=lambda item: item.get("time", ""))
+    return jsonify({"messages": messages})
+
+
+@app.route("/api/chat/conversations/<conversation_id>/messages", methods=["POST"])
+@require_strict_auth
+def visitor_send_message(conversation_id):
+    user = request._user
+    data = request.get_json(silent=True) or {}
+    text = get_chat_message_payload(data)
+    if not text:
+        return jsonify({"error": "Message cannot be empty."}), 400
+
+    now = datetime.now(timezone.utc).isoformat()
+    try:
+        db = get_firestore_client()
+        conv_ref = db.collection("teamConversations").document(conversation_id)
+        conv = conv_ref.get()
+        if not conv.exists or conv.to_dict().get("visitorId") != user["uid"]:
+            return jsonify({"error": "Conversation was not found."}), 404
+        msg_ref = conv_ref.collection("messages").document()
+        msg_ref.set({
+            "sender": "visitor",
+            "senderName": data.get("visitorName") or user.get("email") or "Website visitor",
+            "text": text,
+            "time": now
+        })
+        conv_ref.set({"lastMessage": text, "lastSender": "visitor", "lastUpdated": now, "status": "open"}, merge=True)
+    except Exception as exc:
+        return jsonify({"error": str(exc)}), 500
+
+    return jsonify({"sent": True, "message": {"id": msg_ref.id, "sender": "visitor", "text": text, "time": now}})
+
+
+@app.route("/api/admin/chat/conversations", methods=["GET"])
+@require_admin
+def admin_chat_conversations():
+    try:
+        db = get_firestore_client()
+        docs = db.collection("teamConversations").stream()
+        conversations = [json_safe({"id": doc.id, **doc.to_dict()}) for doc in docs]
+    except Exception as exc:
+        return jsonify({"error": str(exc)}), 500
+
+    conversations.sort(key=lambda item: item.get("lastUpdated", ""), reverse=True)
+    return jsonify({"conversations": conversations})
+
+
+@app.route("/api/admin/chat/conversations/<conversation_id>/messages", methods=["GET"])
+@require_admin
+def admin_chat_messages(conversation_id):
+    try:
+        db = get_firestore_client()
+        conv = db.collection("teamConversations").document(conversation_id).get()
+        if not conv.exists:
+            return jsonify({"error": "Conversation was not found."}), 404
+        docs = db.collection("teamConversations").document(conversation_id).collection("messages").stream()
+        messages = [json_safe({"id": doc.id, **doc.to_dict()}) for doc in docs]
+    except Exception as exc:
+        return jsonify({"error": str(exc)}), 500
+
+    messages.sort(key=lambda item: item.get("time", ""))
+    return jsonify({"messages": messages, "conversation": json_safe({"id": conv.id, **conv.to_dict()})})
+
+
+@app.route("/api/admin/chat/conversations/<conversation_id>/messages", methods=["POST"])
+@require_admin
+def admin_send_chat_message(conversation_id):
+    data = request.get_json(silent=True) or {}
+    text = get_chat_message_payload(data)
+    if not text:
+        return jsonify({"error": "Message cannot be empty."}), 400
+
+    admin_user = request._user
+    now = datetime.now(timezone.utc).isoformat()
+    try:
+        db = get_firestore_client()
+        conv_ref = db.collection("teamConversations").document(conversation_id)
+        conv = conv_ref.get()
+        if not conv.exists:
+            return jsonify({"error": "Conversation was not found."}), 404
+        msg_ref = conv_ref.collection("messages").document()
+        msg_ref.set({
+            "sender": "team",
+            "senderName": admin_user.get("email") or "Nakconel Team",
+            "text": text,
+            "time": now
+        })
+        conv_ref.set({"lastMessage": text, "lastSender": "team", "lastUpdated": now, "status": "open"}, merge=True)
+    except Exception as exc:
+        return jsonify({"error": str(exc)}), 500
+
+    return jsonify({"sent": True, "message": {"id": msg_ref.id, "sender": "team", "text": text, "time": now}})
 
 
 @app.route("/api/admin/campaign-registrations", methods=["GET"])
