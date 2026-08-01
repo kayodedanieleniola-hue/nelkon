@@ -538,6 +538,17 @@ def admin_summary():
         "adminTeam": ADMIN_TEAM
     })
 
+
+def json_safe(value):
+    if hasattr(value, "isoformat"):
+        return value.isoformat()
+    if isinstance(value, dict):
+        return {key: json_safe(item) for key, item in value.items()}
+    if isinstance(value, list):
+        return [json_safe(item) for item in value]
+    return value
+
+
 @app.route("/api/admin/campaign-registrations", methods=["GET"])
 @require_admin
 def admin_campaign_registrations():
@@ -548,7 +559,7 @@ def admin_campaign_registrations():
         for doc in docs:
             data = doc.to_dict()
             data["id"] = doc.id
-            registrations.append(data)
+            registrations.append(json_safe(data))
     except Exception as exc:
         return jsonify({"error": str(exc)}), 500
 
@@ -569,8 +580,8 @@ def admin_users():
                 "username": data.get("username"),
                 "email": data.get("email"),
                 "photoURL": data.get("photoURL"),
-                "createdAt": data.get("createdAt"),
-                "updatedAt": data.get("updatedAt")
+                "createdAt": json_safe(data.get("createdAt")),
+                "updatedAt": json_safe(data.get("updatedAt"))
             })
     except Exception as exc:
         return jsonify({"error": str(exc)}), 500
