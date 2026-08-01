@@ -69,7 +69,8 @@ def require_admin(f):
         if not user:
             return jsonify({"error": "Authentication required"}), 401
         if not is_admin_user(user):
-            return jsonify({"error": "Admin access required"}), 403
+            email = (user or {}).get("email") or "unknown"
+            return jsonify({"error": f"Admin access required. Signed in as {email}."}), 403
         request._user = user
         return f(*args, **kwargs)
     return decorated
