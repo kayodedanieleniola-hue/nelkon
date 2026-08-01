@@ -44,7 +44,10 @@ ADMIN_TEAM = [
 
 def get_admin_emails():
     raw = os.environ.get("ADMIN_EMAILS", "")
-    return {email.strip().lower() for email in raw.split(",") if email.strip()}
+    emails = {email.strip().lower() for email in raw.split(",") if email.strip()}
+    if not emails:
+        emails = {member["email"].strip().lower() for member in ADMIN_TEAM if member.get("email")}
+    return emails
 
 
 def is_admin_user(user):
