@@ -52,8 +52,6 @@ def get_admin_emails():
     raw = os.environ.get("ADMIN_EMAILS", "")
     emails.update(email.strip().lower() for email in raw.split(",") if email.strip())
 
-    if not emails:
-        emails = {member["email"].strip().lower() for member in ADMIN_TEAM if member.get("email")}
     return emails
 
 
