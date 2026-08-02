@@ -100,9 +100,7 @@
   </section>
 </main>
 
-<script type="module">
-import { auth, onAuthStateChanged, nakSignOut } from '/static/js/nak-auth.js';
-
+<script>
 const gate = document.getElementById('gate');
 const dashboard = document.getElementById('dashboard');
 const gateError = document.getElementById('gateError');
@@ -118,25 +116,19 @@ function fmtDate(value){
 function esc(value){
   return String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 }
+
 async function adminFetch(url, options = {}){
-  const user = auth.currentUser;
-  if(!user) throw new Error('Please sign in first.');
-  const token = await user.getIdToken();
-  const headers = {
-    'Content-Type': 'application/json',
-    ...(options.headers || {}),
-    Authorization: `Bearer ${token}`
-  };
-  const res = await fetch(url, {...options, headers});
+  const res = await fetch(url, {...options, headers: {'Content-Type': 'application/json', ...(options.headers || {})}});
   const data = await res.json();
   if(!res.ok) {
     if (res.status === 401 || res.status === 403) {
-      showError(data.error || 'Admin access required. Please sign in with an approved admin account.');
+      showError(data.error || 'Admin access required. Please sign in.');
     }
     throw new Error(data.error || 'Admin request failed.');
   }
   return data;
 }
+
 function showError(message){
   clearInterval(chatPollTimer);
   gate.style.display = 'block';
@@ -144,10 +136,12 @@ function showError(message){
   gateError.textContent = message;
   gateError.classList.add('show');
 }
+
 function fmtChatTime(value){
   const date = new Date(value);
   return Number.isNaN(date.getTime()) ? '' : date.toLocaleString();
 }
+
 async function loadAdminChats(){
   const data = await adminFetch('/api/admin/chat/conversations');
   const rows = data.conversations || [];
@@ -161,6 +155,7 @@ async function loadAdminChats(){
   `).join('') : '<div class="chat-empty">No team conversations yet.</div>';
   list.querySelectorAll('.chat-row').forEach(row => row.addEventListener('click', () => openAdminChat(row.dataset.id)));
 }
+
 async function openAdminChat(id){
   activeChatId = id;
   await loadAdminChats();
@@ -170,6 +165,7 @@ async function openAdminChat(id){
   clearInterval(chatPollTimer);
   chatPollTimer = setInterval(loadAdminChatMessages, 4500);
 }
+
 async function loadAdminChatMessages(){
   if(!activeChatId) return;
   try {
@@ -185,18 +181,20 @@ async function loadAdminChatMessages(){
     throw err;
   }
 }
+
 async function loadAdmin(){
   try{
     const me = await adminFetch('/api/admin/me');
     gate.style.display = 'none';
     dashboard.style.display = 'block';
-    document.getElementById('adminStatus').textContent = `Signed in as ${me.user.email}`;
-    document.getElementById('adminCount').textContent = me.configuredAdmins;
+    document.getElementById('adminStatus').textContent = `Signed in as ${me.name}`;
+    document.getElementById('adminCount').textContent = 7;
 
-    const [summary, registrations, users] = await Promise.all([
+    const [summary, registrations, users, chats] = await Promise.all([
       adminFetch('/api/admin/summary'),
       adminFetch('/api/admin/campaign-registrations'),
-      adminFetch('/api/admin/users')
+      adminFetch('/api/admin/users'),
+      adminFetch('/api/admin/chat/conversations')
     ]);
 
     document.getElementById('campaignCount').textContent = summary.campaignRegistrations;
@@ -224,19 +222,29 @@ async function loadAdmin(){
       `<div class="user-row"><div><strong>${esc(user.username || user.email || 'Unknown')}</strong><br><span>${esc(user.email || user.uid)}</span></div></div>`
     )).join('') : '<div class="user-row"><span>No users yet.</span></div>';
 
+    const teamData = me.team || [];
+    document.getElementById('teamMeta').textContent = `${teamData.length} people`;
+    document.getElementById('teamRows').innerHTML = teamData.length ? teamData.map(member => 
+      `<div class="team-row"><div><strong>${esc(member.name)}</strong><br><span>${esc(member.role)}</span></div><span class="chip">Admin</span></div>`
+    ).join('') : '<div class="team-row"><span>No team members.</span></div>';
+
     await loadAdminChats();
   }catch(err){
     showError(err.message);
   }
 }
 
-onAuthStateChanged(auth, user => {
-  if(!user){
-    showError('You need to sign in with an approved admin account.');
-    return;
+// Check if admin is logged in
+async function checkAdminSession(){
+  try {
+    await adminFetch('/api/admin/check-session');
+    loadAdmin();
+  } catch (err) {
+    showError('Please sign in to access the admin dashboard.');
   }
-  loadAdmin();
-});
+}
+
+checkAdminSession();
 document.getElementById('refreshBtn').addEventListener('click', loadAdmin);
 document.getElementById('chatReplyForm').addEventListener('submit', async event => {
   event.preventDefault();
@@ -256,9 +264,10 @@ document.getElementById('chatReplyForm').addEventListener('submit', async event 
     showError(err.message);
   }
 });
+
 document.getElementById('signOutBtn').addEventListener('click', async () => {
-  await nakSignOut();
-  window.location.href = '/login';
+  await adminFetch('/api/admin/sign-out', { method: 'POST' });
+  window.location.href = '/admin-login';
 });
 </script>
 </body>

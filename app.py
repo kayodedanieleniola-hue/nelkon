@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, session
 import json
 import os
 import requests
@@ -17,6 +17,7 @@ import time
 from collections import defaultdict
 
 app = Flask(__name__)
+app.secret_key = os.environ.get("SECRET_KEY", "your-secret-key-change-this-in-production")
 
 _firebase_admin_ready = False
 _firebase_public_keys = None
@@ -88,6 +89,27 @@ def require_admin(f):
             email = (user or {}).get("email") or "unknown"
             return jsonify({"error": f"Admin access required. Signed in as {email}."}), 403
         request._user = user
+        return f(*args, **kwargs)
+    return decorated
+
+
+def require_admin_session(f):
+    """Decorator to require admin login via username/password session."""
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        admin_username = session.get("admin_username")
+        if not admin_username:
+            return jsonify({"error": "Admin login required"}), 401
+        if admin_username not in ADMIN_CREDENTIALS:
+            return jsonify({"error": "Invalid admin session"}), 403
+        request._admin_username = admin_username
+        # Get admin info from ADMIN_TEAM
+        admin_info = None
+        for member in ADMIN_TEAM:
+            if member["id"] == admin_username:
+                admin_info = member
+                break
+        request._admin_info = admin_info
         return f(*args, **kwargs)
     return decorated
 
@@ -549,32 +571,71 @@ def api_admin_login():
         if username not in ADMIN_CREDENTIALS or ADMIN_CREDENTIALS[username] != password:
             return jsonify({"error": "Invalid username or password"}), 401
 
-        # Generate a simple token (in production, use JWT)
-        import hashlib
-        token = hashlib.sha256(f"{username}{password}{time.time()}".encode()).hexdigest()
+        # Set admin session
+        session["admin_username"] = username
+        session.permanent = True
         
-        # Store token in session or return it for client-side storage
+        # Find admin info
+        admin_info = None
+        for member in ADMIN_TEAM:
+            if member["id"] == username:
+                admin_info = member
+                break
+        
         return jsonify({
-            "token": token,
+            "success": True,
             "username": username,
+            "name": admin_info.get("name") if admin_info else username,
             "message": "Login successful"
         }), 200
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@app.route("/api/admin/check-session", methods=["GET"])
+def api_admin_check_session():
+    """Check if admin is logged in via session."""
+    admin_username = session.get("admin_username")
+    if not admin_username:
+        return jsonify({"loggedIn": False}), 401
+    
+    # Find admin info
+    admin_info = None
+    for member in ADMIN_TEAM:
+        if member["id"] == admin_username:
+            admin_info = member
+            break
+    
+    return jsonify({
+        "loggedIn": True,
+        "username": admin_username,
+        "name": admin_info.get("name") if admin_info else admin_username,
+        "email": admin_info.get("email") if admin_info else None,
+        "role": admin_info.get("role") if admin_info else None
+    }), 200
+
+@app.route("/api/admin/sign-out", methods=["POST"])
+def api_admin_sign_out():
+    """Sign out the admin user."""
+    session.pop("admin_username", None)
+    return jsonify({"message": "Signed out successfully"}), 200
+
 @app.route("/api/admin/me", methods=["GET"])
-@require_admin
+@require_admin_session
 def admin_me():
+    admin_info = request._admin_info or {}
     return jsonify({
         "admin": True,
-        "user": request._user,
+        "username": request._admin_username,
+        "name": admin_info.get("name"),
+        "email": admin_info.get("email"),
+        "role": admin_info.get("role"),
         "team": ADMIN_TEAM,
-        "configuredAdmins": len(get_admin_emails())
+        "configuredAdmins": len(ADMIN_TEAM)
     })
 
 @app.route("/api/admin/summary", methods=["GET"])
-@require_admin
+@require_admin_session
 def admin_summary():
     try:
         db = get_firestore_client()
@@ -742,7 +803,7 @@ def visitor_send_message(conversation_id):
 
 
 @app.route("/api/admin/chat/conversations", methods=["GET"])
-@require_admin
+@require_admin_session
 def admin_chat_conversations():
     try:
         db = get_firestore_client()
@@ -756,7 +817,7 @@ def admin_chat_conversations():
 
 
 @app.route("/api/admin/chat/conversations/<conversation_id>/messages", methods=["GET"])
-@require_admin
+@require_admin_session
 def admin_chat_messages(conversation_id):
     try:
         db = get_firestore_client()
@@ -773,14 +834,15 @@ def admin_chat_messages(conversation_id):
 
 
 @app.route("/api/admin/chat/conversations/<conversation_id>/messages", methods=["POST"])
-@require_admin
+@require_admin_session
 def admin_send_chat_message(conversation_id):
     data = request.get_json(silent=True) or {}
     text = get_chat_message_payload(data)
     if not text:
         return jsonify({"error": "Message cannot be empty."}), 400
 
-    admin_user = request._user
+    admin_info = request._admin_info or {}
+    admin_name = admin_info.get("name") or admin_info.get("email") or request._admin_username or "Nakconel Team"
     now = datetime.now(timezone.utc).isoformat()
     try:
         db = get_firestore_client()
@@ -791,7 +853,7 @@ def admin_send_chat_message(conversation_id):
         msg_ref = conv_ref.collection("messages").document()
         msg_ref.set({
             "sender": "team",
-            "senderName": admin_user.get("email") or "Nakconel Team",
+            "senderName": admin_name,
             "text": text,
             "time": now
         })
@@ -803,7 +865,7 @@ def admin_send_chat_message(conversation_id):
 
 
 @app.route("/api/admin/campaign-registrations", methods=["GET"])
-@require_admin
+@require_admin_session
 def admin_campaign_registrations():
     try:
         db = get_firestore_client()
@@ -820,7 +882,7 @@ def admin_campaign_registrations():
     return jsonify({"registrations": registrations})
 
 @app.route("/api/admin/users", methods=["GET"])
-@require_admin
+@require_admin_session
 def admin_users():
     try:
         db = get_firestore_client()

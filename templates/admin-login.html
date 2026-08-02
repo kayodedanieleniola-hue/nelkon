@@ -206,7 +206,6 @@
 
                 if (response.ok) {
                     showAlert('Login successful! Redirecting...', 'success');
-                    localStorage.setItem('admin_token', data.token);
                     setTimeout(() => {
                         window.location.href = '/admin';
                     }, 1200);
