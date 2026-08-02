@@ -69,11 +69,9 @@
 
       <aside class="side-stack">
         <section class="panel">
-          <div class="panel-head"><h2>Admin Team</h2><span>7 people</span></div>
+          <div class="panel-head"><h2>Admin Team</h2><span id="teamMeta">7 people</span></div>
           <div class="team-list" id="teamRows">
-            {% for member in admin_team %}
-            <div class="team-row"><div><strong>{{ member.name }}</strong><br><span>{{ member.role }}</span></div><span class="chip">Admin</span></div>
-            {% endfor %}
+            <div class="team-row"><span>Loading...</span></div>
           </div>
         </section>
 
