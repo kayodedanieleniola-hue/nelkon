@@ -517,6 +517,8 @@ def ai_chat():
     return render_template("ai-chat.html")
 
 @app.route("/chat")
+@app.route("/team-chat")
+@app.route("/teamchat")
 def team_chat():
     return render_template("team-chat.html", admin_team=ADMIN_TEAM)
 
@@ -641,6 +643,7 @@ def admin_summary():
         db = get_firestore_client()
         registrations = [doc.to_dict() for doc in db.collection("campaignRegistrations").stream()]
         users = [doc.to_dict() for doc in db.collection("users").stream()]
+        strategy_calls = [doc.to_dict() for doc in db.collection("strategyCalls").stream()]
     except Exception as exc:
         return jsonify({"error": str(exc)}), 500
 
@@ -658,6 +661,7 @@ def admin_summary():
     return jsonify({
         "campaignRegistrations": len(registrations),
         "registeredUsers": len(users),
+        "strategyCalls": len(strategy_calls),
         "totalRevenueNgn": total_revenue,
         "packageCounts": package_counts,
         "adminTeam": ADMIN_TEAM
@@ -778,10 +782,26 @@ def visitor_send_message(conversation_id):
     user = request._user
     data = request.get_json(silent=True) or {}
     text = get_chat_message_payload(data)
-    if not text:
-        return jsonify({"error": "Message cannot be empty."}), 400
+    attachment = data.get("attachment")
+    if not text and not attachment:
+        return jsonify({"error": "Message text or attachment is required."}), 400
 
     now = datetime.now(timezone.utc).isoformat()
+    last_msg = text if text else f"📎 {attachment.get('name', 'Attachment') if isinstance(attachment, dict) else 'Attachment'}"
+    msg_data = {
+        "sender": "visitor",
+        "senderName": data.get("visitorName") or user.get("email") or "Website visitor",
+        "text": text,
+        "time": now
+    }
+    if attachment and isinstance(attachment, dict):
+        msg_data["attachment"] = {
+            "url": str(attachment.get("url") or ""),
+            "name": str(attachment.get("name") or "File")[:100],
+            "type": str(attachment.get("type") or "file")[:50],
+            "size": attachment.get("size")
+        }
+
     try:
         db = get_firestore_client()
         conv_ref = db.collection("teamConversations").document(conversation_id)
@@ -789,17 +809,12 @@ def visitor_send_message(conversation_id):
         if not conv.exists or conv.to_dict().get("visitorId") != user["uid"]:
             return jsonify({"error": "Conversation was not found."}), 404
         msg_ref = conv_ref.collection("messages").document()
-        msg_ref.set({
-            "sender": "visitor",
-            "senderName": data.get("visitorName") or user.get("email") or "Website visitor",
-            "text": text,
-            "time": now
-        })
-        conv_ref.set({"lastMessage": text, "lastSender": "visitor", "lastUpdated": now, "status": "open"}, merge=True)
+        msg_ref.set(msg_data)
+        conv_ref.set({"lastMessage": last_msg, "lastSender": "visitor", "lastUpdated": now, "status": "open"}, merge=True)
     except Exception as exc:
         return jsonify({"error": str(exc)}), 500
 
-    return jsonify({"sent": True, "message": {"id": msg_ref.id, "sender": "visitor", "text": text, "time": now}})
+    return jsonify({"sent": True, "message": {"id": msg_ref.id, **msg_data}})
 
 
 @app.route("/api/admin/chat/conversations", methods=["GET"])
@@ -838,12 +853,28 @@ def admin_chat_messages(conversation_id):
 def admin_send_chat_message(conversation_id):
     data = request.get_json(silent=True) or {}
     text = get_chat_message_payload(data)
-    if not text:
-        return jsonify({"error": "Message cannot be empty."}), 400
+    attachment = data.get("attachment")
+    if not text and not attachment:
+        return jsonify({"error": "Message text or attachment is required."}), 400
 
     admin_info = request._admin_info or {}
     admin_name = admin_info.get("name") or admin_info.get("email") or request._admin_username or "Nakconel Team"
     now = datetime.now(timezone.utc).isoformat()
+    last_msg = text if text else f"📎 {attachment.get('name', 'Attachment') if isinstance(attachment, dict) else 'Attachment'}"
+    msg_data = {
+        "sender": "team",
+        "senderName": admin_name,
+        "text": text,
+        "time": now
+    }
+    if attachment and isinstance(attachment, dict):
+        msg_data["attachment"] = {
+            "url": str(attachment.get("url") or ""),
+            "name": str(attachment.get("name") or "File")[:100],
+            "type": str(attachment.get("type") or "file")[:50],
+            "size": attachment.get("size")
+        }
+
     try:
         db = get_firestore_client()
         conv_ref = db.collection("teamConversations").document(conversation_id)
@@ -851,17 +882,12 @@ def admin_send_chat_message(conversation_id):
         if not conv.exists:
             return jsonify({"error": "Conversation was not found."}), 404
         msg_ref = conv_ref.collection("messages").document()
-        msg_ref.set({
-            "sender": "team",
-            "senderName": admin_name,
-            "text": text,
-            "time": now
-        })
-        conv_ref.set({"lastMessage": text, "lastSender": "team", "lastUpdated": now, "status": "open"}, merge=True)
+        msg_ref.set(msg_data)
+        conv_ref.set({"lastMessage": last_msg, "lastSender": "team", "lastUpdated": now, "status": "open"}, merge=True)
     except Exception as exc:
         return jsonify({"error": str(exc)}), 500
 
-    return jsonify({"sent": True, "message": {"id": msg_ref.id, "sender": "team", "text": text, "time": now}})
+    return jsonify({"sent": True, "message": {"id": msg_ref.id, **msg_data}})
 
 
 @app.route("/api/admin/campaign-registrations", methods=["GET"])
@@ -1279,6 +1305,70 @@ def register_campaign():
         return jsonify({"saved": False, "error": str(exc)}), 500
 
     return jsonify({"saved": True, "reference": payment["reference"]})
+
+
+@app.route("/api/strategy-call", methods=["POST"])
+def submit_strategy_call():
+    data = request.get_json(silent=True) or {}
+    name = str(data.get("name") or data.get("from_name") or "").strip()
+    email = str(data.get("email") or data.get("from_email") or "").strip().lower()
+    message = str(data.get("message") or data.get("usrMsg") or "").strip()
+    phone = str(data.get("phone") or "").strip()
+
+    if not name or not email or not message:
+        return jsonify({"saved": False, "error": "Name, email, and operational focus/message are required."}), 400
+
+    now = datetime.now(timezone.utc).isoformat()
+    doc_id = f"CALL-{int(time.time()*1000)}"
+    entry = {
+        "id": doc_id,
+        "name": name[:100],
+        "email": email[:120],
+        "phone": phone[:50],
+        "message": message[:2000],
+        "status": "new",
+        "createdAt": now
+    }
+
+    try:
+        db = get_firestore_client()
+        db.collection("strategyCalls").document(doc_id).set(entry)
+    except Exception as exc:
+        return jsonify({"saved": False, "error": f"Failed to record booking: {exc}"}), 500
+
+    return jsonify({"saved": True, "id": doc_id, "message": "Strategy call request submitted successfully!"})
+
+
+@app.route("/api/admin/strategy-calls", methods=["GET"])
+@require_admin_session
+def admin_strategy_calls():
+    try:
+        db = get_firestore_client()
+        docs = db.collection("strategyCalls").stream()
+        calls = [json_safe({"id": doc.id, **doc.to_dict()}) for doc in docs]
+    except Exception as exc:
+        return jsonify({"error": str(exc)}), 500
+
+    calls.sort(key=lambda item: item.get("createdAt", ""), reverse=True)
+    return jsonify({"strategyCalls": calls})
+
+
+@app.route("/api/admin/strategy-calls/<call_id>/status", methods=["POST"])
+@require_admin_session
+def admin_update_strategy_call_status(call_id):
+    data = request.get_json(silent=True) or {}
+    new_status = str(data.get("status", "")).strip().lower()
+    if new_status not in ["new", "contacted", "completed"]:
+        return jsonify({"error": "Invalid status value."}), 400
+
+    try:
+        db = get_firestore_client()
+        doc_ref = db.collection("strategyCalls").document(call_id)
+        doc_ref.set({"status": new_status, "updatedAt": datetime.now(timezone.utc).isoformat()}, merge=True)
+    except Exception as exc:
+        return jsonify({"error": str(exc)}), 500
+
+    return jsonify({"success": True, "id": call_id, "status": new_status})
 
 
 if __name__ == "__main__":

@@ -4,25 +4,187 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Admin Dashboard - NAKCONEL</title>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 
 :root{--wine-deep:#1B0404;--wine-mid:#3D0A0A;--ground:#0A0202;--bronze:#C99A4A;--bronze-light:#E8C57A;--bronze-dim:#8B6A2E;--cream:#F5E8C7;--white:#FDFAF4;--muted:rgba(245,232,199,.58);--border:rgba(201,154,74,.16);--card:rgba(61,10,10,.48);--good:#91d99b;--bad:#e8a0a0}
 *{box-sizing:border-box;margin:0;padding:0}body{font-family:Poppins,sans-serif;background:radial-gradient(ellipse 70% 50% at 50% 25%,var(--wine-mid),transparent 72%),radial-gradient(ellipse 130% 110% at 50% 50%,var(--wine-deep),var(--ground));color:var(--white);min-height:100vh}a{color:inherit;text-decoration:none}button{font:inherit}
-.topbar{position:sticky;top:0;z-index:20;background:rgba(10,2,2,.78);backdrop-filter:blur(16px);border-bottom:1px solid var(--border)}.topbar-in{max-width:1400px;margin:0 auto;height:76px;padding:0 24px;display:flex;align-items:center;justify-content:space-between;gap:18px}.brand{display:flex;align-items:center;gap:12px}.brand img{height:56px;width:auto}.brand strong{font-family:'Poppins',sans-serif;font-weight:800;font-size:20px}.brand span{color:var(--bronze-light)}.nav-actions{display:flex;align-items:center;gap:10px}.btn{border:1px solid var(--border);background:rgba(255,255,255,.03);color:var(--cream);padding:10px 14px;border-radius:8px;cursor:pointer}.btn.primary{background:linear-gradient(135deg,var(--bronze),var(--bronze-dim));color:var(--wine-deep);border-color:transparent;font-weight:700}.btn:hover{border-color:rgba(201,154,74,.35)}
+.topbar{position:sticky;top:0;z-index:20;background:rgba(10,2,2,.78);backdrop-filter:blur(16px);border-bottom:1px solid var(--border)}.topbar-in{max-width:1400px;margin:0 auto;height:76px;padding:0 24px;display:flex;align-items:center;justify-content:space-between;gap:18px}.brand{display:flex;align-items:center;gap:12px}.brand img{height:56px;width:auto}.brand strong{font-family:'Poppins',sans-serif;font-weight:800;font-size:20px}.brand span{color:var(--bronze-light)}.nav-actions{display:flex;align-items:center;gap:10px}.btn{border:1px solid var(--border);background:rgba(255,255,255,.03);color:var(--cream);padding:10px 14px;border-radius:8px;cursor:pointer;transition:all .2s ease}.btn.primary{background:linear-gradient(135deg,var(--bronze),var(--bronze-dim));color:var(--wine-deep);border-color:transparent;font-weight:700}.btn:hover{border-color:rgba(201,154,74,.35)}
 .page{max-width:1400px;margin:0 auto;padding:36px 24px 80px}.hero{display:flex;justify-content:space-between;gap:24px;align-items:flex-end;margin-bottom:26px}.eyebrow{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--bronze-light);font-weight:700}.hero h1{font-family:'Poppins',sans-serif;font-weight:800;font-size:clamp(30px,5vw,48px);margin:8px 0}.hero p{color:var(--muted);max-width:720px;line-height:1.7}.status{font-size:13px;color:var(--muted)}
 .gate{max-width:520px;margin:90px auto;border:1px solid var(--border);background:var(--card);border-radius:12px;padding:34px;text-align:center}.gate h1{font-family:'Poppins',sans-serif;font-weight:800;margin-bottom:10px}.gate p{color:var(--muted);line-height:1.7;margin-bottom:22px}.error{display:none;color:var(--bad);background:rgba(232,160,160,.1);border:1px solid rgba(232,160,160,.22);border-radius:8px;padding:12px;margin-top:14px;font-size:13px}.error.show{display:block}
-.dashboard{display:none}.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:22px}.card{border:1px solid var(--border);background:var(--card);border-radius:10px;padding:20px}.card small{display:block;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:1px}.card b{display:block;font-family:'Poppins',sans-serif;font-weight:800;font-size:30px;margin-top:8px;color:var(--bronze-light)}
-.grid{display:grid;grid-template-columns:2fr 1fr;gap:18px}.panel{border:1px solid var(--border);background:rgba(10,2,2,.34);border-radius:10px;overflow:hidden}.panel-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px 20px;border-bottom:1px solid var(--border)}.panel-head h2{font-size:17px}.panel-head span{color:var(--muted);font-size:12px}.table-wrap{overflow:auto}.data-table{width:100%;border-collapse:collapse;min-width:760px}.data-table th,.data-table td{padding:14px 16px;border-bottom:1px solid rgba(201,154,74,.1);text-align:left;font-size:13px;vertical-align:top}.data-table th{color:var(--bronze-light);font-size:11px;text-transform:uppercase;letter-spacing:1px;background:rgba(201,154,74,.04)}.data-table td{color:var(--cream)}.muted{color:var(--muted)}.chip{display:inline-flex;border:1px solid rgba(201,154,74,.28);background:rgba(201,154,74,.08);color:var(--bronze-light);padding:4px 8px;border-radius:999px;font-size:11px}
+.dashboard{display:none}.cards{display:grid;grid-template-columns:repeat(5,1fr);gap:16px;margin-bottom:26px}.card{border:1px solid var(--border);background:var(--card);border-radius:10px;padding:20px}.card small{display:block;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:1px}.card b{display:block;font-family:'Poppins',sans-serif;font-weight:800;font-size:28px;margin-top:8px;color:var(--bronze-light)}
+.grid{display:grid;grid-template-columns:2fr 1fr;gap:18px}.panel{border:1px solid var(--border);background:rgba(10,2,2,.34);border-radius:10px;overflow:hidden;margin-bottom:18px}.panel-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px 20px;border-bottom:1px solid var(--border)}.panel-head h2{font-size:17px}.panel-head span{color:var(--muted);font-size:12px}.table-wrap{overflow:auto}.data-table{width:100%;border-collapse:collapse;min-width:760px}.data-table th,.data-table td{padding:14px 16px;border-bottom:1px solid rgba(201,154,74,.1);text-align:left;font-size:13px;vertical-align:top}.data-table th{color:var(--bronze-light);font-size:11px;text-transform:uppercase;letter-spacing:1px;background:rgba(201,154,74,.04)}.data-table td{color:var(--cream)}.muted{color:var(--muted)}.chip{display:inline-flex;border:1px solid rgba(201,154,74,.28);background:rgba(201,154,74,.08);color:var(--bronze-light);padding:4px 8px;border-radius:999px;font-size:11px}
 .side-stack{display:flex;flex-direction:column;gap:18px}.team-list,.user-list{display:flex;flex-direction:column}.team-row,.user-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 16px;border-bottom:1px solid rgba(201,154,74,.1)}.team-row:last-child,.user-row:last-child{border-bottom:0}.team-row strong,.user-row strong{font-size:13px}.team-row span,.user-row span{font-size:12px;color:var(--muted)}
-.admin-chat{display:grid;grid-template-columns:1fr;min-height:420px}.chat-list{max-height:260px;overflow:auto;border-bottom:1px solid var(--border)}.chat-row{padding:13px 16px;border-bottom:1px solid rgba(201,154,74,.1);cursor:pointer}.chat-row:hover,.chat-row.active{background:rgba(201,154,74,.08)}.chat-row strong{display:block;font-size:13px}.chat-row span{display:block;color:var(--muted);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.chat-thread{display:flex;flex-direction:column;min-height:280px}.chat-messages{flex:1;overflow:auto;padding:14px;display:flex;flex-direction:column;gap:8px;max-height:330px}.chat-msg{max-width:82%;padding:9px 11px;border-radius:12px;font-size:13px;line-height:1.5;white-space:pre-wrap}.chat-msg.visitor{align-self:flex-start;background:rgba(255,255,255,.06);border:1px solid var(--border);border-bottom-left-radius:4px}.chat-msg.team{align-self:flex-end;background:linear-gradient(135deg,var(--bronze),var(--bronze-dim));color:var(--wine-deep);border-bottom-right-radius:4px}.chat-msg small{display:block;font-size:10px;opacity:.68;margin-top:4px}.chat-reply{display:flex;gap:8px;padding:12px;border-top:1px solid var(--border)}.chat-reply textarea{flex:1;resize:none;min-height:42px;max-height:110px;border:1px solid var(--border);background:rgba(10,2,2,.58);color:var(--white);border-radius:8px;padding:10px;outline:none}.chat-empty{padding:18px;color:var(--muted);font-size:13px;line-height:1.7}
-@media(max-width:980px){.cards{grid-template-columns:1fr 1fr}.grid{grid-template-columns:1fr}.hero{display:block}.nav-actions{flex-wrap:wrap;justify-content:flex-end}}@media(max-width:560px){.cards{grid-template-columns:1fr}.topbar-in{height:auto;padding:12px 18px;align-items:flex-start}.brand img{height:46px}.page{padding:28px 16px 60px}}
+
+.badge-new { background: rgba(232, 160, 160, 0.18); color: #f7a3a3; border: 1px solid rgba(232, 160, 160, 0.3); padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+.badge-contacted { background: rgba(239, 210, 139, 0.18); color: #efd28b; border: 1px solid rgba(239, 210, 139, 0.3); padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+.badge-completed { background: rgba(145, 217, 155, 0.18); color: #a3f7ad; border: 1px solid rgba(145, 217, 155, 0.3); padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+
+.admin-chat{display:flex;flex-direction:column;min-height:300px}.chat-list{max-height:360px;overflow:auto}.chat-row{padding:14px 16px;border-bottom:1px solid rgba(201,154,74,.1);cursor:pointer;transition:background .2s;display:flex;justify-content:space-between;align-items:center}.chat-row:hover,.chat-row.active{background:rgba(201,154,74,.12)}.chat-row strong{display:block;font-size:13px;color:var(--bronze-light)}.chat-row span{display:block;color:var(--muted);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:220px}.chat-empty{padding:18px;color:var(--muted);font-size:13px;line-height:1.7}
+
+/* Pop-Up Modal Overlay for Admin Chat */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  z-index: 1000;
+  background: rgba(10, 2, 2, 0.85);
+  backdrop-filter: blur(14px);
+  padding: 24px;
+  justify-content: center;
+  align-items: center;
+}
+.modal-overlay.active { display: flex; }
+.chat-modal-window {
+  width: 100%;
+  max-width: 960px;
+  height: 88vh;
+  max-height: 800px;
+  background: var(--wine-deep);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.85);
+  overflow: hidden;
+  animation: modalRise 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+}
+@keyframes modalRise { from { opacity: 0; transform: scale(0.96) translateY(20px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(61, 10, 10, 0.65);
+}
+.modal-header h3 { font-size: 18px; color: var(--bronze-light); font-weight: 700; margin: 0; }
+.modal-header p { font-size: 12px; color: var(--muted); margin-top: 3px; }
+.modal-close-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--white);
+  font-size: 20px;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: all 0.2s;
+}
+.modal-close-btn:hover { background: rgba(201, 154, 74, 0.2); border-color: var(--bronze); color: var(--bronze-light); }
+
+.modal-body-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  background: radial-gradient(ellipse at center, rgba(61, 10, 10, 0.2), transparent);
+}
+.chat-msg {
+  max-width: 78%;
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-size: 14px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.chat-msg.visitor { align-self: flex-start; background: rgba(255, 255, 255, 0.08); border: 1px solid var(--border); border-bottom-left-radius: 4px; }
+.chat-msg.team { align-self: flex-end; background: linear-gradient(135deg, var(--bronze), var(--bronze-dim)); color: var(--wine-deep); font-weight: 500; border-bottom-right-radius: 4px; }
+.chat-msg small { display: block; font-size: 11px; opacity: 0.72; margin-top: 6px; }
+
+.modal-footer-reply {
+  padding: 16px 24px;
+  border-top: 1px solid var(--border);
+  background: rgba(10, 2, 2, 0.95);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.attachment-preview-bar {
+  display: none;
+  align-items: center;
+  gap: 10px;
+  background: rgba(201, 154, 74, 0.12);
+  border: 1px solid var(--bronze);
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 12px;
+  color: var(--bronze-light);
+}
+.attachment-preview-bar.active { display: flex; }
+.attachment-preview-bar button { background: none; border: none; color: #f7a3a3; cursor: pointer; font-size: 16px; font-weight: bold; margin-left: auto; }
+
+.modal-reply-row { display: flex; gap: 12px; align-items: flex-end; }
+.modal-reply-row textarea {
+  flex: 1;
+  min-height: 48px;
+  max-height: 120px;
+  background: rgba(61, 10, 10, 0.45);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 16px;
+  color: var(--white);
+  font-family: inherit;
+  font-size: 14px;
+  resize: none;
+}
+.modal-reply-row textarea:focus { outline: none; border-color: var(--bronze); box-shadow: 0 0 0 2px rgba(201, 154, 74, 0.2); }
+
+.modal-attach-btn {
+  background: rgba(201, 154, 74, 0.12);
+  border: 1px solid var(--border);
+  color: var(--bronze-light);
+  padding: 12px 16px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  transition: all 0.2s;
+}
+.modal-attach-btn:hover { background: rgba(201, 154, 74, 0.25); border-color: var(--bronze); }
+
+.chat-attachment-img {
+  max-width: 280px;
+  max-height: 220px;
+  border-radius: 8px;
+  border: 1px solid rgba(201, 154, 74, 0.3);
+  margin-top: 8px;
+  cursor: pointer;
+  display: block;
+}
+.chat-attachment-file {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  padding: 8px 12px;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--bronze-light);
+  font-size: 13px;
+  text-decoration: none;
+}
+.chat-attachment-file:hover { background: rgba(201, 154, 74, 0.2); }
+
+@media(max-width:1100px){.cards{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:980px){.cards{grid-template-columns:1fr 1fr}.grid{grid-template-columns:1fr}.hero{display:block}.nav-actions{flex-wrap:wrap;justify-content:flex-end}}
+@media(max-width:560px){.cards{grid-template-columns:1fr}.topbar-in{height:auto;padding:12px 18px;align-items:flex-start}.brand img{height:46px}.page{padding:28px 16px 60px}}
 </style>
 </head>
 <body>
 <header class="topbar">
   <div class="topbar-in">
-    <a class="brand" href="/home"><img src="/static/image/logo.png" alt="NAKCONEL"><strong>Admin <span>Dashboard</span></strong></a>
+    <a class="brand" href="/home"><img src="/static/image/logo.png" alt="NAKCONEL"><strong>Admin <span>Control Center</span></strong></a>
     <div class="nav-actions">
       <a class="btn" href="/home">Home</a>
       <button class="btn" id="refreshBtn" type="button">Refresh</button>
@@ -34,8 +196,8 @@
 <main class="page">
   <section class="gate" id="gate">
     <h1>Admin Access</h1>
-    <p>Use your admin username and password to access the dashboard.</p>
-    <a class="btn primary" href="/admin-login">Sign In</a>
+    <p>Use your admin username and password to access the control center.</p>
+    <a class="btn primary" href="/admin-login">Sign In to Admin Portal</a>
     <div class="error" id="gateError"></div>
   </section>
 
@@ -44,30 +206,53 @@
       <div>
         <div class="eyebrow">NAKCONEL Control Center</div>
         <h1>Everything Comes Here</h1>
-        <p>Monitor campaign entries, see how many people have signed up, and keep the admin chat space ready for the next build.</p>
+        <p>Monitor campaign entries, manage strategy calls, see user growth, and reply to visitors in the high-res message portal.</p>
       </div>
       <div class="status" id="adminStatus">Loading...</div>
     </div>
 
     <div class="cards">
       <div class="card"><small>Campaign Submissions</small><b id="campaignCount">0</b></div>
+      <div class="card"><small>Strategy Call Bookings</small><b id="callsCount">0</b></div>
       <div class="card"><small>Registered Users</small><b id="userCount">0</b></div>
       <div class="card"><small>Revenue NGN</small><b id="revenueCount">0</b></div>
       <div class="card"><small>Configured Admins</small><b id="adminCount">0</b></div>
     </div>
 
     <div class="grid">
-      <section class="panel">
-        <div class="panel-head"><h2>Campaign Submissions</h2><span id="campaignMeta">Newest first</span></div>
-        <div class="table-wrap">
-          <table class="data-table">
-            <thead><tr><th>Name</th><th>Business / Challenge</th><th>Package</th><th>Payment</th><th>Date</th></tr></thead>
-            <tbody id="campaignRows"><tr><td colspan="5" class="muted">Loading submissions...</td></tr></tbody>
-          </table>
-        </div>
-      </section>
+      <div>
+        <!-- Strategy Call Bookings Panel -->
+        <section class="panel">
+          <div class="panel-head"><h2>Booked Strategy Calls</h2><span id="callsMeta">Newest first</span></div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead><tr><th>Client Name</th><th>Operational Focus / Message</th><th>Status</th><th>Date</th><th>Action</th></tr></thead>
+              <tbody id="callsRows"><tr><td colspan="5" class="muted">Loading strategy calls...</td></tr></tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Campaign Submissions Panel -->
+        <section class="panel">
+          <div class="panel-head"><h2>Campaign Submissions</h2><span id="campaignMeta">Newest first</span></div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead><tr><th>Name</th><th>Business / Challenge</th><th>Package</th><th>Payment</th><th>Date</th></tr></thead>
+              <tbody id="campaignRows"><tr><td colspan="5" class="muted">Loading submissions...</td></tr></tbody>
+            </table>
+          </div>
+        </section>
+      </div>
 
       <aside class="side-stack">
+        <!-- Admin Chat Panel -->
+        <section class="panel">
+          <div class="panel-head"><h2>Admin Chat Inbox</h2><span id="chatMeta">Click to pop up</span></div>
+          <div class="admin-chat">
+            <div class="chat-list" id="chatRows"><div class="chat-empty">Loading conversations...</div></div>
+          </div>
+        </section>
+
         <section class="panel">
           <div class="panel-head"><h2>Admin Team</h2><span id="teamMeta">7 people</span></div>
           <div class="team-list" id="teamRows">
@@ -79,31 +264,53 @@
           <div class="panel-head"><h2>Recent Signups</h2><span id="usersMeta">Firebase users</span></div>
           <div class="user-list" id="userRows"><div class="user-row"><span>Loading users...</span></div></div>
         </section>
-
-        <section class="panel">
-          <div class="panel-head"><h2>Admin Chat</h2><span id="chatMeta">Team inbox</span></div>
-          <div class="admin-chat">
-            <div class="chat-list" id="chatRows"><div class="chat-empty">Loading conversations...</div></div>
-            <div class="chat-thread">
-              <div class="chat-messages" id="chatMessages"><div class="chat-empty">Select a conversation to reply.</div></div>
-              <form class="chat-reply" id="chatReplyForm">
-                <textarea id="chatReplyInput" placeholder="Reply to visitor..." disabled></textarea>
-                <button class="btn primary" type="submit" id="chatReplyBtn" disabled>Send</button>
-              </form>
-            </div>
-          </div>
-        </section>
       </aside>
     </div>
   </section>
 </main>
 
+<!-- Large Pop-up Chat Modal Overlay -->
+<div class="modal-overlay" id="chatModalOverlay">
+  <div class="chat-modal-window">
+    <div class="modal-header">
+      <div>
+        <h3 id="modalVisitorName">Visitor Conversation</h3>
+        <p id="modalVisitorMeta">Connecting...</p>
+      </div>
+      <button class="modal-close-btn" id="modalCloseBtn" type="button" title="Close Pop-Up">✕</button>
+    </div>
+    
+    <div class="modal-body-messages" id="modalChatMessages">
+      <div class="chat-empty">Loading message transcript...</div>
+    </div>
+
+    <div class="modal-footer-reply">
+      <div class="attachment-preview-bar" id="attachmentPreviewBar">
+        <span id="attachmentPreviewText">📎 file.png</span>
+        <button type="button" id="removeAttachmentBtn">✕</button>
+      </div>
+
+      <form class="modal-reply-row" id="modalChatForm">
+        <input type="file" id="modalFileInput" style="display:none">
+        <button class="modal-attach-btn" type="button" id="modalAttachBtn">📎 Attach</button>
+        <textarea id="modalChatInput" placeholder="Type your reply here..." required></textarea>
+        <button class="btn primary" type="submit" id="modalSendBtn">Send Reply</button>
+      </form>
+    </div>
+  </div>
+</div>
+
 <script>
 const gate = document.getElementById('gate');
 const dashboard = document.getElementById('dashboard');
 const gateError = document.getElementById('gateError');
+const chatModalOverlay = document.getElementById('chatModalOverlay');
+const modalFileInput = document.getElementById('modalFileInput');
+const attachmentPreviewBar = document.getElementById('attachmentPreviewBar');
+
 let activeChatId = null;
 let chatPollTimer = null;
+let currentAttachment = null;
 
 function fmtNgn(value){ return Number(value || 0).toLocaleString('en-NG'); }
 function fmtDate(value){
@@ -143,25 +350,50 @@ function fmtChatTime(value){
 async function loadAdminChats(){
   const data = await adminFetch('/api/admin/chat/conversations');
   const rows = data.conversations || [];
-  document.getElementById('chatMeta').textContent = `${rows.length} conversations`;
+  document.getElementById('chatMeta').textContent = `${rows.length} conversations (Click to open)`;
   const list = document.getElementById('chatRows');
   list.innerHTML = rows.length ? rows.map(item => `
-    <div class="chat-row ${item.id === activeChatId ? 'active' : ''}" data-id="${esc(item.id)}">
-      <strong>${esc(item.visitorName || item.visitorEmail || 'Website visitor')}</strong>
-      <span>${esc(item.teamMemberName || 'Team')} - ${esc(item.lastMessage || 'No messages yet')}</span>
+    <div class="chat-row ${item.id === activeChatId ? 'active' : ''}" data-id="${esc(item.id)}" data-name="${esc(item.visitorName || item.visitorEmail || 'Website visitor')}" data-meta="${esc(item.visitorEmail || '')} • ${esc(item.teamMemberName || 'Team')}">
+      <div>
+        <strong>${esc(item.visitorName || item.visitorEmail || 'Website visitor')}</strong>
+        <span>${esc(item.lastMessage || 'No messages yet')}</span>
+      </div>
+      <span class="chip">Reply ↗</span>
     </div>
   `).join('') : '<div class="chat-empty">No team conversations yet.</div>';
-  list.querySelectorAll('.chat-row').forEach(row => row.addEventListener('click', () => openAdminChat(row.dataset.id)));
+  list.querySelectorAll('.chat-row').forEach(row => row.addEventListener('click', () => openAdminChatModal(row.dataset.id, row.dataset.name, row.dataset.meta)));
 }
 
-async function openAdminChat(id){
+async function openAdminChatModal(id, visitorName, visitorMeta){
   activeChatId = id;
-  await loadAdminChats();
-  document.getElementById('chatReplyInput').disabled = false;
-  document.getElementById('chatReplyBtn').disabled = false;
+  document.getElementById('modalVisitorName').textContent = visitorName || 'Visitor Conversation';
+  document.getElementById('modalVisitorMeta').textContent = visitorMeta || 'Team Inbox';
+  chatModalOverlay.classList.add('active');
+  
   await loadAdminChatMessages();
   clearInterval(chatPollTimer);
-  chatPollTimer = setInterval(loadAdminChatMessages, 4500);
+  chatPollTimer = setInterval(loadAdminChatMessages, 3500);
+}
+
+function closeAdminChatModal(){
+  chatModalOverlay.classList.remove('active');
+  clearInterval(chatPollTimer);
+  activeChatId = null;
+  clearAttachment();
+}
+
+document.getElementById('modalCloseBtn').addEventListener('click', closeAdminChatModal);
+chatModalOverlay.addEventListener('click', (e) => { if(e.target === chatModalOverlay) closeAdminChatModal(); });
+
+function renderAttachmentHTML(attachment){
+  if(!attachment || !attachment.url) return '';
+  const url = esc(attachment.url);
+  const name = esc(attachment.name || 'Attachment');
+  const type = esc(attachment.type || '');
+  if(type.startsWith('image/') || url.startsWith('data:image/')){
+    return `<a href="${url}" target="_blank"><img src="${url}" alt="${name}" class="chat-attachment-img"></a>`;
+  }
+  return `<a href="${url}" download="${name}" target="_blank" class="chat-attachment-file">📎 Download ${name}</a>`;
 }
 
 async function loadAdminChatMessages(){
@@ -169,15 +401,113 @@ async function loadAdminChatMessages(){
   try {
     const data = await adminFetch(`/api/admin/chat/conversations/${encodeURIComponent(activeChatId)}/messages`);
     const messages = data.messages || [];
-    document.getElementById('chatMessages').innerHTML = messages.length ? messages.map(msg => `
-      <div class="chat-msg ${msg.sender === 'team' ? 'team' : 'visitor'}">${esc(msg.text || '')}<small>${esc(msg.senderName || '')} ${esc(fmtChatTime(msg.time))}</small></div>
-    `).join('') : '<div class="chat-empty">No messages yet.</div>';
-    const box = document.getElementById('chatMessages');
+    document.getElementById('modalChatMessages').innerHTML = messages.length ? messages.map(msg => `
+      <div class="chat-msg ${msg.sender === 'team' ? 'team' : 'visitor'}">
+        ${esc(msg.text || '')}
+        ${renderAttachmentHTML(msg.attachment)}
+        <small>${esc(msg.senderName || '')} • ${esc(fmtChatTime(msg.time))}</small>
+      </div>
+    `).join('') : '<div class="chat-empty">No messages yet in this conversation.</div>';
+    const box = document.getElementById('modalChatMessages');
     box.scrollTop = box.scrollHeight;
   } catch (err) {
     clearInterval(chatPollTimer);
     throw err;
   }
+}
+
+// File Attachment Handler
+document.getElementById('modalAttachBtn').addEventListener('click', () => modalFileInput.click());
+modalFileInput.addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if(!file) return;
+  if(file.size > 8 * 1024 * 1024){
+    alert('File size exceeds maximum limit of 8MB.');
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = (event) => {
+    currentAttachment = {
+      url: event.target.result,
+      name: file.name,
+      type: file.type,
+      size: file.size
+    };
+    document.getElementById('attachmentPreviewText').textContent = `📎 ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+    attachmentPreviewBar.classList.add('active');
+  };
+  reader.readAsDataURL(file);
+});
+
+function clearAttachment(){
+  currentAttachment = null;
+  modalFileInput.value = '';
+  attachmentPreviewBar.classList.remove('active');
+}
+
+document.getElementById('removeAttachmentBtn').addEventListener('click', clearAttachment);
+
+document.getElementById('modalChatForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const input = document.getElementById('modalChatInput');
+  const text = input.value.trim();
+  if((!text && !currentAttachment) || !activeChatId) return;
+
+  const payload = { text };
+  if(currentAttachment) payload.attachment = currentAttachment;
+
+  input.value = '';
+  const sentAttach = currentAttachment;
+  clearAttachment();
+
+  try {
+    await adminFetch(`/api/admin/chat/conversations/${encodeURIComponent(activeChatId)}/messages`, {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    });
+    await loadAdminChatMessages();
+    await loadAdminChats();
+  } catch(err) {
+    input.value = text;
+    currentAttachment = sentAttach;
+    showError(err.message);
+  }
+});
+
+// Update Strategy Call Status
+async function updateCallStatus(callId, newStatus){
+  try {
+    await adminFetch(`/api/admin/strategy-calls/${encodeURIComponent(callId)}/status`, {
+      method: 'POST',
+      body: JSON.stringify({ status: newStatus })
+    });
+    await loadStrategyCalls();
+  } catch(err) {
+    alert(err.message || 'Status update failed.');
+  }
+}
+
+async function loadStrategyCalls(){
+  const data = await adminFetch('/api/admin/strategy-calls');
+  const rows = data.strategyCalls || [];
+  document.getElementById('callsCount').textContent = rows.length;
+  document.getElementById('callsMeta').textContent = `${rows.length} total inquiries`;
+  
+  const tbody = document.getElementById('callsRows');
+  tbody.innerHTML = rows.length ? rows.map(item => {
+    const statusClass = item.status === 'completed' ? 'badge-completed' : item.status === 'contacted' ? 'badge-contacted' : 'badge-new';
+    return `<tr>
+      <td><strong>${esc(item.name || 'Unknown')}</strong><br><span class="muted">${esc(item.email)}</span></td>
+      <td><strong>${esc(item.message || '-')}</strong></td>
+      <td><span class="${statusClass}">${esc(item.status || 'new')}</span></td>
+      <td>${esc(fmtDate(item.createdAt))}</td>
+      <td>
+        <button class="btn" style="padding:4px 8px;font-size:11px" onclick="updateCallStatus('${esc(item.id)}', '${item.status === 'new' ? 'contacted' : 'completed'}')">
+          Mark ${item.status === 'new' ? 'Contacted' : 'Completed'}
+        </button>
+      </td>
+    </tr>`;
+  }).join('') : '<tr><td colspan="5" class="muted">No strategy call bookings recorded yet.</td></tr>';
 }
 
 async function loadAdmin(){
@@ -186,18 +516,18 @@ async function loadAdmin(){
     gate.style.display = 'none';
     dashboard.style.display = 'block';
     document.getElementById('adminStatus').textContent = `Signed in as ${me.name}`;
-    document.getElementById('adminCount').textContent = 7;
+    document.getElementById('adminCount').textContent = me.configuredAdmins || 7;
 
-    const [summary, registrations, users, chats] = await Promise.all([
+    const [summary, registrations, users] = await Promise.all([
       adminFetch('/api/admin/summary'),
       adminFetch('/api/admin/campaign-registrations'),
-      adminFetch('/api/admin/users'),
-      adminFetch('/api/admin/chat/conversations')
+      adminFetch('/api/admin/users')
     ]);
 
     document.getElementById('campaignCount').textContent = summary.campaignRegistrations;
     document.getElementById('userCount').textContent = summary.registeredUsers;
     document.getElementById('revenueCount').textContent = fmtNgn(summary.totalRevenueNgn);
+    document.getElementById('callsCount').textContent = summary.strategyCalls || 0;
 
     const rows = registrations.registrations || [];
     document.getElementById('campaignMeta').textContent = `${rows.length} total`;
@@ -226,6 +556,7 @@ async function loadAdmin(){
       `<div class="team-row"><div><strong>${esc(member.name)}</strong><br><span>${esc(member.role)}</span></div><span class="chip">Admin</span></div>`
     ).join('') : '<div class="team-row"><span>No team members.</span></div>';
 
+    await loadStrategyCalls();
     await loadAdminChats();
   }catch(err){
     showError(err.message);
@@ -244,24 +575,6 @@ async function checkAdminSession(){
 
 checkAdminSession();
 document.getElementById('refreshBtn').addEventListener('click', loadAdmin);
-document.getElementById('chatReplyForm').addEventListener('submit', async event => {
-  event.preventDefault();
-  const input = document.getElementById('chatReplyInput');
-  const text = input.value.trim();
-  if(!text || !activeChatId) return;
-  input.value = '';
-  try{
-    await adminFetch(`/api/admin/chat/conversations/${encodeURIComponent(activeChatId)}/messages`, {
-      method: 'POST',
-      body: JSON.stringify({text})
-    });
-    await loadAdminChatMessages();
-    await loadAdminChats();
-  }catch(err){
-    input.value = text;
-    showError(err.message);
-  }
-});
 
 document.getElementById('signOutBtn').addEventListener('click', async () => {
   await adminFetch('/api/admin/sign-out', { method: 'POST' });

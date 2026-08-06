@@ -1002,14 +1002,35 @@ buildDots();
 window.addEventListener('resize', () => { buildDots(); goTo(0); }, {passive: true});
 
 // DISPATCH FORM ACTIONS
-document.getElementById('cForm').addEventListener('submit', e => {
+document.getElementById('cForm').addEventListener('submit', async e => {
   e.preventDefault();
   const b = document.getElementById('sendBtn');
-  b.textContent = 'Scheduling…'; b.disabled = true;
-  setTimeout(() => {
-    b.textContent = 'Call Booked ✓'; b.style.background = '#5c632f';
-    setTimeout(() => { b.textContent = 'Book Strategy Call ↗'; b.disabled = false; b.style.background = ''; e.target.reset(); }, 2500);
-  }, 1200);
+  const name = document.getElementById('usrName').value.trim();
+  const email = document.getElementById('usrEmail').value.trim();
+  const message = document.getElementById('usrMsg').value.trim();
+
+  if(!name || !email || !message) return;
+  b.textContent = 'Booking Call…'; b.disabled = true;
+
+  try {
+    const res = await fetch('/api/strategy-call', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, email, message })
+    });
+    const data = await res.json();
+    if(res.ok && data.saved) {
+      b.textContent = 'Call Booked ✓'; b.style.background = '#5c632f';
+      e.target.reset();
+      setTimeout(() => { b.textContent = 'Book Strategy Call ↗'; b.disabled = false; b.style.background = ''; }, 3000);
+    } else {
+      b.textContent = data.error || 'Failed — Try Again';
+      setTimeout(() => { b.textContent = 'Book Strategy Call ↗'; b.disabled = false; }, 3000);
+    }
+  } catch(err) {
+    b.textContent = 'Connection Error — Try Again';
+    setTimeout(() => { b.textContent = 'Book Strategy Call ↗'; b.disabled = false; }, 3000);
+  }
 });
 </script>
 </body>
