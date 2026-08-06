@@ -156,34 +156,39 @@ document.getElementById('payBtn').addEventListener('click', () => {
     return;
   }
   const payButton = document.getElementById('payBtn');
-  PaystackPop.setup({
+  const handler = PaystackPop.setup({
     key: PAYSTACK_KEY,
     email: state.user.email,
-    amount: state.package.ngn * 100,
+    amount: Math.round(Number(state.package.ngn) * 100),
     currency: 'NGN',
     ref: `NKC-${Date.now()}`,
     metadata: { custom_fields: [
-      { display_name: 'Name', variable_name: 'name', value: state.questions.fullName },
-      { display_name: 'Business', variable_name: 'business', value: state.questions.business },
-      { display_name: 'Package', variable_name: 'package', value: state.package.name }
+      { display_name: 'Name', variable_name: 'name', value: state.questions.fullName || '' },
+      { display_name: 'Business', variable_name: 'business', value: state.questions.business || '' },
+      { display_name: 'Package', variable_name: 'package', value: state.package.name || '' }
     ] },
-    callback: async response => {
+    callback: function(response) {
       payButton.disabled = true;
       payButton.textContent = 'Verifying Payment...';
-      try {
-        const verifiedPayment = await verifyPayment(response.reference);
-        await saveCampaignRegistration(verifiedPayment);
-        document.getElementById('successCopy').textContent = `Payment reference ${verifiedPayment.reference} is confirmed for ${state.package.name}.`;
-        goTo(3);
-      } catch (err) {
-        showAlert('paymentAlert', err.message || 'Payment verification failed.');
-      } finally {
-        payButton.disabled = false;
-        payButton.textContent = 'Pay With Paystack';
-      }
+      verifyPayment(response.reference)
+        .then(verifiedPayment => saveCampaignRegistration(verifiedPayment))
+        .then(() => {
+          document.getElementById('successCopy').textContent = `Payment reference ${response.reference} is confirmed for ${state.package.name}.`;
+          goTo(3);
+        })
+        .catch(err => {
+          showAlert('paymentAlert', err.message || 'Payment verification failed.');
+        })
+        .finally(() => {
+          payButton.disabled = false;
+          payButton.textContent = 'Pay With Paystack';
+        });
     },
-    onClose: () => showAlert('paymentAlert', 'Payment window closed. You can reopen Paystack when ready.')
-  }).openIframe();
+    onClose: function() {
+      showAlert('paymentAlert', 'Payment window closed. You can reopen Paystack when ready.');
+    }
+  });
+  handler.openIframe();
 });
 
 onAuthStateChanged(auth, user => {
