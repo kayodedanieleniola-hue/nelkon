@@ -18,6 +18,11 @@ from collections import defaultdict
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "your-secret-key-change-this-in-production")
+app.config["SESSION_COOKIE_SECURE"] = os.environ.get("VERCEL_ENV") == "production" or os.environ.get("FLASK_ENV") == "production"
+app.config["SESSION_COOKIE_HTTPONLY"] = True
+app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(days=7)
+app.config["SESSION_COOKIE_NAME"] = "nakconel_admin_session"
 
 _firebase_admin_ready = False
 _firebase_public_keys = None
@@ -639,13 +644,29 @@ def admin_me():
 @app.route("/api/admin/summary", methods=["GET"])
 @require_admin_session
 def admin_summary():
+    registrations = []
+    users = []
+    strategy_calls = []
+    error = None
+
     try:
         db = get_firestore_client()
-        registrations = [doc.to_dict() for doc in db.collection("campaignRegistrations").stream()]
-        users = [doc.to_dict() for doc in db.collection("users").stream()]
-        strategy_calls = [doc.to_dict() for doc in db.collection("strategyCalls").stream()]
+        try:
+            registrations = [doc.to_dict() for doc in db.collection("campaignRegistrations").stream()]
+        except Exception as exc:
+            error = f"campaignRegistrations: {exc}"
+
+        try:
+            users = [doc.to_dict() for doc in db.collection("users").stream()]
+        except Exception as exc:
+            error = f"{error}; users: {exc}" if error else f"users: {exc}"
+
+        try:
+            strategy_calls = [doc.to_dict() for doc in db.collection("strategyCalls").stream()]
+        except Exception as exc:
+            error = f"{error}; strategyCalls: {exc}" if error else f"strategyCalls: {exc}"
     except Exception as exc:
-        return jsonify({"error": str(exc)}), 500
+        return jsonify({"error": f"Firestore connection failed: {exc}"}), 500
 
     total_revenue = 0
     package_counts = {}
@@ -658,14 +679,17 @@ def admin_summary():
         except (TypeError, ValueError):
             pass
 
-    return jsonify({
+    result = {
         "campaignRegistrations": len(registrations),
         "registeredUsers": len(users),
         "strategyCalls": len(strategy_calls),
         "totalRevenueNgn": total_revenue,
         "packageCounts": package_counts,
         "adminTeam": ADMIN_TEAM
-    })
+    }
+    if error:
+        result["warning"] = error
+    return jsonify(result)
 
 
 def json_safe(value):
@@ -902,7 +926,7 @@ def admin_campaign_registrations():
             data["id"] = doc.id
             registrations.append(json_safe(data))
     except Exception as exc:
-        return jsonify({"error": str(exc)}), 500
+        return jsonify({"error": f"Failed to load campaign registrations: {exc}"}), 500
 
     registrations.sort(key=lambda item: item.get("createdAt", ""), reverse=True)
     return jsonify({"registrations": registrations})
@@ -925,7 +949,7 @@ def admin_users():
                 "updatedAt": json_safe(data.get("updatedAt"))
             })
     except Exception as exc:
-        return jsonify({"error": str(exc)}), 500
+        return jsonify({"error": f"Failed to load users: {exc}"}), 500
 
     users.sort(key=lambda item: item.get("createdAt") or item.get("updatedAt") or "", reverse=True)
     return jsonify({"users": users})
