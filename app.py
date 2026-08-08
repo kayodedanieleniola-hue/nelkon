@@ -18,7 +18,12 @@ from collections import defaultdict
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "your-secret-key-change-this-in-production")
-app.config["SESSION_COOKIE_SECURE"] = os.environ.get("VERCEL_ENV") == "production" or os.environ.get("FLASK_ENV") == "production"
+app.config["SESSION_COOKIE_SECURE"] = (
+    os.environ.get("SESSION_COOKIE_SECURE", "").lower() in {"1", "true", "yes"}
+    or os.environ.get("VERCEL_ENV") == "production"
+    or os.environ.get("FLASK_ENV") == "production"
+    or os.environ.get("RENDER", "").lower() == "true"
+)
 app.config["SESSION_COOKIE_HTTPONLY"] = True
 app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(days=7)
@@ -31,6 +36,8 @@ _RATE_LIMIT_STORE = defaultdict(list)
 FREE_DAILY_MESSAGES = int(os.environ.get("AI_FREE_DAILY_MESSAGES", "40"))
 DAILY_BOOST_MESSAGES = int(os.environ.get("AI_DAILY_BOOST_MESSAGES", "5"))
 AI_QUOTA_DB_PATH = os.environ.get("AI_QUOTA_DB_PATH", os.path.join("/tmp", "nakconel_ai_quota.sqlite3"))
+NGN_TO_USD_RATE = float(os.environ.get("NGN_TO_USD_RATE", "0.00065"))
+_NGN_USD_RATE_CACHE = {"rate": NGN_TO_USD_RATE, "fetched_at": 0}
 AI_SUBSCRIPTION_PLANS = {
     "weekly": {"name": "Weekly", "amount": 2500, "days": 7},
     "monthly": {"name": "Monthly", "amount": 7500, "days": 30},
@@ -270,6 +277,23 @@ def utc_today():
 def reset_at_iso():
     tomorrow = datetime.now(timezone.utc).date() + timedelta(days=1)
     return datetime.combine(tomorrow, datetime.min.time(), timezone.utc).isoformat()
+
+
+def get_ngn_to_usd_rate():
+    global _NGN_USD_RATE_CACHE
+    now = time.time()
+    if now - _NGN_USD_RATE_CACHE["fetched_at"] < 3600:
+        return _NGN_USD_RATE_CACHE["rate"]
+    try:
+        resp = requests.get("https://api.exchangerate-api.com/v4/latest/NGN", timeout=10)
+        if resp.ok:
+            data = resp.json()
+            rate = float(data.get("rates", {}).get("USD", NGN_TO_USD_RATE))
+            _NGN_USD_RATE_CACHE = {"rate": rate, "fetched_at": now}
+            return rate
+    except Exception:
+        pass
+    return _NGN_USD_RATE_CACHE["rate"]
 
 
 def get_active_subscription(client_key):
@@ -579,8 +603,10 @@ def api_admin_login():
             return jsonify({"error": "Invalid username or password"}), 401
 
         # Set admin session
+        session.clear()
         session["admin_username"] = username
         session.permanent = True
+        session.modified = True
         
         # Find admin info
         admin_info = None
@@ -624,7 +650,7 @@ def api_admin_check_session():
 @app.route("/api/admin/sign-out", methods=["POST"])
 def api_admin_sign_out():
     """Sign out the admin user."""
-    session.pop("admin_username", None)
+    session.clear()
     return jsonify({"message": "Signed out successfully"}), 200
 
 @app.route("/api/admin/me", methods=["GET"])
@@ -669,11 +695,17 @@ def admin_summary():
         return jsonify({"error": f"Firestore connection failed: {exc}"}), 500
 
     total_revenue = 0
+    pending_payments = 0
+    paid_registrations = 0
     package_counts = {}
     for item in registrations:
         package = item.get("package") or {}
         package_name = package.get("name") or "Unknown"
         package_counts[package_name] = package_counts.get(package_name, 0) + 1
+        if (item.get("status") or "").lower() == "pending_payment":
+            pending_payments += 1
+            continue
+        paid_registrations += 1
         try:
             total_revenue += int(package.get("ngn") or 0)
         except (TypeError, ValueError):
@@ -681,6 +713,8 @@ def admin_summary():
 
     result = {
         "campaignRegistrations": len(registrations),
+        "paidCampaignRegistrations": paid_registrations,
+        "pendingCampaignPayments": pending_payments,
         "registeredUsers": len(users),
         "strategyCalls": len(strategy_calls),
         "totalRevenueNgn": total_revenue,
@@ -1287,17 +1321,29 @@ def register_campaign():
     if not all(str(questions.get(field, "")).strip() for field in ["fullName", "business", "challenge"]):
         return jsonify({"saved": False, "error": "Campaign questions are incomplete."}), 400
 
-    if not package.get("name") or not package.get("ngn"):
+    if not package.get("name") or not (package.get("amount") or package.get("usd") or package.get("ngn")):
         return jsonify({"saved": False, "error": "Package selection is incomplete."}), 400
 
+    campaign_packages = {
+        "Brand AI Discovery Session": {"amount": 20, "currency": "USD", "ngn": 32000, "usd": 20},
+        "Brand Evolution Session": {"amount": 60, "currency": "USD", "ngn": 96000, "usd": 60},
+        "Premium Brand Transformation": {"amount": 250, "currency": "USD", "ngn": 400000, "usd": 250},
+    }
+    selected_package = campaign_packages.get(str(package["name"]))
+    if not selected_package:
+        return jsonify({"saved": False, "error": "Unknown campaign package."}), 400
+
+    package_currency = selected_package["currency"]
+    package_amount = selected_package["amount"]
     payment, payment_status = verify_paystack_reference(
         str(data.get("paymentReference", "")).strip(),
-        package.get("ngn"),
-        "NGN"
+        package_amount,
+        package_currency
     )
     if payment_status != 200:
         return jsonify({"saved": False, **payment}), payment_status
 
+    pending_id = str(data.get("pendingRegistrationId", "")).strip()
     registration = {
         "uid": str(data["uid"]),
         "email": str(data["email"]).strip().lower(),
@@ -1308,8 +1354,10 @@ def register_campaign():
         },
         "package": {
             "name": str(package["name"]),
-            "usd": package.get("usd"),
-            "ngn": int(package["ngn"]),
+            "amount": float(package_amount),
+            "currency": package_currency,
+            "ngn": selected_package["ngn"],
+            "usd": selected_package["usd"],
             "time": package.get("time")
         },
         "payment": {
@@ -1318,17 +1366,84 @@ def register_campaign():
             "currency": payment["currency"],
             "paidAt": payment["paidAt"]
         },
+        "status": "paid",
         "createdAt": datetime.now(timezone.utc).isoformat()
     }
 
     try:
         db = get_firestore_client()
-        doc_ref = db.collection("campaignRegistrations").document(payment["reference"])
+        doc_ref = db.collection("campaignRegistrations").document(pending_id or payment["reference"])
         doc_ref.set(registration, merge=True)
     except Exception as exc:
         return jsonify({"saved": False, "error": str(exc)}), 500
 
     return jsonify({"saved": True, "reference": payment["reference"]})
+
+
+@app.route("/api/campaign/pending", methods=["POST"])
+def save_pending_campaign():
+    data = request.get_json(silent=True) or {}
+    required_fields = ["uid", "email", "questions"]
+    missing_fields = [field for field in required_fields if not data.get(field)]
+    if missing_fields:
+        return jsonify({"saved": False, "error": f"Missing fields: {', '.join(missing_fields)}"}), 400
+
+    questions = data.get("questions") or {}
+    if not all(str(questions.get(field, "")).strip() for field in ["fullName", "business", "challenge"]):
+        return jsonify({"saved": False, "error": "Campaign questions are incomplete."}), 400
+
+    now = datetime.now(timezone.utc).isoformat()
+    doc_id = f"pending-{str(data['uid']).strip()}"
+    registration = {
+        "uid": str(data["uid"]),
+        "email": str(data["email"]).strip().lower(),
+        "questions": {
+            "fullName": str(questions["fullName"]).strip(),
+            "business": str(questions["business"]).strip(),
+            "challenge": str(questions["challenge"]).strip()
+        },
+        "status": "pending_payment",
+        "payment": {
+            "reference": None,
+            "amount": 0,
+            "currency": None,
+            "paidAt": None
+        },
+        "updatedAt": now
+    }
+    package = data.get("package") or {}
+    if package.get("name"):
+        campaign_packages = {
+            "Brand AI Discovery Session": {"amount": 20, "currency": "USD", "ngn": 32000, "usd": 20},
+            "Brand Evolution Session": {"amount": 60, "currency": "USD", "ngn": 96000, "usd": 60},
+            "Premium Brand Transformation": {"amount": 250, "currency": "USD", "ngn": 400000, "usd": 250},
+        }
+        selected_package = campaign_packages.get(str(package["name"]))
+        if selected_package:
+            registration["package"] = {
+                "name": str(package["name"]),
+                "amount": selected_package["amount"],
+                "currency": selected_package["currency"],
+                "ngn": selected_package["ngn"],
+                "usd": selected_package["usd"],
+                "time": package.get("time")
+            }
+
+    try:
+        db = get_firestore_client()
+        doc_ref = db.collection("campaignRegistrations").document(doc_id)
+        existing = doc_ref.get()
+        if existing.exists:
+            existing_data = existing.to_dict() or {}
+            if (existing_data.get("status") or "").lower() == "paid":
+                return jsonify({"saved": True, "id": doc_id, "status": "paid"})
+        else:
+            registration["createdAt"] = now
+        doc_ref.set(registration, merge=True)
+    except Exception as exc:
+        return jsonify({"saved": False, "error": str(exc)}), 500
+
+    return jsonify({"saved": True, "id": doc_id, "status": "pending_payment"})
 
 
 @app.route("/api/strategy-call", methods=["POST"])

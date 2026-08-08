@@ -215,7 +215,7 @@
       <div class="card"><small>Campaign Submissions</small><b id="campaignCount">0</b></div>
       <div class="card"><small>Strategy Call Bookings</small><b id="callsCount">0</b></div>
       <div class="card"><small>Registered Users</small><b id="userCount">0</b></div>
-      <div class="card"><small>Revenue NGN</small><b id="revenueCount">0</b></div>
+      <div class="card"><small>Revenue</small><b id="revenueCount">0</b></div>
       <div class="card"><small>Configured Admins</small><b id="adminCount">0</b></div>
     </div>
 
@@ -322,8 +322,130 @@ function esc(value){
   return String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 }
 
+let userCurrency = 'USD';
+let exchangeRates = null;
+
+const LOCALE_TO_CURRENCY = {
+  'en': 'USD', 'en-US': 'USD', 'en-GB': 'GBP', 'en-NG': 'NGN', 'en-ZA': 'ZAR',
+  'en-KE': 'KES', 'en-GH': 'GHS', 'en-AU': 'AUD', 'en-CA': 'CAD', 'en-IN': 'INR',
+  'en-PH': 'PHP', 'en-EG': 'EGP', 'en-DZ': 'DZD', 'en-MA': 'MAD', 'en-TZ': 'TZS',
+  'en-ET': 'ETB', 'en-RW': 'RWF', 'en-UG': 'UGX', 'en-ZW': 'ZWL', 'en-NA': 'NAD',
+  'en-BW': 'BWP', 'en-MU': 'MUR', 'en-CM': 'XAF', 'en-SN': 'XOF', 'en-CI': 'XOF',
+  'de': 'EUR', 'de-DE': 'EUR', 'de-AT': 'EUR', 'de-CH': 'CHF',
+  'fr': 'EUR', 'fr-FR': 'EUR', 'fr-CA': 'CAD', 'fr-BE': 'EUR', 'fr-CH': 'CHF',
+  'es': 'EUR', 'es-ES': 'EUR', 'es-MX': 'MXN', 'es-AR': 'ARS', 'es-CO': 'COP',
+  'it': 'EUR', 'it-IT': 'EUR', 'it-CH': 'CHF',
+  'pt': 'BRL', 'pt-BR': 'BRL', 'pt-PT': 'EUR',
+  'nl': 'EUR', 'nl-NL': 'EUR', 'nl-BE': 'EUR',
+  'ar': 'USD', 'ar-SA': 'SAR', 'ar-AE': 'AED', 'ar-EG': 'EGP', 'ar-QA': 'QAR',
+  'ar-KW': 'KWD', 'ar-BH': 'BHD', 'ar-OM': 'OMR', 'ar-JO': 'JOD', 'ar-LB': 'LBP',
+  'zh': 'CNY', 'zh-CN': 'CNY', 'zh-HK': 'HKD', 'zh-TW': 'TWD', 'zh-SG': 'SGD',
+  'ja': 'JPY', 'ja-JP': 'JPY',
+  'ko': 'KRW', 'ko-KR': 'KRW',
+  'hi': 'INR', 'hi-IN': 'INR',
+  'tr': 'TRY', 'tr-TR': 'TRY',
+  'ru': 'RUB', 'ru-RU': 'RUB',
+  'pl': 'PLN', 'pl-PL': 'PLN',
+  'th': 'THB', 'th-TH': 'THB',
+  'vi': 'VND', 'vi-VN': 'VND',
+  'id': 'IDR', 'id-ID': 'IDR',
+  'ms': 'MYR', 'ms-MY': 'MYR',
+  'tl': 'PHP', 'tl-PH': 'PHP',
+};
+
+function detectUserCurrency(){
+  try {
+    const locale = navigator.language || navigator.userLanguage || 'en';
+    const direct = LOCALE_TO_CURRENCY[locale];
+    if (direct) return direct;
+    const prefix = locale.split('-')[0];
+    const langMatch = LOCALE_TO_CURRENCY[prefix];
+    if (langMatch) return langMatch;
+    if (locale.startsWith('en')) return 'USD';
+  } catch (e) {}
+  return 'USD';
+}
+
+async function fetchExchangeRates(){
+  if (exchangeRates) return exchangeRates;
+  try {
+    const res = await fetch('https://api.exchangerate-api.com/v4/latest/NGN');
+    if (res.ok) {
+      exchangeRates = await res.json();
+      return exchangeRates;
+    }
+  } catch (e) {}
+  return null;
+}
+
+async function convertNgnToLocal(ngnAmount){
+  const rates = await fetchExchangeRates();
+  const targetCurrency = detectUserCurrency();
+  userCurrency = targetCurrency;
+  if (!rates || targetCurrency === 'NGN') {
+    return { amount: ngnAmount, currency: 'NGN', symbol: '₦' };
+  }
+  const rate = rates.rates[targetCurrency];
+  if (rate) {
+    const converted = ngnAmount * rate;
+    const symbol = getCurrencySymbol(targetCurrency);
+    return { amount: converted, currency: targetCurrency, symbol: symbol };
+  }
+  const usdAmount = ngnAmount * (rates.rates['USD'] || 0.00065);
+  return { amount: usdAmount, currency: 'USD', symbol: '$' };
+}
+
+function getCurrencySymbol(currencyCode){
+  const symbols = {
+    'USD': '$', 'EUR': '€', 'GBP': '£', 'NGN': '₦', 'ZAR': 'R', 'KES': 'KSh',
+    'GHS': 'GH₵', 'AUD': 'A$', 'CAD': 'C$', 'INR': '₹', 'PHP': '₱', 'EGP': 'E£',
+    'DZD': 'د.ج', 'MAD': 'MAD', 'TZS': 'TSh', 'ETB': 'Br', 'RWF': 'RF', 'UGX': 'USh',
+    'ZWL': 'Z$', 'NAD': 'N$', 'BWP': 'P', 'MUR': 'Rs', 'XAF': 'FCFA', 'XOF': 'CFA',
+    'CHF': 'CHF', 'MXN': 'MX$', 'ARS': 'AR$', 'COP': 'CO$', 'BRL': 'R$', 'TRY': '₺',
+    'RUB': '₽', 'PLN': 'zł', 'THB': '฿', 'VND': '₫', 'IDR': 'Rp', 'MYR': 'RM',
+    'CNY': '¥', 'HKD': 'HK$', 'TWD': 'NT$', 'SGD': 'S$', 'JPY': '¥', 'KRW': '₩',
+    'SAR': '﷼', 'AED': 'د.إ', 'QAR': '﷼', 'KWD': 'KD', 'BHD': 'BD', 'OMR': 'OMR',
+    'JOD': 'JD', 'LBP': 'L£'
+  };
+  return symbols[currencyCode] || currencyCode + ' ';
+}
+
+function fmtLocal(value){
+  if (userCurrency === 'NGN') return fmtNgn(value);
+  try {
+    return new Intl.NumberFormat(undefined, {
+      style: 'currency',
+      currency: userCurrency,
+      maximumFractionDigits: 0
+    }).format(value);
+  } catch (e) {
+    return `${getCurrencySymbol(userCurrency)}${Number(value || 0).toLocaleString()}`;
+  }
+}
+
+function fmtCampaignMoney(amount, currency){
+  const code = String(currency || '').toUpperCase();
+  const value = Number(amount || 0);
+  if (!code) return '-';
+  try {
+    return new Intl.NumberFormat(undefined, {
+      style: 'currency',
+      currency: code,
+      maximumFractionDigits: 0
+    }).format(value);
+  } catch (e) {
+    return `${code} ${value.toLocaleString()}`;
+  }
+}
+
+async function fmtNgnAsLocal(ngnValue){
+  const converted = await convertNgnToLocal(ngnValue);
+  if (converted.currency === 'NGN') return `NGN ${fmtNgn(converted.amount)}`;
+  return fmtLocal(converted.amount);
+}
+
 async function adminFetch(url, options = {}){
-  const res = await fetch(url, {...options, headers: {'Content-Type': 'application/json', ...(options.headers || {})}, credentials: 'include'});
+  const res = await fetch(url, {...options, headers: {'Content-Type': 'application/json', ...(options.headers || {})}, credentials: 'include', cache: 'no-store'});
   const data = await res.json();
   if(!res.ok) {
     if (res.status === 401 || res.status === 403) {
@@ -525,24 +647,35 @@ async function loadAdmin(){
     ]);
 
     document.getElementById('campaignCount').textContent = summary.campaignRegistrations;
+    document.getElementById('campaignCount').title = `${summary.pendingCampaignPayments || 0} pending payment / ${summary.paidCampaignRegistrations || 0} paid`;
     document.getElementById('userCount').textContent = summary.registeredUsers;
-    document.getElementById('revenueCount').textContent = fmtNgn(summary.totalRevenueNgn);
+    const revenueLocal = await fmtNgnAsLocal(summary.totalRevenueNgn);
+    document.getElementById('revenueCount').textContent = revenueLocal;
+    document.getElementById('revenueCount').title = `Approximate conversion from NGN to your local currency`;
     document.getElementById('callsCount').textContent = summary.strategyCalls || 0;
 
     const rows = registrations.registrations || [];
     document.getElementById('campaignMeta').textContent = `${rows.length} total`;
-    document.getElementById('campaignRows').innerHTML = rows.length ? rows.map(item => {
+    const campaignParts = rows.length ? await Promise.all(rows.map(async item => {
       const q = item.questions || {};
       const pkg = item.package || {};
       const pay = item.payment || {};
+      const status = (item.status || (pay.reference ? 'paid' : 'pending_payment')).toLowerCase();
+      const isPaid = status === 'paid';
+      const pkgPrice = pkg.currency ? fmtCampaignMoney(pkg.amount || pkg.usd || pkg.ngn, pkg.currency) : await fmtNgnAsLocal(pkg.ngn);
+      const payAmount = pay.amount ? Number(pay.amount) / 100 : 0;
+      const payLocal = isPaid ? fmtCampaignMoney(payAmount, pay.currency || pkg.currency) : 'Pending payment';
+      const payClass = isPaid ? 'badge-completed' : 'badge-contacted';
+      const payLabel = isPaid ? 'Paid' : 'Pending';
       return `<tr>
         <td><strong>${esc(q.fullName || item.email || 'Unknown')}</strong><br><span class="muted">${esc(item.email || '')}</span></td>
         <td><strong>${esc(q.business || '-')}</strong><br><span class="muted">${esc(q.challenge || '-')}</span></td>
-        <td><span class="chip">${esc(pkg.name || '-')}</span><br><span class="muted">NGN ${fmtNgn(pkg.ngn)}</span></td>
-        <td><strong>${esc(pay.reference || item.id || '-')}</strong><br><span class="muted">${esc(pay.currency || 'NGN')} ${fmtNgn(pay.amount ? pay.amount / 100 : pkg.ngn)}</span></td>
+        <td><span class="chip">${esc(pkg.name || 'Not selected yet')}</span><br><span class="muted">${esc(pkgPrice)}</span></td>
+        <td><span class="${payClass}">${payLabel}</span><br><strong>${esc(pay.reference || item.id || '-')}</strong><br><span class="muted">${esc(payLocal)}</span></td>
         <td>${esc(fmtDate(item.createdAt || pay.paidAt))}</td>
       </tr>`;
-    }).join('') : '<tr><td colspan="5" class="muted">No campaign submissions yet.</td></tr>';
+    })) : [];
+    document.getElementById('campaignRows').innerHTML = campaignParts.length ? campaignParts.join('') : '<tr><td colspan="5" class="muted">No campaign submissions yet.</td></tr>';
 
     const userRows = users.users || [];
     document.getElementById('usersMeta').textContent = `${userRows.length} total`;

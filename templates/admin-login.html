@@ -242,6 +242,8 @@
             try {
                 const response = await fetch('/api/admin-login', {
                     method: 'POST',
+                    credentials: 'include',
+                    cache: 'no-store',
                     headers: {
                         'Content-Type': 'application/json'
                     },

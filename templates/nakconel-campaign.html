@@ -40,11 +40,11 @@
   </section>
 
   <section class="panel" data-step="2">
-    <div class="panel-head"><div class="kicker">Step 2 / Package + Payment</div><h2>Secure Your Session</h2><p>USD package values are converted at approximately NGN 1,600 per USD and charged through Paystack in NGN.</p></div>
+    <div class="panel-head"><div class="kicker">Step 2 / Package + Payment</div><h2>Secure Your Session</h2><p>Select a package below. You will be charged in USD via Paystack. The approximate value in your local currency is shown for reference.</p></div>
     <div class="packages" id="packages">
-      <button class="pkg" type="button" data-name="Brand AI Discovery Session" data-usd="20" data-ngn="32000" data-time="30 minutes"><span class="pkg-time">30 minutes</span><h3>Brand AI Discovery</h3><p>AI tool recommendations, quick business analysis, and growth suggestions.</p><div class="price">NGN 32,000<small>Approx. USD 20</small></div></button>
-      <button class="pkg featured" type="button" data-name="Brand Evolution Session" data-usd="60" data-ngn="96000" data-time="60 minutes"><span class="pkg-time">60 minutes</span><h3>Brand Evolution</h3><p>Brand audit, strategy direction, content guidance, and AI workflow setup.</p><div class="price">NGN 96,000<small>Approx. USD 60</small></div></button>
-      <button class="pkg" type="button" data-name="Premium Brand Transformation" data-usd="250" data-ngn="400000" data-time="Custom session"><span class="pkg-time">Custom</span><h3>Premium Transformation</h3><p>Full brand strategy, identity direction, AI implementation, and growth system.</p><div class="price">NGN 400,000<small>Approx. USD 250</small></div></button>
+      <button class="pkg" type="button" data-name="Brand AI Discovery Session" data-usd="20" data-ngn="32000" data-time="30 minutes"><span class="pkg-time">30 minutes</span><h3>Brand AI Discovery</h3><p>AI tool recommendations, quick business analysis, and growth suggestions.</p><div class="price">$20<small>Approx. local currency</small></div></button>
+      <button class="pkg featured" type="button" data-name="Brand Evolution Session" data-usd="60" data-ngn="96000" data-time="60 minutes"><span class="pkg-time">60 minutes</span><h3>Brand Evolution</h3><p>Brand audit, strategy direction, content guidance, and AI workflow setup.</p><div class="price">$60<small>Approx. local currency</small></div></button>
+      <button class="pkg" type="button" data-name="Premium Brand Transformation" data-usd="250" data-ngn="400000" data-time="Custom session"><span class="pkg-time">Custom</span><h3>Premium Transformation</h3><p>Full brand strategy, identity direction, AI implementation, and growth system.</p><div class="price">$250<small>Approx. local currency</small></div></button>
     </div>
     <div class="summary" id="summary" hidden><div><strong id="summaryName"></strong><span id="summaryMeta"></span></div><b id="summaryAmount"></b><button class="btn" id="payBtn" type="button">Pay With Paystack</button></div>
     <div id="paymentAlert" class="alert"></div>
@@ -60,11 +60,123 @@
 import { onAuthStateChanged, auth } from '/static/js/nak-auth.js';
 
 const PAYSTACK_KEY = 'pk_live_eefc2236ca35e9b3d72ee382cba858121bb8edd8';
-const state = { step: 1, user: null, questions: {}, package: null };
+const state = { step: 1, user: null, questions: {}, package: null, pendingRegistrationId: null };
 const labels = ['Questions', 'Package', 'Success'];
 const panels = document.querySelectorAll('.panel');
 const railDots = document.getElementById('railDots');
 const railFill = document.getElementById('railFill');
+let userCurrency = 'USD';
+let exchangeRates = null;
+
+const LOCALE_TO_CURRENCY = {
+  'en': 'USD', 'en-US': 'USD', 'en-GB': 'GBP', 'en-NG': 'NGN', 'en-ZA': 'ZAR',
+  'en-KE': 'KES', 'en-GH': 'GHS', 'en-AU': 'AUD', 'en-CA': 'CAD', 'en-IN': 'INR',
+  'en-PH': 'PHP', 'en-EG': 'EGP', 'en-DZ': 'DZD', 'en-MA': 'MAD', 'en-TZ': 'TZS',
+  'en-ET': 'ETB', 'en-RW': 'RWF', 'en-UG': 'UGX', 'en-ZW': 'ZWL', 'en-NA': 'NAD',
+  'en-BW': 'BWP', 'en-MU': 'MUR', 'en-CM': 'XAF', 'en-SN': 'XOF', 'en-CI': 'XOF',
+  'de': 'EUR', 'de-DE': 'EUR', 'de-AT': 'EUR', 'de-CH': 'CHF',
+  'fr': 'EUR', 'fr-FR': 'EUR', 'fr-CA': 'CAD', 'fr-BE': 'EUR', 'fr-CH': 'CHF',
+  'es': 'EUR', 'es-ES': 'EUR', 'es-MX': 'MXN', 'es-AR': 'ARS', 'es-CO': 'COP',
+  'it': 'EUR', 'it-IT': 'EUR', 'it-CH': 'CHF',
+  'pt': 'BRL', 'pt-BR': 'BRL', 'pt-PT': 'EUR',
+  'nl': 'EUR', 'nl-NL': 'EUR', 'nl-BE': 'EUR',
+  'ar': 'USD', 'ar-SA': 'SAR', 'ar-AE': 'AED', 'ar-EG': 'EGP', 'ar-QA': 'QAR',
+  'ar-KW': 'KWD', 'ar-BH': 'BHD', 'ar-OM': 'OMR', 'ar-JO': 'JOD', 'ar-LB': 'LBP',
+  'zh': 'CNY', 'zh-CN': 'CNY', 'zh-HK': 'HKD', 'zh-TW': 'TWD', 'zh-SG': 'SGD',
+  'ja': 'JPY', 'ja-JP': 'JPY',
+  'ko': 'KRW', 'ko-KR': 'KRW',
+  'hi': 'INR', 'hi-IN': 'INR',
+  'tr': 'TRY', 'tr-TR': 'TRY',
+  'ru': 'RUB', 'ru-RU': 'RUB',
+  'pl': 'PLN', 'pl-PL': 'PLN',
+  'th': 'THB', 'th-TH': 'THB',
+  'vi': 'VND', 'vi-VN': 'VND',
+  'id': 'IDR', 'id-ID': 'IDR',
+  'ms': 'MYR', 'ms-MY': 'MYR',
+  'tl': 'PHP', 'tl-PH': 'PHP',
+};
+
+function detectUserCurrency(){
+  try {
+    const locale = navigator.language || navigator.userLanguage || 'en';
+    const direct = LOCALE_TO_CURRENCY[locale];
+    if (direct) return direct;
+    const prefix = locale.split('-')[0];
+    const langMatch = LOCALE_TO_CURRENCY[prefix];
+    if (langMatch) return langMatch;
+    if (locale.startsWith('en')) return 'USD';
+  } catch (e) {}
+  return 'USD';
+}
+
+async function fetchExchangeRates(){
+  if (exchangeRates) return exchangeRates;
+  try {
+    const res = await fetch('https://api.exchangerate-api.com/v4/latest/USD');
+    if (res.ok) {
+      exchangeRates = await res.json();
+      return exchangeRates;
+    }
+  } catch (e) {}
+  return null;
+}
+
+async function convertUsdToLocal(usdAmount){
+  const rates = await fetchExchangeRates();
+  const targetCurrency = detectUserCurrency();
+  userCurrency = targetCurrency;
+  if (!rates || targetCurrency === 'USD') {
+    return { amount: usdAmount, currency: 'USD', symbol: '$' };
+  }
+  const rate = rates.rates[targetCurrency];
+  if (rate) {
+    const converted = usdAmount * rate;
+    const symbol = getCurrencySymbol(targetCurrency);
+    return { amount: converted, currency: targetCurrency, symbol: symbol };
+  }
+  return { amount: usdAmount, currency: 'USD', symbol: '$' };
+}
+
+function getCurrencySymbol(currencyCode){
+  const symbols = {
+    'USD': '$', 'EUR': '€', 'GBP': '£', 'NGN': '₦', 'ZAR': 'R', 'KES': 'KSh',
+    'GHS': 'GH₵', 'AUD': 'A$', 'CAD': 'C$', 'INR': '₹', 'PHP': '₱', 'EGP': 'E£',
+    'DZD': 'د.ج', 'MAD': 'MAD', 'TZS': 'TSh', 'ETB': 'Br', 'RWF': 'RF', 'UGX': 'USh',
+    'ZWL': 'Z$', 'NAD': 'N$', 'BWP': 'P', 'MUR': 'Rs', 'XAF': 'FCFA', 'XOF': 'CFA',
+    'CHF': 'CHF', 'MXN': 'MX$', 'ARS': 'AR$', 'COP': 'CO$', 'BRL': 'R$', 'TRY': '₺',
+    'RUB': '₽', 'PLN': 'zł', 'THB': '฿', 'VND': '₫', 'IDR': 'Rp', 'MYR': 'RM',
+    'CNY': '¥', 'HKD': 'HK$', 'TWD': 'NT$', 'SGD': 'S$', 'JPY': '¥', 'KRW': '₩',
+    'SAR': '﷼', 'AED': 'د.إ', 'QAR': '﷼', 'KWD': 'KD', 'BHD': 'BD', 'OMR': 'OMR',
+    'JOD': 'JD', 'LBP': 'L£'
+  };
+  return symbols[currencyCode] || currencyCode + ' ';
+}
+
+function fmtLocal(value, currency){
+  try {
+    return new Intl.NumberFormat(undefined, {
+      style: 'currency',
+      currency: currency || userCurrency,
+      maximumFractionDigits: 0
+    }).format(value);
+  } catch (e) {
+    return `${getCurrencySymbol(currency || userCurrency)}${Number(value || 0).toLocaleString()}`;
+  }
+}
+
+async function fmtUsdAsLocal(usdAmount){
+  const rates = await fetchExchangeRates();
+  const targetCurrency = detectUserCurrency();
+  userCurrency = targetCurrency;
+  if (!rates || targetCurrency === 'USD') {
+    return fmtLocal(usdAmount, 'USD');
+  }
+  const rate = rates.rates[targetCurrency];
+  if (rate) {
+    return fmtLocal(usdAmount * rate, targetCurrency);
+  }
+  return fmtLocal(usdAmount, 'USD');
+}
 
 function showAlert(id, message) {
   const el = document.getElementById(id);
@@ -91,7 +203,25 @@ function goTo(step) {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-document.getElementById('questionsForm').addEventListener('submit', event => {
+async function savePendingRegistration(){
+  if (!state.user || !state.questions.fullName) return null;
+  const response = await fetch('/api/campaign/pending', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      uid: state.user.uid,
+      email: state.user.email,
+      questions: state.questions,
+      package: state.package
+    })
+  });
+  const data = await response.json();
+  if (!response.ok || !data.saved) throw new Error(data.error || 'Campaign registration could not be saved.');
+  state.pendingRegistrationId = data.id || state.pendingRegistrationId;
+  return data;
+}
+
+document.getElementById('questionsForm').addEventListener('submit', async event => {
   event.preventDefault();
   clearAlert('questionsAlert');
   if (!state.user) {
@@ -106,18 +236,26 @@ document.getElementById('questionsForm').addEventListener('submit', event => {
     return;
   }
   state.questions = { fullName, business, challenge };
-  goTo(2);
+  try {
+    await savePendingRegistration();
+    goTo(2);
+  } catch (err) {
+    showAlert('questionsAlert', err.message || 'Could not save your campaign registration yet.');
+  }
 });
 
 document.querySelectorAll('.pkg').forEach(card => {
-  card.addEventListener('click', () => {
+  card.addEventListener('click', async () => {
     document.querySelectorAll('.pkg').forEach(item => item.classList.remove('selected'));
     card.classList.add('selected');
-    state.package = { name: card.dataset.name, usd: Number(card.dataset.usd), ngn: Number(card.dataset.ngn), time: card.dataset.time };
+    state.package = { name: card.dataset.name, usd: Number(card.dataset.usd), ngn: Number(card.dataset.ngn), amount: Number(card.dataset.usd), currency: 'USD', time: card.dataset.time };
     document.getElementById('summaryName').textContent = state.package.name;
-    document.getElementById('summaryMeta').textContent = `${state.package.time} / approx. USD ${state.package.usd}`;
-    document.getElementById('summaryAmount').textContent = `NGN ${state.package.ngn.toLocaleString()}`;
+    const localPrice = await fmtUsdAsLocal(state.package.usd);
+    const approxText = userCurrency === 'USD' ? '' : ` / approx. ${localPrice}`;
+    document.getElementById('summaryMeta').textContent = `${state.package.time}${approxText}`;
+    document.getElementById('summaryAmount').textContent = fmtLocal(state.package.usd, 'USD');
     document.getElementById('summary').hidden = false;
+    savePendingRegistration().catch(() => {});
   });
 });
 
@@ -125,7 +263,7 @@ async function verifyPayment(reference) {
   const response = await fetch('/api/paystack/verify', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ reference, expectedAmount: state.package.ngn, currency: 'NGN' })
+    body: JSON.stringify({ reference, expectedAmount: state.package.usd, currency: 'USD' })
   });
   const data = await response.json();
   if (!response.ok || !data.verified) throw new Error(data.error || 'Payment verification failed.');
@@ -141,7 +279,8 @@ async function saveCampaignRegistration(verifiedPayment) {
       email: state.user.email,
       questions: state.questions,
       package: state.package,
-      paymentReference: verifiedPayment.reference
+      paymentReference: verifiedPayment.reference,
+      pendingRegistrationId: state.pendingRegistrationId
     })
   });
   const data = await response.json();
@@ -155,12 +294,13 @@ document.getElementById('payBtn').addEventListener('click', () => {
     showAlert('paymentAlert', 'Please register and choose a package before payment.');
     return;
   }
+  savePendingRegistration().catch(() => {});
   const payButton = document.getElementById('payBtn');
   const handler = PaystackPop.setup({
     key: PAYSTACK_KEY,
     email: state.user.email,
-    amount: Math.round(Number(state.package.ngn) * 100),
-    currency: 'NGN',
+    amount: Math.round(Number(state.package.usd) * 100),
+    currency: 'USD',
     ref: `NKC-${Date.now()}`,
     metadata: { custom_fields: [
       { display_name: 'Name', variable_name: 'name', value: state.questions.fullName || '' },
@@ -200,6 +340,19 @@ onAuthStateChanged(auth, user => {
   document.getElementById('fullName').value = user.displayName || user.email?.split('@')[0] || '';
 });
 
+async function updatePackagePrices(){
+  const cards = document.querySelectorAll('.pkg');
+  for (const card of cards) {
+    const usd = Number(card.dataset.usd);
+    const localPrice = await fmtUsdAsLocal(usd);
+    const priceEl = card.querySelector('.price');
+    if (priceEl) {
+      const approx = userCurrency === 'USD' ? 'Local currency: USD' : `Approx. ${localPrice}`;
+      priceEl.innerHTML = `${fmtLocal(usd, 'USD')}<small>${approx}</small>`;
+    }
+  }
+}
+updatePackagePrices();
 renderRail();
 </script>
 </body>
