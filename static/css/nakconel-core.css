@@ -40,9 +40,13 @@
 
 /* ---- RESET & BASE ---- */
 * { margin: 0; padding: 0; box-sizing: border-box; scroll-behavior: smooth; }
-html, body { overflow-x: hidden; width: 100%; }
+html, body {
+  font-size: 16px;
+  line-height: 1.65; overflow-x: hidden; width: 100%; }
 
 body {
+  font-size: 16px;
+  line-height: 1.65;
   background: var(--ground);
   background: radial-gradient(ellipse 60% 50% at 50% 40%, var(--wine-mid) 0%, transparent 70%),
               radial-gradient(ellipse 130% 110% at 50% 50%, var(--wine-deep) 0%, var(--ground) 100%);

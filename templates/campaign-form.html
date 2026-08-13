@@ -51,7 +51,7 @@
     .back-link {
       color: var(--muted);
       text-decoration: none;
-      font-size: 14px;
+      font-size: 16px;
       font-weight: 600;
       transition: var(--tr);
       display: flex;
@@ -81,8 +81,8 @@
     .rail { display: flex; align-items: center; justify-content: space-between; position: relative; margin-bottom: 40px; padding: 0 10px; }
     .rail::before { content: ''; position: absolute; top: 14px; left: 0; right: 0; height: 2px; background: rgba(201,154,74,0.15); z-index: 1; }
     .rail-fill { position: absolute; top: 14px; left: 0; height: 2px; background: linear-gradient(90deg, var(--bronze), var(--bronze-light)); z-index: 2; transition: width 0.4s ease; width: 0%; }
-    .rail-dot { position: relative; z-index: 3; display: flex; flex-direction: column; align-items: center; gap: 8px; font-size: 12px; font-weight: 500; color: var(--muted); cursor: default; }
-    .rail-dot span { width: 32px; height: 32px; border-radius: 50%; background: var(--wine-deep); border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; color: var(--muted); transition: var(--tr); }
+    .rail-dot { position: relative; z-index: 3; display: flex; flex-direction: column; align-items: center; gap: 8px; font-size: 14px; font-weight: 500; color: var(--muted); cursor: default; }
+    .rail-dot span { width: 32px; height: 32px; border-radius: 50%; background: var(--wine-deep); border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 17px; color: var(--muted); transition: var(--tr); }
     .rail-dot.active span { border-color: var(--bronze-light); color: var(--wine-deep); background: var(--bronze-light); box-shadow: 0 0 14px rgba(201,154,74,0.4); }
     .rail-dot.done span { border-color: var(--bronze); color: var(--wine-deep); background: var(--bronze); }
     .rail-dot.active, .rail-dot.done { color: var(--bronze-light); font-weight: 600; }
@@ -102,7 +102,7 @@
       gap: 8px;
       border: none;
       cursor: pointer;
-      font-size: 15px;
+      font-size: 17px;
       transition: var(--tr);
       text-decoration: none;
     }
@@ -113,17 +113,17 @@
     .pkg:hover { border-color: rgba(201,154,74,0.4); transform: translateY(-3px); }
     .pkg.selected { border-color: var(--bronze-light); background: rgba(61,10,10,0.7); box-shadow: 0 0 20px rgba(201,154,74,0.25); }
     .pkg.popular::before { content: 'MOST POPULAR'; position: absolute; top: -10px; right: 12px; background: var(--bronze); color: var(--wine-deep); font-size: 9px; font-weight: 800; padding: 3px 8px; border-radius: 12px; letter-spacing: 0.5px; }
-    .pkg h4 { font-size: 15px; font-weight: 700; color: var(--white); margin-bottom: 6px; }
-    .pkg p { font-size: 12px; color: var(--muted); line-height: 1.4; margin-bottom: 14px; }
+    .pkg h4 { font-size: 17px; font-weight: 700; color: var(--white); margin-bottom: 6px; }
+    .pkg p { font-size: 14px; color: var(--muted); line-height: 1.4; margin-bottom: 14px; }
     .pkg .price { font-size: 20px; font-weight: 800; color: var(--bronze-light); margin-top: auto; }
     .pkg .price small { display: block; font-size: 10px; color: var(--muted); font-weight: 400; margin-top: 2px; }
 
     .summary-box { background: rgba(10,2,2,0.5); border: 1px solid var(--border); border-radius: var(--rs); padding: 18px; margin: 20px 0; text-align: left; }
-    .summary-box h5 { font-size: 14px; color: var(--bronze-light); margin-bottom: 4px; }
-    .summary-box p { font-size: 12px; color: var(--muted); margin: 0; }
+    .summary-box h5 { font-size: 16px; color: var(--bronze-light); margin-bottom: 4px; }
+    .summary-box p { font-size: 14px; color: var(--muted); margin: 0; }
     .summary-amount { font-size: 20px; font-weight: 800; color: var(--white); margin-top: 6px; }
 
-    .alert { padding: 12px 16px; border-radius: var(--rs); font-size: 13px; margin-bottom: 20px; display: none; }
+    .alert { padding: 12px 16px; border-radius: var(--rs); font-size: 17px; margin-bottom: 20px; display: none; }
     .alert-err { background: rgba(220,53,69,0.15); border: 1px solid rgba(220,53,69,0.4); color: #ff6b6b; }
     .alert-ok { background: rgba(40,167,69,0.15); border: 1px solid rgba(40,167,69,0.4); color: #51cf66; }
 
