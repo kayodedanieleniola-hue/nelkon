@@ -478,11 +478,11 @@ footer{border-top:1px solid var(--border);padding:80px 24px 40px 24px;position:r
     // gracefully to the poster frame instead of leaving a blank section, and
     // don't hold the visitor hostage waiting for an 'ended' event that'll never fire.
     setTimeout(() => {
-      if (video.readyState === 0) { un// lockScroll removed for smooth user scrolling }
+      // video fallback readyState check removed
     }, 5000);
 
     // Safety net: never trap a visitor if the video can't load or play for any reason.
-    unlockTimer = setTimeout(unlockScroll, 20000);
+    // unlockTimer removed
   } else {
     locked = false;
   }
