@@ -283,8 +283,8 @@ footer{border-top:1px solid var(--border);padding:80px 24px 40px 24px;position:r
       <h1>Step Into <span class="accent">the Movement</span></h1>
       <p class="lead">Your journey starts here. Book a consultation and see what's next for your brand.</p>
       <div class="camp-hero-btns">
-        <a href="/register?next=/nakconel-campaign.html" class="hero-cta">Get Started ↗</a>
-        <a href="#qualify" class="sec-btn">See How It Works</a>
+        <a href="/register?next=/campaign-form" class="hero-cta">Get Started ↗</a>
+        <a href="/campaign-form" class="sec-btn">See How It Works</a>
       </div>
     </div>
   </div>
@@ -394,13 +394,7 @@ footer{border-top:1px solid var(--border);padding:80px 24px 40px 24px;position:r
 
   function preventScroll(e){ if(locked){ e.preventDefault(); } }
 
-  function lockScroll(){
-    document.documentElement.style.overflow = 'hidden';
-    document.body.style.overflow = 'hidden';
-    window.addEventListener('wheel', preventScroll, { passive: false });
-    window.addEventListener('touchmove', preventScroll, { passive: false });
-    window.addEventListener('keydown', preventScrollKeys, { passive: false });
-  }
+  function lockScroll(){ /* no scroll lock */ }
 
   function preventScrollKeys(e){
     const keys = ['ArrowDown','ArrowUp','PageDown','PageUp',' ','Spacebar'];
@@ -420,7 +414,7 @@ footer{border-top:1px solid var(--border);padding:80px 24px 40px 24px;position:r
   }
 
   if(video){
-    lockScroll();
+    // lockScroll removed for smooth user scrolling
 
     // Try to autoplay with sound immediately.
     video.muted = false;
@@ -484,7 +478,7 @@ footer{border-top:1px solid var(--border);padding:80px 24px 40px 24px;position:r
     // gracefully to the poster frame instead of leaving a blank section, and
     // don't hold the visitor hostage waiting for an 'ended' event that'll never fire.
     setTimeout(() => {
-      if (video.readyState === 0) { unlockScroll(); }
+      if (video.readyState === 0) { un// lockScroll removed for smooth user scrolling }
     }, 5000);
 
     // Safety net: never trap a visitor if the video can't load or play for any reason.
@@ -550,13 +544,8 @@ function handleGetStarted() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Attach handler to all Get Started buttons
-  const getStartedBtns = document.querySelectorAll('.hero-cta, #landingGetStartedBtn');
+  const getStartedBtns = document.querySelectorAll('.hero-cta, #landingGetStartedBtn, a[href="/campaign-form"]');
   getStartedBtns.forEach(btn => {
-    if (btn.tagName === 'A' && btn.getAttribute('href') === '#qualify-form') {
-      btn.removeAttribute('href');
-      btn.style.cursor = 'pointer';
-    }
     btn.addEventListener('click', (e) => {
       e.preventDefault();
       handleGetStarted();
