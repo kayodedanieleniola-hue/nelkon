@@ -569,6 +569,12 @@ def team_chat():
 def campaign():
     return render_template("campaign.html")
 
+@app.route("/campaign-form")
+@app.route("/campaign-qualify")
+def campaign_form():
+    return render_template("campaign-form.html")
+
+
 @app.route("/contact")
 def contact():
     return render_template("contact.html")

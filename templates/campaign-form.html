@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Campaign Application — NAKCONEL</title>
+  <link rel="icon" href="/static/image/logo.png" type="image/png">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://js.paystack.co/v1/inline.js"></script>
+  <style>
+    :root {
+      --ground: #0A0202;
+      --wine-deep: #1B0404;
+      --wine-card: #2D0808;
+      --bronze: #C99A4A;
+      --bronze-light: #E0B86C;
+      --border: rgba(201, 154, 74, 0.2);
+      --white: #FDFAF4;
+      --muted: rgba(245, 232, 199, 0.6);
+      --rs: 12px;
+      --tr: all 0.3s ease;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: radial-gradient(ellipse 70% 60% at 50% 30%, #3D0A0A 0%, transparent 70%),
+                  radial-gradient(ellipse 140% 120% at 50% 50%, #1B0404 0%, #0A0202 100%);
+      color: var(--white);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .header-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 32px;
+      background: rgba(10, 2, 2, 0.7);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+    }
+    .logo-img { height: 40px; width: auto; }
+    .logo-text { font-size: 20px; font-weight: 800; color: var(--white); letter-spacing: 1px; }
+    .logo-text span { color: var(--bronze-light); }
+    .back-link {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 600;
+      transition: var(--tr);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .back-link:hover { color: var(--bronze-light); }
+
+    .main-container {
+      flex: 1;
+      max-width: 800px;
+      width: 100%;
+      margin: 40px auto;
+      padding: 0 20px 60px 20px;
+    }
+
+    .form-card {
+      background: rgba(45, 8, 8, 0.7);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 40px 32px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+    }
+
+    /* RAIL PROGRESS */
+    .rail { display: flex; align-items: center; justify-content: space-between; position: relative; margin-bottom: 40px; padding: 0 10px; }
+    .rail::before { content: ''; position: absolute; top: 14px; left: 0; right: 0; height: 2px; background: rgba(201,154,74,0.15); z-index: 1; }
+    .rail-fill { position: absolute; top: 14px; left: 0; height: 2px; background: linear-gradient(90deg, var(--bronze), var(--bronze-light)); z-index: 2; transition: width 0.4s ease; width: 0%; }
+    .rail-dot { position: relative; z-index: 3; display: flex; flex-direction: column; align-items: center; gap: 8px; font-size: 12px; font-weight: 500; color: var(--muted); cursor: default; }
+    .rail-dot span { width: 32px; height: 32px; border-radius: 50%; background: var(--wine-deep); border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; color: var(--muted); transition: var(--tr); }
+    .rail-dot.active span { border-color: var(--bronze-light); color: var(--wine-deep); background: var(--bronze-light); box-shadow: 0 0 14px rgba(201,154,74,0.4); }
+    .rail-dot.done span { border-color: var(--bronze); color: var(--wine-deep); background: var(--bronze); }
+    .rail-dot.active, .rail-dot.done { color: var(--bronze-light); font-weight: 600; }
+
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    .hero-cta {
+      background: linear-gradient(135deg, var(--bronze), #8B6A2E);
+      color: var(--wine-deep);
+      font-weight: 700;
+      padding: 14px 28px;
+      border-radius: var(--rs);
+      box-shadow: 0 4px 15px rgba(201,154,74,0.3);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: none;
+      cursor: pointer;
+      font-size: 15px;
+      transition: var(--tr);
+      text-decoration: none;
+    }
+    .hero-cta:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(201,154,74,0.4); }
+
+    .pkg-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 24px 0; }
+    .pkg { position: relative; background: rgba(10,2,2,0.6); border: 1px solid var(--border); border-radius: var(--rs); padding: 20px 16px; text-align: left; cursor: pointer; transition: var(--tr); display: flex; flex-direction: column; justify-content: space-between; }
+    .pkg:hover { border-color: rgba(201,154,74,0.4); transform: translateY(-3px); }
+    .pkg.selected { border-color: var(--bronze-light); background: rgba(61,10,10,0.7); box-shadow: 0 0 20px rgba(201,154,74,0.25); }
+    .pkg.popular::before { content: 'MOST POPULAR'; position: absolute; top: -10px; right: 12px; background: var(--bronze); color: var(--wine-deep); font-size: 9px; font-weight: 800; padding: 3px 8px; border-radius: 12px; letter-spacing: 0.5px; }
+    .pkg h4 { font-size: 15px; font-weight: 700; color: var(--white); margin-bottom: 6px; }
+    .pkg p { font-size: 12px; color: var(--muted); line-height: 1.4; margin-bottom: 14px; }
+    .pkg .price { font-size: 20px; font-weight: 800; color: var(--bronze-light); margin-top: auto; }
+    .pkg .price small { display: block; font-size: 10px; color: var(--muted); font-weight: 400; margin-top: 2px; }
+
+    .summary-box { background: rgba(10,2,2,0.5); border: 1px solid var(--border); border-radius: var(--rs); padding: 18px; margin: 20px 0; text-align: left; }
+    .summary-box h5 { font-size: 14px; color: var(--bronze-light); margin-bottom: 4px; }
+    .summary-box p { font-size: 12px; color: var(--muted); margin: 0; }
+    .summary-amount { font-size: 20px; font-weight: 800; color: var(--white); margin-top: 6px; }
+
+    .alert { padding: 12px 16px; border-radius: var(--rs); font-size: 13px; margin-bottom: 20px; display: none; }
+    .alert-err { background: rgba(220,53,69,0.15); border: 1px solid rgba(220,53,69,0.4); color: #ff6b6b; }
+    .alert-ok { background: rgba(40,167,69,0.15); border: 1px solid rgba(40,167,69,0.4); color: #51cf66; }
+
+    @media (max-width: 768px) {
+      .header-nav { padding: 16px 20px; }
+      .form-card { padding: 28px 20px; }
+      .pkg-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header class="header-nav">
+    <a href="/campaign" class="logo-container">
+      <img src="/static/image/logo.png" alt="NAKCONEL" class="logo-img">
+      <div class="logo-text">NAKCONEL <span>CAMPAIGN</span></div>
+    </a>
+    <a href="/campaign" class="back-link"><i class="fas fa-arrow-left"></i> Back to Campaign</a>
+  </header>
+
+  <main class="main-container">
+    <div class="form-card">
+      <div style="text-align:center;margin-bottom:28px;">
+        <h2 style="font-size:24px;font-weight:800;color:var(--white);margin-bottom:6px;">Brand Transformation Application</h2>
+        <p style="font-size:14px;color:var(--muted);">Complete your questionnaire and choose your package tier to secure your spot.</p>
+      </div>
+
+      <!-- STEP PROGRESS RAIL -->
+      <div class="rail">
+        <div class="rail-fill" id="railFill"></div>
+        <div class="rail-dot active" id="dot1"><span>1</span>Questions</div>
+        <div class="rail-dot" id="dot2"><span>2</span>Package</div>
+        <div class="rail-dot" id="dot3"><span>3</span>Success</div>
+      </div>
+
+      <div id="formAlert" class="alert alert-err"></div>
+
+      <!-- PANEL 1: QUESTIONS -->
+      <div class="panel active" id="panel1">
+        <form id="questionsForm" onsubmit="return false;">
+          <div style="margin-bottom:20px;">
+            <label style="display:block;font-size:13px;font-weight:600;color:var(--white);margin-bottom:8px;">Full Name *</label>
+            <input type="text" id="fullName" required placeholder="Enter your full name" style="width:100%;padding:14px 16px;background:rgba(10,2,2,0.7);border:1px solid var(--border);border-radius:var(--rs);color:var(--white);font-size:14px;outline:none;">
+          </div>
+          <div style="margin-bottom:20px;">
+            <label style="display:block;font-size:13px;font-weight:600;color:var(--white);margin-bottom:8px;">Business / Concept Name *</label>
+            <input type="text" id="business" required placeholder="Your business or project title" style="width:100%;padding:14px 16px;background:rgba(10,2,2,0.7);border:1px solid var(--border);border-radius:var(--rs);color:var(--white);font-size:14px;outline:none;">
+          </div>
+          <div style="margin-bottom:24px;">
+            <label style="display:block;font-size:13px;font-weight:600;color:var(--white);margin-bottom:8px;">What is your biggest brand or marketing challenge right now? *</label>
+            <textarea id="challenge" required rows="3" placeholder="Describe what you want to achieve or overcome..." style="width:100%;padding:14px 16px;background:rgba(10,2,2,0.7);border:1px solid var(--border);border-radius:var(--rs);color:var(--white);font-size:14px;outline:none;resize:vertical;"></textarea>
+          </div>
+          <button type="button" id="nextToPkgBtn" class="hero-cta" style="width:100%;justify-content:center;">Continue to Package Selection &rarr;</button>
+        </form>
+      </div>
+
+      <!-- PANEL 2: PACKAGE SELECTION & PAYMENT -->
+      <div class="panel" id="panel2">
+        <h4 style="font-size:17px;color:var(--white);margin-bottom:4px;">Select Your Transformation Tier</h4>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:16px;">Choose a package to complete your registration. Prices automatically adjust to local currency.</p>
+        
+        <div class="pkg-grid" id="pkgGrid">
+          <div class="pkg" data-pkg="discovery" data-usd="20">
+            <div>
+              <h4>Brand AI Discovery Session</h4>
+              <p>Initial brand intelligence audit & 30-min strategy roadmap session.</p>
+            </div>
+            <div class="price" id="price-discovery">$20 USD<small>One-time payment</small></div>
+          </div>
+          <div class="pkg popular selected" data-pkg="evolution" data-usd="60">
+            <div>
+              <h4>Brand Evolution Session</h4>
+              <p>Comprehensive positioning audit, custom AI toolkit & priority consultation.</p>
+            </div>
+            <div class="price" id="price-evolution">$60 USD<small>One-time payment</small></div>
+          </div>
+          <div class="pkg" data-pkg="transformation" data-usd="250">
+            <div>
+              <h4>Premium Brand Transformation</h4>
+              <p>Full 360&deg; strategic identity overhaul, dedicated team & 60-day execution plan.</p>
+            </div>
+            <div class="price" id="price-transformation">$250 USD<small>One-time payment</small></div>
+          </div>
+        </div>
+
+        <div class="summary-box" id="summary">
+          <h5 id="summaryName">Brand Evolution Session</h5>
+          <p id="summaryMeta">Comprehensive positioning audit, custom AI toolkit & priority consultation.</p>
+          <div class="summary-amount" id="summaryAmount">$60 USD</div>
+        </div>
+
+        <div style="display:flex;gap:12px;">
+          <button type="button" id="backToQuestionsBtn" style="padding:14px 20px;background:transparent;border:1px solid var(--border);border-radius:var(--rs);color:var(--muted);cursor:pointer;font-weight:600;">&larr; Back</button>
+          <button type="button" id="payBtn" class="hero-cta" style="flex:1;justify-content:center;">Proceed to Secure Checkout &rarr;</button>
+        </div>
+      </div>
+
+      <!-- PANEL 3: SUCCESS CONFIRMATION -->
+      <div class="panel" id="panel3">
+        <div style="padding:32px 20px;background:rgba(201,154,74,0.1);border:1px solid var(--border);border-radius:var(--rs);text-align:center;">
+          <div style="font-size:44px;margin-bottom:12px;">&#127881;</div>
+          <h3 style="color:var(--bronze-light);margin-bottom:10px;">Registration Complete!</h3>
+          <p id="successCopy" style="color:var(--muted);font-size:15px;line-height:1.6;margin-bottom:24px;">Thank you for joining the Nakconel Future Brand Movement. Your spot is confirmed and our strategic team will reach out via email shortly.</p>
+          <a href="/account" class="hero-cta" style="display:inline-flex;justify-content:center;">View Your Account Dashboard &rarr;</a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script type="module">
+    import { onAuthStateChanged, auth } from '/static/js/nak-auth.js';
+
+    const PAYSTACK_KEY = 'pk_live_eefc2236ca35e9b3d72ee382cba858121bb8edd8';
+    const state = { step: 1, user: null, questions: {}, package: 'evolution', pendingRegistrationId: null };
+    const panels = {
+      1: document.getElementById('panel1'),
+      2: document.getElementById('panel2'),
+      3: document.getElementById('panel3')
+    };
+    const railDots = document.querySelectorAll('.rail-dot');
+    const railFill = document.getElementById('railFill');
+    let userCurrency = 'USD';
+    let exchangeRates = null;
+
+    const LOCALE_TO_CURRENCY = {
+      'en': 'USD', 'en-US': 'USD', 'en-GB': 'GBP', 'en-NG': 'NGN', 'en-ZA': 'ZAR',
+      'en-KE': 'KES', 'en-GH': 'GHS', 'en-AU': 'AUD', 'en-CA': 'CAD', 'en-IN': 'INR',
+      'de': 'EUR', 'fr': 'EUR', 'es': 'EUR', 'it': 'EUR', 'nl': 'EUR', 'ja': 'JPY'
+    };
+
+    function detectUserCurrency(email){
+      try {
+        const userEmail = email || state.user?.email || '';
+        if (userEmail && userEmail.includes('@')) {
+          const domain = userEmail.split('@')[1].toLowerCase();
+          const EMAP = { 'ng': 'NGN', 'co.uk': 'GBP', 'uk': 'GBP', 'ca': 'CAD', 'za': 'ZAR', 'ke': 'KES', 'gh': 'GHS', 'in': 'INR', 'au': 'AUD', 'de': 'EUR', 'fr': 'EUR', 'nl': 'EUR', 'es': 'EUR', 'it': 'EUR' };
+          for (const [tld, curr] of Object.entries(EMAP)) {
+            if (domain.endsWith('.' + tld)) return curr;
+          }
+        }
+        const navLang = (navigator.language || navigator.userLanguage || '').trim();
+        if (LOCALE_TO_CURRENCY[navLang]) return LOCALE_TO_CURRENCY[navLang];
+        const prefix = navLang.split('-')[0];
+        if (LOCALE_TO_CURRENCY[prefix]) return LOCALE_TO_CURRENCY[prefix];
+        const tz = (Intl.DateTimeFormat().resolvedOptions().timeZone || '').toLowerCase();
+        if (tz.includes('lagos') || tz.includes('africa/lagos')) return 'NGN';
+        if (tz.includes('london') || tz.includes('europe/london')) return 'GBP';
+        if (tz.includes('johannesburg')) return 'ZAR';
+        if (tz.includes('nairobi')) return 'KES';
+        if (tz.includes('accra')) return 'GHS';
+        if (tz.includes('paris') || tz.includes('berlin') || tz.includes('rome') || tz.includes('amsterdam') || tz.includes('europe')) return 'EUR';
+      } catch(e) { console.warn('Currency detection fallback:', e); }
+      return 'USD';
+    }
+
+    async function fetchExchangeRates(){
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 4000);
+        const res = await fetch('https://open.er-api.com/v6/latest/USD', { signal: controller.signal });
+        clearTimeout(timeoutId);
+        if (!res.ok) throw new Error('API error');
+        const data = await res.json();
+        if (data && data.rates) return data.rates;
+      } catch(e) { console.warn('Using static exchange fallback rates:', e); }
+      return { USD: 1, NGN: 1600, GBP: 0.78, EUR: 0.92, ZAR: 18.2, KES: 129, GHS: 15.5, CAD: 1.36, AUD: 1.52, INR: 83.5, JPY: 155 };
+    }
+
+    function convertPrice(usdAmount, rates, targetCurrency){
+      if (!rates || targetCurrency === 'USD') return { text: `$${usdAmount} USD`, amount: usdAmount, curr: 'USD' };
+      const rate = rates[targetCurrency];
+      if (!rate) return { text: `$${usdAmount} USD`, amount: usdAmount, curr: 'USD' };
+      const converted = Math.round(usdAmount * rate);
+      const SYMBOLS = { NGN: '&#8358;', GBP: '&pound;', EUR: '&euro;', ZAR: 'R ', KES: 'KSh ', GHS: 'GH&#8373;', CAD: 'CA$', AUD: 'A$', INR: '&#8377;', JPY: '&yen;' };
+      const symbol = SYMBOLS[targetCurrency] || (targetCurrency + ' ');
+      return { text: `${symbol}${converted.toLocaleString()} ${targetCurrency} <small>(&asymp; $${usdAmount} USD)</small>`, amount: converted, curr: targetCurrency };
+    }
+
+    function updatePrices(){
+      const pkgs = document.querySelectorAll('.pkg');
+      pkgs.forEach(pkg => {
+        const usd = parseFloat(pkg.dataset.usd);
+        const pId = 'price-' + pkg.dataset.pkg;
+        const el = document.getElementById(pId);
+        if (el) {
+          const conv = convertPrice(usd, exchangeRates, userCurrency);
+          el.innerHTML = `${conv.text}<small>One-time payment</small>`;
+        }
+      });
+      updateSummary();
+    }
+
+    function updateSummary(){
+      const selectedPkg = document.querySelector('.pkg.selected');
+      if (!selectedPkg) return;
+      const name = selectedPkg.querySelector('h4')?.textContent || '';
+      const desc = selectedPkg.querySelector('p')?.textContent || '';
+      const usd = parseFloat(selectedPkg.dataset.usd);
+      const conv = convertPrice(usd, exchangeRates, userCurrency);
+      
+      const sName = document.getElementById('summaryName');
+      const sMeta = document.getElementById('summaryMeta');
+      const sAmt = document.getElementById('summaryAmount');
+      if (sName) sName.textContent = name;
+      if (sMeta) sMeta.textContent = desc;
+      if (sAmt) sAmt.innerHTML = conv.text;
+    }
+
+    function showAlert(msg, isOk = false){
+      const box = document.getElementById('formAlert');
+      if (!box) return;
+      box.textContent = msg;
+      box.className = 'alert ' + (isOk ? 'alert-ok' : 'alert-err');
+      box.style.display = 'block';
+      box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function hideAlert(){
+      const box = document.getElementById('formAlert');
+      if (box) box.style.display = 'none';
+    }
+
+    function goToStep(s){
+      state.step = s;
+      hideAlert();
+
+      if (railFill) railFill.style.width = ((s - 1) * 50) + '%';
+
+      railDots.forEach((dot, i) => {
+        const stepNum = i + 1;
+        dot.classList.remove('active', 'done');
+        if (stepNum === s) dot.classList.add('active');
+        else if (stepNum < s) dot.classList.add('done');
+      });
+
+      [1, 2, 3].forEach((pNum) => {
+        if (panels[pNum]) {
+          if (pNum === s) panels[pNum].classList.add('active');
+          else panels[pNum].classList.remove('active');
+        }
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      onAuthStateChanged(auth, async (u) => {
+        if (!u) {
+          // If not logged in, redirect to register page with next parameter
+          window.location.href = '/register?next=/campaign-form';
+          return;
+        }
+        state.user = u;
+        const nameInput = document.getElementById('fullName');
+        if (nameInput && !nameInput.value) nameInput.value = u.displayName || '';
+        userCurrency = detectUserCurrency(u.email);
+        exchangeRates = await fetchExchangeRates();
+        updatePrices();
+      });
+
+      // Next to Pkg Button
+      const nextBtn = document.getElementById('nextToPkgBtn');
+      if (nextBtn) {
+        nextBtn.addEventListener('click', async () => {
+          const name = document.getElementById('fullName')?.value.trim();
+          const biz = document.getElementById('business')?.value.trim();
+          const chal = document.getElementById('challenge')?.value.trim();
+
+          if (!name || !biz || !chal) {
+            showAlert('Please fill in all required question fields before continuing.');
+            return;
+          }
+
+          state.questions = { fullName: name, business: biz, challenge: chal };
+
+          if (state.user) {
+            try {
+              const res = await fetch('/api/campaign/pending', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  uid: state.user.uid,
+                  email: state.user.email,
+                  questions: state.questions
+                })
+              });
+              const data = await res.json();
+              if (data && data.pendingId) state.pendingRegistrationId = data.pendingId;
+            } catch(e) { console.warn('Pending save warning:', e); }
+          }
+
+          goToStep(2);
+        });
+      }
+
+      // Back button
+      const backBtn = document.getElementById('backToQuestionsBtn');
+      if (backBtn) {
+        backBtn.addEventListener('click', () => goToStep(1));
+      }
+
+      // Package Card Selector
+      const pkgs = document.querySelectorAll('.pkg');
+      pkgs.forEach(pkg => {
+        pkg.addEventListener('click', () => {
+          pkgs.forEach(p => p.classList.remove('selected'));
+          pkg.classList.add('selected');
+          state.package = pkg.dataset.pkg;
+          updateSummary();
+        });
+      });
+
+      // Pay Button
+      const payBtn = document.getElementById('payBtn');
+      if (payBtn) {
+        payBtn.addEventListener('click', () => {
+          if (!state.questions.fullName) {
+            showAlert('Please complete Step 1 questions first.');
+            goToStep(1);
+            return;
+          }
+
+          const selectedPkg = document.querySelector('.pkg.selected');
+          if (!selectedPkg) {
+            showAlert('Please select a package tier.');
+            return;
+          }
+
+          const usd = parseFloat(selectedPkg.dataset.usd);
+          const pkgKey = selectedPkg.dataset.pkg;
+          const pkgName = selectedPkg.querySelector('h4')?.textContent || 'Campaign Registration';
+          const payEmail = state.user?.email || '';
+
+          if (!payEmail) {
+            showAlert('Please sign in to proceed with payment checkout.');
+            window.location.href = '/register?next=/campaign-form';
+            return;
+          }
+
+          const ngnRate = exchangeRates?.NGN || 1600;
+          const amountInNgnKobo = Math.round(usd * ngnRate * 100);
+
+          const handler = PaystackPop.setup({
+            key: PAYSTACK_KEY,
+            email: payEmail,
+            amount: amountInNgnKobo,
+            currency: 'NGN',
+            ref: 'NAK_' + Math.floor(Math.random() * 1000000000 + 1),
+            metadata: {
+              custom_fields: [
+                { display_name: 'Full Name', variable_name: 'full_name', value: state.questions.fullName },
+                { display_name: 'Business', variable_name: 'business', value: state.questions.business },
+                { display_name: 'Package', variable_name: 'package', value: pkgName }
+              ]
+            },
+            callback: function(response) {
+              showAlert('Payment successful! Verifying registration...', true);
+              fetch('/api/campaign/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  reference: response.reference,
+                  email: payEmail,
+                  questions: state.questions,
+                  package: pkgKey,
+                  usdAmount: usd,
+                  uid: state.user?.uid || null
+                })
+              }).then(res => res.json()).then(data => {
+                const successCopy = document.getElementById('successCopy');
+                if (successCopy) {
+                  successCopy.textContent = `Thank you ${state.questions.fullName}! Your ${pkgName} registration is confirmed (Ref: ${response.reference}). Our executive team will contact you at ${payEmail} to schedule your session.`;
+                }
+                goToStep(3);
+              }).catch(err => {
+                console.error('Registration API error:', err);
+                goToStep(3);
+              });
+            },
+            onClose: function() {
+              showAlert('Payment checkout window closed. You can retry when ready.');
+            }
+          });
+
+          handler.openIframe();
+        });
+      }
+    });
+  </script>
+</body>
+</html>
