@@ -132,7 +132,15 @@
       .form-card { padding: 28px 20px; }
       .pkg-grid { grid-template-columns: 1fr; }
     }
-  </style>
+  
+/* DESKTOP / PC SPECIFIC SCREEN FIT OPTIMIZATIONS */
+@media (min-width: 1025px) {
+  .main-container { max-width: 860px !important; margin: 50px auto !important; }
+  .form-card { padding: 48px 44px !important; }
+  .pkg-grid { grid-template-columns: repeat(3, 1fr) !important; gap: 20px !important; }
+}
+
+</style>
 </head>
 <body>
   <header class="header-nav">
