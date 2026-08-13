@@ -1,22 +1,38 @@
-from flask import Flask, render_template, request, jsonify, session
+from flask import Flask, render_template, request, jsonify, session, send_from_directory
 import json
 import os
 import requests
 import sqlite3
+import re
+import urllib.parse
+import time
 from datetime import datetime, timezone, timedelta
 from functools import wraps
+from collections import defaultdict
 
 try:
     from dotenv import load_dotenv
     load_dotenv()
 except ImportError:
-    pass
+    load_dotenv = None
 
-import re
-import time
-from collections import defaultdict
+try:
+    import firebase_admin
+    from firebase_admin import credentials, firestore, auth as firebase_auth
+    HAS_FIREBASE_ADMIN = True
+except ImportError:
+    firebase_admin = None
+    credentials = None
+    firestore = None
+    firebase_auth = None
+    HAS_FIREBASE_ADMIN = False
 
 app = Flask(__name__)
+
+@app.route("/favicon.ico")
+def favicon():
+    return send_from_directory(os.path.join(app.root_path, "static", "image"), "logo.png", mimetype="image/png")
+
 app.secret_key = os.environ.get("SECRET_KEY", "your-secret-key-change-this-in-production")
 app.config["SESSION_COOKIE_SECURE"] = (
     os.environ.get("SESSION_COOKIE_SECURE", "").lower() in {"1", "true", "yes"}
@@ -167,8 +183,8 @@ def verify_firebase_id_token(id_token):
 
 def initialize_firebase_admin():
     global _firebase_admin_ready
-    import firebase_admin
-    from firebase_admin import credentials
+    if not HAS_FIREBASE_ADMIN:
+        raise RuntimeError("Firebase Admin SDK is not installed.")
 
     if not _firebase_admin_ready:
         service_account_json = os.environ.get("FIREBASE_SERVICE_ACCOUNT_JSON")
@@ -182,11 +198,8 @@ def initialize_firebase_admin():
 
 
 def get_firebase_auth():
-    try:
-        from firebase_admin import auth as firebase_auth
-    except ImportError as exc:
-        raise RuntimeError("Firebase Admin SDK is not installed.") from exc
-
+    if not HAS_FIREBASE_ADMIN:
+        raise RuntimeError("Firebase Admin SDK is not installed.")
     initialize_firebase_admin()
     return firebase_auth
 
@@ -552,12 +565,9 @@ def team_chat():
     return render_template("team-chat.html", admin_team=ADMIN_TEAM)
 
 @app.route("/campaign")
+@app.route("/nakconel-campaign.html")
 def campaign():
     return render_template("campaign.html")
-
-@app.route("/nakconel-campaign.html")
-def nakconel_campaign():
-    return render_template("nakconel-campaign.html")
 
 @app.route("/contact")
 def contact():
@@ -1139,10 +1149,8 @@ Only use code blocks for genuine programming help, not design mockups. User's na
 @app.route("/api/generate-image", methods=["POST"])
 @optional_auth
 def generate_image():
-    POLLINATIONS_KEY = os.environ.get("POLLINATIONS_API_KEY")
-    GROQ_KEY = os.environ.get("GROQ_API_KEY")
-    if not POLLINATIONS_KEY:
-        return jsonify({"error": "Image generation is not configured."})
+    pollinations_key = os.environ.get("POLLINATIONS_API_KEY") or POLLINATIONS_KEY
+    groq_key = os.environ.get("GROQ_API_KEY") or GROQ_KEY
 
     # Identify client (authenticated user gets higher rate limits)
     user = getattr(request, '_user', None)
@@ -1164,11 +1172,11 @@ def generate_image():
         return jsonify({"error": "Missing prompt"}), 400
 
     final_prompt = prompt
-    if GROQ_KEY:
+    if groq_key:
         try:
             r = requests.post(
                 "https://api.groq.com/openai/v1/chat/completions",
-                headers={"Content-Type": "application/json", "Authorization": f"Bearer {GROQ_KEY}"},
+                headers={"Content-Type": "application/json", "Authorization": f"Bearer {groq_key}"},
                 json={"model": "llama-3.3-70b-versatile", "max_tokens": 120, "temperature": 0.8,
                       "messages": [
                           {"role": "system", "content": "You write vivid, detailed text-to-image prompts in 2-3 sentences max. Output ONLY the prompt text, nothing else. Keep it under 60 words."},
@@ -1182,15 +1190,21 @@ def generate_image():
             pass
 
     try:
-        r = requests.post(
-            "https://gen.pollinations.ai/v1/images/generations",
-            headers={"Authorization": f"Bearer {POLLINATIONS_KEY}", "Content-Type": "application/json"},
-            json={"model": "flux", "prompt": final_prompt, "n": 1, "size": "1024x1024", "response_format": "b64_json"}
-        )
-        item = r.json().get("data", [{}])[0]
-        if item.get("b64_json"):
-            return jsonify({"image": f"data:image/jpeg;base64,{item['b64_json']}", "promptUsed": final_prompt, "quota": quota})
-        return jsonify({"error": "No image returned — please try again."})
+        if pollinations_key:
+            r = requests.post(
+                "https://gen.pollinations.ai/v1/images/generations",
+                headers={"Authorization": f"Bearer {pollinations_key}", "Content-Type": "application/json"},
+                json={"model": "flux", "prompt": final_prompt, "n": 1, "size": "1024x1024", "response_format": "b64_json"},
+                timeout=30
+            )
+            item = r.json().get("data", [{}])[0]
+            if item.get("b64_json"):
+                return jsonify({"image": f"data:image/jpeg;base64,{item['b64_json']}", "promptUsed": final_prompt, "quota": quota})
+        
+        # Fallback to public Pollinations URL
+        encoded_prompt = urllib.parse.quote(final_prompt)
+        image_url = f"https://image.pollinations.ai/prompt/{encoded_prompt}?model=flux&width=1024&height=1024&nologo=true"
+        return jsonify({"image": image_url, "promptUsed": final_prompt, "quota": quota})
     except Exception as e:
         return jsonify({"error": "Connection error. Please try again."})
 
@@ -1237,7 +1251,7 @@ def verify_paystack_reference(reference, expected_amount, expected_currency="NGN
         return {"verified": False, "error": "Missing payment reference."}, 400
 
     try:
-        expected_amount_kobo = int(expected_amount) * 100
+        expected_amount_kobo = round(float(expected_amount) * 100)
     except (TypeError, ValueError):
         return {"verified": False, "error": "Invalid expected amount."}, 400
 
@@ -1256,7 +1270,7 @@ def verify_paystack_reference(reference, expected_amount, expected_currency="NGN
         response.ok
         and payload.get("status") is True
         and transaction.get("status") == "success"
-        and transaction.get("currency") == expected_currency
+        and str(transaction.get("currency", "")).upper() == str(expected_currency).upper()
         and int(transaction.get("amount") or 0) == expected_amount_kobo
     )
 
@@ -1277,23 +1291,9 @@ def verify_paystack_reference(reference, expected_amount, expected_currency="NGN
 
 
 def get_firestore_client():
-    global _firebase_admin_ready
-    try:
-        import firebase_admin
-        from firebase_admin import credentials, firestore
-    except ImportError as exc:
-        raise RuntimeError("Firebase Admin SDK is not installed.") from exc
-
-    if not _firebase_admin_ready:
-        service_account_json = os.environ.get("FIREBASE_SERVICE_ACCOUNT_JSON")
-        if not service_account_json:
-            raise RuntimeError("FIREBASE_SERVICE_ACCOUNT_JSON is not configured.")
-        service_account_info = json.loads(service_account_json)
-        cred = credentials.Certificate(service_account_info)
-        if not firebase_admin._apps:
-            firebase_admin.initialize_app(cred)
-        _firebase_admin_ready = True
-
+    if not HAS_FIREBASE_ADMIN:
+        raise RuntimeError("Firebase Admin SDK is not installed.")
+    initialize_firebase_admin()
     return firestore.client()
 
 
