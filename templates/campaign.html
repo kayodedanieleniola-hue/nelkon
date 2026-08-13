@@ -192,6 +192,10 @@ footer{border-top:1px solid var(--border);padding:80px 24px 40px 24px;position:r
 .panel { display: none; transition: opacity 0.3s ease; }
 .panel.active { display: block; }
 
+.auth-gate-box { background: rgba(10,2,2,0.8); border: 1px solid var(--border); border-radius: var(--rs); padding: 40px 24px; text-align: center; margin: 20px 0; box-shadow: 0 12px 40px rgba(0,0,0,0.5); }
+.btn-google-auth { background: rgba(255,255,255,0.06); border: 1px solid var(--border); color: var(--white); padding: 14px 28px; border-radius: var(--rs); font-size: 15px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 12px; transition: var(--tr); width: 100%; max-width: 360px; margin-top: 16px; }
+.btn-google-auth:hover { background: rgba(201,154,74,0.15); border-color: var(--bronze-light); color: var(--bronze-light); transform: translateY(-2px); }
+
 .pkg-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin: 24px 0; }
 .pkg { position: relative; background: rgba(10,2,2,0.6); border: 1px solid var(--border); border-radius: var(--rs); padding: 24px 20px; text-align: left; cursor: pointer; transition: var(--tr); display: flex; flex-direction: column; justify-content: space-between; }
 .pkg:hover { border-color: rgba(201,154,74,0.4); transform: translateY(-3px); }
@@ -237,6 +241,7 @@ footer{border-top:1px solid var(--border);padding:80px 24px 40px 24px;position:r
 
 </style>
 <link rel="icon" href="/static/image/logo.png" type="image/png">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <script src="https://js.paystack.co/v1/inline.js"></script>
 </head>
 <body>
@@ -369,10 +374,10 @@ footer{border-top:1px solid var(--border);padding:80px 24px 40px 24px;position:r
     <div class="ct-info" style="max-width:720px;margin:0 auto;width:100%;">
       <span class="tag">Join the Movement</span>
       <h3 style="margin-bottom:8px;">Claim your spot in the Future Brand Movement.</h3>
-      <p style="margin-bottom:32px;color:var(--muted);">Answer a few quick questions and choose your tier to secure your brand transformation strategy session.</p>
+      <p style="margin-bottom:32px;color:var(--muted);">Get started by signing in with your account, then complete your registration questions and select your tier.</p>
 
       <!-- STEP PROGRESS RAIL -->
-      <div class="rail">
+      <div class="rail" id="stepRail">
         <div class="rail-fill" id="railFill"></div>
         <div class="rail-dot active" id="dot1"><span>1</span>Questions</div>
         <div class="rail-dot" id="dot2"><span>2</span>Package</div>
@@ -380,6 +385,24 @@ footer{border-top:1px solid var(--border);padding:80px 24px 40px 24px;position:r
       </div>
 
       <div id="formAlert" class="alert alert-err"></div>
+
+      <!-- PANEL 0: AUTH GATE (SHOWN IF USER IS NOT SIGNED IN) -->
+      <div class="panel" id="panelAuth">
+        <div class="auth-gate-box">
+          <i class="fas fa-user-lock" style="font-size:36px;color:var(--bronze-light);margin-bottom:16px;"></i>
+          <h4 style="font-size:20px;color:var(--white);margin-bottom:10px;">Account Sign-In Required</h4>
+          <p style="font-size:14px;color:var(--muted);max-width:480px;margin:0 auto 20px auto;line-height:1.6;">
+            To unlock the 3-step registration questionnaire and secure your transformation slot, please sign in with Google or your account.
+          </p>
+          <button type="button" id="googleAuthBtn" class="btn-google-auth">
+            <svg width="18" height="18" viewBox="0 0 24 24" style="display:inline-block;vertical-align:middle;"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
+            Continue with Google
+          </button>
+          <div style="margin-top:20px;font-size:13px;color:var(--muted);">
+            Already have an account? <a href="/login?redirect=/campaign" style="color:var(--bronze-light);font-weight:600;">Sign in with Email</a>
+          </div>
+        </div>
+      </div>
 
       <!-- PANEL 1: QUESTIONS -->
       <div class="panel active" id="panel1">
@@ -662,12 +685,16 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 
 <script type="module">
-import { onAuthStateChanged, auth } from '/static/js/nak-auth.js';
+import { onAuthStateChanged, auth, signInWithGoogle } from '/static/js/nak-auth.js';
 
 const PAYSTACK_KEY = 'pk_live_eefc2236ca35e9b3d72ee382cba858121bb8edd8';
 const state = { step: 1, user: null, questions: {}, package: 'evolution', pendingRegistrationId: null };
-const labels = ['Questions', 'Package', 'Success'];
-const panels = document.querySelectorAll('.panel');
+const panels = {
+  auth: document.getElementById('panelAuth'),
+  1: document.getElementById('panel1'),
+  2: document.getElementById('panel2'),
+  3: document.getElementById('panel3')
+};
 const railDots = document.querySelectorAll('.rail-dot');
 const railFill = document.getElementById('railFill');
 let userCurrency = 'USD';
@@ -775,6 +802,17 @@ function goToStep(s){
   state.step = s;
   hideAlert();
 
+  // If user is not logged in, force panelAuth
+  if (!state.user && s < 3) {
+    if (panels.auth) panels.auth.classList.add('active');
+    if (panels[1]) panels[1].classList.remove('active');
+    if (panels[2]) panels[2].classList.remove('active');
+    if (panels[3]) panels[3].classList.remove('active');
+    return;
+  }
+
+  if (panels.auth) panels.auth.classList.remove('active');
+
   // Rail fill width: step 1 -> 0%, step 2 -> 50%, step 3 -> 100%
   if (railFill) railFill.style.width = ((s - 1) * 50) + '%';
 
@@ -785,22 +823,43 @@ function goToStep(s){
     else if (stepNum < s) dot.classList.add('done');
   });
 
-  panels.forEach((p, i) => {
-    if (i + 1 === s) p.classList.add('active');
-    else p.classList.remove('active');
+  [1, 2, 3].forEach((pNum) => {
+    if (panels[pNum]) {
+      if (pNum === s) panels[pNum].classList.add('active');
+      else panels[pNum].classList.remove('active');
+    }
   });
 }
 
 // Attach Event Listeners
 document.addEventListener('DOMContentLoaded', async () => {
+  // Google Auth Button Click
+  const googleBtn = document.getElementById('googleAuthBtn');
+  if (googleBtn) {
+    googleBtn.addEventListener('click', async () => {
+      try {
+        googleBtn.disabled = true;
+        googleBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing in with Google...';
+        await signInWithGoogle();
+      } catch(err) {
+        console.error('Google Sign-in error:', err);
+        showAlert(err.message || 'Google sign-in failed. Please try again.');
+        googleBtn.disabled = false;
+        googleBtn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" style="display:inline-block;vertical-align:middle;"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg> Continue with Google';
+      }
+    });
+  }
+
   onAuthStateChanged(auth, async (u) => {
     state.user = u;
     if (u) {
       const nameInput = document.getElementById('fullName');
       if (nameInput && !nameInput.value) nameInput.value = u.displayName || '';
       userCurrency = detectUserCurrency(u.email);
+      goToStep(1);
     } else {
       userCurrency = detectUserCurrency('');
+      goToStep(1);
     }
     exchangeRates = await fetchExchangeRates();
     updatePrices();
@@ -821,7 +880,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       state.questions = { fullName: name, business: biz, challenge: chal };
 
-      // Optional pending backend save
       if (state.user) {
         try {
           const res = await fetch('/api/campaign/pending', {
@@ -878,14 +936,12 @@ document.addEventListener('DOMContentLoaded', async () => {
       const usd = parseFloat(selectedPkg.dataset.usd);
       const pkgKey = selectedPkg.dataset.pkg;
       const pkgName = selectedPkg.querySelector('h4')?.textContent || 'Campaign Registration';
+      const payEmail = state.user?.email || '';
 
-      let payEmail = state.user?.email || '';
       if (!payEmail) {
-        payEmail = prompt('Please enter your email address to receive registration details & payment receipt:') || '';
-        if (!payEmail || !payEmail.includes('@')) {
-          showAlert('A valid email address is required for registration.');
-          return;
-        }
+        showAlert('Please sign in to proceed with payment checkout.');
+        goToStep(1);
+        return;
       }
 
       // Convert USD to NGN for Paystack checkout (Paystack processes NGN)
