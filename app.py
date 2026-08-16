@@ -181,26 +181,58 @@ def verify_firebase_id_token(id_token):
         return None
 
 
+def parse_firebase_service_account_info(raw_val):
+    if not raw_val or not isinstance(raw_val, str):
+        return None
+    val = raw_val.strip()
+    if (val.startswith("'") and val.endswith("'")) or (val.startswith('"') and val.endswith('"')):
+        val = val[1:-1].strip()
+
+    try:
+        data = json.loads(val)
+    except Exception:
+        try:
+            fixed = val.replace("\\n", "\n")
+            data = json.loads(fixed)
+        except Exception:
+            return None
+
+    if isinstance(data, dict):
+        if "private_key" in data and isinstance(data["private_key"], str):
+            data["private_key"] = data["private_key"].replace("\\n", "\n")
+        return data
+    return None
+
+
 def initialize_firebase_admin():
     global _firebase_admin_ready
     if not HAS_FIREBASE_ADMIN:
-        raise RuntimeError("Firebase Admin SDK is not installed.")
+        return False
 
     if not _firebase_admin_ready:
         service_account_json = os.environ.get("FIREBASE_SERVICE_ACCOUNT_JSON")
         if not service_account_json:
-            raise RuntimeError("FIREBASE_SERVICE_ACCOUNT_JSON is not configured.")
-        service_account_info = json.loads(service_account_json)
-        cred = credentials.Certificate(service_account_info)
-        if not firebase_admin._apps:
-            firebase_admin.initialize_app(cred)
-        _firebase_admin_ready = True
+            return False
+        service_account_info = parse_firebase_service_account_info(service_account_json)
+        if not service_account_info:
+            return False
+        try:
+            cred = credentials.Certificate(service_account_info)
+            if not firebase_admin._apps:
+                firebase_admin.initialize_app(cred)
+            _firebase_admin_ready = True
+        except Exception as exc:
+            print(f"Firebase initialize app warning: {exc}")
+            return False
+
+    return _firebase_admin_ready
 
 
 def get_firebase_auth():
     if not HAS_FIREBASE_ADMIN:
-        raise RuntimeError("Firebase Admin SDK is not installed.")
-    initialize_firebase_admin()
+        return None
+    if not initialize_firebase_admin():
+        return None
     return firebase_auth
 
 
@@ -277,6 +309,20 @@ def get_quota_db():
             starts_at TEXT,
             expires_at TEXT,
             created_at TEXT NOT NULL
+        )
+        """
+    )
+    conn.execute(
+        """
+        CREATE TABLE IF NOT EXISTS strategy_calls (
+            id TEXT PRIMARY KEY,
+            name TEXT NOT NULL,
+            email TEXT NOT NULL,
+            phone TEXT,
+            message TEXT NOT NULL,
+            status TEXT NOT NULL DEFAULT 'new',
+            created_at TEXT NOT NULL,
+            updated_at TEXT
         )
         """
     )
@@ -691,8 +737,8 @@ def admin_summary():
     strategy_calls = []
     error = None
 
-    try:
-        db = get_firestore_client()
+    db = get_firestore_client()
+    if db is not None:
         try:
             registrations = [doc.to_dict() for doc in db.collection("campaignRegistrations").stream()]
         except Exception as exc:
@@ -707,8 +753,16 @@ def admin_summary():
             strategy_calls = [doc.to_dict() for doc in db.collection("strategyCalls").stream()]
         except Exception as exc:
             error = f"{error}; strategyCalls: {exc}" if error else f"strategyCalls: {exc}"
-    except Exception as exc:
-        return jsonify({"error": f"Firestore connection failed: {exc}"}), 500
+    else:
+        error = "Firebase Firestore is unconfigured or offline (FIREBASE_SERVICE_ACCOUNT_JSON missing or invalid)."
+        # Fallback local strategy calls count
+        try:
+            with get_quota_db() as conn:
+                count_row = conn.execute("SELECT COUNT(*) FROM strategy_calls").fetchone()
+                if count_row:
+                    strategy_calls = [1] * count_row[0]
+        except Exception:
+            pass
 
     total_revenue = 0
     pending_payments = 0
@@ -772,12 +826,14 @@ def chat_team():
 @require_strict_auth
 def visitor_conversations():
     user = request._user
+    conversations = []
     try:
         db = get_firestore_client()
-        docs = db.collection("teamConversations").where("visitorId", "==", user["uid"]).stream()
-        conversations = [json_safe({"id": doc.id, **doc.to_dict()}) for doc in docs]
+        if db:
+            docs = db.collection("teamConversations").where("visitorId", "==", user["uid"]).stream()
+            conversations = [json_safe({"id": doc.id, **doc.to_dict()}) for doc in docs]
     except Exception as exc:
-        return jsonify({"error": str(exc)}), 500
+        print(f"Visitor conversations warning: {exc}")
 
     conversations.sort(key=lambda item: item.get("lastUpdated", ""), reverse=True)
     return jsonify({"conversations": conversations})
@@ -810,8 +866,11 @@ def start_visitor_conversation():
         "createdAt": now
     }
 
+    db = get_firestore_client()
+    if not db:
+        return jsonify({"error": "Live chat service is temporarily unavailable."}), 503
+
     try:
-        db = get_firestore_client()
         doc_ref = db.collection("teamConversations").document(conversation_id)
         existing = doc_ref.get()
         if existing.exists:
@@ -836,8 +895,10 @@ def start_visitor_conversation():
 @require_strict_auth
 def visitor_messages(conversation_id):
     user = request._user
+    db = get_firestore_client()
+    if not db:
+        return jsonify({"messages": []})
     try:
-        db = get_firestore_client()
         conv = db.collection("teamConversations").document(conversation_id).get()
         if not conv.exists or conv.to_dict().get("visitorId") != user["uid"]:
             return jsonify({"error": "Conversation was not found."}), 404
@@ -876,8 +937,11 @@ def visitor_send_message(conversation_id):
             "size": attachment.get("size")
         }
 
+    db = get_firestore_client()
+    if not db:
+        return jsonify({"error": "Live chat is temporarily offline."}), 503
+
     try:
-        db = get_firestore_client()
         conv_ref = db.collection("teamConversations").document(conversation_id)
         conv = conv_ref.get()
         if not conv.exists or conv.to_dict().get("visitorId") != user["uid"]:
@@ -894,12 +958,14 @@ def visitor_send_message(conversation_id):
 @app.route("/api/admin/chat/conversations", methods=["GET"])
 @require_admin_session
 def admin_chat_conversations():
+    conversations = []
     try:
         db = get_firestore_client()
-        docs = db.collection("teamConversations").stream()
-        conversations = [json_safe({"id": doc.id, **doc.to_dict()}) for doc in docs]
+        if db:
+            docs = db.collection("teamConversations").stream()
+            conversations = [json_safe({"id": doc.id, **doc.to_dict()}) for doc in docs]
     except Exception as exc:
-        return jsonify({"error": str(exc)}), 500
+        print(f"Admin chat conversations warning: {exc}")
 
     conversations.sort(key=lambda item: item.get("lastUpdated", ""), reverse=True)
     return jsonify({"conversations": conversations})
@@ -908,8 +974,10 @@ def admin_chat_conversations():
 @app.route("/api/admin/chat/conversations/<conversation_id>/messages", methods=["GET"])
 @require_admin_session
 def admin_chat_messages(conversation_id):
+    db = get_firestore_client()
+    if not db:
+        return jsonify({"messages": [], "conversation": None, "warning": "Firebase Firestore is unconfigured."})
     try:
-        db = get_firestore_client()
         conv = db.collection("teamConversations").document(conversation_id).get()
         if not conv.exists:
             return jsonify({"error": "Conversation was not found."}), 404
@@ -949,8 +1017,11 @@ def admin_send_chat_message(conversation_id):
             "size": attachment.get("size")
         }
 
+    db = get_firestore_client()
+    if not db:
+        return jsonify({"error": "Firebase Firestore is unconfigured."}), 503
+
     try:
-        db = get_firestore_client()
         conv_ref = db.collection("teamConversations").document(conversation_id)
         conv = conv_ref.get()
         if not conv.exists:
@@ -967,42 +1038,59 @@ def admin_send_chat_message(conversation_id):
 @app.route("/api/admin/campaign-registrations", methods=["GET"])
 @require_admin_session
 def admin_campaign_registrations():
+    registrations = []
+    warning = None
     try:
         db = get_firestore_client()
-        docs = db.collection("campaignRegistrations").stream()
-        registrations = []
-        for doc in docs:
-            data = doc.to_dict()
-            data["id"] = doc.id
-            registrations.append(json_safe(data))
+        if db:
+            docs = db.collection("campaignRegistrations").stream()
+            for doc in docs:
+                data = doc.to_dict()
+                data["id"] = doc.id
+                registrations.append(json_safe(data))
+        else:
+            warning = "Firebase Firestore is unconfigured or offline (FIREBASE_SERVICE_ACCOUNT_JSON missing or invalid)."
     except Exception as exc:
-        return jsonify({"error": f"Failed to load campaign registrations: {exc}"}), 500
+        print(f"Failed to load campaign registrations: {exc}")
+        warning = f"Failed to load campaign registrations: {exc}"
 
     registrations.sort(key=lambda item: item.get("createdAt", ""), reverse=True)
-    return jsonify({"registrations": registrations})
+    res = {"registrations": registrations}
+    if warning:
+        res["warning"] = warning
+    return jsonify(res)
+
 
 @app.route("/api/admin/users", methods=["GET"])
 @require_admin_session
 def admin_users():
+    users = []
+    warning = None
     try:
         db = get_firestore_client()
-        docs = db.collection("users").stream()
-        users = []
-        for doc in docs:
-            data = doc.to_dict()
-            users.append({
-                "uid": doc.id,
-                "username": data.get("username"),
-                "email": data.get("email"),
-                "photoURL": data.get("photoURL"),
-                "createdAt": json_safe(data.get("createdAt")),
-                "updatedAt": json_safe(data.get("updatedAt"))
-            })
+        if db:
+            docs = db.collection("users").stream()
+            for doc in docs:
+                data = doc.to_dict()
+                users.append({
+                    "uid": doc.id,
+                    "username": data.get("username"),
+                    "email": data.get("email"),
+                    "photoURL": data.get("photoURL"),
+                    "createdAt": json_safe(data.get("createdAt")),
+                    "updatedAt": json_safe(data.get("updatedAt"))
+                })
+        else:
+            warning = "Firebase Firestore is unconfigured or offline (FIREBASE_SERVICE_ACCOUNT_JSON missing or invalid)."
     except Exception as exc:
-        return jsonify({"error": f"Failed to load users: {exc}"}), 500
+        print(f"Failed to load users: {exc}")
+        warning = f"Failed to load users: {exc}"
 
     users.sort(key=lambda item: item.get("createdAt") or item.get("updatedAt") or "", reverse=True)
-    return jsonify({"users": users})
+    res = {"users": users}
+    if warning:
+        res["warning"] = warning
+    return jsonify(res)
 
 def call_gemini_text(gemini_key, sys_prompt, messages):
     try:
@@ -1298,9 +1386,14 @@ def verify_paystack_reference(reference, expected_amount, expected_currency="NGN
 
 def get_firestore_client():
     if not HAS_FIREBASE_ADMIN:
-        raise RuntimeError("Firebase Admin SDK is not installed.")
-    initialize_firebase_admin()
-    return firestore.client()
+        return None
+    if not initialize_firebase_admin():
+        return None
+    try:
+        return firestore.client()
+    except Exception as exc:
+        print(f"Firestore client initialization warning: {exc}")
+        return None
 
 
 @app.route("/api/paystack/verify", methods=["POST"])
@@ -1475,11 +1568,26 @@ def submit_strategy_call():
         "createdAt": now
     }
 
+    # Always persist locally to SQLite
     try:
-        db = get_firestore_client()
-        db.collection("strategyCalls").document(doc_id).set(entry)
+        with get_quota_db() as conn:
+            conn.execute(
+                """
+                INSERT OR REPLACE INTO strategy_calls (id, name, email, phone, message, status, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+                """,
+                (doc_id, entry["name"], entry["email"], entry["phone"], entry["message"], entry["status"], now)
+            )
     except Exception as exc:
-        return jsonify({"saved": False, "error": f"Failed to record booking: {exc}"}), 500
+        print(f"Strategy call SQLite save warning: {exc}")
+
+    # Also persist to Firestore if available
+    db = get_firestore_client()
+    if db:
+        try:
+            db.collection("strategyCalls").document(doc_id).set(entry)
+        except Exception as exc:
+            print(f"Strategy call Firestore save warning: {exc}")
 
     return jsonify({"saved": True, "id": doc_id, "message": "Strategy call request submitted successfully!"})
 
@@ -1487,12 +1595,33 @@ def submit_strategy_call():
 @app.route("/api/admin/strategy-calls", methods=["GET"])
 @require_admin_session
 def admin_strategy_calls():
-    try:
-        db = get_firestore_client()
-        docs = db.collection("strategyCalls").stream()
-        calls = [json_safe({"id": doc.id, **doc.to_dict()}) for doc in docs]
-    except Exception as exc:
-        return jsonify({"error": str(exc)}), 500
+    calls = []
+    db = get_firestore_client()
+    if db:
+        try:
+            docs = db.collection("strategyCalls").stream()
+            calls = [json_safe({"id": doc.id, **doc.to_dict()}) for doc in docs]
+        except Exception as exc:
+            print(f"Admin strategy calls Firestore fetch warning: {exc}")
+
+    if not calls:
+        # Fallback to local SQLite strategy calls
+        try:
+            with get_quota_db() as conn:
+                rows = conn.execute("SELECT * FROM strategy_calls ORDER BY created_at DESC").fetchall()
+                for row in rows:
+                    r = dict(row)
+                    calls.append({
+                        "id": r["id"],
+                        "name": r["name"],
+                        "email": r["email"],
+                        "phone": r["phone"],
+                        "message": r["message"],
+                        "status": r["status"],
+                        "createdAt": r["created_at"]
+                    })
+        except Exception as exc:
+            print(f"Admin strategy calls SQLite fetch warning: {exc}")
 
     calls.sort(key=lambda item: item.get("createdAt", ""), reverse=True)
     return jsonify({"strategyCalls": calls})
@@ -1506,12 +1635,23 @@ def admin_update_strategy_call_status(call_id):
     if new_status not in ["new", "contacted", "completed"]:
         return jsonify({"error": "Invalid status value."}), 400
 
+    now = datetime.now(timezone.utc).isoformat()
+
+    # Update SQLite
     try:
-        db = get_firestore_client()
-        doc_ref = db.collection("strategyCalls").document(call_id)
-        doc_ref.set({"status": new_status, "updatedAt": datetime.now(timezone.utc).isoformat()}, merge=True)
+        with get_quota_db() as conn:
+            conn.execute("UPDATE strategy_calls SET status = ?, updated_at = ? WHERE id = ?", (new_status, now, call_id))
     except Exception as exc:
-        return jsonify({"error": str(exc)}), 500
+        print(f"Update call status SQLite warning: {exc}")
+
+    # Update Firestore if available
+    db = get_firestore_client()
+    if db:
+        try:
+            doc_ref = db.collection("strategyCalls").document(call_id)
+            doc_ref.set({"status": new_status, "updatedAt": now}, merge=True)
+        except Exception as exc:
+            print(f"Update call status Firestore warning: {exc}")
 
     return jsonify({"success": True, "id": call_id, "status": new_status})
 

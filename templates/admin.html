@@ -202,6 +202,11 @@
   </section>
 
   <section class="dashboard" id="dashboard">
+    <div id="adminWarningBanner" style="display:none; background: rgba(239, 210, 139, 0.15); border: 1px solid rgba(239, 210, 139, 0.35); color: #efd28b; padding: 12px 18px; border-radius: 10px; margin-bottom: 20px; font-size: 13px; align-items: center; justify-content: space-between; gap: 12px;">
+      <span id="adminWarningText">⚠️ Firestore connection notice</span>
+      <button type="button" onclick="document.getElementById('adminWarningBanner').style.display='none'" style="background:none; border:none; color:inherit; cursor:pointer; font-weight:bold; font-size:16px;">✕</button>
+    </div>
+
     <div class="hero">
       <div>
         <div class="eyebrow">NAKCONEL Control Center</div>
@@ -640,16 +645,33 @@ async function loadAdmin(){
     document.getElementById('adminStatus').textContent = `Signed in as ${me.name}`;
     document.getElementById('adminCount').textContent = me.configuredAdmins || 7;
 
-    const [summary, registrations, users] = await Promise.all([
+    const [summaryRes, registrationsRes, usersRes] = await Promise.allSettled([
       adminFetch('/api/admin/summary'),
       adminFetch('/api/admin/campaign-registrations'),
       adminFetch('/api/admin/users')
     ]);
 
-    document.getElementById('campaignCount').textContent = summary.campaignRegistrations;
+    const summary = summaryRes.status === 'fulfilled' ? summaryRes.value : {};
+    const registrations = registrationsRes.status === 'fulfilled' ? registrationsRes.value : { registrations: [] };
+    const users = usersRes.status === 'fulfilled' ? usersRes.value : { users: [] };
+
+    const warningText = summary.warning || registrations.warning || users.warning ||
+      (summaryRes.status === 'rejected' ? summaryRes.reason.message : null) ||
+      (usersRes.status === 'rejected' ? usersRes.reason.message : null);
+
+    if (warningText) {
+      const banner = document.getElementById('adminWarningBanner');
+      const bannerText = document.getElementById('adminWarningText');
+      if (banner && bannerText) {
+        bannerText.textContent = `⚠️ ${warningText}`;
+        banner.style.display = 'flex';
+      }
+    }
+
+    document.getElementById('campaignCount').textContent = summary.campaignRegistrations || 0;
     document.getElementById('campaignCount').title = `${summary.pendingCampaignPayments || 0} pending payment / ${summary.paidCampaignRegistrations || 0} paid`;
-    document.getElementById('userCount').textContent = summary.registeredUsers;
-    const revenueLocal = await fmtNgnAsLocal(summary.totalRevenueNgn);
+    document.getElementById('userCount').textContent = summary.registeredUsers || 0;
+    const revenueLocal = await fmtNgnAsLocal(summary.totalRevenueNgn || 0);
     document.getElementById('revenueCount').textContent = revenueLocal;
     document.getElementById('revenueCount').title = `Approximate conversion from NGN to your local currency`;
     document.getElementById('callsCount').textContent = summary.strategyCalls || 0;
@@ -681,7 +703,7 @@ async function loadAdmin(){
     document.getElementById('usersMeta').textContent = `${userRows.length} total`;
     document.getElementById('userRows').innerHTML = userRows.length ? userRows.slice(0, 8).map(user => (
       `<div class="user-row"><div><strong>${esc(user.username || user.email || 'Unknown')}</strong><br><span>${esc(user.email || user.uid)}</span></div></div>`
-    )).join('') : '<div class="user-row"><span>No users yet.</span></div>';
+    )).join('') : '<div class="user-row"><span>No users recorded yet.</span></div>';
 
     const teamData = me.team || [];
     document.getElementById('teamMeta').textContent = `${teamData.length} people`;
@@ -689,8 +711,8 @@ async function loadAdmin(){
       `<div class="team-row"><div><strong>${esc(member.name)}</strong><br><span>${esc(member.role)}</span></div><span class="chip">Admin</span></div>`
     ).join('') : '<div class="team-row"><span>No team members.</span></div>';
 
-    await loadStrategyCalls();
-    await loadAdminChats();
+    try { await loadStrategyCalls(); } catch(e) {}
+    try { await loadAdminChats(); } catch(e) {}
   }catch(err){
     showError(err.message);
   }
