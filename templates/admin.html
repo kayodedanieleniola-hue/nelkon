@@ -216,7 +216,8 @@
       <div class="status" id="adminStatus">Loading...</div>
     </div>
 
-    <div class="cards">
+    <div class="cards" style="grid-template-columns: repeat(6, 1fr);">
+      <div class="card"><small>Training & Career</small><b id="careerCount">0</b></div>
       <div class="card"><small>Campaign Submissions</small><b id="campaignCount">0</b></div>
       <div class="card"><small>Strategy Call Bookings</small><b id="callsCount">0</b></div>
       <div class="card"><small>Registered Users</small><b id="userCount">0</b></div>
@@ -226,6 +227,31 @@
 
     <div class="grid">
       <div>
+        <!-- Training & Career Registrations Panel -->
+        <section class="panel">
+          <div class="panel-head">
+            <h2>Training & Career Applications</h2>
+            <span id="careerMeta">Newest first</span>
+          </div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Applicant Info</th>
+                  <th>Program / Track</th>
+                  <th>Registration Details</th>
+                  <th>Status</th>
+                  <th>Date</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="careerRows">
+                <tr><td colspan="6" class="muted">Loading training & career applications...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
         <!-- Strategy Call Bookings Panel -->
         <section class="panel">
           <div class="panel-head"><h2>Booked Strategy Calls</h2><span id="callsMeta">Newest first</span></div>
@@ -685,6 +711,8 @@ async function loadAdmin(){
       }
     }
 
+    document.getElementById('careerCount').textContent = summary.careerRegistrations || 0;
+    document.getElementById('careerCount').title = `${summary.pendingCareerPayments || 0} pending payment / ${summary.approvedCareerRegistrations || 0} approved`;
     document.getElementById('campaignCount').textContent = summary.campaignRegistrations || 0;
     document.getElementById('campaignCount').title = `${summary.pendingCampaignPayments || 0} pending payment / ${summary.paidCampaignRegistrations || 0} paid`;
     document.getElementById('userCount').textContent = summary.registeredUsers || 0;
@@ -728,11 +756,83 @@ async function loadAdmin(){
       `<div class="team-row"><div><strong>${esc(member.name)}</strong><br><span>${esc(member.role)}</span></div><span class="chip">Admin</span></div>`
     ).join('') : '<div class="team-row"><span>No team members.</span></div>';
 
+    try { await loadCareerRegistrations(); } catch(e) {}
     try { await loadStrategyCalls(); } catch(e) {}
     try { await loadAdminChats(); } catch(e) {}
   }catch(err){
     showError(err.message);
   }
+}
+
+async function updateCareerStatus(regId, newStatus){
+  try {
+    await adminFetch(`/api/admin/career-registrations/${encodeURIComponent(regId)}/status`, {
+      method: 'POST',
+      body: JSON.stringify({ status: newStatus })
+    });
+    await loadCareerRegistrations();
+    loadAdmin();
+  } catch(err) {
+    alert(err.message || 'Status update failed.');
+  }
+}
+
+async function loadCareerRegistrations(){
+  const data = await adminFetch('/api/admin/career-registrations');
+  const rows = data.registrations || [];
+  document.getElementById('careerMeta').textContent = `${rows.length} total (${data.pendingCount || 0} pending / ${data.approvedCount || 0} approved)`;
+  
+  const tbody = document.getElementById('careerRows');
+  tbody.innerHTML = rows.length ? rows.map(item => {
+    const st = (item.status || 'pending_payment').toLowerCase();
+    const isIntern = (item.type || '').toLowerCase() === 'internship' || (item.id || '').startsWith('INT');
+    const isApproved = st === 'paid' || st === 'approved' || (isIntern && st === 'submitted');
+    
+    let statusBadge = '';
+    if (isIntern) {
+      if (st === 'approved') {
+        statusBadge = '<span class="badge-completed">Shortlisted / Approved ✓</span>';
+      } else {
+        statusBadge = '<span class="badge-completed">Application Received ✓</span>';
+      }
+    } else {
+      statusBadge = isApproved ? '<span class="badge-completed">Approved & Paid ✓</span>' : '<span class="badge-new">Pending Payment ⏳</span>';
+    }
+
+    const d = item.detailsParsed || {};
+    const typeLabel = (item.type || 'registration').toUpperCase();
+    
+    let detailsHtml = '';
+    if (d.age || d.gender || d.address || d.guardianName) {
+      detailsHtml += `<small class="muted">Age/Gender: ${esc(d.age || '-')}/${esc(d.gender || '-')}</small><br>`;
+      if (d.address) detailsHtml += `<small class="muted">Address: ${esc(d.address)}</small><br>`;
+      if (d.guardianName) detailsHtml += `<small class="muted">Guardian: ${esc(d.guardianName)} (${esc(d.guardianPhone || '-')})</small><br>`;
+    }
+    if (d.commitment) detailsHtml += `<small class="muted">Commitment: ${esc(d.commitment)}</small><br>`;
+    if (d.availableDays) detailsHtml += `<small class="muted">Days: ${esc(d.availableDays)}</small><br>`;
+    if (item.statement || d.comments) detailsHtml += `<strong>Statement:</strong> <span class="muted">${esc(item.statement || d.comments)}</span>`;
+    if (!detailsHtml) detailsHtml = '<span class="muted">-</span>';
+
+    let actionBtn = '';
+    if (isIntern) {
+      actionBtn = (st === 'approved') 
+        ? `<button class="btn" style="padding:4px 8px;font-size:11px" onclick="updateCareerStatus('${esc(item.id)}', 'submitted')">Mark Received ⏳</button>`
+        : `<button class="btn primary" style="padding:4px 8px;font-size:11px" onclick="updateCareerStatus('${esc(item.id)}', 'approved')">Approve / Shortlist ✓</button>`;
+    } else {
+      actionBtn = isApproved 
+        ? `<button class="btn" style="padding:4px 8px;font-size:11px" onclick="updateCareerStatus('${esc(item.id)}', 'pending_payment')">Mark Pending ⏳</button>`
+        : `<button class="btn primary" style="padding:4px 8px;font-size:11px" onclick="updateCareerStatus('${esc(item.id)}', 'approved')">Mark Approved ✓</button>`;
+    }
+
+    return `<tr>
+      <td><strong>${esc(item.name || 'Applicant')}</strong><br><span class="muted">${esc(item.email)}</span><br><small>${esc(item.phone || '-')}</small></td>
+      <td><strong>${esc(item.program || 'Career Program')}</strong><br><span class="chip">${esc(typeLabel)}</span></td>
+      <td style="max-width:320px;">${detailsHtml}</td>
+      <td>${statusBadge}<br><small class="muted">#${esc(item.id)}</small></td>
+      <td>${esc(fmtDate(item.created_at || item.createdAt))}</td>
+      <td>${actionBtn}</td>
+    </tr>`;
+  }).join('') : '<tr><td colspan="6" class="muted">No training or internship applications recorded yet.</td></tr>';
 }
 
 // Check if admin is logged in

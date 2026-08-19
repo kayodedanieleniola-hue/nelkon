@@ -190,8 +190,8 @@ p.lead {
 
 <div class="wrap">
   <div class="icon-badge">✓</div>
-  <h1>Registration &amp; Payment <span>Approved!</span></h1>
-  <p class="lead">Your spot in the Nakconel Career Store Program has been confirmed and recorded in our system.</p>
+  <h1 id="mainTitle">Registration &amp; Payment <span>Approved!</span></h1>
+  <p class="lead" id="mainLead">Your spot in the Nakconel Career Store Program has been confirmed and recorded in our system.</p>
 
   <div class="receipt-card">
     <div class="row">
@@ -207,12 +207,12 @@ p.lead {
       <span class="val" id="recId">#TRN-0000</span>
     </div>
     <div class="row">
-      <span class="label">Amount Paid</span>
+      <span class="label" id="recAmountLabel">Amount Paid</span>
       <span class="val" style="color:var(--bronze-light);" id="recAmount">₦250,000 NGN</span>
     </div>
     <div class="row">
       <span class="label">Admin Status</span>
-      <span class="val"><span class="badge-approved">Approved &amp; Paid ✓</span></span>
+      <span class="val"><span class="badge-approved" id="recBadge">Approved &amp; Paid ✓</span></span>
     </div>
   </div>
 
@@ -220,15 +220,15 @@ p.lead {
     <div class="steps-title">What Happens Next</div>
     <div class="step-item">
       <div class="step-num">1</div>
-      <div>Our team has received your registration in the Nakconel Admin Desk.</div>
+      <div>Our team has received your submission in the Nakconel Admin Desk.</div>
     </div>
     <div class="step-item">
       <div class="step-num">2</div>
-      <div>Your assigned instructor / mentor will reach out to your contact email within 24 hours.</div>
+      <div>Our hiring team / mentors will review your application details within 24–48 hours.</div>
     </div>
     <div class="step-item">
       <div class="step-num">3</div>
-      <div>You will receive your Onboarding Welcome Kit &amp; schedule access.</div>
+      <div>You will receive next steps &amp; communication via your provided contact email.</div>
     </div>
   </div>
 
@@ -242,8 +242,19 @@ p.lead {
 <script>
 const params = new URLSearchParams(window.location.search);
 const regId = params.get('id') || 'TRN-0000';
+const typeParam = params.get('type') || '';
+const isIntern = regId.startsWith('INT') || typeParam === 'internship';
 
 document.getElementById('recId').textContent = '#' + regId;
+
+if (isIntern) {
+  document.getElementById('mainTitle').innerHTML = 'Application <span>Submitted!</span>';
+  document.getElementById('mainLead').textContent = 'Your internship application has been received and routed directly to the Nakconel Admin Desk.';
+  document.getElementById('recAmountLabel').textContent = 'Fee';
+  document.getElementById('recAmount').textContent = 'Free Application (No Fee)';
+  document.getElementById('recBadge').className = 'badge-approved';
+  document.getElementById('recBadge').textContent = 'Submitted ✓';
+}
 
 fetch('/api/registration/' + regId)
   .then(res => res.json())
@@ -251,9 +262,19 @@ fetch('/api/registration/' + regId)
     if (data.success && data.registration) {
       const r = data.registration;
       document.getElementById('recName').textContent = r.name || 'Applicant';
-      document.getElementById('recProgram').textContent = r.program || 'Career Program';
-      const amt = Number(r.amount || 250000).toLocaleString();
-      document.getElementById('recAmount').textContent = '₦' + amt + ' NGN';
+      document.getElementById('recProgram').textContent = r.program || (isIntern ? 'Nakconel Internship Track' : 'Career Program');
+      const isFree = Number(r.amount) === 0 || r.type === 'internship' || isIntern;
+      if (isFree) {
+        document.getElementById('mainTitle').innerHTML = 'Application <span>Submitted!</span>';
+        document.getElementById('mainLead').textContent = 'Your internship application has been received and routed directly to the Nakconel Admin Desk.';
+        document.getElementById('recAmountLabel').textContent = 'Fee';
+        document.getElementById('recAmount').textContent = 'Free Application (No Fee)';
+        document.getElementById('recBadge').className = 'badge-approved';
+        document.getElementById('recBadge').textContent = 'Submitted ✓';
+      } else {
+        const amt = Number(r.amount || 250000).toLocaleString();
+        document.getElementById('recAmount').textContent = '₦' + amt + ' NGN';
+      }
     }
   }).catch(err => console.log(err));
 </script>

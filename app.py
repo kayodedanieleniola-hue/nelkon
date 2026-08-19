@@ -769,7 +769,7 @@ def apply_internship_api():
                 (id, type, name, email, phone, program, experience_level, statement, details, amount, status, created_at, updated_at)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
-                (reg_id, "internship", name, email, phone, track, experience, statement, details_str, 250000, "pending_payment", now, now)
+                (reg_id, "internship", name, email, phone, track, experience, statement, details_str, 0, "submitted", now, now)
             )
     except Exception as exc:
         print(f"Error saving internship application: {exc}")
@@ -780,7 +780,7 @@ def apply_internship_api():
         try:
             db.collection("careerRegistrations").document(reg_id).set({
                 "id": reg_id, "type": "internship", "name": name, "email": email, "phone": phone,
-                "program": track, "amount": 250000, "status": "pending_payment",
+                "program": track, "amount": 0, "status": "submitted",
                 "experienceLevel": experience, "statement": statement,
                 "details": details_str, "createdAt": now, "updatedAt": now
             })
@@ -790,8 +790,8 @@ def apply_internship_api():
     return jsonify({
         "success": True,
         "id": reg_id,
-        "amount": 250000,
-        "redirect_url": f"/payment.html?id={reg_id}&type=internship"
+        "amount": 0,
+        "redirect_url": f"/thank-you.html?id={reg_id}&type=internship"
     })
 
 @app.route("/api/registration/<reg_id>", methods=["GET"])
@@ -810,17 +810,18 @@ def get_registration_api(reg_id):
     except Exception as exc:
         print(f"Error fetching registration: {exc}")
 
+    is_int = reg_id.startswith("INT")
     return jsonify({
         "success": True,
         "registration": {
             "id": reg_id,
-            "type": "training" if reg_id.startswith("TRN") else "internship",
+            "type": "internship" if is_int else "training",
             "name": "Applicant",
             "email": "applicant@nakconel.com",
             "phone": "+234 800 000 0000",
-            "program": "Nakconel Professional Program",
-            "amount": 250000,
-            "status": "pending_payment",
+            "program": "Nakconel Internship Program" if is_int else "Nakconel Professional Program",
+            "amount": 0 if is_int else 250000,
+            "status": "submitted" if is_int else "pending_payment",
             "created_at": datetime.now(timezone.utc).isoformat()
         }
     })
@@ -1023,20 +1024,61 @@ def complete_payment_api(reg_id):
 def admin_career_registrations():
     registrations = []
     total_paid_revenue = 0
+    pending_count = 0
+    approved_count = 0
     try:
         with get_quota_db() as conn:
             rows = conn.execute("SELECT * FROM career_registrations ORDER BY created_at DESC").fetchall()
             for row in rows:
                 item = dict(row)
-                if item.get("status") == "paid":
+                if item.get("details"):
+                    try:
+                        item["detailsParsed"] = json.loads(item["details"])
+                    except Exception:
+                        item["detailsParsed"] = {}
+                else:
+                    item["detailsParsed"] = {}
+
+                st = (item.get("status") or "").lower()
+                if st in ["paid", "approved"]:
                     total_paid_revenue += int(item.get("amount") or 250000)
+                    approved_count += 1
+                else:
+                    pending_count += 1
                 registrations.append(item)
     except Exception as exc:
         print(f"Error loading career registrations: {exc}")
 
+    # Fallback to Firestore if sqlite has no rows
+    db = get_firestore_client()
+    if db and not registrations:
+        try:
+            docs = db.collection("careerRegistrations").stream()
+            for doc in docs:
+                item = doc.to_dict()
+                if item.get("details"):
+                    try:
+                        item["detailsParsed"] = json.loads(item["details"])
+                    except Exception:
+                        item["detailsParsed"] = {}
+                else:
+                    item["detailsParsed"] = {}
+
+                st = (item.get("status") or "").lower()
+                if st in ["paid", "approved"]:
+                    total_paid_revenue += int(item.get("amount") or 250000)
+                    approved_count += 1
+                else:
+                    pending_count += 1
+                registrations.append(item)
+        except Exception as exc:
+            print(f"Firestore career reg warning: {exc}")
+
     return jsonify({
         "registrations": registrations,
         "total": len(registrations),
+        "pendingCount": pending_count,
+        "approvedCount": approved_count,
         "totalRevenueNgn": total_paid_revenue
     })
 
@@ -1226,10 +1268,35 @@ def admin_summary():
         except (TypeError, ValueError):
             pass
 
+    # Career / Training Registrations summary stats
+    career_registrations_list = []
+    career_pending = 0
+    career_approved = 0
+    try:
+        with get_quota_db() as conn:
+            c_rows = conn.execute("SELECT * FROM career_registrations").fetchall()
+            for cr in c_rows:
+                c_item = dict(cr)
+                st = (c_item.get("status") or "").lower()
+                if st in ["paid", "approved"]:
+                    career_approved += 1
+                    try:
+                        total_revenue += int(c_item.get("amount") or 250000)
+                    except (TypeError, ValueError):
+                        pass
+                else:
+                    career_pending += 1
+                career_registrations_list.append(c_item)
+    except Exception as exc:
+        print(f"Error checking career registrations for summary: {exc}")
+
     result = {
         "campaignRegistrations": len(registrations),
         "paidCampaignRegistrations": paid_registrations,
         "pendingCampaignPayments": pending_payments,
+        "careerRegistrations": len(career_registrations_list),
+        "pendingCareerPayments": career_pending,
+        "approvedCareerRegistrations": career_approved,
         "registeredUsers": len(users),
         "strategyCalls": len(strategy_calls),
         "totalRevenueNgn": total_revenue,
@@ -1718,7 +1785,7 @@ def generate_image():
                 headers={"Content-Type": "application/json", "Authorization": f"Bearer {groq_key}"},
                 json={"model": "llama-3.3-70b-versatile", "max_tokens": 120, "temperature": 0.8,
                       "messages": [
-                          {"role": "system", "content": "You write vivid, detailed text-to-image prompts in 2-3 sentences max. Output ONLY the prompt text, nothing else. Keep it under 60 words."},
+                          {"role": "system", "content": "You write vivid, detailed text-to-image prompts in 2-3 sentences max. IMPORTANT: Output clean prompts without any text, logos, or watermarks. Output ONLY the prompt text, nothing else. Keep it under 60 words."},
                           {"role": "user", "content": prompt}
                       ]}
             )
@@ -1728,21 +1795,24 @@ def generate_image():
         except Exception:
             pass
 
+    # Ensure negative prompting instructions for watermark removal
+    clean_prompt = f"{final_prompt}, no watermark, no logo, no signature, clean background, ultra-high resolution"
+
     try:
         if pollinations_key:
             r = requests.post(
                 "https://gen.pollinations.ai/v1/images/generations",
                 headers={"Authorization": f"Bearer {pollinations_key}", "Content-Type": "application/json"},
-                json={"model": "flux", "prompt": final_prompt, "n": 1, "size": "1024x1024", "response_format": "b64_json"},
+                json={"model": "flux", "prompt": clean_prompt, "n": 1, "size": "1024x1024", "response_format": "b64_json"},
                 timeout=30
             )
             item = r.json().get("data", [{}])[0]
             if item.get("b64_json"):
                 return jsonify({"image": f"data:image/jpeg;base64,{item['b64_json']}", "promptUsed": final_prompt, "quota": quota})
         
-        # Fallback to public Pollinations URL
-        encoded_prompt = urllib.parse.quote(final_prompt)
-        image_url = f"https://image.pollinations.ai/prompt/{encoded_prompt}?model=flux&width=1024&height=1024&nologo=true"
+        # Fallback to public Pollinations URL with explicit watermark removal parameters
+        encoded_prompt = urllib.parse.quote(clean_prompt)
+        image_url = f"https://image.pollinations.ai/prompt/{encoded_prompt}?model=flux&width=1024&height=1024&nologo=true&private=true&enhance=false"
         return jsonify({"image": image_url, "promptUsed": final_prompt, "quota": quota})
     except Exception as e:
         return jsonify({"error": "Connection error. Please try again."})
