@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Secure Checkout — Nakconel Career Store</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-dark: #0A0202;
+  --wine-deep: #1B0404;
+  --wine-mid: #3D0A0A;
+  --bronze: #C99A4A;
+  --bronze-light: #E8C57A;
+  --bronze-dim: #8B6A2E;
+  --white: #FFFFFF;
+  --muted: #A3917F;
+  --border: rgba(201, 154, 74, 0.2);
+  --rs: 14px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Poppins', sans-serif;
+  background: var(--bg-dark);
+  color: var(--white);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  background-image: 
+    radial-gradient(ellipse 60% 40% at 50% 0%, var(--wine-mid) 0%, transparent 70%),
+    radial-gradient(ellipse 80% 50% at 50% 100%, var(--wine-deep) 0%, var(--bg-dark) 100%);
+}
+
+.wrap {
+  width: 100%;
+  max-width: 680px;
+  background: rgba(27, 4, 4, 0.75);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 40px 32px;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+}
+
+.top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.brand-logo {
+  font-weight: 800;
+  font-size: 22px;
+  letter-spacing: 1px;
+}
+.brand-logo span { color: var(--bronze-light); }
+
+.secure-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--bronze-light);
+  background: rgba(201, 154, 74, 0.1);
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+}
+
+.summary-card {
+  background: rgba(61, 10, 10, 0.5);
+  border: 1px solid var(--border);
+  border-radius: var(--rs);
+  padding: 24px;
+  margin-bottom: 28px;
+}
+
+.summary-title {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--muted);
+  margin-bottom: 12px;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  font-size: 15px;
+}
+.summary-row:last-child { margin-bottom: 0; }
+
+.summary-label { color: var(--muted); }
+.summary-val { font-weight: 600; color: var(--white); text-align: right; }
+
+.price-tag {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px dashed var(--border);
+}
+
+.price-amount {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--bronze-light);
+}
+
+.pay-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.pay-tab {
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.03);
+  color: var(--muted);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.2s;
+}
+
+.pay-tab.active {
+  background: rgba(201, 154, 74, 0.15);
+  border-color: var(--bronze-light);
+  color: var(--bronze-light);
+}
+
+.pay-form-box {
+  display: none;
+  margin-bottom: 24px;
+}
+.pay-form-box.active { display: block; }
+
+.field-g {
+  margin-bottom: 16px;
+}
+.field-g label {
+  display: block;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+.field-g input, .field-g select {
+  width: 100%;
+  padding: 14px;
+  background: rgba(10, 2, 2, 0.8);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--white);
+  font-family: inherit;
+  font-size: 14px;
+  outline: none;
+}
+.field-g input:focus { border-color: var(--bronze-light); }
+
+.bank-info {
+  background: rgba(10, 2, 2, 0.6);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  line-height: 1.8;
+  font-size: 14px;
+}
+.bank-info strong { color: var(--bronze-light); }
+
+.pay-btn {
+  width: 100%;
+  padding: 18px;
+  background: linear-gradient(135deg, var(--bronze), var(--bronze-light));
+  color: var(--wine-deep);
+  font-family: inherit;
+  font-size: 17px;
+  font-weight: 800;
+  border: none;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 6px 20px rgba(201, 154, 74, 0.3);
+}
+
+.pay-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(201, 154, 74, 0.4);
+}
+
+.footnote {
+  text-align: center;
+  color: var(--muted);
+  font-size: 12px;
+  margin-top: 20px;
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="top-bar">
+    <div class="brand-logo">NAK<span>CON</span>EL</div>
+    <div class="secure-badge">🔒 256-Bit SSL Checkout</div>
+  </div>
+
+  <div class="summary-card">
+    <div class="summary-title">Program Summary</div>
+    <div class="summary-row">
+      <span class="summary-label">Applicant Name</span>
+      <span class="summary-val" id="regName">Loading...</span>
+    </div>
+    <div class="summary-row">
+      <span class="summary-label">Program Track</span>
+      <span class="summary-val" id="regProgram">Career Store Registration</span>
+    </div>
+    <div class="summary-row">
+      <span class="summary-label">Reference ID</span>
+      <span class="summary-val" id="regId">#TRN-0000</span>
+    </div>
+    <div class="summary-row">
+      <span class="summary-label">Status</span>
+      <span class="summary-val" style="color: #e8a0a0;">Pending Payment</span>
+    </div>
+
+    <div class="price-tag">
+      <span class="summary-label">Total Enrollment Fee</span>
+      <span class="price-amount" id="regAmount">₦250,000</span>
+    </div>
+  </div>
+
+  <div class="pay-options">
+    <button type="button" class="pay-tab active" id="tabCard" onclick="switchMethod('card')">💳 Card Payment</button>
+    <button type="button" class="pay-tab" id="tabBank" onclick="switchMethod('bank')">🏛 Bank Transfer</button>
+  </div>
+
+  <form id="payForm">
+    <div class="pay-form-box active" id="boxCard">
+      <div class="field-g">
+        <label>Cardholder Name</label>
+        <input type="text" id="cardName" placeholder="Jane Doe" required>
+      </div>
+      <div class="field-g">
+        <label>Card Number</label>
+        <input type="text" id="cardNumber" placeholder="5399 •••• •••• 4021" maxlength="19" required>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div class="field-g">
+          <label>Expiry Date</label>
+          <input type="text" placeholder="12 / 28" maxlength="5" required>
+        </div>
+        <div class="field-g">
+          <label>CVV / CVC</label>
+          <input type="password" placeholder="•••" maxlength="4" required>
+        </div>
+      </div>
+    </div>
+
+    <div class="pay-form-box" id="boxBank">
+      <div class="bank-info">
+        <div>Bank Name: <strong>Guaranty Trust Bank (GTBank)</strong></div>
+        <div>Account Name: <strong>Nakconel Digital Services Ltd</strong></div>
+        <div>Account Number: <strong>0123456789</strong></div>
+        <div>Reference Memo: <strong id="bankMemo">#TRN-0000</strong></div>
+        <div style="margin-top:8px;font-size:12px;color:var(--muted);">Click complete payment below after transferring to record your submission in the admin desk.</div>
+      </div>
+    </div>
+
+    <button type="submit" class="pay-btn" id="submitPayBtn">Complete Payment (₦250,000) 🔒</button>
+  </form>
+
+  <div class="footnote">Nakconel Digital Services — Brand Management & AI Strategy Desk</div>
+</div>
+
+<script>
+const params = new URLSearchParams(window.location.search);
+const regId = params.get('id') || ('TRN-' + Date.now());
+let currentMethod = 'card';
+
+document.getElementById('regId').textContent = '#' + regId;
+document.getElementById('bankMemo').textContent = '#' + regId;
+
+fetch('/api/registration/' + regId)
+  .then(res => res.json())
+  .then(data => {
+    if (data.success && data.registration) {
+      const r = data.registration;
+      document.getElementById('regName').textContent = r.name || 'Applicant';
+      document.getElementById('regProgram').textContent = r.program || 'Career Program';
+      document.getElementById('cardName').value = r.name || '';
+      const amt = Number(r.amount || 250000).toLocaleString();
+      document.getElementById('regAmount').textContent = '₦' + amt;
+      document.getElementById('submitPayBtn').textContent = 'Complete Payment (₦' + amt + ') 🔒';
+    }
+  }).catch(err => console.log(err));
+
+function switchMethod(method) {
+  currentMethod = method;
+  document.getElementById('tabCard').classList.toggle('active', method === 'card');
+  document.getElementById('tabBank').classList.toggle('active', method === 'bank');
+  document.getElementById('boxCard').classList.toggle('active', method === 'card');
+  document.getElementById('boxBank').classList.toggle('active', method === 'bank');
+  
+  const reqFields = document.querySelectorAll('#boxCard input');
+  reqFields.forEach(f => f.required = (method === 'card'));
+}
+
+document.getElementById('payForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+  const btn = document.getElementById('submitPayBtn');
+  btn.disabled = true;
+  btn.textContent = 'Processing Payment...';
+
+  fetch('/api/registration/' + regId + '/complete-payment', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      paymentMethod: currentMethod,
+      reference: 'PAY-' + Date.now()
+    })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.success) {
+      window.location.href = data.redirect_url || ('/thank-you.html?id=' + regId);
+    } else {
+      alert('Payment error: ' + (data.error || 'Please try again.'));
+      btn.disabled = false;
+      btn.textContent = 'Complete Payment (₦250,000) 🔒';
+    }
+  })
+  .catch(err => {
+    window.location.href = '/thank-you.html?id=' + regId;
+  });
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,1642 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Career Store — NAKCONEL</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --wine-deep: #1B0404;
+      --wine-mid: #3D0A0A;
+      --ground: #0A0202;
+      --nakconel-red: #751008;
+      --muted-rose: #a9443b;
+      --bronze: #C99A4A;
+      --bronze-light: #E8C57A;
+      --bronze-dim: #8B6A2E;
+      --olive-green: #5c632f;
+      --warm-cream: #FDFBF7;
+      --cream: #F5E8C7;
+      --white: #FDFAF4;
+      --muted: rgba(245, 232, 199, 0.52);
+      --border: rgba(201, 154, 74, 0.15);
+      --card: rgba(61, 10, 10, 0.42);
+      --r: 16px;
+      --rs: 8px;
+      --tr: 0.42s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      scroll-behavior: smooth;
+    }
+
+    html,
+    body {
+      overflow-x: hidden;
+      width: 100%;
+    }
+
+    body {
+      background: var(--ground);
+      background: radial-gradient(ellipse 60% 50% at 50% 40%, var(--wine-mid) 0%, transparent 70%),
+        radial-gradient(ellipse 130% 110% at 50% 50%, var(--wine-deep) 0%, var(--ground) 100%);
+      background-attachment: fixed;
+      color: var(--white);
+      font-family: 'Poppins', sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a {
+      text-decoration: none;
+      color: inherit;
+      transition: var(--tr);
+    }
+
+    ul {
+      list-style: none;
+    }
+
+    img {
+      max-width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    /* --- STICKY NAVIGATION BAR --- */
+    .h-nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      z-index: 100;
+      background: rgba(10, 2, 2, 0.6);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+      transition: var(--tr);
+    }
+
+    .h-nav.scrolled {
+      background: rgba(27, 4, 4, 0.92);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    }
+
+    .nav-cont {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 24px;
+      height: 84px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .logo-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 32px;
+      align-items: center;
+    }
+
+    .nav-links a {
+      font-size: 16px;
+      font-weight: 500;
+      color: var(--muted);
+      letter-spacing: 0.5px;
+      cursor: pointer;
+    }
+
+    .nav-links a:hover,
+    .nav-links a.active {
+      color: var(--bronze-light);
+    }
+
+    .menu-tg {
+      display: none;
+      background: none;
+      border: none;
+      cursor: pointer;
+      flex-direction: column;
+      gap: 6px;
+      padding: 4px;
+      z-index: 110;
+    }
+
+    .menu-tg span {
+      width: 24px;
+      height: 2px;
+      background: var(--cream);
+      transition: var(--tr);
+      transform-origin: center;
+    }
+
+    /* --- AUTH NAV --- */
+    .nav-auth-btn {
+      background: linear-gradient(135deg, var(--bronze), var(--bronze-dim));
+      color: var(--wine-deep);
+      font-weight: 600;
+      padding: 9px 20px;
+      border-radius: var(--rs);
+      font-size: 17px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+
+    .nav-auth-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 14px rgba(201, 154, 74, 0.35);
+      color: var(--wine-deep);
+    }
+
+    .nav-avatar-wrap {
+      position: relative;
+      display: none;
+      align-items: center;
+    }
+
+    .nav-avatar-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 2px solid var(--bronze);
+      background: var(--wine-mid);
+      cursor: pointer;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--tr);
+    }
+
+    .nav-avatar-btn:hover {
+      border-color: var(--bronze-light);
+      box-shadow: 0 0 12px rgba(201, 154, 74, 0.4);
+    }
+
+    .nav-avatar-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 50%;
+    }
+
+    .nav-avatar-initials {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 800;
+      font-size: 17px;
+      color: var(--bronze-light);
+      background: var(--wine-mid);
+      border-radius: 50%;
+    }
+
+    .nav-avatar-dd {
+      position: absolute;
+      top: calc(100% + 12px);
+      right: 0;
+      min-width: 220px;
+      background: linear-gradient(160deg, rgba(27, 4, 4, 0.97) 0%, rgba(10, 2, 2, 0.99) 100%);
+      border: 1px solid rgba(201, 154, 74, 0.25);
+      border-radius: 14px;
+      padding: 8px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity 0.25s ease, transform 0.25s ease, visibility 0.25s;
+      transform: translateY(-6px);
+      z-index: 300;
+      backdrop-filter: blur(20px);
+    }
+
+    .nav-avatar-dd.open {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+      transform: translateY(0);
+    }
+
+    .nav-dd-info {
+      padding: 12px 14px 10px;
+      border-bottom: 1px solid rgba(201, 154, 74, 0.12);
+      margin-bottom: 6px;
+    }
+
+    .nav-dd-name {
+      font-size: 17px;
+      font-weight: 600;
+      color: var(--white);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .nav-dd-email {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .nav-dd-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      border-radius: 9px;
+      cursor: pointer;
+      color: var(--white);
+      font-size: 17px;
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+
+    .nav-dd-item:hover {
+      background: rgba(201, 154, 74, 0.1);
+    }
+
+    .nav-dd-item.danger {
+      color: #e8a0a0;
+    }
+
+    .nav-dd-item.danger:hover {
+      background: rgba(244, 67, 54, 0.1);
+    }
+
+    /* --- ABOUT DROPDOWN --- */
+    .about-dd-wrap {
+      position: relative;
+    }
+
+    .about-dd-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-family: 'Poppins', sans-serif;
+      font-size: 16px;
+      font-weight: 500;
+      color: var(--muted);
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 6px 10px;
+      border-radius: 6px;
+      transition: var(--tr);
+      position: relative;
+    }
+
+    .about-dd-btn:hover,
+    .about-dd-btn.active {
+      color: var(--bronze-light);
+    }
+
+    .about-dd-btn.open {
+      color: var(--bronze-light);
+      background: rgba(201, 154, 74, 0.07);
+    }
+
+    .dd-arrow {
+      font-size: 11px;
+      transition: transform 0.3s ease;
+      display: inline-block;
+    }
+
+    .about-dd-btn.open .dd-arrow {
+      transform: rotate(180deg);
+    }
+
+    .about-dd-menu {
+      position: absolute;
+      top: calc(100% + 12px);
+      left: 50%;
+      transform: translateX(-50%) translateY(-8px);
+      min-width: 240px;
+      background: linear-gradient(160deg, rgba(27, 4, 4, 0.97) 0%, rgba(10, 2, 2, 0.99) 100%);
+      border: 1px solid rgba(201, 154, 74, 0.25);
+      border-radius: 14px;
+      padding: 8px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(201, 154, 74, 0.05);
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity 0.28s ease, transform 0.28s ease, visibility 0.28s;
+      z-index: 200;
+      backdrop-filter: blur(20px);
+    }
+
+    .about-dd-menu::before {
+      content: '';
+      position: absolute;
+      top: -6px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 10px;
+      height: 10px;
+      background: rgba(27, 4, 4, 0.97);
+      border-left: 1px solid rgba(201, 154, 74, 0.25);
+      border-top: 1px solid rgba(201, 154, 74, 0.25);
+      transform: translateX(-50%) rotate(45deg);
+    }
+
+    .about-dd-menu.open {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .dd-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 11px 14px;
+      border-radius: 9px;
+      cursor: pointer;
+      transition: background 0.2s ease, transform 0.2s ease;
+      color: var(--white);
+      text-decoration: none;
+    }
+
+    .dd-item:hover {
+      background: rgba(201, 154, 74, 0.1);
+      transform: translateX(2px);
+    }
+
+    .dd-icon {
+      width: 30px;
+      height: 30px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--bronze);
+      font-size: 17px;
+      background: rgba(201, 154, 74, 0.08);
+      border-radius: 7px;
+      border: 1px solid rgba(201, 154, 74, 0.12);
+    }
+
+    .dd-text {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+    }
+
+    .dd-text strong {
+      font-size: 17px;
+      font-weight: 600;
+      color: var(--white);
+    }
+
+    .dd-text small {
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 400;
+    }
+
+    .dd-divider {
+      height: 1px;
+      background: rgba(201, 154, 74, 0.12);
+      margin: 6px 8px;
+    }
+
+    .dd-cta .dd-icon {
+      color: var(--bronze-light);
+      background: rgba(117, 16, 8, 0.3);
+      border-color: rgba(201, 154, 74, 0.2);
+    }
+
+    .dd-cta .dd-text strong {
+      color: var(--bronze-light);
+    }
+
+    /* --- CAMPAIGN HERO (video background) --- */
+    .camp-hero {
+      position: relative;
+      min-height: 100vh;
+      min-height: 100svh;
+      display: flex;
+      align-items: flex-start;
+      overflow: hidden;
+      padding: 0;
+      background: var(--ground);
+    }
+
+    .hero-video-bg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center top;
+      z-index: 1;
+      -webkit-backface-visibility: hidden;
+      backface-visibility: hidden;
+      transform: translateZ(0);
+      image-rendering: auto;
+    }
+
+    .hero-video-overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      pointer-events: none;
+      background: linear-gradient(90deg, rgba(8, 2, 2, 0.82) 0%, rgba(8, 2, 2, 0.5) 30%, transparent 55%), linear-gradient(0deg, rgba(8, 2, 2, 0.5) 0%, transparent 25%);
+    }
+
+    .camp-hero-cont {
+      position: relative;
+      max-width: 1400px;
+      margin: 0 auto;
+      width: 100%;
+      z-index: 4;
+      padding: 150px 24px 96px 24px;
+    }
+
+    .camp-hero-txt {
+      max-width: 420px;
+      text-align: left;
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+
+    .camp-hero-txt.hide {
+      opacity: 0;
+      transform: translateY(16px);
+      pointer-events: none;
+    }
+
+    .camp-badge {
+      display: inline-block;
+      background: rgba(201, 154, 74, 0.15);
+      color: var(--bronze-light);
+      border: 1px solid var(--bronze-dim);
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      margin-bottom: 20px;
+      backdrop-filter: blur(4px);
+    }
+
+    .camp-hero h1 {
+      font-family: 'Poppins', sans-serif;
+      font-size: clamp(40px, 5.8vw, 76px);
+      line-height: 1.12;
+      overflow-wrap: break-word;
+      line-height: 1.15;
+      font-weight: 800;
+      margin-bottom: 16px;
+      color: var(--white);
+      text-shadow: 0 2px 20px rgba(0, 0, 0, 0.5);
+    }
+
+    .camp-hero h1 .accent {
+      color: var(--bronze-light);
+      background: linear-gradient(135deg, var(--white) 30%, var(--bronze-light) 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .camp-hero-sub {
+      font-size: 17px;
+      letter-spacing: 0.5px;
+      color: var(--muted);
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    .camp-hero p.lead {
+      font-size: clamp(18px, 2.2vw, 24px);
+      line-height: 1.65;
+      color: var(--muted);
+      line-height: 1.6;
+      margin-bottom: 32px;
+      max-width: 460px;
+    }
+
+    .camp-hero-btns {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .hero-cta {
+      background: linear-gradient(135deg, var(--bronze), var(--bronze-dim));
+      color: var(--wine-deep);
+      font-weight: 600;
+      padding: 13px 26px;
+      border-radius: var(--rs);
+      box-shadow: 0 4px 15px rgba(201, 154, 74, 0.25);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: none;
+      cursor: pointer;
+      font-size: 17px;
+    }
+
+    .hero-cta:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(201, 154, 74, 0.4);
+      color: var(--wine-deep);
+    }
+
+    .sec-btn {
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--cream);
+      font-weight: 500;
+      padding: 13px 26px;
+      border-radius: var(--rs);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+    }
+
+    .sec-btn:hover {
+      background: var(--border);
+      color: var(--white);
+    }
+
+    .scroll-cue {
+      position: absolute;
+      left: 24px;
+      bottom: 28px;
+      z-index: 4;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      font-weight: 600;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.6s ease;
+    }
+
+    .scroll-cue.show {
+      opacity: 1;
+    }
+
+    .scroll-cue .arrow {
+      width: 20px;
+      height: 20px;
+      border-right: 2px solid var(--bronze-light);
+      border-bottom: 2px solid var(--bronze-light);
+      transform: rotate(45deg);
+      animation: cueBounce 1.6s ease-in-out infinite;
+    }
+
+    @keyframes cueBounce {
+
+      0%,
+      100% {
+        transform: rotate(45deg) translate(0, 0);
+      }
+
+      50% {
+        transform: rotate(45deg) translate(4px, 4px);
+      }
+    }
+
+    @media (max-width: 1024px) {
+      .camp-hero-cont {
+        padding: 140px 20px 80px 20px;
+      }
+
+      .camp-hero-txt {
+        max-width: 100%;
+      }
+    }
+
+    /* --- QUALIFY STEPS --- */
+    .sec {
+      padding: 100px 24px;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .sec-head {
+      margin-bottom: 56px;
+      max-width: 680px;
+    }
+
+    .sec-head.center {
+      margin-left: auto;
+      margin-right: auto;
+      text-align: center;
+    }
+
+    .tag {
+      color: var(--bronze);
+      text-transform: uppercase;
+      font-size: 17px;
+      font-weight: 700;
+      font-weight: 600;
+      letter-spacing: 2px;
+      display: inline-block;
+      margin-bottom: 12px;
+    }
+
+    .sec-title {
+      font-family: 'Poppins', sans-serif;
+      font-size: clamp(26px, 3.6vw, 40px);
+      font-weight: 800;
+      line-height: 1.25;
+      color: var(--white);
+    }
+
+    .sec-title .accent {
+      color: var(--bronze-light);
+    }
+
+    .qualify-section {
+      background: rgba(27, 4, 4, 0.4);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .qualify-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 24px;
+      margin-top: 8px;
+    }
+
+    .qualify-card {
+      position: relative;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 36px 24px 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      backdrop-filter: blur(8px);
+      transition: var(--tr);
+    }
+
+    .qualify-card:hover {
+      border-color: rgba(201, 154, 74, 0.4);
+      transform: translateY(-3px);
+    }
+
+    .qualify-num {
+      position: absolute;
+      top: -16px;
+      left: 24px;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--warm-cream);
+      color: var(--wine-deep);
+      font-family: 'Poppins', sans-serif;
+      font-weight: 800;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    }
+
+    .qualify-icon {
+      color: var(--bronze-light);
+      font-size: 28px;
+      margin-top: 12px;
+    }
+
+    .qualify-card h4 {
+      font-family: 'Poppins', sans-serif;
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--white);
+      line-height: 1.35;
+    }
+
+    .qualify-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: -4px;
+    }
+
+    .qualify-list li {
+      font-size: 17px;
+      color: var(--muted);
+      display: flex;
+      align-items: flex-start;
+      gap: 6px;
+      line-height: 1.4;
+    }
+
+    .qualify-list li::before {
+      content: '✓';
+      color: var(--bronze-light);
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    /* --- LEAD FORM --- */
+    .ct-box {
+      display: grid;
+      grid-template-columns: 1fr 1.2fr;
+      gap: 64px;
+      background: linear-gradient(135deg, var(--nakconel-red), rgba(10, 2, 2, 0.6));
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 64px;
+      backdrop-filter: blur(8px);
+    }
+
+    .ct-info h3 {
+      font-family: 'Poppins', sans-serif;
+      font-size: clamp(32px, 4.5vw, 52px);
+      line-height: 1.2;
+      overflow-wrap: break-word;
+      margin-bottom: 16px;
+      line-height: 1.25;
+    }
+
+    .ct-info p {
+      color: var(--muted);
+      margin-bottom: 32px;
+      line-height: 1.6;
+    }
+
+    .ct-perks {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .ct-perks li {
+      font-size: 16px;
+      color: var(--cream);
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      line-height: 1.4;
+    }
+
+    .ct-perks li::before {
+      content: '★';
+      color: var(--bronze-light);
+      flex-shrink: 0;
+    }
+
+    .ct-form {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .form-g {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .form-g label {
+      font-size: 17px;
+      font-weight: 700;
+      font-weight: 500;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .form-g input,
+    .form-g textarea {
+      background: rgba(10, 2, 2, 0.6);
+      border: 1px solid var(--border);
+      border-radius: var(--rs);
+      padding: 16px;
+      color: var(--white);
+      font-family: inherit;
+      font-size: 16px;
+      transition: var(--tr);
+    }
+
+    .form-g input:focus,
+    .form-g textarea:focus {
+      outline: none;
+      border-color: var(--bronze);
+      background: rgba(61, 10, 10, 0.3);
+    }
+
+    .submit-btn {
+      background: var(--bronze);
+      color: var(--wine-deep);
+      border: none;
+      border-radius: var(--rs);
+      padding: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--tr);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .submit-btn:hover {
+      background: var(--bronze-light);
+      transform: translateY(-2px);
+    }
+
+    .submit-btn:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .form-err {
+      font-size: 17px;
+      color: #e8a0a0;
+      min-height: 18px;
+    }
+
+    .form-success {
+      display: none;
+      text-align: center;
+      padding: 40px 20px;
+    }
+
+    .form-success.show {
+      display: block;
+    }
+
+    .form-success .icon {
+      font-size: 48px;
+      color: var(--bronze-light);
+      margin-bottom: 16px;
+    }
+
+    .form-success h4 {
+      font-family: 'Poppins', sans-serif;
+      font-size: 22px;
+      margin-bottom: 10px;
+      color: var(--white);
+    }
+
+    .form-success p {
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1.6;
+    }
+
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 80px 24px 40px 24px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .ft-main {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1.5fr repeat(3, 1fr);
+      gap: 48px;
+      margin-bottom: 60px;
+    }
+
+    .ft-desc {
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1.6;
+      margin: 16px 0 24px 0;
+      max-width: 320px;
+    }
+
+    .ft-col h5 {
+      font-family: 'Poppins', sans-serif;
+      font-size: 16px;
+      margin-bottom: 24px;
+      color: var(--white);
+    }
+
+    .ft-col ul {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .ft-col a {
+      font-size: 16px;
+      color: var(--muted);
+    }
+
+    .ft-col a:hover {
+      color: var(--bronze-light);
+      padding-left: 4px;
+    }
+
+    .ft-btm {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding-top: 40px;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: var(--muted);
+      font-size: 17px;
+    }
+
+    /* --- RESPONSIVE --- */
+    @media (max-width: 1024px) {
+      .camp-hero {
+        padding-top: 140px;
+        min-height: auto;
+      }
+
+      .camp-hero-cont {
+        grid-template-columns: 1fr;
+        gap: 40px;
+        text-align: center;
+      }
+
+      .camp-hero p.lead {
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      .camp-hero-btns {
+        justify-content: center;
+      }
+
+      .camp-img-frame {
+        max-width: 480px;
+        margin: 0 auto;
+        aspect-ratio: 1/1;
+      }
+
+      .qualify-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .ct-box {
+        grid-template-columns: 1fr;
+        gap: 48px;
+        padding: 40px 24px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .menu-tg {
+        display: flex;
+      }
+
+      .nav-links {
+        position: fixed;
+        top: 84px;
+        left: -100%;
+        width: 100%;
+        height: calc(100vh - 84px);
+        background: rgba(27, 4, 4, 0.98);
+        backdrop-filter: blur(24px);
+        flex-direction: column;
+        justify-content: center;
+        gap: 35px;
+        transition: var(--tr);
+        padding: 40px;
+        border-top: 1px solid var(--border);
+      }
+
+      .nav-links.open {
+        left: 0;
+      }
+
+      .ft-main {
+        grid-template-columns: 1fr 1fr;
+        gap: 32px;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .qualify-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .ft-main {
+        grid-template-columns: 1fr;
+      }
+
+      .ft-btm {
+        flex-direction: column;
+        gap: 16px;
+        text-align: center;
+      }
+    }
+
+    /* LANDING PAGE SPECIFIC OPTIMIZATIONS */
+    .camp-hero {
+      position: relative;
+      min-height: 100vh;
+      min-height: 100dvh;
+      min-height: 100svh;
+      display: flex;
+      align-items: center;
+      overflow: hidden;
+      padding: 0;
+      background: var(--ground);
+    }
+
+    .hero-video-bg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center top;
+      z-index: 1;
+      -webkit-backface-visibility: hidden;
+      backface-visibility: hidden;
+      transform: translateZ(0);
+    }
+
+    .hero-video-overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      pointer-events: none;
+      background: linear-gradient(90deg, rgba(8, 2, 2, 0.85) 0%, rgba(8, 2, 2, 0.55) 40%, rgba(8, 2, 2, 0.2) 70%), linear-gradient(0deg, rgba(8, 2, 2, 0.6) 0%, transparent 35%);
+    }
+
+    @media (max-width: 1024px) {
+      .camp-hero {
+        min-height: 100vh;
+        min-height: 100dvh;
+        min-height: 100svh;
+        padding-top: 120px;
+        padding-bottom: 60px;
+        display: flex;
+        align-items: center;
+      }
+
+      .camp-hero-cont {
+        padding: 0 24px;
+        max-width: 100%;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .camp-hero {
+        min-height: 100vh;
+        min-height: 100dvh;
+        min-height: 100svh;
+        padding: 110px 20px 60px 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .hero-video-bg {
+        object-fit: cover !important;
+        object-position: center top !important;
+        width: 100% !important;
+        height: 100% !important;
+        inset: 0 !important;
+        position: absolute !important;
+      }
+
+      .hero-video-overlay {
+        background: linear-gradient(180deg, rgba(8, 2, 2, 0.85) 0%, rgba(8, 2, 2, 0.65) 50%, rgba(8, 2, 2, 0.95) 100%) !important;
+      }
+
+      .camp-hero-cont {
+        padding: 0 !important;
+        text-align: center !important;
+      }
+
+      .camp-hero-txt {
+        max-width: 100% !important;
+        margin: 0 auto !important;
+      }
+
+      .camp-hero p.lead {
+        margin-left: auto !important;
+        margin-right: auto !important;
+      }
+
+      .camp-hero-btns {
+        justify-content: center !important;
+        width: 100% !important;
+      }
+    }
+
+
+    /* DESKTOP / PC SPECIFIC SCREEN FIT OPTIMIZATIONS */
+    @media (min-width: 1025px) {
+      .camp-hero-txt {
+        max-width: 820px !important;
+      }
+
+      .camp-hero h1 {
+        font-size: clamp(36px, 4vw, 56px) !important;
+        line-height: 1.16 !important;
+        margin-bottom: 18px !important;
+      }
+
+      .camp-hero p.lead {
+        font-size: clamp(16px, 1.3vw, 19px) !important;
+        line-height: 1.6 !important;
+        max-width: 640px !important;
+        margin-bottom: 32px !important;
+      }
+
+      .sec-title,
+      h2,
+      h3 {
+        line-height: 1.25 !important;
+      }
+
+      .container,
+      .sec {
+        max-width: 1320px !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
+      }
+    }
+  </style>
+  <link rel="icon" href="/static/image/logo.png" type="image/png">
+</head>
+
+<body>
+
+  <header class="h-nav" id="navbar">
+    <div class="nav-cont">
+      <div class="logo-wrapper">
+        <a href="/home"><img src="/static/image/logo.png" alt="NAKCONEL Logo"
+            style="height:72px;width:auto;object-fit:contain;"></a>
+      </div>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="/home">Home</a></li>
+        <li class="about-dd-wrap">
+          <button class="about-dd-btn" id="aboutDropBtn" aria-expanded="false" aria-haspopup="true">
+            About <span class="dd-arrow">▾</span>
+          </button>
+          <div class="about-dd-menu" id="aboutDropMenu" role="menu">
+            <a class="dd-item" href="/about" role="menuitem">
+              <span class="dd-icon">◈</span>
+              <span class="dd-text"><strong>About Nakconel</strong><small>Our story &amp; direction</small></span>
+            </a>
+            <a class="dd-item" href="/meet-the-team" role="menuitem">
+              <span class="dd-icon">◉</span>
+              <span class="dd-text"><strong>Meet the Team</strong><small>The people behind the brand</small></span>
+            </a>
+            <a class="dd-item" href="/about#vision-mission" role="menuitem">
+              <span class="dd-icon">◎</span>
+              <span class="dd-text"><strong>Vision &amp; Mission</strong><small>Where we are going</small></span>
+            </a>
+            <a class="dd-item" href="/voice" role="menuitem">
+              <span class="dd-icon">◇</span>
+              <span class="dd-text"><strong>Brand Voice</strong><small>How we speak &amp; show up</small></span>
+            </a>
+            <div class="dd-divider"></div>
+            <a class="dd-item dd-cta" href="/contact" role="menuitem">
+              <span class="dd-icon">↗</span>
+              <span class="dd-text"><strong>Work With Us</strong><small>Book a strategy call</small></span>
+            </a>
+          </div>
+        </li>
+        <li><a href="/#services">Pillars</a></li>
+        <li><a href="/#markets">Global Footprints</a></li>
+        <li><a href="/career" class="active">Career Store</a></li>
+        <li><a href="/contact">Contact</a></li>
+      </ul>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <a href="/login" class="nav-auth-btn" id="navAuthBtn">Sign In ↗</a>
+        <div class="nav-avatar-wrap" id="navAvatarWrap">
+          <button class="nav-avatar-btn" aria-label="Account">
+            <img class="nav-avatar-img" src="" alt="" style="display:none;">
+            <span class="nav-avatar-initials" style="display:none;"></span>
+          </button>
+          <div class="nav-avatar-dd">
+            <div class="nav-dd-info">
+              <div class="nav-dd-name"></div>
+              <div class="nav-dd-email"></div>
+            </div>
+            <a href="/account" class="nav-dd-item">◉ &nbsp;My Account</a>
+            <a href="/ai-chat" class="nav-dd-item">◈ &nbsp;AI Chat</a>
+            <div style="height:1px;background:rgba(201,154,74,0.12);margin:6px 8px;"></div>
+            <a class="nav-dd-item danger" onclick="nakSignOut()">↩ &nbsp;Sign Out</a>
+          </div>
+        </div>
+        <button class="menu-tg" id="menuToggle" aria-label="Toggle Menu">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <section class="camp-hero" id="hero">
+    <img class="hero-video-bg" id="heroVideo" src="/static/image/career-hero.jpg" alt="Nakconel Career Store Hero">
+    <div class="hero-video-overlay"></div>
+    <div class="camp-hero-cont">
+      <div class="camp-hero-txt" id="heroTxt">
+        <span class="camp-badge">Nakconel Career Store</span>
+        <h1>Build Your <span class="accent">Career</span> With Us</h1>
+        <p class="camp-hero-sub">TRAINING &bull; MENTORSHIP &bull; REAL CLIENT WORK</p>
+        <p class="lead">Gain job-ready skills through hands-on training, then step directly into real client projects
+          with our team.</p>
+        <div class="camp-hero-btns">
+          <a href="/training-registration.html" class="hero-cta">Register for Training ↗</a>
+          <a href="/internship-application.html" class="sec-btn">Apply for Internship ↗</a>
+        </div>
+      </div>
+    </div>
+    <div class="scroll-cue" id="scrollCue"><span>Scroll to explore</span><span class="arrow"></span></div>
+  </section>
+
+  <section class="sec qualify-section" id="pathways" style="padding-bottom:20px;">
+    <div class="sec-head center">
+      <span class="tag">Choose Your Path</span>
+      <h2 class="sec-title">Two Ways to <span class="accent">Grow With Us</span></h2>
+    </div>
+    <div class="qualify-grid"
+      style="grid-template-columns:repeat(2,1fr);max-width:820px;margin-left:auto;margin-right:auto;">
+      <a href="#training" class="qualify-card" style="text-decoration:none;">
+        <div class="qualify-icon" style="font-size:36px;">▤</div>
+        <h4 style="font-size:20px;">Training</h4>
+        <p style="color:var(--muted);font-size:15px;line-height:1.5;margin-top:-8px;">Structured, hands-on sessions that
+          build real, job-ready skills from the ground up.</p>
+        <span style="color:var(--bronze-light);font-weight:600;font-size:15px;margin-top:4px;">Explore Training ↓</span>
+      </a>
+      <a href="#internship" class="qualify-card" style="text-decoration:none;">
+        <div class="qualify-icon" style="font-size:36px;">◎</div>
+        <h4 style="font-size:20px;">Internship</h4>
+        <p style="color:var(--muted);font-size:15px;line-height:1.5;margin-top:-8px;">Apply what you've learned on real
+          projects, with mentorship every step of the way.</p>
+        <span style="color:var(--bronze-light);font-weight:600;font-size:15px;margin-top:4px;">Explore Internship
+          ↓</span>
+      </a>
+    </div>
+  </section>
+
+  <section class="sec" style="padding-top:0;padding-bottom:40px;text-align:center;">
+    <div style="max-width:760px;margin:0 auto;">
+      <span class="tag" style="display:block;margin-bottom:16px;">Our Promise</span>
+      <p style="font-size:clamp(20px,2.4vw,28px);line-height:1.5;color:var(--white);font-weight:500;">Every skill you
+        build here is yours to keep. We invest in people first — because a stronger you makes a stronger NAKCONEL, and a
+        stronger industry around us.</p>
+    </div>
+  </section>
+
+  <section class="sec qualify-section" id="training">
+    <div class="sec-head center">
+      <span class="tag">Track 01 — Training</span>
+      <h2 class="sec-title">Start With <span class="accent">Training</span></h2>
+      <p style="color:var(--muted);font-size:16px;line-height:1.6;max-width:600px;margin:16px auto 0;">Hands-on sessions
+        built to give you real, job-ready skills before you ever touch a live project.</p>
+    </div>
+    <div class="qualify-grid"
+      style="grid-template-columns:repeat(2,1fr);max-width:700px;margin-left:auto;margin-right:auto;">
+      <div class="qualify-card">
+        <div class="qualify-num">01</div>
+        <div class="qualify-icon">▤</div>
+        <h4>Register for the Training Program</h4>
+      </div>
+      <div class="qualify-card">
+        <div class="qualify-num">02</div>
+        <div class="qualify-icon">◉</div>
+        <h4>Attend Hands-On Training Sessions</h4>
+      </div>
+    </div>
+    <div style="text-align:center;margin-top:40px;">
+      <a href="training-registration.html" class="hero-cta">Register for Training ↗</a>
+    </div>
+  </section>
+
+  <section class="sec qualify-section" id="internship" style="padding-top:0;">
+    <div class="sec-head center">
+      <span class="tag">Track 02 — Internship</span>
+      <h2 class="sec-title">Then Step Into Your <span class="accent">Internship</span></h2>
+      <p style="color:var(--muted);font-size:16px;line-height:1.6;max-width:600px;margin:16px auto 0;">Apply what you've
+        learned on real projects, with mentorship and support every step of the way.</p>
+    </div>
+    <div class="qualify-grid"
+      style="grid-template-columns:repeat(2,1fr);max-width:700px;margin-left:auto;margin-right:auto;">
+      <div class="qualify-card">
+        <div class="qualify-num">03</div>
+        <div class="qualify-icon">◎</div>
+        <h4>Apply for Your Internship Placement</h4>
+        <ul class="qualify-list">
+          <li>Real project experience</li>
+          <li>One-on-one mentorship</li>
+          <li>Skill-building workshops</li>
+          <li>Career guidance & support</li>
+        </ul>
+      </div>
+      <div class="qualify-card">
+        <div class="qualify-num">04</div>
+        <div class="qualify-icon">◈</div>
+        <h4>Earn Your Certificate & Nakconel Welcome Kit</h4>
+      </div>
+    </div>
+    <div style="text-align:center;margin-top:40px;">
+      <a href="internship-application.html" class="sec-btn">Register for Internship ↗</a>
+    </div>
+  </section>
+
+  <section class="sec qualify-section" id="why-join">
+    <div class="sec-head center">
+      <span class="tag">Why Join Us</span>
+      <h2 class="sec-title">What You'll <span class="accent">Gain</span></h2>
+    </div>
+    <div class="qualify-grid">
+      <div class="qualify-card">
+        <div class="qualify-icon">◆</div>
+        <h4>Do Work That Matters</h4>
+        <p style="color:var(--muted);font-size:15px;line-height:1.5;">Every project you touch here has a real client and
+          a real outcome — no busywork.</p>
+      </div>
+      <div class="qualify-card">
+        <div class="qualify-icon">✦</div>
+        <h4>Learn From Real Mentors</h4>
+        <p style="color:var(--muted);font-size:15px;line-height:1.5;">Work directly alongside the NAKCONEL team, not
+          just a training manual.</p>
+      </div>
+      <div class="qualify-card">
+        <div class="qualify-icon">◇</div>
+        <h4>Grow at Your Pace</h4>
+        <p style="color:var(--muted);font-size:15px;line-height:1.5;">Structured tracks, with room to move faster once
+          you're ready.</p>
+      </div>
+      <div class="qualify-card">
+        <div class="qualify-icon">✧</div>
+        <h4>Be Part of the Team</h4>
+        <p style="color:var(--muted);font-size:15px;line-height:1.5;">Trainees and interns aren't kept on the sidelines
+          — you're in the room.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" style="padding-top:20px;padding-bottom:80px;text-align:center;">
+    <div style="max-width:820px;margin:0 auto;">
+      <p
+        style="font-family:'Poppins',sans-serif;font-size:clamp(26px,3.4vw,42px);font-weight:700;line-height:1.35;color:var(--white);">
+        "We don't just teach skills.<br><span
+          style="background:linear-gradient(135deg,var(--white) 30%,var(--bronze-light) 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;">We
+          build futures."</span></p>
+      <p
+        style="color:var(--muted);font-size:15px;letter-spacing:1px;text-transform:uppercase;margin-top:20px;font-weight:600;">
+        — The NAKCONEL Team</p>
+    </div>
+  </section>
+
+
+  <section class="sec" id="qualify-cta">
+    <div class="ct-box"
+      style="grid-template-columns:1fr;text-align:center;align-items:center;background:rgba(61,10,10,0.6);border:1px solid var(--border);border-radius:var(--rs);padding:60px 24px;">
+      <div class="ct-info" style="max-width:720px;margin:0 auto;width:100%;">
+        <span class="tag"
+          style="background:rgba(201,154,74,0.15);color:var(--bronze-light);padding:6px 16px;border-radius:20px;font-size:17px; font-weight:700;font-weight:700;letter-spacing:1px;text-transform:uppercase;display:inline-block;margin-bottom:16px;">Not
+          Sure Where to Start?</span>
+        <h2 style="font-size:clamp(24px,3vw,38px);color:var(--white);margin-bottom:16px;font-weight:800;">Your Career,
+          Your Way</h2>
+        <p style="color:var(--muted);font-size:16px;line-height:1.6;margin:0 auto 36px auto;max-width:580px;">
+          Whether you're starting fresh with Training or ready to apply your skills as an Intern, the Career Store has a
+          track for you.
+        </p>
+        <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap;">
+          <a href="training-registration.html" class="hero-cta"
+            style="padding:16px 28px;font-size:17px;text-decoration:none;">Register for Training ↗</a>
+          <a href="internship-application.html" class="sec-btn"
+            style="padding:16px 28px;font-size:17px;text-decoration:none;">Register for Internship ↗</a>
+          <a href="about" class="sec-btn" style="padding:16px 28px;font-size:17px;text-decoration:none;">Get in
+            Touch</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <footer>
+    <div class="ft-main">
+      <div>
+        <div class="logo-wrapper" style="margin-bottom:16px;">
+          <a href="/home"><img src="/static/image/logo.png" alt="NAKCONEL Logo"
+              style="height:72px;width:auto;object-fit:contain;"></a>
+        </div>
+        <p class="ft-desc">Combining brand strategy, content design, and enterprise technology with deep cultural
+          intelligence.</p>
+      </div>
+      <div class="ft-col">
+        <h5>Pillars</h5>
+        <ul>
+          <li><a href="/#services">Brand Activation Campaign</a></li>
+          <li><a href="/#services">Content & Design</a></li>
+          <li><a href="/#services">IT & Tech Systems</a></li>
+        </ul>
+      </div>
+      <div class="ft-col">
+        <h5>Enablement</h5>
+        <ul>
+          <li><a href="/about">About Identity</a></li>
+          <li><a href="/contact">Strategy Support Desk</a></li>
+        </ul>
+      </div>
+      <div class="ft-col">
+        <h5>Footprints</h5>
+        <ul>
+          <li><a href="/#markets">Africa & Gulf Regions</a></li>
+          <li><a href="/#markets">United States & Australia</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="ft-btm">
+      <p>&copy; 2026 NAKCONEL Studio Inc. All rights reserved.</p>
+      <p>Culture gives meaning. Intelligence gives movement.</p>
+    </div>
+  </footer>
+
+
+  <script type="module" src="/static/js/auth-nav.js"></script>
+
+  <script>
+    // ===== HERO VIDEO: AUTOPLAY WITH SOUND + SCROLL LOCK UNTIL FINISHED =====
+    (function () {
+      const video = document.getElementById('heroVideo');
+      const scrollCue = document.getElementById('scrollCue');
+      let locked = true;
+      let unlockTimer = null;
+
+      function preventScroll(e) { if (locked) { e.preventDefault(); } }
+
+      function lockScroll() { /* no scroll lock */ }
+
+      function preventScrollKeys(e) {
+        const keys = ['ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', ' ', 'Spacebar'];
+        if (locked && keys.includes(e.key)) { e.preventDefault(); }
+      }
+
+      function unlockScroll() {
+        if (!locked) return;
+        locked = false;
+        document.documentElement.style.overflow = '';
+        document.body.style.overflow = '';
+        window.removeEventListener('wheel', preventScroll, { passive: false });
+        window.removeEventListener('touchmove', preventScroll, { passive: false });
+        window.removeEventListener('keydown', preventScrollKeys, { passive: false });
+        if (scrollCue) { scrollCue.classList.add('show'); }
+        if (unlockTimer) { clearTimeout(unlockTimer); }
+      }
+
+      if (video) {
+        // lockScroll removed for smooth user scrolling
+
+        // Try to autoplay with sound immediately.
+        video.muted = false;
+        const playAttempt = video.play();
+        if (playAttempt !== undefined) {
+          playAttempt.catch(() => {
+            // Sound was blocked by the browser's autoplay policy — the video still
+            // has to start playing the instant the page loads, so fall back to a
+            // muted autoplay (every browser allows this) and unmute the moment the
+            // visitor's first tap/click/keypress happens anywhere on the page.
+            video.muted = true;
+            video.play().catch(() => { });
+
+            const resumeSound = () => {
+              video.muted = false;
+              video.play().catch(() => { });
+              document.removeEventListener('click', resumeSound);
+              document.removeEventListener('touchstart', resumeSound);
+              document.removeEventListener('keydown', resumeSound);
+            };
+            document.addEventListener('click', resumeSound, { once: true });
+            document.addEventListener('touchstart', resumeSound, { once: true });
+            document.addEventListener('keydown', resumeSound, { once: true });
+          });
+        }
+
+        video.addEventListener('ended', unlockScroll);
+        video.addEventListener('error', unlockScroll);
+
+        // Our overlay text fades out just before the video's own on-screen text
+        // reaches the same side of the frame near the end, so the two never overlap.
+        const heroTxt = document.querySelector('.camp-hero-txt');
+        const FADE_OUT_BEFORE_END = 2.5; // seconds
+        video.addEventListener('timeupdate', () => {
+          if (heroTxt && !isNaN(video.duration) && video.currentTime >= video.duration - FADE_OUT_BEFORE_END) {
+            heroTxt.classList.add('hide');
+          }
+        });
+        video.addEventListener('ended', () => { if (heroTxt) heroTxt.classList.add('hide'); });
+
+        // If a visitor scrolls away from the hero after the video has finished and then
+        // scrolls back up to it, bring the text back and replay the video from the start.
+        let hasLeftHero = false;
+        const heroSection = document.getElementById('hero');
+        if (heroSection && 'IntersectionObserver' in window) {
+          const heroObserver = new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+              if (!entry.isIntersecting) {
+                hasLeftHero = true;
+              } else if (entry.isIntersecting && hasLeftHero) {
+                if (heroTxt) heroTxt.classList.remove('hide');
+                video.currentTime = 0;
+                video.play().catch(() => { });
+              }
+            });
+          }, { threshold: 0.6 });
+          heroObserver.observe(heroSection);
+        }
+
+        // If the embedded video can't actually play (older/odd browsers), fall back
+        // gracefully to the poster frame instead of leaving a blank section, and
+        // don't hold the visitor hostage waiting for an 'ended' event that'll never fire.
+        setTimeout(() => {
+          // video fallback readyState check removed
+        }, 5000);
+
+        // Safety net: never trap a visitor if the video can't load or play for any reason.
+        // unlockTimer removed
+      } else {
+        locked = false;
+      }
+    })();
+
+    // ===== ABOUT DROPDOWN =====
+
+    const aboutDropBtn = document.getElementById('aboutDropBtn');
+    const aboutDropMenu = document.getElementById('aboutDropMenu');
+    function openDropdown() { aboutDropBtn.classList.add('open'); aboutDropMenu.classList.add('open'); aboutDropBtn.setAttribute('aria-expanded', 'true'); }
+    function closeDropdown() { aboutDropBtn.classList.remove('open'); aboutDropMenu.classList.remove('open'); aboutDropBtn.setAttribute('aria-expanded', 'false'); }
+    aboutDropBtn.addEventListener('click', (e) => { e.stopPropagation(); aboutDropMenu.classList.contains('open') ? closeDropdown() : openDropdown(); });
+    document.addEventListener('click', () => closeDropdown());
+    aboutDropMenu.addEventListener('click', (e) => e.stopPropagation());
+
+    // ===== NAVBAR SCROLL =====
+    window.addEventListener('scroll', () => {
+      const nav = document.getElementById('navbar');
+      if (window.scrollY > 50) { nav.classList.add('scrolled'); } else { nav.classList.remove('scrolled'); }
+    }, { passive: true });
+
+    // ===== MOBILE MENU =====
+    const menuToggle = document.getElementById('menuToggle');
+    const navLinks = document.getElementById('navLinks');
+    menuToggle.addEventListener('click', () => {
+      navLinks.classList.toggle('open');
+      const spans = menuToggle.querySelectorAll('span');
+      if (navLinks.classList.contains('open')) {
+        spans[0].style.transform = 'rotate(45deg) translate(5px, 5px)';
+        spans[1].style.opacity = '0';
+        spans[2].style.transform = 'rotate(-45deg) translate(6px, -6px)';
+      } else {
+        spans[0].style.transform = 'none'; spans[1].style.opacity = '1'; spans[2].style.transform = 'none';
+      }
+    });
+    document.querySelectorAll('.nav-links a').forEach(link => {
+      link.addEventListener('click', () => {
+        navLinks.classList.remove('open');
+        const spans = menuToggle.querySelectorAll('span');
+        spans[0].style.transform = 'none'; spans[1].style.opacity = '1'; spans[2].style.transform = 'none';
+      });
+    });
+  </script>
+
+  <script type="module">
+    import { onAuthStateChanged, auth } from '/static/js/nak-auth.js';
+
+    let currentUser = null;
+    onAuthStateChanged(auth, (u) => {
+      currentUser = u;
+    });
+  </script>
+</body>
+
+</html>

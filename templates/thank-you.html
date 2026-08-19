@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Registration & Payment Approved — Nakconel</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-dark: #0A0202;
+  --wine-deep: #1B0404;
+  --wine-mid: #3D0A0A;
+  --bronze: #C99A4A;
+  --bronze-light: #E8C57A;
+  --white: #FFFFFF;
+  --muted: #A3917F;
+  --border: rgba(201, 154, 74, 0.2);
+  --rs: 16px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Poppins', sans-serif;
+  background: var(--bg-dark);
+  color: var(--white);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  background-image: 
+    radial-gradient(ellipse 60% 40% at 50% 0%, var(--wine-mid) 0%, transparent 70%),
+    radial-gradient(ellipse 80% 50% at 50% 100%, var(--wine-deep) 0%, var(--bg-dark) 100%);
+}
+
+.wrap {
+  width: 100%;
+  max-width: 680px;
+  background: rgba(27, 4, 4, 0.85);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 48px 36px;
+  backdrop-filter: blur(12px);
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+}
+
+.icon-badge {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(201, 154, 74, 0.2), rgba(232, 197, 122, 0.3));
+  border: 2px solid var(--bronze-light);
+  color: var(--bronze-light);
+  font-size: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 24px;
+  box-shadow: 0 0 30px rgba(201, 154, 74, 0.25);
+}
+
+h1 {
+  font-size: clamp(26px, 3.5vw, 38px);
+  font-weight: 800;
+  margin-bottom: 12px;
+  line-height: 1.25;
+}
+h1 span { color: var(--bronze-light); }
+
+p.lead {
+  color: var(--muted);
+  font-size: 16px;
+  line-height: 1.6;
+  max-width: 520px;
+  margin: 0 auto 32px;
+}
+
+.receipt-card {
+  background: rgba(61, 10, 10, 0.5);
+  border: 1px solid var(--border);
+  border-radius: var(--rs);
+  padding: 24px;
+  text-align: left;
+  margin-bottom: 32px;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(201, 154, 74, 0.1);
+  font-size: 14px;
+}
+.row:last-child { border-bottom: none; }
+
+.label { color: var(--muted); }
+.val { font-weight: 600; color: var(--white); text-align: right; }
+
+.badge-approved {
+  display: inline-block;
+  background: rgba(46, 125, 50, 0.2);
+  color: #81c784;
+  border: 1px solid rgba(129, 199, 132, 0.3);
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.steps-list {
+  text-align: left;
+  background: rgba(10, 2, 2, 0.6);
+  border: 1px solid var(--border);
+  border-radius: var(--rs);
+  padding: 24px;
+  margin-bottom: 36px;
+}
+.steps-title {
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--bronze-light);
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+.step-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 14px;
+  font-size: 14px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+.step-item:last-child { margin-bottom: 0; }
+.step-num {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba(201, 154, 74, 0.15);
+  color: var(--bronze-light);
+  font-weight: 700;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.btn-group {
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.btn-primary {
+  padding: 14px 28px;
+  background: linear-gradient(135deg, var(--bronze), var(--bronze-light));
+  color: var(--wine-deep);
+  font-weight: 700;
+  font-size: 15px;
+  border-radius: 12px;
+  text-decoration: none;
+  transition: transform 0.2s;
+}
+
+.btn-secondary {
+  padding: 14px 28px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border);
+  color: var(--white);
+  font-weight: 600;
+  font-size: 15px;
+  border-radius: 12px;
+  text-decoration: none;
+  transition: background 0.2s;
+}
+
+.btn-primary:hover, .btn-secondary:hover {
+  transform: translateY(-2px);
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="icon-badge">✓</div>
+  <h1>Registration &amp; Payment <span>Approved!</span></h1>
+  <p class="lead">Your spot in the Nakconel Career Store Program has been confirmed and recorded in our system.</p>
+
+  <div class="receipt-card">
+    <div class="row">
+      <span class="label">Applicant Name</span>
+      <span class="val" id="recName">Jane Doe</span>
+    </div>
+    <div class="row">
+      <span class="label">Program Track</span>
+      <span class="val" id="recProgram">Nakconel Professional Track</span>
+    </div>
+    <div class="row">
+      <span class="label">Registration Reference</span>
+      <span class="val" id="recId">#TRN-0000</span>
+    </div>
+    <div class="row">
+      <span class="label">Amount Paid</span>
+      <span class="val" style="color:var(--bronze-light);" id="recAmount">₦250,000 NGN</span>
+    </div>
+    <div class="row">
+      <span class="label">Admin Status</span>
+      <span class="val"><span class="badge-approved">Approved &amp; Paid ✓</span></span>
+    </div>
+  </div>
+
+  <div class="steps-list">
+    <div class="steps-title">What Happens Next</div>
+    <div class="step-item">
+      <div class="step-num">1</div>
+      <div>Our team has received your registration in the Nakconel Admin Desk.</div>
+    </div>
+    <div class="step-item">
+      <div class="step-num">2</div>
+      <div>Your assigned instructor / mentor will reach out to your contact email within 24 hours.</div>
+    </div>
+    <div class="step-item">
+      <div class="step-num">3</div>
+      <div>You will receive your Onboarding Welcome Kit &amp; schedule access.</div>
+    </div>
+  </div>
+
+  <div class="btn-group">
+    <a href="/home" class="btn-primary">Return to Home ↗</a>
+    <a href="/career" class="btn-secondary">Career Store</a>
+    <a href="/ai-chat" class="btn-secondary">Explore AI Chat ◈</a>
+  </div>
+</div>
+
+<script>
+const params = new URLSearchParams(window.location.search);
+const regId = params.get('id') || 'TRN-0000';
+
+document.getElementById('recId').textContent = '#' + regId;
+
+fetch('/api/registration/' + regId)
+  .then(res => res.json())
+  .then(data => {
+    if (data.success && data.registration) {
+      const r = data.registration;
+      document.getElementById('recName').textContent = r.name || 'Applicant';
+      document.getElementById('recProgram').textContent = r.program || 'Career Program';
+      const amt = Number(r.amount || 250000).toLocaleString();
+      document.getElementById('recAmount').textContent = '₦' + amt + ' NGN';
+    }
+  }).catch(err => console.log(err));
+</script>
+</body>
+</html>

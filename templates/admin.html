@@ -374,13 +374,30 @@ function detectUserCurrency(){
 async function fetchExchangeRates(){
   if (exchangeRates) return exchangeRates;
   try {
-    const res = await fetch('https://api.exchangerate-api.com/v4/latest/NGN');
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 3000);
+    const res = await fetch('https://api.exchangerate-api.com/v4/latest/NGN', { signal: controller.signal });
+    clearTimeout(timer);
     if (res.ok) {
       exchangeRates = await res.json();
       return exchangeRates;
     }
   } catch (e) {}
-  return null;
+
+  exchangeRates = {
+    rates: {
+      USD: 0.00065,
+      GBP: 0.00050,
+      EUR: 0.00059,
+      NGN: 1.0,
+      ZAR: 0.012,
+      KES: 0.084,
+      GHS: 0.010,
+      CAD: 0.00088,
+      AUD: 0.00098
+    }
+  };
+  return exchangeRates;
 }
 
 async function convertNgnToLocal(ngnAmount){

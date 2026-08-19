@@ -326,6 +326,27 @@ def get_quota_db():
         )
         """
     )
+    conn.execute(
+        """
+        CREATE TABLE IF NOT EXISTS career_registrations (
+            id TEXT PRIMARY KEY,
+            type TEXT NOT NULL,
+            name TEXT NOT NULL,
+            email TEXT NOT NULL,
+            phone TEXT,
+            program TEXT NOT NULL,
+            experience_level TEXT,
+            statement TEXT,
+            details TEXT,
+            amount INTEGER NOT NULL DEFAULT 250000,
+            status TEXT NOT NULL DEFAULT 'pending_payment',
+            payment_reference TEXT,
+            paid_at TEXT,
+            created_at TEXT NOT NULL,
+            updated_at TEXT
+        )
+        """
+    )
     return conn
 
 
@@ -619,6 +640,263 @@ def campaign():
 @app.route("/campaign-qualify")
 def campaign_form():
     return render_template("campaign-form.html")
+
+@app.route("/career")
+@app.route("/career.html")
+def career():
+    return render_template("career.html")
+
+@app.route("/training-registration")
+@app.route("/training-registration.html")
+def training_registration():
+    return render_template("training-registration.html")
+
+@app.route("/internship-application")
+@app.route("/internship-application.html")
+def internship_application():
+    return render_template("internship-application.html")
+
+@app.route("/payment")
+@app.route("/payment.html")
+def payment_page():
+    return render_template("payment.html")
+
+@app.route("/thank-you")
+@app.route("/thank-you.html")
+def thank_you_page():
+    return render_template("thank-you.html")
+
+@app.route("/templates/<path:filename>")
+def serve_template_direct(filename):
+    return render_template(filename)
+
+@app.route("/api/register-training", methods=["POST"])
+def register_training_api():
+    data = request.get_json(silent=True) or request.form.to_dict() or {}
+    name = str(data.get("fullName") or data.get("name") or "").strip()
+    email = str(data.get("email") or "").strip().lower()
+    phone = str(data.get("phone") or "").strip()
+    course = str(data.get("course") or data.get("program") or "Brand Strategy & Positioning").strip()
+    age = str(data.get("age") or "").strip()
+    gender = str(data.get("gender") or "").strip()
+    address = str(data.get("address") or "").strip()
+    social = str(data.get("social") or "").strip()
+    comments = str(data.get("comments") or data.get("statement") or "").strip()
+    guardian_name = str(data.get("guardianName") or "").strip()
+    guardian_phone = str(data.get("guardianPhone") or "").strip()
+
+    if not name or not email or not phone:
+        return jsonify({"success": False, "error": "Full Name, Email, and Phone Number are required."}), 400
+
+    now = datetime.now(timezone.utc).isoformat()
+    reg_id = f"TRN-{int(time.time()*1000)}"
+    details_str = json.dumps({
+        "age": age, "gender": gender, "address": address, "social": social,
+        "comments": comments, "guardianName": guardian_name, "guardianPhone": guardian_phone
+    })
+
+    try:
+        with get_quota_db() as conn:
+            conn.execute(
+                """
+                INSERT INTO career_registrations 
+                (id, type, name, email, phone, program, experience_level, statement, details, amount, status, created_at, updated_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (reg_id, "training", name, email, phone, course, "", comments, details_str, 250000, "pending_payment", now, now)
+            )
+    except Exception as exc:
+        print(f"Error saving training registration: {exc}")
+        return jsonify({"success": False, "error": f"Database error: {exc}"}), 500
+
+    db = get_firestore_client()
+    if db:
+        try:
+            db.collection("careerRegistrations").document(reg_id).set({
+                "id": reg_id, "type": "training", "name": name, "email": email, "phone": phone,
+                "program": course, "amount": 250000, "status": "pending_payment",
+                "details": details_str, "createdAt": now, "updatedAt": now
+            })
+        except Exception as exc:
+            print(f"Firestore save warning: {exc}")
+
+    return jsonify({
+        "success": True,
+        "id": reg_id,
+        "amount": 250000,
+        "redirect_url": f"/payment.html?id={reg_id}&type=training"
+    })
+
+@app.route("/api/apply-internship", methods=["POST"])
+def apply_internship_api():
+    data = request.get_json(silent=True) or request.form.to_dict() or {}
+    name = str(data.get("fullName") or data.get("name") or "").strip()
+    email = str(data.get("email") or "").strip().lower()
+    phone = str(data.get("phone") or "").strip()
+    track = str(data.get("service") or data.get("track") or data.get("program") or "General Internship").strip()
+    experience = str(data.get("exp_level") or data.get("experience_level") or "").strip()
+    commitment = str(data.get("commitment") or "").strip()
+    available_days = str(data.get("available_days") or "").strip()
+    statement = str(data.get("statement") or data.get("reason") or "").strip()
+    portfolio = str(data.get("portfolio") or "").strip()
+    found_us = str(data.get("found_us") or "").strip()
+
+    if not name or not email or not phone:
+        return jsonify({"success": False, "error": "Full Name, Email, and Phone Number are required."}), 400
+
+    now = datetime.now(timezone.utc).isoformat()
+    reg_id = f"INT-{int(time.time()*1000)}"
+    details_str = json.dumps({
+        "commitment": commitment, "availableDays": available_days,
+        "portfolio": portfolio, "foundUs": found_us
+    })
+
+    try:
+        with get_quota_db() as conn:
+            conn.execute(
+                """
+                INSERT INTO career_registrations 
+                (id, type, name, email, phone, program, experience_level, statement, details, amount, status, created_at, updated_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (reg_id, "internship", name, email, phone, track, experience, statement, details_str, 250000, "pending_payment", now, now)
+            )
+    except Exception as exc:
+        print(f"Error saving internship application: {exc}")
+        return jsonify({"success": False, "error": f"Database error: {exc}"}), 500
+
+    db = get_firestore_client()
+    if db:
+        try:
+            db.collection("careerRegistrations").document(reg_id).set({
+                "id": reg_id, "type": "internship", "name": name, "email": email, "phone": phone,
+                "program": track, "amount": 250000, "status": "pending_payment",
+                "experienceLevel": experience, "statement": statement,
+                "details": details_str, "createdAt": now, "updatedAt": now
+            })
+        except Exception as exc:
+            print(f"Firestore save warning: {exc}")
+
+    return jsonify({
+        "success": True,
+        "id": reg_id,
+        "amount": 250000,
+        "redirect_url": f"/payment.html?id={reg_id}&type=internship"
+    })
+
+@app.route("/api/registration/<reg_id>", methods=["GET"])
+def get_registration_api(reg_id):
+    try:
+        with get_quota_db() as conn:
+            row = conn.execute("SELECT * FROM career_registrations WHERE id = ?", (reg_id,)).fetchone()
+            if row:
+                res = dict(row)
+                if res.get("details"):
+                    try:
+                        res["detailsParsed"] = json.loads(res["details"])
+                    except Exception:
+                        pass
+                return jsonify({"success": True, "registration": res})
+    except Exception as exc:
+        print(f"Error fetching registration: {exc}")
+
+    return jsonify({
+        "success": True,
+        "registration": {
+            "id": reg_id,
+            "type": "training" if reg_id.startswith("TRN") else "internship",
+            "name": "Applicant",
+            "email": "applicant@nakconel.com",
+            "phone": "+234 800 000 0000",
+            "program": "Nakconel Professional Program",
+            "amount": 250000,
+            "status": "pending_payment",
+            "created_at": datetime.now(timezone.utc).isoformat()
+        }
+    })
+
+@app.route("/api/registration/<reg_id>/complete-payment", methods=["POST"])
+def complete_payment_api(reg_id):
+    data = request.get_json(silent=True) or {}
+    payment_method = str(data.get("paymentMethod") or "online_transfer").strip()
+    reference = str(data.get("reference") or f"PAY-{int(time.time()*1000)}").strip()
+    now = datetime.now(timezone.utc).isoformat()
+
+    try:
+        with get_quota_db() as conn:
+            conn.execute(
+                """
+                UPDATE career_registrations 
+                SET status = 'paid', payment_reference = ?, paid_at = ?, updated_at = ?
+                WHERE id = ?
+                """,
+                (reference, now, now, reg_id)
+            )
+    except Exception as exc:
+        print(f"Error completing payment: {exc}")
+
+    db = get_firestore_client()
+    if db:
+        try:
+            db.collection("careerRegistrations").document(reg_id).set({
+                "status": "paid", "paymentReference": reference, "paidAt": now, "updatedAt": now
+            }, merge=True)
+        except Exception as exc:
+            print(f"Firestore update warning: {exc}")
+
+    return jsonify({
+        "success": True,
+        "id": reg_id,
+        "paymentReference": reference,
+        "redirect_url": f"/thank-you.html?id={reg_id}"
+    })
+
+@app.route("/api/admin/career-registrations", methods=["GET"])
+@require_admin_session
+def admin_career_registrations():
+    registrations = []
+    total_paid_revenue = 0
+    try:
+        with get_quota_db() as conn:
+            rows = conn.execute("SELECT * FROM career_registrations ORDER BY created_at DESC").fetchall()
+            for row in rows:
+                item = dict(row)
+                if item.get("status") == "paid":
+                    total_paid_revenue += int(item.get("amount") or 250000)
+                registrations.append(item)
+    except Exception as exc:
+        print(f"Error loading career registrations: {exc}")
+
+    return jsonify({
+        "registrations": registrations,
+        "total": len(registrations),
+        "totalRevenueNgn": total_paid_revenue
+    })
+
+@app.route("/api/admin/career-registrations/<reg_id>/status", methods=["POST"])
+@require_admin_session
+def admin_update_career_status(reg_id):
+    data = request.get_json(silent=True) or {}
+    new_status = str(data.get("status", "")).strip().lower()
+    if new_status not in ["pending_payment", "paid", "approved", "rejected"]:
+        return jsonify({"error": "Invalid status value."}), 400
+
+    now = datetime.now(timezone.utc).isoformat()
+    try:
+        with get_quota_db() as conn:
+            conn.execute("UPDATE career_registrations SET status = ?, updated_at = ? WHERE id = ?", (new_status, now, reg_id))
+    except Exception as exc:
+        print(f"Error updating career status: {exc}")
+
+    db = get_firestore_client()
+    if db:
+        try:
+            db.collection("careerRegistrations").document(reg_id).set({"status": new_status, "updatedAt": now}, merge=True)
+        except Exception as exc:
+            print(f"Firestore status update warning: {exc}")
+
+    return jsonify({"success": True, "id": reg_id, "status": new_status})
+
 
 
 @app.route("/contact")
