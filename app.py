@@ -730,16 +730,24 @@ def register_training_api():
 @app.route("/api/apply-internship", methods=["POST"])
 def apply_internship_api():
     data = request.get_json(silent=True) or request.form.to_dict() or {}
-    name = str(data.get("fullName") or data.get("name") or "").strip()
-    email = str(data.get("email") or "").strip().lower()
+    name = str(data.get("fullName") or data.get("name") or data.get("from_name") or "").strip()
+    email = str(data.get("email") or data.get("from_email") or "").strip().lower()
     phone = str(data.get("phone") or "").strip()
     track = str(data.get("service") or data.get("track") or data.get("program") or "General Internship").strip()
-    experience = str(data.get("exp_level") or data.get("experience_level") or "").strip()
+    experience = str(data.get("exp_level") or data.get("experience_level") or data.get("status") or "").strip()
     commitment = str(data.get("commitment") or "").strip()
-    available_days = str(data.get("available_days") or "").strip()
-    statement = str(data.get("statement") or data.get("reason") or "").strip()
-    portfolio = str(data.get("portfolio") or "").strip()
-    found_us = str(data.get("found_us") or "").strip()
+    raw_days = data.get("available_days") or ""
+    if isinstance(raw_days, list):
+        available_days = ", ".join([str(d) for d in raw_days if d])
+    else:
+        available_days = str(raw_days).strip()
+    statement = str(data.get("statement") or data.get("reason") or data.get("motivation") or "").strip()
+    portfolio = str(data.get("portfolio") or data.get("portfolio_link") or "").strip()
+    found_us = str(data.get("found_us") or data.get("source") or "").strip()
+    location = str(data.get("location") or "").strip()
+    start_date = str(data.get("start_date") or "").strip()
+    duration = str(data.get("duration") or "").strip()
+    mode = str(data.get("mode") or "").strip()
 
     if not name or not email or not phone:
         return jsonify({"success": False, "error": "Full Name, Email, and Phone Number are required."}), 400
@@ -748,7 +756,8 @@ def apply_internship_api():
     reg_id = f"INT-{int(time.time()*1000)}"
     details_str = json.dumps({
         "commitment": commitment, "availableDays": available_days,
-        "portfolio": portfolio, "foundUs": found_us
+        "portfolio": portfolio, "foundUs": found_us,
+        "location": location, "startDate": start_date, "duration": duration, "mode": mode
     })
 
     try:

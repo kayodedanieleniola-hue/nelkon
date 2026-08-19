@@ -459,7 +459,14 @@ form.addEventListener('submit', function(e){
 
   const formData = new FormData(form);
   const data = {};
-  formData.forEach((value, key) => data[key] = value);
+  formData.forEach((value, key) => {
+    if (key === 'available_days') {
+      if (!data[key]) data[key] = [];
+      data[key].push(value);
+    } else {
+      data[key] = value;
+    }
+  });
 
   fetch('/api/apply-internship', {
     method: 'POST',
