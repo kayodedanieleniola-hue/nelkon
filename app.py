@@ -9,6 +9,7 @@ import time
 from datetime import datetime, timezone, timedelta
 from functools import wraps
 from collections import defaultdict
+import base64
 
 try:
     from dotenv import load_dotenv
@@ -188,6 +189,14 @@ def parse_firebase_service_account_info(raw_val):
     if (val.startswith("'") and val.endswith("'")) or (val.startswith('"') and val.endswith('"')):
         val = val[1:-1].strip()
 
+    if os.path.exists(val):
+        try:
+            with open(val, "r", encoding="utf-8") as f:
+                val = f.read().strip()
+        except Exception:
+            pass
+
+    data = None
     try:
         data = json.loads(val)
     except Exception:
@@ -195,7 +204,11 @@ def parse_firebase_service_account_info(raw_val):
             fixed = val.replace("\\n", "\n")
             data = json.loads(fixed)
         except Exception:
-            return None
+            try:
+                decoded = base64.b64decode(val).decode("utf-8")
+                data = json.loads(decoded)
+            except Exception:
+                return None
 
     if isinstance(data, dict):
         if "private_key" in data and isinstance(data["private_key"], str):
@@ -210,9 +223,17 @@ def initialize_firebase_admin():
         return False
 
     if not _firebase_admin_ready:
-        service_account_json = os.environ.get("FIREBASE_SERVICE_ACCOUNT_JSON")
+        service_account_json = os.environ.get("FIREBASE_SERVICE_ACCOUNT_JSON") or os.environ.get("FIREBASE_SERVICE_ACCOUNT_PATH")
+        if not service_account_json:
+            for potential_filename in ["firebase-service-account.json", "firebase-key.json", "service-account.json"]:
+                full_p = os.path.join(app.root_path, potential_filename)
+                if os.path.exists(full_p):
+                    service_account_json = full_p
+                    break
+
         if not service_account_json:
             return False
+
         service_account_info = parse_firebase_service_account_info(service_account_json)
         if not service_account_info:
             return False
@@ -344,6 +365,25 @@ def get_quota_db():
             paid_at TEXT,
             created_at TEXT NOT NULL,
             updated_at TEXT
+        )
+        """
+    )
+    conn.execute(
+        """
+        CREATE TABLE IF NOT EXISTS campaign_registrations (
+            id TEXT PRIMARY KEY,
+            uid TEXT NOT NULL,
+            email TEXT NOT NULL,
+            full_name TEXT,
+            business TEXT,
+            challenge TEXT,
+            package_name TEXT,
+            amount REAL,
+            currency TEXT,
+            status TEXT NOT NULL DEFAULT 'pending_payment',
+            payment_reference TEXT,
+            created_at TEXT NOT NULL,
+            raw_json TEXT
         )
         """
     )
@@ -1129,6 +1169,7 @@ def account_page():
     return render_template("account.html")
 
 @app.route("/admin-login")
+@app.route("/admin/login")
 def admin_login_page():
     return render_template("admin-login.html")
 
@@ -1219,37 +1260,70 @@ def admin_me():
 @app.route("/api/admin/summary", methods=["GET"])
 @require_admin_session
 def admin_summary():
-    registrations = []
-    users = []
-    strategy_calls = []
+    registrations_map = {}
+    users_map = {}
+    strategy_calls_map = {}
     error = None
 
     db = get_firestore_client()
     if db is not None:
         try:
-            registrations = [doc.to_dict() for doc in db.collection("campaignRegistrations").stream()]
+            for doc in db.collection("campaignRegistrations").stream():
+                d = doc.to_dict()
+                d["id"] = doc.id
+                registrations_map[doc.id] = d
         except Exception as exc:
             error = f"campaignRegistrations: {exc}"
 
         try:
-            users = [doc.to_dict() for doc in db.collection("users").stream()]
+            for doc in db.collection("users").stream():
+                d = doc.to_dict()
+                d["uid"] = doc.id
+                users_map[doc.id] = d
         except Exception as exc:
             error = f"{error}; users: {exc}" if error else f"users: {exc}"
 
         try:
-            strategy_calls = [doc.to_dict() for doc in db.collection("strategyCalls").stream()]
+            for doc in db.collection("strategyCalls").stream():
+                d = doc.to_dict()
+                d["id"] = doc.id
+                strategy_calls_map[doc.id] = d
         except Exception as exc:
             error = f"{error}; strategyCalls: {exc}" if error else f"strategyCalls: {exc}"
     else:
         error = "Firebase Firestore is unconfigured or offline (FIREBASE_SERVICE_ACCOUNT_JSON missing or invalid)."
-        # Fallback local strategy calls count
-        try:
-            with get_quota_db() as conn:
-                count_row = conn.execute("SELECT COUNT(*) FROM strategy_calls").fetchone()
-                if count_row:
-                    strategy_calls = [1] * count_row[0]
-        except Exception:
-            pass
+
+    # Merge SQLite fallback data
+    try:
+        with get_quota_db() as conn:
+            # Campaign Registrations
+            c_rows = conn.execute("SELECT * FROM campaign_registrations").fetchall()
+            for r in c_rows:
+                row_dict = dict(r)
+                reg_id = row_dict["id"]
+                if reg_id not in registrations_map:
+                    raw = row_dict.get("raw_json")
+                    if raw:
+                        try:
+                            registrations_map[reg_id] = json.loads(raw)
+                        except Exception:
+                            registrations_map[reg_id] = row_dict
+                    else:
+                        registrations_map[reg_id] = row_dict
+
+            # Strategy Calls
+            sc_rows = conn.execute("SELECT * FROM strategy_calls").fetchall()
+            for r in sc_rows:
+                row_dict = dict(r)
+                sc_id = row_dict["id"]
+                if sc_id not in strategy_calls_map:
+                    strategy_calls_map[sc_id] = row_dict
+    except Exception as exc:
+        print(f"SQLite summary merge error: {exc}")
+
+    registrations = list(registrations_map.values())
+    users = list(users_map.values())
+    strategy_calls = list(strategy_calls_map.values())
 
     total_revenue = 0
     pending_payments = 0
@@ -1257,14 +1331,14 @@ def admin_summary():
     package_counts = {}
     for item in registrations:
         package = item.get("package") or {}
-        package_name = package.get("name") or "Unknown"
+        package_name = package.get("name") or item.get("package_name") or "Unknown"
         package_counts[package_name] = package_counts.get(package_name, 0) + 1
         if (item.get("status") or "").lower() == "pending_payment":
             pending_payments += 1
             continue
         paid_registrations += 1
         try:
-            total_revenue += int(package.get("ngn") or 0)
+            total_revenue += int(package.get("ngn") or item.get("amount") or 0)
         except (TypeError, ValueError):
             pass
 
@@ -1303,7 +1377,7 @@ def admin_summary():
         "packageCounts": package_counts,
         "adminTeam": ADMIN_TEAM
     }
-    if error:
+    if error and not (registrations or users or strategy_calls or career_registrations_list):
         result["warning"] = error
     return jsonify(result)
 
@@ -1550,7 +1624,7 @@ def admin_send_chat_message(conversation_id):
 @app.route("/api/admin/campaign-registrations", methods=["GET"])
 @require_admin_session
 def admin_campaign_registrations():
-    registrations = []
+    registrations_map = {}
     warning = None
     try:
         db = get_firestore_client()
@@ -1559,16 +1633,36 @@ def admin_campaign_registrations():
             for doc in docs:
                 data = doc.to_dict()
                 data["id"] = doc.id
-                registrations.append(json_safe(data))
+                registrations_map[doc.id] = json_safe(data)
         else:
             warning = "Firebase Firestore is unconfigured or offline (FIREBASE_SERVICE_ACCOUNT_JSON missing or invalid)."
     except Exception as exc:
-        print(f"Failed to load campaign registrations: {exc}")
-        warning = f"Failed to load campaign registrations: {exc}"
+        print(f"Failed to load campaign registrations from Firestore: {exc}")
+        warning = f"Failed to load campaign registrations from Firestore: {exc}"
 
-    registrations.sort(key=lambda item: item.get("createdAt", ""), reverse=True)
+    # Merge SQLite campaign registrations
+    try:
+        with get_quota_db() as conn:
+            rows = conn.execute("SELECT * FROM campaign_registrations ORDER BY created_at DESC").fetchall()
+            for row in rows:
+                r = dict(row)
+                reg_id = r["id"]
+                if reg_id not in registrations_map:
+                    raw = r.get("raw_json")
+                    if raw:
+                        try:
+                            registrations_map[reg_id] = json.loads(raw)
+                        except Exception:
+                            registrations_map[reg_id] = r
+                    else:
+                        registrations_map[reg_id] = r
+    except Exception as exc:
+        print(f"SQLite campaign registrations fallback error: {exc}")
+
+    registrations = list(registrations_map.values())
+    registrations.sort(key=lambda item: item.get("createdAt") or item.get("created_at") or "", reverse=True)
     res = {"registrations": registrations}
-    if warning:
+    if warning and not registrations:
         res["warning"] = warning
     return jsonify(res)
 
@@ -1984,12 +2078,45 @@ def register_campaign():
         "createdAt": datetime.now(timezone.utc).isoformat()
     }
 
+    reg_id = pending_id or payment["reference"]
+    registration["id"] = reg_id
+
+    # Always save locally to SQLite
     try:
-        db = get_firestore_client()
-        doc_ref = db.collection("campaignRegistrations").document(pending_id or payment["reference"])
-        doc_ref.set(registration, merge=True)
+        with get_quota_db() as conn:
+            conn.execute(
+                """
+                INSERT OR REPLACE INTO campaign_registrations 
+                (id, uid, email, full_name, business, challenge, package_name, amount, currency, status, payment_reference, created_at, raw_json)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    reg_id,
+                    registration["uid"],
+                    registration["email"],
+                    registration.get("questions", {}).get("fullName"),
+                    registration.get("questions", {}).get("business"),
+                    registration.get("questions", {}).get("challenge"),
+                    registration.get("package", {}).get("name"),
+                    registration.get("package", {}).get("amount", 0),
+                    registration.get("package", {}).get("currency"),
+                    registration.get("status", "paid"),
+                    registration.get("payment", {}).get("reference"),
+                    registration.get("createdAt"),
+                    json.dumps(registration)
+                )
+            )
     except Exception as exc:
-        return jsonify({"saved": False, "error": str(exc)}), 500
+        print(f"Campaign registration SQLite save warning: {exc}")
+
+    # Also save to Firestore if available
+    db = get_firestore_client()
+    if db:
+        try:
+            doc_ref = db.collection("campaignRegistrations").document(reg_id)
+            doc_ref.set(registration, merge=True)
+        except Exception as exc:
+            print(f"Campaign registration Firestore save warning: {exc}")
 
     return jsonify({"saved": True, "reference": payment["reference"]})
 
@@ -2009,6 +2136,7 @@ def save_pending_campaign():
     now = datetime.now(timezone.utc).isoformat()
     doc_id = f"pending-{str(data['uid']).strip()}"
     registration = {
+        "id": doc_id,
         "uid": str(data["uid"]),
         "email": str(data["email"]).strip().lower(),
         "questions": {
@@ -2023,6 +2151,7 @@ def save_pending_campaign():
             "currency": None,
             "paidAt": None
         },
+        "createdAt": now,
         "updatedAt": now
     }
     package = data.get("package") or {}
@@ -2043,19 +2172,47 @@ def save_pending_campaign():
                 "time": package.get("time")
             }
 
+    # Save to SQLite
     try:
-        db = get_firestore_client()
-        doc_ref = db.collection("campaignRegistrations").document(doc_id)
-        existing = doc_ref.get()
-        if existing.exists:
-            existing_data = existing.to_dict() or {}
-            if (existing_data.get("status") or "").lower() == "paid":
-                return jsonify({"saved": True, "id": doc_id, "status": "paid"})
-        else:
-            registration["createdAt"] = now
-        doc_ref.set(registration, merge=True)
+        with get_quota_db() as conn:
+            conn.execute(
+                """
+                INSERT OR REPLACE INTO campaign_registrations 
+                (id, uid, email, full_name, business, challenge, package_name, amount, currency, status, payment_reference, created_at, raw_json)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    doc_id,
+                    registration["uid"],
+                    registration["email"],
+                    registration.get("questions", {}).get("fullName"),
+                    registration.get("questions", {}).get("business"),
+                    registration.get("questions", {}).get("challenge"),
+                    registration.get("package", {}).get("name"),
+                    registration.get("package", {}).get("amount", 0),
+                    registration.get("package", {}).get("currency"),
+                    registration.get("status", "pending_payment"),
+                    None,
+                    now,
+                    json.dumps(registration)
+                )
+            )
     except Exception as exc:
-        return jsonify({"saved": False, "error": str(exc)}), 500
+        print(f"Pending campaign registration SQLite save warning: {exc}")
+
+    # Also attempt Firestore
+    db = get_firestore_client()
+    if db:
+        try:
+            doc_ref = db.collection("campaignRegistrations").document(doc_id)
+            existing = doc_ref.get()
+            if existing.exists:
+                existing_data = existing.to_dict() or {}
+                if (existing_data.get("status") or "").lower() == "paid":
+                    return jsonify({"saved": True, "id": doc_id, "status": "paid"})
+            doc_ref.set(registration, merge=True)
+        except Exception as exc:
+            print(f"Pending campaign registration Firestore save warning: {exc}")
 
     return jsonify({"saved": True, "id": doc_id, "status": "pending_payment"})
 
