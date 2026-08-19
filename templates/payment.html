@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Secure Checkout — Nakconel Career Store</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://js.paystack.co/v1/inline.js"></script>
 <style>
 :root {
   --bg-dark: #0A0202;
@@ -132,7 +133,7 @@ body {
   background: rgba(255,255,255,0.03);
   color: var(--muted);
   font-family: inherit;
-  font-size: 14px;
+  font-size: 13.5px;
   font-weight: 600;
   cursor: pointer;
   text-align: center;
@@ -185,6 +186,18 @@ body {
 }
 .bank-info strong { color: var(--bronze-light); }
 
+.paystack-notice {
+  background: rgba(201, 154, 74, 0.08);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px;
+  text-align: center;
+  font-size: 13.5px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+.paystack-notice strong { color: var(--bronze-light); }
+
 .pay-btn {
   width: 100%;
   padding: 18px;
@@ -218,7 +231,7 @@ body {
 <div class="wrap">
   <div class="top-bar">
     <div class="brand-logo">NAK<span>CON</span>EL</div>
-    <div class="secure-badge">🔒 256-Bit SSL Checkout</div>
+    <div class="secure-badge">🔒 Paystack Secure Gateway</div>
   </div>
 
   <div class="summary-card">
@@ -246,44 +259,18 @@ body {
     </div>
   </div>
 
-  <div class="pay-options">
-    <button type="button" class="pay-tab active" id="tabCard" onclick="switchMethod('card')">💳 Card Payment</button>
-    <button type="button" class="pay-tab" id="tabBank" onclick="switchMethod('bank')">🏛 Bank Transfer</button>
+  <div class="pay-options" style="grid-template-columns: 1fr;">
+    <div class="pay-tab active" style="cursor: default;">⚡ Paystack Gateway (Card / Mobile Transfer / USSD / Bank)</div>
   </div>
 
   <form id="payForm">
-    <div class="pay-form-box active" id="boxCard">
-      <div class="field-g">
-        <label>Cardholder Name</label>
-        <input type="text" id="cardName" placeholder="Jane Doe" required>
-      </div>
-      <div class="field-g">
-        <label>Card Number</label>
-        <input type="text" id="cardNumber" placeholder="5399 •••• •••• 4021" maxlength="19" required>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-        <div class="field-g">
-          <label>Expiry Date</label>
-          <input type="text" placeholder="12 / 28" maxlength="5" required>
-        </div>
-        <div class="field-g">
-          <label>CVV / CVC</label>
-          <input type="password" placeholder="•••" maxlength="4" required>
-        </div>
+    <div class="pay-form-box active">
+      <div class="paystack-notice">
+        ⚡ Clicking complete payment will connect securely to <strong>Paystack Gateway</strong>. You can choose Card, Bank Transfer, USSD, or Mobile Money.
       </div>
     </div>
 
-    <div class="pay-form-box" id="boxBank">
-      <div class="bank-info">
-        <div>Bank Name: <strong>Guaranty Trust Bank (GTBank)</strong></div>
-        <div>Account Name: <strong>Nakconel Digital Services Ltd</strong></div>
-        <div>Account Number: <strong>0123456789</strong></div>
-        <div>Reference Memo: <strong id="bankMemo">#TRN-0000</strong></div>
-        <div style="margin-top:8px;font-size:12px;color:var(--muted);">Click complete payment below after transferring to record your submission in the admin desk.</div>
-      </div>
-    </div>
-
-    <button type="submit" class="pay-btn" id="submitPayBtn">Complete Payment (₦250,000) 🔒</button>
+    <button type="submit" class="pay-btn" id="submitPayBtn">Pay with Paystack (₦250,000) 🔒</button>
   </form>
 
   <div class="footnote">Nakconel Digital Services — Brand Management & AI Strategy Desk</div>
@@ -292,62 +279,57 @@ body {
 <script>
 const params = new URLSearchParams(window.location.search);
 const regId = params.get('id') || ('TRN-' + Date.now());
-let currentMethod = 'card';
+let regDetails = { name: 'Applicant', email: 'applicant@nakconel.com', amount: 250000, program: 'Career Program' };
 
 document.getElementById('regId').textContent = '#' + regId;
-document.getElementById('bankMemo').textContent = '#' + regId;
 
 fetch('/api/registration/' + regId)
   .then(res => res.json())
   .then(data => {
     if (data.success && data.registration) {
       const r = data.registration;
-      document.getElementById('regName').textContent = r.name || 'Applicant';
-      document.getElementById('regProgram').textContent = r.program || 'Career Program';
-      document.getElementById('cardName').value = r.name || '';
-      const amt = Number(r.amount || 250000).toLocaleString();
+      regDetails = {
+        name: r.name || 'Applicant',
+        email: r.email || 'applicant@nakconel.com',
+        amount: Number(r.amount || 250000),
+        program: r.program || 'Career Program'
+      };
+      document.getElementById('regName').textContent = regDetails.name;
+      document.getElementById('regProgram').textContent = regDetails.program;
+      const amt = regDetails.amount.toLocaleString();
       document.getElementById('regAmount').textContent = '₦' + amt;
-      document.getElementById('submitPayBtn').textContent = 'Complete Payment (₦' + amt + ') 🔒';
+      document.getElementById('submitPayBtn').textContent = 'Pay with Paystack (₦' + amt + ') 🔒';
     }
   }).catch(err => console.log(err));
-
-function switchMethod(method) {
-  currentMethod = method;
-  document.getElementById('tabCard').classList.toggle('active', method === 'card');
-  document.getElementById('tabBank').classList.toggle('active', method === 'bank');
-  document.getElementById('boxCard').classList.toggle('active', method === 'card');
-  document.getElementById('boxBank').classList.toggle('active', method === 'bank');
-  
-  const reqFields = document.querySelectorAll('#boxCard input');
-  reqFields.forEach(f => f.required = (method === 'card'));
-}
 
 document.getElementById('payForm').addEventListener('submit', function(e) {
   e.preventDefault();
   const btn = document.getElementById('submitPayBtn');
   btn.disabled = true;
-  btn.textContent = 'Processing Payment...';
+  btn.textContent = 'Connecting to Paystack Secure Server...';
 
-  fetch('/api/registration/' + regId + '/complete-payment', {
+  fetch('/api/registration/' + regId + '/initialize-paystack', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      paymentMethod: currentMethod,
-      reference: 'PAY-' + Date.now()
-    })
+    body: JSON.stringify({ email: regDetails.email })
   })
   .then(res => res.json())
   .then(data => {
-    if (data.success) {
-      window.location.href = data.redirect_url || ('/thank-you.html?id=' + regId);
+    if (data.success && data.authorization_url) {
+      btn.textContent = 'Redirecting to Paystack Checkout...';
+      window.location.href = data.authorization_url;
     } else {
-      alert('Payment error: ' + (data.error || 'Please try again.'));
+      alert('Paystack initialization error: ' + (data.error || 'Please try again.'));
       btn.disabled = false;
-      btn.textContent = 'Complete Payment (₦250,000) 🔒';
+      const amt = regDetails.amount.toLocaleString();
+      btn.textContent = 'Pay with Paystack (₦' + amt + ') 🔒';
     }
   })
   .catch(err => {
-    window.location.href = '/thank-you.html?id=' + regId;
+    alert('Connection error. Please try again.');
+    btn.disabled = false;
+    const amt = regDetails.amount.toLocaleString();
+    btn.textContent = 'Pay with Paystack (₦' + amt + ') 🔒';
   });
 });
 </script>

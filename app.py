@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify, session, send_from_directory
+from flask import Flask, render_template, request, jsonify, session, send_from_directory, redirect
 import json
 import os
 import requests
@@ -659,7 +659,8 @@ def internship_application():
 @app.route("/payment")
 @app.route("/payment.html")
 def payment_page():
-    return render_template("payment.html")
+    paystack_public_key = os.environ.get("PAYSTACK_PUBLIC_KEY", "pk_live_eefc2236ca35e9b3d72ee382cba858121bb8edd8")
+    return render_template("payment.html", paystack_public_key=paystack_public_key)
 
 @app.route("/thank-you")
 @app.route("/thank-you.html")
@@ -824,12 +825,169 @@ def get_registration_api(reg_id):
         }
     })
 
+
+@app.route("/api/registration/<reg_id>/initialize-paystack", methods=["POST"])
+def initialize_paystack_registration(reg_id):
+    PAYSTACK_SECRET_KEY = os.environ.get("PAYSTACK_SECRET_KEY")
+    if not PAYSTACK_SECRET_KEY:
+        return jsonify({"success": False, "error": "PAYSTACK_SECRET_KEY is not configured in environment."}), 500
+
+    reg = None
+    try:
+        with get_quota_db() as conn:
+            row = conn.execute("SELECT * FROM career_registrations WHERE id = ?", (reg_id,)).fetchone()
+            if row:
+                reg = dict(row)
+    except Exception as exc:
+        print(f"Error fetching registration for Paystack init: {exc}")
+
+    if not reg:
+        reg = {
+            "id": reg_id,
+            "name": "Applicant",
+            "email": "applicant@nakconel.com",
+            "amount": 250000,
+            "program": "Career Program"
+        }
+
+    email = str(reg.get("email") or "applicant@nakconel.com").strip().lower()
+    if "@" not in email:
+        email = "applicant@nakconel.com"
+
+    amount_val = float(reg.get("amount") or 250000)
+    amount_kobo = round(amount_val * 100)
+
+    callback_url = request.host_url.rstrip("/") + f"/api/paystack/callback?id={reg_id}"
+
+    try:
+        response = requests.post(
+            "https://api.paystack.co/transaction/initialize",
+            headers={
+                "Authorization": f"Bearer {PAYSTACK_SECRET_KEY}",
+                "Content-Type": "application/json"
+            },
+            json={
+                "email": email,
+                "amount": amount_kobo,
+                "currency": "NGN",
+                "callback_url": callback_url,
+                "reference": f"PAY-{reg_id}-{int(time.time()*1000)}",
+                "metadata": {
+                    "registration_id": reg_id,
+                    "applicant_name": reg.get("name"),
+                    "program": reg.get("program")
+                }
+            },
+            timeout=15
+        )
+        payload = response.json()
+    except Exception as exc:
+        return jsonify({"success": False, "error": f"Could not reach Paystack gateway: {exc}"}), 502
+
+    data = payload.get("data") or {}
+    authorization_url = data.get("authorization_url")
+    reference = data.get("reference")
+
+    if not response.ok or payload.get("status") is not True or not authorization_url:
+        return jsonify({"success": False, "error": payload.get("message") or "Paystack initialization failed."}), 400
+
+    now = datetime.now(timezone.utc).isoformat()
+    try:
+        with get_quota_db() as conn:
+            conn.execute(
+                "UPDATE career_registrations SET payment_reference = ?, updated_at = ? WHERE id = ?",
+                (reference, now, reg_id)
+            )
+    except Exception as exc:
+        print(f"Error saving Paystack reference: {exc}")
+
+    return jsonify({
+        "success": True,
+        "authorization_url": authorization_url,
+        "reference": reference
+    })
+
+
+@app.route("/api/paystack/callback", methods=["GET", "POST"])
+def paystack_callback():
+    reference = request.args.get("reference") or request.args.get("trxref") or (request.get_json(silent=True) or {}).get("reference")
+    reg_id = request.args.get("id") or (request.get_json(silent=True) or {}).get("id")
+
+    if not reference:
+        return redirect("/thank-you.html?error=missing_reference")
+
+    PAYSTACK_SECRET_KEY = os.environ.get("PAYSTACK_SECRET_KEY")
+    if not PAYSTACK_SECRET_KEY:
+        return redirect(f"/thank-you.html?id={reg_id or ''}&status=pending")
+
+    try:
+        response = requests.get(
+            f"https://api.paystack.co/transaction/verify/{reference}",
+            headers={"Authorization": f"Bearer {PAYSTACK_SECRET_KEY}"},
+            timeout=15
+        )
+        payload = response.json()
+    except Exception as exc:
+        print(f"Callback verification error: {exc}")
+        return redirect(f"/thank-you.html?id={reg_id or ''}&reference={reference}")
+
+    data = payload.get("data") or {}
+    if payload.get("status") is True and data.get("status") == "success":
+        meta = data.get("metadata") or {}
+        if not reg_id:
+            reg_id = meta.get("registration_id")
+
+        now = datetime.now(timezone.utc).isoformat()
+        if reg_id:
+            try:
+                with get_quota_db() as conn:
+                    conn.execute(
+                        """
+                        UPDATE career_registrations 
+                        SET status = 'paid', payment_reference = ?, paid_at = ?, updated_at = ?
+                        WHERE id = ?
+                        """,
+                        (reference, now, now, reg_id)
+                    )
+            except Exception as exc:
+                print(f"Error updating payment on callback: {exc}")
+
+            db = get_firestore_client()
+            if db:
+                try:
+                    db.collection("careerRegistrations").document(reg_id).set({
+                        "status": "paid", "paymentReference": reference, "paidAt": now, "updatedAt": now
+                    }, merge=True)
+                except Exception as exc:
+                    print(f"Firestore callback update warning: {exc}")
+
+            return redirect(f"/thank-you.html?id={reg_id}&status=paid&reference={reference}")
+        else:
+            return redirect(f"/thank-you.html?status=paid&reference={reference}")
+
+    return redirect(f"/payment.html?id={reg_id or ''}&error=payment_unverified")
+
+
 @app.route("/api/registration/<reg_id>/complete-payment", methods=["POST"])
 def complete_payment_api(reg_id):
     data = request.get_json(silent=True) or {}
-    payment_method = str(data.get("paymentMethod") or "online_transfer").strip()
+    payment_method = str(data.get("paymentMethod") or "paystack").strip()
     reference = str(data.get("reference") or f"PAY-{int(time.time()*1000)}").strip()
     now = datetime.now(timezone.utc).isoformat()
+
+    # Optional Paystack verification if reference provided
+    if os.environ.get("PAYSTACK_SECRET_KEY") and reference and not reference.startswith("MANUAL-"):
+        try:
+            reg_amount = 250000
+            with get_quota_db() as conn:
+                r = conn.execute("SELECT amount FROM career_registrations WHERE id = ?", (reg_id,)).fetchone()
+                if r and r["amount"]:
+                    reg_amount = r["amount"]
+            ver_res, ver_status = verify_paystack_reference(reference, reg_amount, "NGN")
+            if ver_status != 200:
+                print(f"Paystack warning for registration {reg_id}: {ver_res}")
+        except Exception as exc:
+            print(f"Paystack verification check exception: {exc}")
 
     try:
         with get_quota_db() as conn:
