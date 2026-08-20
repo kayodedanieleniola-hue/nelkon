@@ -30,6 +30,13 @@ except ImportError:
 
 app = Flask(__name__)
 
+
+@app.teardown_request
+def log_unhandled_request_error(error):
+    """Write unexpected server failures to Vercel Function Logs without request data."""
+    if error is not None:
+        app.logger.exception("[NAKCONEL] Unhandled server error during %s %s", request.method, request.path)
+
 @app.route("/favicon.ico")
 def favicon():
     return send_from_directory(os.path.join(app.root_path, "static", "image"), "logo.png", mimetype="image/png")
@@ -53,6 +60,7 @@ _RATE_LIMIT_STORE = defaultdict(list)
 FREE_DAILY_MESSAGES = int(os.environ.get("AI_FREE_DAILY_MESSAGES", "40"))
 DAILY_BOOST_MESSAGES = int(os.environ.get("AI_DAILY_BOOST_MESSAGES", "5"))
 AI_QUOTA_DB_PATH = os.environ.get("AI_QUOTA_DB_PATH", os.path.join("/tmp", "nakconel_ai_quota.sqlite3"))
+IS_VERCEL_DEPLOYMENT = bool(os.environ.get("VERCEL") or os.environ.get("VERCEL_ENV"))
 NGN_TO_USD_RATE = float(os.environ.get("NGN_TO_USD_RATE", "0.00065"))
 _NGN_USD_RATE_CACHE = {"rate": NGN_TO_USD_RATE, "fetched_at": 0}
 AI_SUBSCRIPTION_PLANS = {
@@ -1062,65 +1070,60 @@ def complete_payment_api(reg_id):
 @app.route("/api/admin/career-registrations", methods=["GET"])
 @require_admin_session
 def admin_career_registrations():
-    registrations = []
-    total_paid_revenue = 0
-    pending_count = 0
-    approved_count = 0
-    try:
-        with get_quota_db() as conn:
-            rows = conn.execute("SELECT * FROM career_registrations ORDER BY created_at DESC").fetchall()
-            for row in rows:
-                item = dict(row)
-                if item.get("details"):
-                    try:
-                        item["detailsParsed"] = json.loads(item["details"])
-                    except Exception:
-                        item["detailsParsed"] = {}
-                else:
-                    item["detailsParsed"] = {}
-
-                st = (item.get("status") or "").lower()
-                if st in ["paid", "approved"]:
-                    total_paid_revenue += int(item.get("amount") or 250000)
-                    approved_count += 1
-                else:
-                    pending_count += 1
-                registrations.append(item)
-    except Exception as exc:
-        print(f"Error loading career registrations: {exc}")
-
-    # Fallback to Firestore if sqlite has no rows
+    registrations_map = {}
+    warning = None
     db = get_firestore_client()
-    if db and not registrations:
+    if db:
         try:
             docs = db.collection("careerRegistrations").stream()
             for doc in docs:
                 item = doc.to_dict()
-                if item.get("details"):
-                    try:
-                        item["detailsParsed"] = json.loads(item["details"])
-                    except Exception:
-                        item["detailsParsed"] = {}
-                else:
-                    item["detailsParsed"] = {}
-
-                st = (item.get("status") or "").lower()
-                if st in ["paid", "approved"]:
-                    total_paid_revenue += int(item.get("amount") or 250000)
-                    approved_count += 1
-                else:
-                    pending_count += 1
-                registrations.append(item)
+                item["id"] = doc.id
+                registrations_map[doc.id] = item
         except Exception as exc:
-            print(f"Firestore career reg warning: {exc}")
+            warning = f"Failed to load career registrations from Firestore: {exc}"
+    else:
+        warning = "Firebase Firestore is unconfigured or offline (FIREBASE_SERVICE_ACCOUNT_JSON missing or invalid)."
 
-    return jsonify({
+    if not IS_VERCEL_DEPLOYMENT:
+        try:
+            with get_quota_db() as conn:
+                rows = conn.execute("SELECT * FROM career_registrations ORDER BY created_at DESC").fetchall()
+                for row in rows:
+                    item = dict(row)
+                    registrations_map.setdefault(item["id"], item)
+        except Exception as exc:
+            print(f"Error loading local career registrations: {exc}")
+
+    registrations = list(registrations_map.values())
+    total_paid_revenue = 0
+    pending_count = 0
+    approved_count = 0
+    for item in registrations:
+        if item.get("details"):
+            try:
+                item["detailsParsed"] = json.loads(item["details"])
+            except Exception:
+                item["detailsParsed"] = {}
+        else:
+            item["detailsParsed"] = {}
+        if (item.get("status") or "").lower() in ["paid", "approved"]:
+            total_paid_revenue += int(item.get("amount") or 250000)
+            approved_count += 1
+        else:
+            pending_count += 1
+
+    registrations.sort(key=lambda item: item.get("createdAt") or item.get("created_at") or "", reverse=True)
+    result = {
         "registrations": registrations,
         "total": len(registrations),
         "pendingCount": pending_count,
         "approvedCount": approved_count,
         "totalRevenueNgn": total_paid_revenue
-    })
+    }
+    if warning:
+        result["warning"] = warning
+    return jsonify(result)
 
 @app.route("/api/admin/career-registrations/<reg_id>/status", methods=["POST"])
 @require_admin_session
@@ -1263,6 +1266,7 @@ def admin_summary():
     registrations_map = {}
     users_map = {}
     strategy_calls_map = {}
+    career_registrations_map = {}
     error = None
 
     db = get_firestore_client()
@@ -1290,11 +1294,21 @@ def admin_summary():
                 strategy_calls_map[doc.id] = d
         except Exception as exc:
             error = f"{error}; strategyCalls: {exc}" if error else f"strategyCalls: {exc}"
+
+        try:
+            for doc in db.collection("careerRegistrations").stream():
+                d = doc.to_dict()
+                d["id"] = doc.id
+                career_registrations_map[doc.id] = d
+        except Exception as exc:
+            error = f"{error}; careerRegistrations: {exc}" if error else f"careerRegistrations: {exc}"
     else:
         error = "Firebase Firestore is unconfigured or offline (FIREBASE_SERVICE_ACCOUNT_JSON missing or invalid)."
 
-    # Merge SQLite fallback data
-    try:
+    # Never read instance-local SQLite data in Vercel. It would make one
+    # deployed function return records that another function cannot see.
+    if not IS_VERCEL_DEPLOYMENT:
+      try:
         with get_quota_db() as conn:
             # Campaign Registrations
             c_rows = conn.execute("SELECT * FROM campaign_registrations").fetchall()
@@ -1318,8 +1332,14 @@ def admin_summary():
                 sc_id = row_dict["id"]
                 if sc_id not in strategy_calls_map:
                     strategy_calls_map[sc_id] = row_dict
-    except Exception as exc:
-        print(f"SQLite summary merge error: {exc}")
+
+            # Career / training registrations
+            career_rows = conn.execute("SELECT * FROM career_registrations").fetchall()
+            for r in career_rows:
+                row_dict = dict(r)
+                career_registrations_map.setdefault(row_dict["id"], row_dict)
+      except Exception as exc:
+          print(f"SQLite summary merge error: {exc}")
 
     registrations = list(registrations_map.values())
     users = list(users_map.values())
@@ -1342,27 +1362,20 @@ def admin_summary():
         except (TypeError, ValueError):
             pass
 
-    # Career / Training Registrations summary stats
-    career_registrations_list = []
+    # Career / training registration statistics use the shared Firestore data.
+    career_registrations_list = list(career_registrations_map.values())
     career_pending = 0
     career_approved = 0
-    try:
-        with get_quota_db() as conn:
-            c_rows = conn.execute("SELECT * FROM career_registrations").fetchall()
-            for cr in c_rows:
-                c_item = dict(cr)
-                st = (c_item.get("status") or "").lower()
-                if st in ["paid", "approved"]:
-                    career_approved += 1
-                    try:
-                        total_revenue += int(c_item.get("amount") or 250000)
-                    except (TypeError, ValueError):
-                        pass
-                else:
-                    career_pending += 1
-                career_registrations_list.append(c_item)
-    except Exception as exc:
-        print(f"Error checking career registrations for summary: {exc}")
+    for c_item in career_registrations_list:
+        st = (c_item.get("status") or "").lower()
+        if st in ["paid", "approved"]:
+            career_approved += 1
+            try:
+                total_revenue += int(c_item.get("amount") or 250000)
+            except (TypeError, ValueError):
+                pass
+        else:
+            career_pending += 1
 
     result = {
         "campaignRegistrations": len(registrations),
@@ -1640,8 +1653,10 @@ def admin_campaign_registrations():
         print(f"Failed to load campaign registrations from Firestore: {exc}")
         warning = f"Failed to load campaign registrations from Firestore: {exc}"
 
-    # Merge SQLite campaign registrations
-    try:
+    # Vercel's /tmp SQLite storage is per-instance. Only use this local
+    # development fallback outside Vercel, where Firestore is the shared source.
+    if not IS_VERCEL_DEPLOYMENT:
+      try:
         with get_quota_db() as conn:
             rows = conn.execute("SELECT * FROM campaign_registrations ORDER BY created_at DESC").fetchall()
             for row in rows:
@@ -1656,8 +1671,8 @@ def admin_campaign_registrations():
                             registrations_map[reg_id] = r
                     else:
                         registrations_map[reg_id] = r
-    except Exception as exc:
-        print(f"SQLite campaign registrations fallback error: {exc}")
+      except Exception as exc:
+          print(f"SQLite campaign registrations fallback error: {exc}")
 
     registrations = list(registrations_map.values())
     registrations.sort(key=lambda item: item.get("createdAt") or item.get("created_at") or "", reverse=True)
@@ -2276,7 +2291,7 @@ def admin_strategy_calls():
         except Exception as exc:
             print(f"Admin strategy calls Firestore fetch warning: {exc}")
 
-    if not calls:
+    if not calls and not IS_VERCEL_DEPLOYMENT:
         # Fallback to local SQLite strategy calls
         try:
             with get_quota_db() as conn:
