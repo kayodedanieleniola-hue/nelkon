@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script src="/static/js/error-logger.js" defer></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Login - NAKCONEL</title>
@@ -220,6 +221,26 @@
         const loginForm = document.getElementById('loginForm');
         const submitBtn = document.getElementById('submitBtn');
 
+        // Log technical details only. Do not write login credentials to the console.
+        function logAdminLoginError(context, error, details = {}) {
+            console.error(`[NAKCONEL Admin Login] ${context}`, {
+                message: error instanceof Error ? error.message : String(error),
+                ...details
+            });
+        }
+
+        window.addEventListener('error', (event) => {
+            logAdminLoginError('Unhandled page error', event.error || event.message, {
+                source: event.filename,
+                line: event.lineno,
+                column: event.colno
+            });
+        });
+
+        window.addEventListener('unhandledrejection', (event) => {
+            logAdminLoginError('Unhandled promise rejection', event.reason);
+        });
+
         function showAlert(message, type) {
             alertBox.textContent = message;
             alertBox.className = `alert ${type}`;
@@ -250,7 +271,13 @@
                     body: JSON.stringify({ username, password })
                 });
 
-                const data = await response.json();
+                let data;
+                try {
+                    data = await response.json();
+                } catch (error) {
+                    logAdminLoginError('Invalid server response', error, { status: response.status });
+                    throw new Error(`The server returned an invalid response (HTTP ${response.status}).`);
+                }
 
                 if (response.ok) {
                     showAlert('Login successful! Redirecting to Control Center...', 'success');
@@ -258,11 +285,12 @@
                         window.location.href = '/admin';
                     }, 1000);
                 } else {
+                    logAdminLoginError('Login request rejected', new Error(data.error || 'Login failed.'), { status: response.status });
                     showAlert(data.error || 'Invalid username or password. Please try again.', 'error');
                 }
             } catch (error) {
                 showAlert('Network error occurred. Please try again.', 'error');
-                console.error('Login error:', error);
+                logAdminLoginError('Login request failed', error);
             } finally {
                 submitBtn.disabled = false;
                 submitBtn.textContent = 'Sign In to Dashboard';

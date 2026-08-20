@@ -33,6 +33,13 @@ except ImportError:
 
 app = Flask(__name__)
 
+
+@app.teardown_request
+def log_unhandled_request_error(error):
+    """Write unexpected server failures to Vercel Function Logs without request data."""
+    if error is not None:
+        app.logger.exception("[NAKCONEL] Unhandled server error during %s %s", request.method, request.path)
+
 @app.route("/favicon.ico")
 def favicon():
     return send_from_directory(os.path.join(app.root_path, "static", "image"), "logo.png", mimetype="image/png")
@@ -55,6 +62,7 @@ _firebase_public_keys_fetched_at = 0
 _RATE_LIMIT_STORE = defaultdict(list)
 FREE_DAILY_MESSAGES = int(os.environ.get("AI_FREE_DAILY_MESSAGES", "40"))
 DAILY_BOOST_MESSAGES = int(os.environ.get("AI_DAILY_BOOST_MESSAGES", "5"))
+IS_VERCEL_DEPLOYMENT = bool(os.environ.get("VERCEL") or os.environ.get("VERCEL_ENV"))
 NGN_TO_USD_RATE = float(os.environ.get("NGN_TO_USD_RATE", "0.00065"))
 _NGN_USD_RATE_CACHE = {"rate": NGN_TO_USD_RATE, "fetched_at": 0}
 CAMPAIGN_PACKAGES = {
@@ -887,19 +895,28 @@ def complete_payment_api(reg_id):
 @app.route("/api/admin/career-registrations", methods=["GET"])
 @require_admin_session
 def admin_career_registrations():
-    registrations = nakdb.fetch_all(
-        "SELECT * FROM career_registrations ORDER BY created_at DESC",
-        context="Career registrations load"
-    )
-
-    # Fallback to Firestore if sqlite has no rows
+    registrations_map = {}
+    warning = None
     db = get_firestore_client()
-    if db and not registrations:
+    if db:
         try:
-            registrations = firestore_utils.stream_documents(db, "careerRegistrations")
+            for item in firestore_utils.stream_documents(db, "careerRegistrations"):
+                registrations_map[item["id"]] = item
         except Exception as exc:
-            print(f"Firestore career reg warning: {exc}")
+            warning = f"Failed to load career registrations from Firestore: {exc}"
+    else:
+        warning = firestore_utils.UNCONFIGURED_WARNING
 
+    # Vercel's /tmp SQLite storage is per-instance, so it is only a local fallback.
+    if not IS_VERCEL_DEPLOYMENT:
+        rows = nakdb.fetch_all(
+            "SELECT * FROM career_registrations ORDER BY created_at DESC",
+            context="Local career registrations load"
+        )
+        for row in rows:
+            registrations_map.setdefault(row["id"], row)
+
+    registrations = list(registrations_map.values())
     total_paid_revenue = 0
     pending_count = 0
     approved_count = 0
@@ -911,13 +928,17 @@ def admin_career_registrations():
         else:
             pending_count += 1
 
-    return jsonify({
+    registrations.sort(key=lambda item: item.get("createdAt") or item.get("created_at") or "", reverse=True)
+    result = {
         "registrations": registrations,
         "total": len(registrations),
         "pendingCount": pending_count,
         "approvedCount": approved_count,
         "totalRevenueNgn": total_paid_revenue
-    })
+    }
+    if warning:
+        result["warning"] = warning
+    return jsonify(result)
 
 @app.route("/api/admin/career-registrations/<reg_id>/status", methods=["POST"])
 @require_admin_session
@@ -1061,6 +1082,7 @@ def admin_summary():
     registrations_map = {}
     users_map = {}
     strategy_calls_map = {}
+    career_registrations_map = {}
     error = None
 
     db = get_firestore_client()
@@ -1069,6 +1091,7 @@ def admin_summary():
             ("campaignRegistrations", registrations_map, "id"),
             ("users", users_map, "uid"),
             ("strategyCalls", strategy_calls_map, "id"),
+            ("careerRegistrations", career_registrations_map, "id"),
         ):
             try:
                 for item in firestore_utils.stream_documents(db, collection, id_field=id_field):
@@ -1079,11 +1102,15 @@ def admin_summary():
     else:
         error = firestore_utils.UNCONFIGURED_WARNING
 
-    # Merge SQLite fallback data
-    for row in nakdb.fetch_all("SELECT * FROM campaign_registrations", context="Campaign summary merge"):
-        registrations_map.setdefault(row["id"], nakdb.registration_from_row(row))
-    for row in nakdb.fetch_all("SELECT * FROM strategy_calls", context="Strategy call summary merge"):
-        strategy_calls_map.setdefault(row["id"], row)
+    # Never read instance-local SQLite data in Vercel. It would make one
+    # deployed function return records that another function cannot see.
+    if not IS_VERCEL_DEPLOYMENT:
+        for row in nakdb.fetch_all("SELECT * FROM campaign_registrations", context="Campaign summary merge"):
+            registrations_map.setdefault(row["id"], nakdb.registration_from_row(row))
+        for row in nakdb.fetch_all("SELECT * FROM strategy_calls", context="Strategy call summary merge"):
+            strategy_calls_map.setdefault(row["id"], row)
+        for row in nakdb.fetch_all("SELECT * FROM career_registrations", context="Career summary merge"):
+            career_registrations_map.setdefault(row["id"], row)
 
     registrations = list(registrations_map.values())
     users = list(users_map.values())
@@ -1106,11 +1133,7 @@ def admin_summary():
         except (TypeError, ValueError):
             pass
 
-    # Career / Training Registrations summary stats
-    career_registrations_list = nakdb.fetch_all(
-        "SELECT * FROM career_registrations",
-        context="Career registrations summary"
-    )
+    career_registrations_list = list(career_registrations_map.values())
     career_pending = 0
     career_approved = 0
     for c_item in career_registrations_list:
@@ -1399,13 +1422,15 @@ def admin_campaign_registrations():
         print(f"Failed to load campaign registrations from Firestore: {exc}")
         warning = f"Failed to load campaign registrations from Firestore: {exc}"
 
-    # Merge SQLite campaign registrations
-    rows = nakdb.fetch_all(
-        "SELECT * FROM campaign_registrations ORDER BY created_at DESC",
-        context="Campaign registrations fallback"
-    )
-    for row in rows:
-        registrations_map.setdefault(row["id"], nakdb.registration_from_row(row))
+    # Vercel's /tmp SQLite storage is per-instance. Only use this local
+    # development fallback outside Vercel, where Firestore is the shared source.
+    if not IS_VERCEL_DEPLOYMENT:
+        rows = nakdb.fetch_all(
+            "SELECT * FROM campaign_registrations ORDER BY created_at DESC",
+            context="Campaign registrations fallback"
+        )
+        for row in rows:
+            registrations_map.setdefault(row["id"], nakdb.registration_from_row(row))
 
     registrations = list(registrations_map.values())
     registrations.sort(key=lambda item: item.get("createdAt") or item.get("created_at") or "", reverse=True)
@@ -1881,7 +1906,7 @@ def admin_strategy_calls():
         except Exception as exc:
             print(f"Admin strategy calls Firestore fetch warning: {exc}")
 
-    if not calls:
+    if not calls and not IS_VERCEL_DEPLOYMENT:
         # Fallback to local SQLite strategy calls
         rows = nakdb.fetch_all(
             "SELECT * FROM strategy_calls ORDER BY created_at DESC",

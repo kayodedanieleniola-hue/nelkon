@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script src="/static/js/error-logger.js" defer></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Admin Dashboard - NAKCONEL</title>
@@ -332,6 +333,27 @@
 </div>
 
 <script>
+// Diagnostics for administrators: intentionally excludes credentials, tokens,
+// messages, and other dashboard data from the browser console.
+function logAdminError(context, error, details = {}) {
+  console.error(`[NAKCONEL Admin] ${context}`, {
+    message: error instanceof Error ? error.message : String(error),
+    ...details
+  });
+}
+
+window.addEventListener('error', (event) => {
+  logAdminError('Unhandled page error', event.error || event.message, {
+    source: event.filename,
+    line: event.lineno,
+    column: event.colno
+  });
+});
+
+window.addEventListener('unhandledrejection', (event) => {
+  logAdminError('Unhandled promise rejection', event.reason);
+});
+
 const gate = document.getElementById('gate');
 const dashboard = document.getElementById('dashboard');
 const gateError = document.getElementById('gateError');
@@ -493,13 +515,29 @@ async function fmtNgnAsLocal(ngnValue){
 }
 
 async function adminFetch(url, options = {}){
-  const res = await fetch(url, {...options, headers: {'Content-Type': 'application/json', ...(options.headers || {})}, credentials: 'include', cache: 'no-store'});
-  const data = await res.json();
+  let res;
+  try {
+    res = await fetch(url, {...options, headers: {'Content-Type': 'application/json', ...(options.headers || {})}, credentials: 'include', cache: 'no-store'});
+  } catch (error) {
+    logAdminError('Network request failed', error, { url, method: options.method || 'GET' });
+    throw error;
+  }
+
+  let data;
+  try {
+    data = await res.json();
+  } catch (error) {
+    logAdminError('Invalid JSON response', error, { url, method: options.method || 'GET', status: res.status });
+    throw new Error(`The server returned an invalid response (HTTP ${res.status}).`);
+  }
+
   if(!res.ok) {
+    const requestError = new Error(data.error || 'Admin request failed.');
+    logAdminError('Admin API request failed', requestError, { url, method: options.method || 'GET', status: res.status });
     if (res.status === 401 || res.status === 403) {
       showError(data.error || 'Admin access required. Please sign in.');
     }
-    throw new Error(data.error || 'Admin request failed.');
+    throw requestError;
   }
   return data;
 }
@@ -756,10 +794,11 @@ async function loadAdmin(){
       `<div class="team-row"><div><strong>${esc(member.name)}</strong><br><span>${esc(member.role)}</span></div><span class="chip">Admin</span></div>`
     ).join('') : '<div class="team-row"><span>No team members.</span></div>';
 
-    try { await loadCareerRegistrations(); } catch(e) {}
-    try { await loadStrategyCalls(); } catch(e) {}
-    try { await loadAdminChats(); } catch(e) {}
+    try { await loadCareerRegistrations(); } catch(e) { logAdminError('Could not load career registrations', e); }
+    try { await loadStrategyCalls(); } catch(e) { logAdminError('Could not load strategy calls', e); }
+    try { await loadAdminChats(); } catch(e) { logAdminError('Could not load team conversations', e); }
   }catch(err){
+    logAdminError('Could not load admin dashboard', err);
     showError(err.message);
   }
 }
@@ -773,6 +812,7 @@ async function updateCareerStatus(regId, newStatus){
     await loadCareerRegistrations();
     loadAdmin();
   } catch(err) {
+    logAdminError('Could not update career registration status', err, { registrationId: regId });
     alert(err.message || 'Status update failed.');
   }
 }
@@ -841,6 +881,7 @@ async function checkAdminSession(){
     await adminFetch('/api/admin/check-session');
     loadAdmin();
   } catch (err) {
+    logAdminError('Admin session check failed', err);
     showError('Please sign in to access the admin dashboard.');
   }
 }
@@ -849,8 +890,13 @@ checkAdminSession();
 document.getElementById('refreshBtn').addEventListener('click', loadAdmin);
 
 document.getElementById('signOutBtn').addEventListener('click', async () => {
-  await adminFetch('/api/admin/sign-out', { method: 'POST' });
-  window.location.href = '/admin-login';
+  try {
+    await adminFetch('/api/admin/sign-out', { method: 'POST' });
+    window.location.href = '/admin-login';
+  } catch (err) {
+    logAdminError('Could not sign out', err);
+    alert(err.message || 'Sign out failed. Please try again.');
+  }
 });
 </script>
 </body>
