@@ -1,8 +1,8 @@
-flask
-requests
-gunicorn
-firebase-admin
-PyJWT>=2.6.0
-cryptography>=3.4.0
-python-dotenv
-
+flask>=3.1.0,<4
+werkzeug>=3.1.0,<4
+requests>=2.32.4,<3
+gunicorn>=23.0.0,<27
+firebase-admin>=6.5.0,<8
+PyJWT>=2.6.0,<3
+cryptography>=44.0.1
+python-dotenv>=1.0.1,<2
