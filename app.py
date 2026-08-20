@@ -719,6 +719,110 @@ def thank_you_page():
 def serve_template_direct(filename):
     return render_template(filename)
 
+CAREER_FIRESTORE_FIELD_MAP = {
+    "experienceLevel": "experience_level",
+    "createdAt": "created_at",
+    "updatedAt": "updated_at",
+    "paymentReference": "payment_reference",
+    "paidAt": "paid_at",
+}
+
+
+def normalize_career_registration(item):
+    """Normalize a Firestore or SQLite career registration into one shape."""
+    record = {CAREER_FIRESTORE_FIELD_MAP.get(key, key): value for key, value in dict(item).items()}
+    details = record.get("details")
+    if details and not isinstance(details, dict):
+        try:
+            record["detailsParsed"] = json.loads(details)
+        except Exception:
+            record["detailsParsed"] = {}
+    elif isinstance(details, dict):
+        record["detailsParsed"] = details
+    else:
+        record["detailsParsed"] = {}
+    return json_safe(record)
+
+
+def save_career_registration(reg_id, sqlite_row, firestore_doc):
+    """Write a registration to Firestore (primary) and SQLite (cache).
+
+    Returns (saved, error). Saving is considered successful when at least one
+    store accepted the write.
+    """
+    firestore_error = None
+    sqlite_error = None
+    saved_firestore = False
+    saved_sqlite = False
+
+    db = get_firestore_client()
+    if db:
+        try:
+            db.collection("careerRegistrations").document(reg_id).set(firestore_doc)
+            saved_firestore = True
+        except Exception as exc:
+            firestore_error = str(exc)
+            print(f"Firestore registration save error: {exc}")
+    else:
+        firestore_error = "Firestore is unconfigured (FIREBASE_SERVICE_ACCOUNT_JSON missing or invalid)."
+        print(f"Firestore registration save skipped: {firestore_error}")
+
+    try:
+        with get_quota_db() as conn:
+            conn.execute(
+                """
+                INSERT OR REPLACE INTO career_registrations
+                (id, type, name, email, phone, program, experience_level, statement, details, amount, status, created_at, updated_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                sqlite_row
+            )
+        saved_sqlite = True
+    except Exception as exc:
+        sqlite_error = str(exc)
+        print(f"SQLite registration save error: {exc}")
+
+    if saved_firestore or saved_sqlite:
+        return True, None
+    return False, sqlite_error or firestore_error
+
+
+def find_career_registration(reg_id):
+    """Look up a registration in SQLite, then Firestore."""
+    try:
+        with get_quota_db() as conn:
+            row = conn.execute("SELECT * FROM career_registrations WHERE id = ?", (reg_id,)).fetchone()
+            if row:
+                return normalize_career_registration(dict(row))
+    except Exception as exc:
+        print(f"SQLite registration lookup warning: {exc}")
+
+    db = get_firestore_client()
+    if db:
+        try:
+            doc = db.collection("careerRegistrations").document(reg_id).get()
+            if doc.exists:
+                return normalize_career_registration(doc.to_dict() or {})
+        except Exception as exc:
+            print(f"Firestore registration lookup warning: {exc}")
+    return None
+
+
+def update_career_registration(reg_id, sqlite_sql, sqlite_params, firestore_fields):
+    try:
+        with get_quota_db() as conn:
+            conn.execute(sqlite_sql, sqlite_params)
+    except Exception as exc:
+        print(f"SQLite registration update warning: {exc}")
+
+    db = get_firestore_client()
+    if db:
+        try:
+            db.collection("careerRegistrations").document(reg_id).set(firestore_fields, merge=True)
+        except Exception as exc:
+            print(f"Firestore registration update warning: {exc}")
+
+
 @app.route("/api/register-training", methods=["POST"])
 def register_training_api():
     data = request.get_json(silent=True) or request.form.to_dict() or {}
@@ -744,30 +848,17 @@ def register_training_api():
         "comments": comments, "guardianName": guardian_name, "guardianPhone": guardian_phone
     })
 
-    try:
-        with get_quota_db() as conn:
-            conn.execute(
-                """
-                INSERT INTO career_registrations 
-                (id, type, name, email, phone, program, experience_level, statement, details, amount, status, created_at, updated_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """,
-                (reg_id, "training", name, email, phone, course, "", comments, details_str, 250000, "pending_payment", now, now)
-            )
-    except Exception as exc:
-        print(f"Error saving training registration: {exc}")
-        return jsonify({"success": False, "error": f"Database error: {exc}"}), 500
-
-    db = get_firestore_client()
-    if db:
-        try:
-            db.collection("careerRegistrations").document(reg_id).set({
-                "id": reg_id, "type": "training", "name": name, "email": email, "phone": phone,
-                "program": course, "amount": 250000, "status": "pending_payment",
-                "details": details_str, "createdAt": now, "updatedAt": now
-            })
-        except Exception as exc:
-            print(f"Firestore save warning: {exc}")
+    saved, error = save_career_registration(
+        reg_id,
+        (reg_id, "training", name, email, phone, course, "", comments, details_str, 250000, "pending_payment", now, now),
+        {
+            "id": reg_id, "type": "training", "name": name, "email": email, "phone": phone,
+            "program": course, "amount": 250000, "status": "pending_payment",
+            "details": details_str, "createdAt": now, "updatedAt": now
+        }
+    )
+    if not saved:
+        return jsonify({"success": False, "error": f"Database error: {error}"}), 500
 
     return jsonify({
         "success": True,
@@ -809,31 +900,18 @@ def apply_internship_api():
         "location": location, "startDate": start_date, "duration": duration, "mode": mode
     })
 
-    try:
-        with get_quota_db() as conn:
-            conn.execute(
-                """
-                INSERT INTO career_registrations 
-                (id, type, name, email, phone, program, experience_level, statement, details, amount, status, created_at, updated_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """,
-                (reg_id, "internship", name, email, phone, track, experience, statement, details_str, 0, "submitted", now, now)
-            )
-    except Exception as exc:
-        print(f"Error saving internship application: {exc}")
-        return jsonify({"success": False, "error": f"Database error: {exc}"}), 500
-
-    db = get_firestore_client()
-    if db:
-        try:
-            db.collection("careerRegistrations").document(reg_id).set({
-                "id": reg_id, "type": "internship", "name": name, "email": email, "phone": phone,
-                "program": track, "amount": 0, "status": "submitted",
-                "experienceLevel": experience, "statement": statement,
-                "details": details_str, "createdAt": now, "updatedAt": now
-            })
-        except Exception as exc:
-            print(f"Firestore save warning: {exc}")
+    saved, error = save_career_registration(
+        reg_id,
+        (reg_id, "internship", name, email, phone, track, experience, statement, details_str, 0, "submitted", now, now),
+        {
+            "id": reg_id, "type": "internship", "name": name, "email": email, "phone": phone,
+            "program": track, "amount": 0, "status": "submitted",
+            "experienceLevel": experience, "statement": statement,
+            "details": details_str, "createdAt": now, "updatedAt": now
+        }
+    )
+    if not saved:
+        return jsonify({"success": False, "error": f"Database error: {error}"}), 500
 
     return jsonify({
         "success": True,
@@ -844,35 +922,10 @@ def apply_internship_api():
 
 @app.route("/api/registration/<reg_id>", methods=["GET"])
 def get_registration_api(reg_id):
-    try:
-        with get_quota_db() as conn:
-            row = conn.execute("SELECT * FROM career_registrations WHERE id = ?", (reg_id,)).fetchone()
-            if row:
-                res = dict(row)
-                if res.get("details"):
-                    try:
-                        res["detailsParsed"] = json.loads(res["details"])
-                    except Exception:
-                        pass
-                return jsonify({"success": True, "registration": res})
-    except Exception as exc:
-        print(f"Error fetching registration: {exc}")
-
-    is_int = reg_id.startswith("INT")
-    return jsonify({
-        "success": True,
-        "registration": {
-            "id": reg_id,
-            "type": "internship" if is_int else "training",
-            "name": "Applicant",
-            "email": "applicant@nakconel.com",
-            "phone": "+234 800 000 0000",
-            "program": "Nakconel Internship Program" if is_int else "Nakconel Professional Program",
-            "amount": 0 if is_int else 250000,
-            "status": "submitted" if is_int else "pending_payment",
-            "created_at": datetime.now(timezone.utc).isoformat()
-        }
-    })
+    registration = find_career_registration(reg_id)
+    if not registration:
+        return jsonify({"success": False, "error": "Registration not found."}), 404
+    return jsonify({"success": True, "registration": registration})
 
 
 @app.route("/api/registration/<reg_id>/initialize-paystack", methods=["POST"])
@@ -881,27 +934,13 @@ def initialize_paystack_registration(reg_id):
     if not PAYSTACK_SECRET_KEY:
         return jsonify({"success": False, "error": "PAYSTACK_SECRET_KEY is not configured in environment."}), 500
 
-    reg = None
-    try:
-        with get_quota_db() as conn:
-            row = conn.execute("SELECT * FROM career_registrations WHERE id = ?", (reg_id,)).fetchone()
-            if row:
-                reg = dict(row)
-    except Exception as exc:
-        print(f"Error fetching registration for Paystack init: {exc}")
-
+    reg = find_career_registration(reg_id)
     if not reg:
-        reg = {
-            "id": reg_id,
-            "name": "Applicant",
-            "email": "applicant@nakconel.com",
-            "amount": 250000,
-            "program": "Career Program"
-        }
+        return jsonify({"success": False, "error": "Registration not found."}), 404
 
-    email = str(reg.get("email") or "applicant@nakconel.com").strip().lower()
+    email = str(reg.get("email") or "").strip().lower()
     if "@" not in email:
-        email = "applicant@nakconel.com"
+        return jsonify({"success": False, "error": "Registration has no valid email address."}), 400
 
     amount_val = float(reg.get("amount") or 250000)
     amount_kobo = round(amount_val * 100)
@@ -941,14 +980,12 @@ def initialize_paystack_registration(reg_id):
         return jsonify({"success": False, "error": payload.get("message") or "Paystack initialization failed."}), 400
 
     now = datetime.now(timezone.utc).isoformat()
-    try:
-        with get_quota_db() as conn:
-            conn.execute(
-                "UPDATE career_registrations SET payment_reference = ?, updated_at = ? WHERE id = ?",
-                (reference, now, reg_id)
-            )
-    except Exception as exc:
-        print(f"Error saving Paystack reference: {exc}")
+    update_career_registration(
+        reg_id,
+        "UPDATE career_registrations SET payment_reference = ?, updated_at = ? WHERE id = ?",
+        (reference, now, reg_id),
+        {"paymentReference": reference, "updatedAt": now}
+    )
 
     return jsonify({
         "success": True,
@@ -988,27 +1025,16 @@ def paystack_callback():
 
         now = datetime.now(timezone.utc).isoformat()
         if reg_id:
-            try:
-                with get_quota_db() as conn:
-                    conn.execute(
-                        """
-                        UPDATE career_registrations 
-                        SET status = 'paid', payment_reference = ?, paid_at = ?, updated_at = ?
-                        WHERE id = ?
-                        """,
-                        (reference, now, now, reg_id)
-                    )
-            except Exception as exc:
-                print(f"Error updating payment on callback: {exc}")
-
-            db = get_firestore_client()
-            if db:
-                try:
-                    db.collection("careerRegistrations").document(reg_id).set({
-                        "status": "paid", "paymentReference": reference, "paidAt": now, "updatedAt": now
-                    }, merge=True)
-                except Exception as exc:
-                    print(f"Firestore callback update warning: {exc}")
+            update_career_registration(
+                reg_id,
+                """
+                UPDATE career_registrations
+                SET status = 'paid', payment_reference = ?, paid_at = ?, updated_at = ?
+                WHERE id = ?
+                """,
+                (reference, now, now, reg_id),
+                {"status": "paid", "paymentReference": reference, "paidAt": now, "updatedAt": now}
+            )
 
             return redirect(f"/thank-you.html?id={reg_id}&status=paid&reference={reference}")
         else:
@@ -1027,38 +1053,24 @@ def complete_payment_api(reg_id):
     # Optional Paystack verification if reference provided
     if os.environ.get("PAYSTACK_SECRET_KEY") and reference and not reference.startswith("MANUAL-"):
         try:
-            reg_amount = 250000
-            with get_quota_db() as conn:
-                r = conn.execute("SELECT amount FROM career_registrations WHERE id = ?", (reg_id,)).fetchone()
-                if r and r["amount"]:
-                    reg_amount = r["amount"]
+            existing = find_career_registration(reg_id) or {}
+            reg_amount = existing.get("amount") or 250000
             ver_res, ver_status = verify_paystack_reference(reference, reg_amount, "NGN")
             if ver_status != 200:
                 print(f"Paystack warning for registration {reg_id}: {ver_res}")
         except Exception as exc:
             print(f"Paystack verification check exception: {exc}")
 
-    try:
-        with get_quota_db() as conn:
-            conn.execute(
-                """
-                UPDATE career_registrations 
-                SET status = 'paid', payment_reference = ?, paid_at = ?, updated_at = ?
-                WHERE id = ?
-                """,
-                (reference, now, now, reg_id)
-            )
-    except Exception as exc:
-        print(f"Error completing payment: {exc}")
-
-    db = get_firestore_client()
-    if db:
-        try:
-            db.collection("careerRegistrations").document(reg_id).set({
-                "status": "paid", "paymentReference": reference, "paidAt": now, "updatedAt": now
-            }, merge=True)
-        except Exception as exc:
-            print(f"Firestore update warning: {exc}")
+    update_career_registration(
+        reg_id,
+        """
+        UPDATE career_registrations
+        SET status = 'paid', payment_reference = ?, paid_at = ?, updated_at = ?
+        WHERE id = ?
+        """,
+        (reference, now, now, reg_id),
+        {"status": "paid", "paymentReference": reference, "paidAt": now, "updatedAt": now}
+    )
 
     return jsonify({
         "success": True,
@@ -1072,16 +1084,16 @@ def complete_payment_api(reg_id):
 def admin_career_registrations():
     registrations_map = {}
     warning = None
+
     db = get_firestore_client()
     if db:
         try:
-            docs = db.collection("careerRegistrations").stream()
-            for doc in docs:
-                item = doc.to_dict()
-                item["id"] = doc.id
-                registrations_map[doc.id] = item
+            for doc in db.collection("careerRegistrations").stream():
+                item = normalize_career_registration({"id": doc.id, **(doc.to_dict() or {})})
+                registrations_map[item.get("id") or doc.id] = item
         except Exception as exc:
-            warning = f"Failed to load career registrations from Firestore: {exc}"
+            print(f"Firestore career reg warning: {exc}")
+            warning = f"Failed to load registrations from Firestore: {exc}"
     else:
         warning = "Firebase Firestore is unconfigured or offline (FIREBASE_SERVICE_ACCOUNT_JSON missing or invalid)."
 
@@ -1090,31 +1102,28 @@ def admin_career_registrations():
             with get_quota_db() as conn:
                 rows = conn.execute("SELECT * FROM career_registrations ORDER BY created_at DESC").fetchall()
                 for row in rows:
-                    item = dict(row)
-                    registrations_map.setdefault(item["id"], item)
+                    item = normalize_career_registration(dict(row))
+                    registrations_map.setdefault(item.get("id"), item)
         except Exception as exc:
-            print(f"Error loading local career registrations: {exc}")
+            print(f"Error loading career registrations: {exc}")
 
-    registrations = list(registrations_map.values())
+    registrations = sorted(
+        registrations_map.values(),
+        key=lambda item: item.get("created_at") or "",
+        reverse=True
+    )
+
     total_paid_revenue = 0
     pending_count = 0
     approved_count = 0
     for item in registrations:
-        if item.get("details"):
-            try:
-                item["detailsParsed"] = json.loads(item["details"])
-            except Exception:
-                item["detailsParsed"] = {}
-        else:
-            item["detailsParsed"] = {}
         if (item.get("status") or "").lower() in ["paid", "approved"]:
             total_paid_revenue += int(item.get("amount") or 250000)
             approved_count += 1
         else:
             pending_count += 1
 
-    registrations.sort(key=lambda item: item.get("createdAt") or item.get("created_at") or "", reverse=True)
-    result = {
+    res = {
         "registrations": registrations,
         "total": len(registrations),
         "pendingCount": pending_count,
@@ -1122,8 +1131,8 @@ def admin_career_registrations():
         "totalRevenueNgn": total_paid_revenue
     }
     if warning:
-        result["warning"] = warning
-    return jsonify(result)
+        res["warning"] = warning
+    return jsonify(res)
 
 @app.route("/api/admin/career-registrations/<reg_id>/status", methods=["POST"])
 @require_admin_session
@@ -1363,12 +1372,11 @@ def admin_summary():
             pass
 
     # Career / training registration statistics use the shared Firestore data.
-    career_registrations_list = list(career_registrations_map.values())
+    career_registrations_list = [normalize_career_registration(item) for item in career_registrations_map.values()]
     career_pending = 0
     career_approved = 0
     for c_item in career_registrations_list:
-        st = (c_item.get("status") or "").lower()
-        if st in ["paid", "approved"]:
+        if (c_item.get("status") or "").lower() in ["paid", "approved"]:
             career_approved += 1
             try:
                 total_revenue += int(c_item.get("amount") or 250000)
@@ -2282,23 +2290,22 @@ def submit_strategy_call():
 @app.route("/api/admin/strategy-calls", methods=["GET"])
 @require_admin_session
 def admin_strategy_calls():
-    calls = []
+    calls_map = {}
     db = get_firestore_client()
     if db:
         try:
-            docs = db.collection("strategyCalls").stream()
-            calls = [json_safe({"id": doc.id, **doc.to_dict()}) for doc in docs]
+            for doc in db.collection("strategyCalls").stream():
+                calls_map[doc.id] = json_safe({"id": doc.id, **(doc.to_dict() or {})})
         except Exception as exc:
             print(f"Admin strategy calls Firestore fetch warning: {exc}")
 
-    if not calls and not IS_VERCEL_DEPLOYMENT:
-        # Fallback to local SQLite strategy calls
+    if not IS_VERCEL_DEPLOYMENT:
         try:
             with get_quota_db() as conn:
                 rows = conn.execute("SELECT * FROM strategy_calls ORDER BY created_at DESC").fetchall()
                 for row in rows:
                     r = dict(row)
-                    calls.append({
+                    calls_map.setdefault(r["id"], {
                         "id": r["id"],
                         "name": r["name"],
                         "email": r["email"],
@@ -2310,7 +2317,8 @@ def admin_strategy_calls():
         except Exception as exc:
             print(f"Admin strategy calls SQLite fetch warning: {exc}")
 
-    calls.sort(key=lambda item: item.get("createdAt", ""), reverse=True)
+    calls = list(calls_map.values())
+    calls.sort(key=lambda item: item.get("createdAt") or "", reverse=True)
     return jsonify({"strategyCalls": calls})
 
 
