@@ -1,5 +1,7 @@
 from flask import Flask, render_template, request, jsonify, session, send_from_directory, redirect
+from contextlib import contextmanager
 import json
+import logging
 import os
 import requests
 import sqlite3
@@ -10,6 +12,9 @@ from datetime import datetime, timezone, timedelta
 from functools import wraps
 from collections import defaultdict
 import base64
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 try:
     from dotenv import load_dotenv
@@ -174,8 +179,13 @@ def get_firebase_public_keys():
             _firebase_public_keys = resp.json()
             _firebase_public_keys_fetched_at = now
             return _firebase_public_keys
+        logger.warning(
+            "Firebase public key request returned HTTP %s: %s",
+            resp.status_code,
+            resp.text[:300]
+        )
     except Exception:
-        pass
+        logger.exception("Failed to fetch Firebase public keys")
     return None
 
 
@@ -186,7 +196,8 @@ def verify_firebase_id_token(id_token):
     try:
         decoded = get_firebase_auth().verify_id_token(id_token)
         return {"uid": decoded.get("uid"), "email": decoded.get("email")}
-    except Exception:
+    except Exception as exc:
+        logger.warning("Firebase ID token verification failed: %s", exc)
         return None
 
 
@@ -202,20 +213,27 @@ def parse_firebase_service_account_info(raw_val):
             with open(val, "r", encoding="utf-8") as f:
                 val = f.read().strip()
         except Exception:
-            pass
+            logger.exception("Failed to read Firebase service-account file")
+            return None
 
     data = None
     try:
         data = json.loads(val)
-    except Exception:
+    except Exception as first_exc:
         try:
             fixed = val.replace("\\n", "\n")
             data = json.loads(fixed)
-        except Exception:
+        except Exception as second_exc:
             try:
                 decoded = base64.b64decode(val).decode("utf-8")
                 data = json.loads(decoded)
-            except Exception:
+            except Exception as final_exc:
+                logger.error(
+                    "Failed to parse Firebase service-account JSON: %s; %s; %s",
+                    first_exc,
+                    second_exc,
+                    final_exc
+                )
                 return None
 
     if isinstance(data, dict):
@@ -250,8 +268,8 @@ def initialize_firebase_admin():
             if not firebase_admin._apps:
                 firebase_admin.initialize_app(cred)
             _firebase_admin_ready = True
-        except Exception as exc:
-            print(f"Firebase initialize app warning: {exc}")
+        except Exception:
+            logger.exception("Firebase initialize app warning")
             return False
 
     return _firebase_admin_ready
@@ -307,95 +325,106 @@ def check_rate_limit(client_key, max_requests=15, window_seconds=60):
     return True, 0
 
 
+@contextmanager
 def get_quota_db():
-    db_dir = os.path.dirname(AI_QUOTA_DB_PATH)
-    if db_dir:
-        os.makedirs(db_dir, exist_ok=True)
-    conn = sqlite3.connect(AI_QUOTA_DB_PATH)
-    conn.row_factory = sqlite3.Row
-    conn.execute(
-        """
-        CREATE TABLE IF NOT EXISTS ai_quotas (
-            client_key TEXT PRIMARY KEY,
-            period_start TEXT NOT NULL,
-            used INTEGER NOT NULL DEFAULT 0,
-            boost_claimed_on TEXT
+    conn = None
+    try:
+        db_dir = os.path.dirname(AI_QUOTA_DB_PATH)
+        if db_dir:
+            os.makedirs(db_dir, exist_ok=True)
+        conn = sqlite3.connect(AI_QUOTA_DB_PATH)
+        conn.row_factory = sqlite3.Row
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS ai_quotas (
+                client_key TEXT PRIMARY KEY,
+                period_start TEXT NOT NULL,
+                used INTEGER NOT NULL DEFAULT 0,
+                boost_claimed_on TEXT
+            )
+            """
         )
-        """
-    )
-    conn.execute(
-        """
-        CREATE TABLE IF NOT EXISTS ai_subscriptions (
-            reference TEXT PRIMARY KEY,
-            client_key TEXT NOT NULL,
-            email TEXT NOT NULL,
-            plan_id TEXT NOT NULL,
-            plan_name TEXT NOT NULL,
-            amount INTEGER NOT NULL,
-            status TEXT NOT NULL,
-            authorization_url TEXT,
-            paid_at TEXT,
-            starts_at TEXT,
-            expires_at TEXT,
-            created_at TEXT NOT NULL
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS ai_subscriptions (
+                reference TEXT PRIMARY KEY,
+                client_key TEXT NOT NULL,
+                email TEXT NOT NULL,
+                plan_id TEXT NOT NULL,
+                plan_name TEXT NOT NULL,
+                amount INTEGER NOT NULL,
+                status TEXT NOT NULL,
+                authorization_url TEXT,
+                paid_at TEXT,
+                starts_at TEXT,
+                expires_at TEXT,
+                created_at TEXT NOT NULL
+            )
+            """
         )
-        """
-    )
-    conn.execute(
-        """
-        CREATE TABLE IF NOT EXISTS strategy_calls (
-            id TEXT PRIMARY KEY,
-            name TEXT NOT NULL,
-            email TEXT NOT NULL,
-            phone TEXT,
-            message TEXT NOT NULL,
-            status TEXT NOT NULL DEFAULT 'new',
-            created_at TEXT NOT NULL,
-            updated_at TEXT
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS strategy_calls (
+                id TEXT PRIMARY KEY,
+                name TEXT NOT NULL,
+                email TEXT NOT NULL,
+                phone TEXT,
+                message TEXT NOT NULL,
+                status TEXT NOT NULL DEFAULT 'new',
+                created_at TEXT NOT NULL,
+                updated_at TEXT
+            )
+            """
         )
-        """
-    )
-    conn.execute(
-        """
-        CREATE TABLE IF NOT EXISTS career_registrations (
-            id TEXT PRIMARY KEY,
-            type TEXT NOT NULL,
-            name TEXT NOT NULL,
-            email TEXT NOT NULL,
-            phone TEXT,
-            program TEXT NOT NULL,
-            experience_level TEXT,
-            statement TEXT,
-            details TEXT,
-            amount INTEGER NOT NULL DEFAULT 250000,
-            status TEXT NOT NULL DEFAULT 'pending_payment',
-            payment_reference TEXT,
-            paid_at TEXT,
-            created_at TEXT NOT NULL,
-            updated_at TEXT
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS career_registrations (
+                id TEXT PRIMARY KEY,
+                type TEXT NOT NULL,
+                name TEXT NOT NULL,
+                email TEXT NOT NULL,
+                phone TEXT,
+                program TEXT NOT NULL,
+                experience_level TEXT,
+                statement TEXT,
+                details TEXT,
+                amount INTEGER NOT NULL DEFAULT 250000,
+                status TEXT NOT NULL DEFAULT 'pending_payment',
+                payment_reference TEXT,
+                paid_at TEXT,
+                created_at TEXT NOT NULL,
+                updated_at TEXT
+            )
+            """
         )
-        """
-    )
-    conn.execute(
-        """
-        CREATE TABLE IF NOT EXISTS campaign_registrations (
-            id TEXT PRIMARY KEY,
-            uid TEXT NOT NULL,
-            email TEXT NOT NULL,
-            full_name TEXT,
-            business TEXT,
-            challenge TEXT,
-            package_name TEXT,
-            amount REAL,
-            currency TEXT,
-            status TEXT NOT NULL DEFAULT 'pending_payment',
-            payment_reference TEXT,
-            created_at TEXT NOT NULL,
-            raw_json TEXT
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS campaign_registrations (
+                id TEXT PRIMARY KEY,
+                uid TEXT NOT NULL,
+                email TEXT NOT NULL,
+                full_name TEXT,
+                business TEXT,
+                challenge TEXT,
+                package_name TEXT,
+                amount REAL,
+                currency TEXT,
+                status TEXT NOT NULL DEFAULT 'pending_payment',
+                payment_reference TEXT,
+                created_at TEXT NOT NULL,
+                raw_json TEXT
+            )
+            """
         )
-        """
-    )
-    return conn
+        yield conn
+        conn.commit()
+    except Exception:
+        if conn is not None:
+            conn.rollback()
+        raise
+    finally:
+        if conn is not None:
+            conn.close()
 
 
 def utc_today():
@@ -419,8 +448,13 @@ def get_ngn_to_usd_rate():
             rate = float(data.get("rates", {}).get("USD", NGN_TO_USD_RATE))
             _NGN_USD_RATE_CACHE = {"rate": rate, "fetched_at": now}
             return rate
+        logger.warning(
+            "Exchange-rate request returned HTTP %s: %s",
+            resp.status_code,
+            resp.text[:300]
+        )
     except Exception:
-        pass
+        logger.exception("Failed to fetch NGN to USD exchange rate")
     return _NGN_USD_RATE_CACHE["rate"]
 
 
@@ -587,6 +621,7 @@ def initialize_ai_subscription():
         )
         payload = response.json()
     except Exception:
+        logger.exception("Could not reach Paystack for subscription initialization")
         return jsonify({"error": "Could not reach Paystack."}), 502
 
     data_payload = payload.get("data") or {}
@@ -754,9 +789,9 @@ def register_training_api():
                 """,
                 (reg_id, "training", name, email, phone, course, "", comments, details_str, 250000, "pending_payment", now, now)
             )
-    except Exception as exc:
-        print(f"Error saving training registration: {exc}")
-        return jsonify({"success": False, "error": f"Database error: {exc}"}), 500
+    except Exception:
+        logger.exception("Error saving training registration")
+        return jsonify({"success": False, "error": "Could not save training registration."}), 500
 
     db = get_firestore_client()
     if db:
@@ -766,8 +801,8 @@ def register_training_api():
                 "program": course, "amount": 250000, "status": "pending_payment",
                 "details": details_str, "createdAt": now, "updatedAt": now
             })
-        except Exception as exc:
-            print(f"Firestore save warning: {exc}")
+        except Exception:
+            logger.exception("Firestore save warning for training registration")
 
     return jsonify({
         "success": True,
@@ -819,9 +854,9 @@ def apply_internship_api():
                 """,
                 (reg_id, "internship", name, email, phone, track, experience, statement, details_str, 0, "submitted", now, now)
             )
-    except Exception as exc:
-        print(f"Error saving internship application: {exc}")
-        return jsonify({"success": False, "error": f"Database error: {exc}"}), 500
+    except Exception:
+        logger.exception("Error saving internship application")
+        return jsonify({"success": False, "error": "Could not save internship application."}), 500
 
     db = get_firestore_client()
     if db:
@@ -832,8 +867,8 @@ def apply_internship_api():
                 "experienceLevel": experience, "statement": statement,
                 "details": details_str, "createdAt": now, "updatedAt": now
             })
-        except Exception as exc:
-            print(f"Firestore save warning: {exc}")
+        except Exception:
+            logger.exception("Firestore save warning for internship application")
 
     return jsonify({
         "success": True,
@@ -852,11 +887,11 @@ def get_registration_api(reg_id):
                 if res.get("details"):
                     try:
                         res["detailsParsed"] = json.loads(res["details"])
-                    except Exception:
-                        pass
+                    except Exception as exc:
+                        logger.warning("Invalid registration details JSON for %s: %s", reg_id, exc)
                 return jsonify({"success": True, "registration": res})
-    except Exception as exc:
-        print(f"Error fetching registration: {exc}")
+    except Exception:
+        logger.exception("Error fetching registration")
 
     is_int = reg_id.startswith("INT")
     return jsonify({
@@ -887,8 +922,8 @@ def initialize_paystack_registration(reg_id):
             row = conn.execute("SELECT * FROM career_registrations WHERE id = ?", (reg_id,)).fetchone()
             if row:
                 reg = dict(row)
-    except Exception as exc:
-        print(f"Error fetching registration for Paystack init: {exc}")
+    except Exception:
+        logger.exception("Error fetching registration for Paystack init")
 
     if not reg:
         reg = {
@@ -930,8 +965,9 @@ def initialize_paystack_registration(reg_id):
             timeout=15
         )
         payload = response.json()
-    except Exception as exc:
-        return jsonify({"success": False, "error": f"Could not reach Paystack gateway: {exc}"}), 502
+    except Exception:
+        logger.exception("Could not reach Paystack gateway for registration initialization")
+        return jsonify({"success": False, "error": "Could not reach Paystack gateway."}), 502
 
     data = payload.get("data") or {}
     authorization_url = data.get("authorization_url")
@@ -947,8 +983,8 @@ def initialize_paystack_registration(reg_id):
                 "UPDATE career_registrations SET payment_reference = ?, updated_at = ? WHERE id = ?",
                 (reference, now, reg_id)
             )
-    except Exception as exc:
-        print(f"Error saving Paystack reference: {exc}")
+    except Exception:
+        logger.exception("Error saving Paystack reference")
 
     return jsonify({
         "success": True,
@@ -976,9 +1012,12 @@ def paystack_callback():
             timeout=15
         )
         payload = response.json()
-    except Exception as exc:
-        print(f"Callback verification error: {exc}")
-        return redirect(f"/thank-you.html?id={reg_id or ''}&reference={reference}")
+    except Exception:
+        logger.exception("Callback verification error")
+        return redirect(f"/payment.html?id={reg_id or ''}&error=payment_unverified")
+
+    if not response.ok:
+        logger.warning("Paystack callback verification returned HTTP %s: %s", response.status_code, response.text[:300])
 
     data = payload.get("data") or {}
     if payload.get("status") is True and data.get("status") == "success":
@@ -998,8 +1037,8 @@ def paystack_callback():
                         """,
                         (reference, now, now, reg_id)
                     )
-            except Exception as exc:
-                print(f"Error updating payment on callback: {exc}")
+            except Exception:
+                logger.exception("Error updating payment on callback")
 
             db = get_firestore_client()
             if db:
@@ -1007,8 +1046,8 @@ def paystack_callback():
                     db.collection("careerRegistrations").document(reg_id).set({
                         "status": "paid", "paymentReference": reference, "paidAt": now, "updatedAt": now
                     }, merge=True)
-                except Exception as exc:
-                    print(f"Firestore callback update warning: {exc}")
+                except Exception:
+                    logger.exception("Firestore callback update warning")
 
             return redirect(f"/thank-you.html?id={reg_id}&status=paid&reference={reference}")
         else:
@@ -1020,12 +1059,12 @@ def paystack_callback():
 @app.route("/api/registration/<reg_id>/complete-payment", methods=["POST"])
 def complete_payment_api(reg_id):
     data = request.get_json(silent=True) or {}
-    payment_method = str(data.get("paymentMethod") or "paystack").strip()
-    reference = str(data.get("reference") or f"PAY-{int(time.time()*1000)}").strip()
+    provided_reference = str(data.get("reference") or "").strip()
+    reference = provided_reference or f"PAY-{int(time.time()*1000)}"
     now = datetime.now(timezone.utc).isoformat()
 
     # Optional Paystack verification if reference provided
-    if os.environ.get("PAYSTACK_SECRET_KEY") and reference and not reference.startswith("MANUAL-"):
+    if os.environ.get("PAYSTACK_SECRET_KEY") and provided_reference and not reference.startswith("MANUAL-"):
         try:
             reg_amount = 250000
             with get_quota_db() as conn:
@@ -1034,13 +1073,19 @@ def complete_payment_api(reg_id):
                     reg_amount = r["amount"]
             ver_res, ver_status = verify_paystack_reference(reference, reg_amount, "NGN")
             if ver_status != 200:
-                print(f"Paystack warning for registration {reg_id}: {ver_res}")
-        except Exception as exc:
-            print(f"Paystack verification check exception: {exc}")
+                logger.error("Paystack verification rejected for registration %s: %s", reg_id, ver_res)
+                if ver_status >= 500:
+                    return jsonify({"success": False, "error": "Payment verification service is unavailable."}), 502
+                return jsonify({"success": False, "error": "Payment could not be verified."}), 402
+        except Exception:
+            logger.exception("Paystack verification check exception")
+            return jsonify({"success": False, "error": "Payment verification service is unavailable."}), 502
 
+    sqlite_saved = False
+    sqlite_failed = False
     try:
         with get_quota_db() as conn:
-            conn.execute(
+            cursor = conn.execute(
                 """
                 UPDATE career_registrations 
                 SET status = 'paid', payment_reference = ?, paid_at = ?, updated_at = ?
@@ -1048,17 +1093,26 @@ def complete_payment_api(reg_id):
                 """,
                 (reference, now, now, reg_id)
             )
-    except Exception as exc:
-        print(f"Error completing payment: {exc}")
+            sqlite_saved = cursor.rowcount > 0
+    except Exception:
+        sqlite_failed = True
+        logger.exception("Error completing payment in SQLite")
 
+    firestore_saved = False
     db = get_firestore_client()
     if db:
         try:
             db.collection("careerRegistrations").document(reg_id).set({
                 "status": "paid", "paymentReference": reference, "paidAt": now, "updatedAt": now
             }, merge=True)
-        except Exception as exc:
-            print(f"Firestore update warning: {exc}")
+            firestore_saved = True
+        except Exception:
+            logger.exception("Firestore update warning")
+
+    if not sqlite_saved and not firestore_saved:
+        if sqlite_failed:
+            return jsonify({"success": False, "error": "Could not complete payment."}), 500
+        return jsonify({"success": False, "error": "Registration not found."}), 404
 
     return jsonify({
         "success": True,
@@ -1081,6 +1135,7 @@ def admin_career_registrations():
                 item["id"] = doc.id
                 registrations_map[doc.id] = item
         except Exception as exc:
+            logger.exception("Failed to load career registrations from Firestore")
             warning = f"Failed to load career registrations from Firestore: {exc}"
     else:
         warning = "Firebase Firestore is unconfigured or offline (FIREBASE_SERVICE_ACCOUNT_JSON missing or invalid)."
@@ -1092,8 +1147,8 @@ def admin_career_registrations():
                 for row in rows:
                     item = dict(row)
                     registrations_map.setdefault(item["id"], item)
-        except Exception as exc:
-            print(f"Error loading local career registrations: {exc}")
+        except Exception:
+            logger.exception("Error loading local career registrations")
 
     registrations = list(registrations_map.values())
     total_paid_revenue = 0
@@ -1103,7 +1158,8 @@ def admin_career_registrations():
         if item.get("details"):
             try:
                 item["detailsParsed"] = json.loads(item["details"])
-            except Exception:
+            except Exception as exc:
+                logger.warning("Invalid career registration details JSON for %s: %s", item.get("id"), exc)
                 item["detailsParsed"] = {}
         else:
             item["detailsParsed"] = {}
@@ -1134,18 +1190,29 @@ def admin_update_career_status(reg_id):
         return jsonify({"error": "Invalid status value."}), 400
 
     now = datetime.now(timezone.utc).isoformat()
+    sqlite_updated = False
+    sqlite_failed = False
     try:
         with get_quota_db() as conn:
-            conn.execute("UPDATE career_registrations SET status = ?, updated_at = ? WHERE id = ?", (new_status, now, reg_id))
-    except Exception as exc:
-        print(f"Error updating career status: {exc}")
+            cursor = conn.execute("UPDATE career_registrations SET status = ?, updated_at = ? WHERE id = ?", (new_status, now, reg_id))
+            sqlite_updated = cursor.rowcount > 0
+    except Exception:
+        sqlite_failed = True
+        logger.exception("Error updating career status")
 
+    firestore_updated = False
     db = get_firestore_client()
     if db:
         try:
             db.collection("careerRegistrations").document(reg_id).set({"status": new_status, "updatedAt": now}, merge=True)
-        except Exception as exc:
-            print(f"Firestore status update warning: {exc}")
+            firestore_updated = True
+        except Exception:
+            logger.exception("Firestore status update warning")
+
+    if not sqlite_updated and not firestore_updated:
+        if sqlite_failed:
+            return jsonify({"success": False, "error": "Could not update registration status."}), 500
+        return jsonify({"success": False, "error": "Registration not found."}), 404
 
     return jsonify({"success": True, "id": reg_id, "status": new_status})
 
@@ -1215,8 +1282,9 @@ def api_admin_login():
             "message": "Login successful"
         }), 200
 
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+    except Exception:
+        logger.exception("Admin login failed")
+        return jsonify({"error": "Admin login failed."}), 500
 
 @app.route("/api/admin/check-session", methods=["GET"])
 def api_admin_check_session():
@@ -1277,6 +1345,7 @@ def admin_summary():
                 d["id"] = doc.id
                 registrations_map[doc.id] = d
         except Exception as exc:
+            logger.exception("Admin summary campaign registration fetch failed")
             error = f"campaignRegistrations: {exc}"
 
         try:
@@ -1285,6 +1354,7 @@ def admin_summary():
                 d["uid"] = doc.id
                 users_map[doc.id] = d
         except Exception as exc:
+            logger.exception("Admin summary users fetch failed")
             error = f"{error}; users: {exc}" if error else f"users: {exc}"
 
         try:
@@ -1293,6 +1363,7 @@ def admin_summary():
                 d["id"] = doc.id
                 strategy_calls_map[doc.id] = d
         except Exception as exc:
+            logger.exception("Admin summary strategy calls fetch failed")
             error = f"{error}; strategyCalls: {exc}" if error else f"strategyCalls: {exc}"
 
         try:
@@ -1320,7 +1391,8 @@ def admin_summary():
                     if raw:
                         try:
                             registrations_map[reg_id] = json.loads(raw)
-                        except Exception:
+                        except Exception as exc:
+                            logger.warning("Invalid campaign registration JSON for %s: %s", reg_id, exc)
                             registrations_map[reg_id] = row_dict
                     else:
                         registrations_map[reg_id] = row_dict
@@ -1338,8 +1410,8 @@ def admin_summary():
             for r in career_rows:
                 row_dict = dict(r)
                 career_registrations_map.setdefault(row_dict["id"], row_dict)
-      except Exception as exc:
-          print(f"SQLite summary merge error: {exc}")
+      except Exception:
+          logger.exception("SQLite summary merge error")
 
     registrations = list(registrations_map.values())
     users = list(users_map.values())
@@ -1431,8 +1503,8 @@ def visitor_conversations():
         if db:
             docs = db.collection("teamConversations").where("visitorId", "==", user["uid"]).stream()
             conversations = [json_safe({"id": doc.id, **doc.to_dict()}) for doc in docs]
-    except Exception as exc:
-        print(f"Visitor conversations warning: {exc}")
+    except Exception:
+        logger.exception("Visitor conversations warning")
 
     conversations.sort(key=lambda item: item.get("lastUpdated", ""), reverse=True)
     return jsonify({"conversations": conversations})
@@ -1484,8 +1556,9 @@ def start_visitor_conversation():
         else:
             doc_ref.set(conversation)
             conversation["id"] = conversation_id
-    except Exception as exc:
-        return jsonify({"error": str(exc)}), 500
+    except Exception:
+        logger.exception("Failed to start visitor conversation")
+        return jsonify({"error": "Could not start conversation."}), 500
 
     return jsonify({"conversation": json_safe(conversation)})
 
@@ -1503,8 +1576,9 @@ def visitor_messages(conversation_id):
             return jsonify({"error": "Conversation was not found."}), 404
         docs = db.collection("teamConversations").document(conversation_id).collection("messages").stream()
         messages = [json_safe({"id": doc.id, **doc.to_dict()}) for doc in docs]
-    except Exception as exc:
-        return jsonify({"error": str(exc)}), 500
+    except Exception:
+        logger.exception("Failed to load visitor messages")
+        return jsonify({"error": "Could not load messages."}), 500
 
     messages.sort(key=lambda item: item.get("time", ""))
     return jsonify({"messages": messages})
@@ -1548,8 +1622,9 @@ def visitor_send_message(conversation_id):
         msg_ref = conv_ref.collection("messages").document()
         msg_ref.set(msg_data)
         conv_ref.set({"lastMessage": last_msg, "lastSender": "visitor", "lastUpdated": now, "status": "open"}, merge=True)
-    except Exception as exc:
-        return jsonify({"error": str(exc)}), 500
+    except Exception:
+        logger.exception("Failed to send visitor message")
+        return jsonify({"error": "Could not send message."}), 500
 
     return jsonify({"sent": True, "message": {"id": msg_ref.id, **msg_data}})
 
@@ -1563,8 +1638,8 @@ def admin_chat_conversations():
         if db:
             docs = db.collection("teamConversations").stream()
             conversations = [json_safe({"id": doc.id, **doc.to_dict()}) for doc in docs]
-    except Exception as exc:
-        print(f"Admin chat conversations warning: {exc}")
+    except Exception:
+        logger.exception("Admin chat conversations warning")
 
     conversations.sort(key=lambda item: item.get("lastUpdated", ""), reverse=True)
     return jsonify({"conversations": conversations})
@@ -1582,8 +1657,9 @@ def admin_chat_messages(conversation_id):
             return jsonify({"error": "Conversation was not found."}), 404
         docs = db.collection("teamConversations").document(conversation_id).collection("messages").stream()
         messages = [json_safe({"id": doc.id, **doc.to_dict()}) for doc in docs]
-    except Exception as exc:
-        return jsonify({"error": str(exc)}), 500
+    except Exception:
+        logger.exception("Failed to load admin chat messages")
+        return jsonify({"error": "Could not load messages."}), 500
 
     messages.sort(key=lambda item: item.get("time", ""))
     return jsonify({"messages": messages, "conversation": json_safe({"id": conv.id, **conv.to_dict()})})
@@ -1628,8 +1704,9 @@ def admin_send_chat_message(conversation_id):
         msg_ref = conv_ref.collection("messages").document()
         msg_ref.set(msg_data)
         conv_ref.set({"lastMessage": last_msg, "lastSender": "team", "lastUpdated": now, "status": "open"}, merge=True)
-    except Exception as exc:
-        return jsonify({"error": str(exc)}), 500
+    except Exception:
+        logger.exception("Failed to send admin chat message")
+        return jsonify({"error": "Could not send message."}), 500
 
     return jsonify({"sent": True, "message": {"id": msg_ref.id, **msg_data}})
 
@@ -1650,7 +1727,7 @@ def admin_campaign_registrations():
         else:
             warning = "Firebase Firestore is unconfigured or offline (FIREBASE_SERVICE_ACCOUNT_JSON missing or invalid)."
     except Exception as exc:
-        print(f"Failed to load campaign registrations from Firestore: {exc}")
+        logger.exception("Failed to load campaign registrations from Firestore")
         warning = f"Failed to load campaign registrations from Firestore: {exc}"
 
     # Vercel's /tmp SQLite storage is per-instance. Only use this local
@@ -1667,12 +1744,13 @@ def admin_campaign_registrations():
                     if raw:
                         try:
                             registrations_map[reg_id] = json.loads(raw)
-                        except Exception:
+                        except Exception as exc:
+                            logger.warning("Invalid campaign registration JSON for %s: %s", reg_id, exc)
                             registrations_map[reg_id] = r
                     else:
                         registrations_map[reg_id] = r
-      except Exception as exc:
-          print(f"SQLite campaign registrations fallback error: {exc}")
+      except Exception:
+          logger.exception("SQLite campaign registrations fallback error")
 
     registrations = list(registrations_map.values())
     registrations.sort(key=lambda item: item.get("createdAt") or item.get("created_at") or "", reverse=True)
@@ -1704,7 +1782,7 @@ def admin_users():
         else:
             warning = "Firebase Firestore is unconfigured or offline (FIREBASE_SERVICE_ACCOUNT_JSON missing or invalid)."
     except Exception as exc:
-        print(f"Failed to load users: {exc}")
+        logger.exception("Failed to load users")
         warning = f"Failed to load users: {exc}"
 
     users.sort(key=lambda item: item.get("createdAt") or item.get("updatedAt") or "", reverse=True)
@@ -1732,8 +1810,9 @@ def call_gemini_text(gemini_key, sys_prompt, messages):
         if r.ok:
             d = r.json()
             return d.get("candidates", [{}])[0].get("content", {}).get("parts", [{}])[0].get("text")
-    except Exception as exc:
-        print(f"Gemini call exception: {exc}")
+        logger.warning("Gemini text request returned HTTP %s: %s", r.status_code, r.text[:300])
+    except Exception:
+        logger.exception("Gemini call exception")
     return None
 
 
@@ -1815,6 +1894,12 @@ Only use code blocks for genuine programming help, not design mockups. User's na
                     json={"system_instruction": {"parts": [{"text": sys_prompt}]}, "contents": contents, "generationConfig": {"maxOutputTokens": 1000, "temperature": 0.7}},
                     timeout=20
                 )
+                if not r.ok:
+                    logger.warning(
+                        "Gemini vision request returned HTTP %s: %s",
+                        r.status_code,
+                        r.text[:300]
+                    )
                 d = r.json()
                 if d.get("error", {}).get("code") == 429:
                     continue
@@ -1822,6 +1907,7 @@ Only use code blocks for genuine programming help, not design mockups. User's na
                 if reply:
                     return jsonify({"reply": reply, "model": "gemini-vision", "quota": quota})
             except Exception:
+                logger.exception("Gemini vision request failed for model %s", model)
                 continue
         return jsonify({"reply": "Image analysis is temporarily unavailable. Please try again.", "quota": quota})
 
@@ -1839,8 +1925,10 @@ Only use code blocks for genuine programming help, not design mockups. User's na
                 reply = d.get("choices", [{}])[0].get("message", {}).get("content")
                 if reply:
                     return jsonify({"reply": reply, "model": "groq", "quota": quota})
-        except Exception as e:
-            print(f"Groq API call error: {e}")
+            else:
+                logger.warning("Groq chat request returned HTTP %s: %s", r.status_code, r.text[:300])
+        except Exception:
+            logger.exception("Groq API call error")
 
     # Fallback Text Chat via Gemini
     if GEMINI_KEY:
@@ -1864,8 +1952,8 @@ Only use code blocks for genuine programming help, not design mockups. User's na
 @app.route("/api/generate-image", methods=["POST"])
 @optional_auth
 def generate_image():
-    pollinations_key = os.environ.get("POLLINATIONS_API_KEY") or POLLINATIONS_KEY
-    groq_key = os.environ.get("GROQ_API_KEY") or GROQ_KEY
+    pollinations_key = os.environ.get("POLLINATIONS_API_KEY")
+    groq_key = os.environ.get("GROQ_API_KEY")
 
     # Identify client (authenticated user gets higher rate limits)
     user = getattr(request, '_user', None)
@@ -1898,11 +1986,14 @@ def generate_image():
                           {"role": "user", "content": prompt}
                       ]}
             )
-            expanded = r.json().get("choices", [{}])[0].get("message", {}).get("content", "").strip()
-            if expanded:
-                final_prompt = expanded[:600]
+            if r.ok:
+                expanded = r.json().get("choices", [{}])[0].get("message", {}).get("content", "").strip()
+                if expanded:
+                    final_prompt = expanded[:600]
+            else:
+                logger.warning("Groq prompt expansion returned HTTP %s: %s", r.status_code, r.text[:300])
         except Exception:
-            pass
+            logger.exception("Groq prompt expansion failed")
 
     # Ensure negative prompting instructions for watermark removal
     clean_prompt = f"{final_prompt}, no watermark, no logo, no signature, clean background, ultra-high resolution"
@@ -1915,16 +2006,20 @@ def generate_image():
                 json={"model": "flux", "prompt": clean_prompt, "n": 1, "size": "1024x1024", "response_format": "b64_json"},
                 timeout=30
             )
-            item = r.json().get("data", [{}])[0]
-            if item.get("b64_json"):
-                return jsonify({"image": f"data:image/jpeg;base64,{item['b64_json']}", "promptUsed": final_prompt, "quota": quota})
+            if r.ok:
+                item = r.json().get("data", [{}])[0]
+                if item.get("b64_json"):
+                    return jsonify({"image": f"data:image/jpeg;base64,{item['b64_json']}", "promptUsed": final_prompt, "quota": quota})
+            else:
+                logger.warning("Pollinations image request returned HTTP %s: %s", r.status_code, r.text[:300])
         
         # Fallback to public Pollinations URL with explicit watermark removal parameters
         encoded_prompt = urllib.parse.quote(clean_prompt)
         image_url = f"https://image.pollinations.ai/prompt/{encoded_prompt}?model=flux&width=1024&height=1024&nologo=true&private=true&enhance=false"
         return jsonify({"image": image_url, "promptUsed": final_prompt, "quota": quota})
-    except Exception as e:
-        return jsonify({"error": "Connection error. Please try again."})
+    except Exception:
+        logger.exception("Image generation request failed")
+        return jsonify({"error": "Connection error. Please try again."}), 502
 
 
 @app.route("/api/music", methods=["POST"])
@@ -1981,7 +2076,11 @@ def verify_paystack_reference(reference, expected_amount, expected_currency="NGN
         )
         payload = response.json()
     except Exception:
+        logger.exception("Paystack verification request failed")
         return {"verified": False, "error": "Could not reach Paystack verification."}, 502
+
+    if not response.ok:
+        logger.warning("Paystack verification returned HTTP %s: %s", response.status_code, response.text[:300])
 
     transaction = payload.get("data") or {}
     verified = (
@@ -2015,8 +2114,8 @@ def get_firestore_client():
         return None
     try:
         return firestore.client()
-    except Exception as exc:
-        print(f"Firestore client initialization warning: {exc}")
+    except Exception:
+        logger.exception("Firestore client initialization warning")
         return None
 
 
@@ -2096,7 +2195,7 @@ def register_campaign():
     reg_id = pending_id or payment["reference"]
     registration["id"] = reg_id
 
-    # Always save locally to SQLite
+    sqlite_saved = False
     try:
         with get_quota_db() as conn:
             conn.execute(
@@ -2121,17 +2220,22 @@ def register_campaign():
                     json.dumps(registration)
                 )
             )
-    except Exception as exc:
-        print(f"Campaign registration SQLite save warning: {exc}")
+            sqlite_saved = True
+    except Exception:
+        logger.exception("Campaign registration SQLite save warning")
 
-    # Also save to Firestore if available
+    firestore_saved = False
     db = get_firestore_client()
     if db:
         try:
             doc_ref = db.collection("campaignRegistrations").document(reg_id)
             doc_ref.set(registration, merge=True)
-        except Exception as exc:
-            print(f"Campaign registration Firestore save warning: {exc}")
+            firestore_saved = True
+        except Exception:
+            logger.exception("Campaign registration Firestore save warning")
+
+    if not sqlite_saved and not firestore_saved:
+        return jsonify({"saved": False, "error": "Could not save campaign registration."}), 500
 
     return jsonify({"saved": True, "reference": payment["reference"]})
 
@@ -2187,7 +2291,7 @@ def save_pending_campaign():
                 "time": package.get("time")
             }
 
-    # Save to SQLite
+    sqlite_saved = False
     try:
         with get_quota_db() as conn:
             conn.execute(
@@ -2212,10 +2316,11 @@ def save_pending_campaign():
                     json.dumps(registration)
                 )
             )
-    except Exception as exc:
-        print(f"Pending campaign registration SQLite save warning: {exc}")
+            sqlite_saved = True
+    except Exception:
+        logger.exception("Pending campaign registration SQLite save warning")
 
-    # Also attempt Firestore
+    firestore_saved = False
     db = get_firestore_client()
     if db:
         try:
@@ -2226,8 +2331,12 @@ def save_pending_campaign():
                 if (existing_data.get("status") or "").lower() == "paid":
                     return jsonify({"saved": True, "id": doc_id, "status": "paid"})
             doc_ref.set(registration, merge=True)
-        except Exception as exc:
-            print(f"Pending campaign registration Firestore save warning: {exc}")
+            firestore_saved = True
+        except Exception:
+            logger.exception("Pending campaign registration Firestore save warning")
+
+    if not sqlite_saved and not firestore_saved:
+        return jsonify({"saved": False, "error": "Could not save campaign registration."}), 500
 
     return jsonify({"saved": True, "id": doc_id, "status": "pending_payment"})
 
@@ -2255,7 +2364,7 @@ def submit_strategy_call():
         "createdAt": now
     }
 
-    # Always persist locally to SQLite
+    sqlite_saved = False
     try:
         with get_quota_db() as conn:
             conn.execute(
@@ -2265,16 +2374,21 @@ def submit_strategy_call():
                 """,
                 (doc_id, entry["name"], entry["email"], entry["phone"], entry["message"], entry["status"], now)
             )
-    except Exception as exc:
-        print(f"Strategy call SQLite save warning: {exc}")
+            sqlite_saved = True
+    except Exception:
+        logger.exception("Strategy call SQLite save warning")
 
-    # Also persist to Firestore if available
+    firestore_saved = False
     db = get_firestore_client()
     if db:
         try:
             db.collection("strategyCalls").document(doc_id).set(entry)
-        except Exception as exc:
-            print(f"Strategy call Firestore save warning: {exc}")
+            firestore_saved = True
+        except Exception:
+            logger.exception("Strategy call Firestore save warning")
+
+    if not sqlite_saved and not firestore_saved:
+        return jsonify({"saved": False, "error": "Could not save strategy call."}), 500
 
     return jsonify({"saved": True, "id": doc_id, "message": "Strategy call request submitted successfully!"})
 
@@ -2288,8 +2402,8 @@ def admin_strategy_calls():
         try:
             docs = db.collection("strategyCalls").stream()
             calls = [json_safe({"id": doc.id, **doc.to_dict()}) for doc in docs]
-        except Exception as exc:
-            print(f"Admin strategy calls Firestore fetch warning: {exc}")
+        except Exception:
+            logger.exception("Admin strategy calls Firestore fetch warning")
 
     if not calls and not IS_VERCEL_DEPLOYMENT:
         # Fallback to local SQLite strategy calls
@@ -2307,8 +2421,8 @@ def admin_strategy_calls():
                         "status": r["status"],
                         "createdAt": r["created_at"]
                     })
-        except Exception as exc:
-            print(f"Admin strategy calls SQLite fetch warning: {exc}")
+        except Exception:
+            logger.exception("Admin strategy calls SQLite fetch warning")
 
     calls.sort(key=lambda item: item.get("createdAt", ""), reverse=True)
     return jsonify({"strategyCalls": calls})
@@ -2324,21 +2438,30 @@ def admin_update_strategy_call_status(call_id):
 
     now = datetime.now(timezone.utc).isoformat()
 
-    # Update SQLite
+    sqlite_updated = False
+    sqlite_failed = False
     try:
         with get_quota_db() as conn:
-            conn.execute("UPDATE strategy_calls SET status = ?, updated_at = ? WHERE id = ?", (new_status, now, call_id))
-    except Exception as exc:
-        print(f"Update call status SQLite warning: {exc}")
+            cursor = conn.execute("UPDATE strategy_calls SET status = ?, updated_at = ? WHERE id = ?", (new_status, now, call_id))
+            sqlite_updated = cursor.rowcount > 0
+    except Exception:
+        sqlite_failed = True
+        logger.exception("Update call status SQLite warning")
 
-    # Update Firestore if available
+    firestore_updated = False
     db = get_firestore_client()
     if db:
         try:
             doc_ref = db.collection("strategyCalls").document(call_id)
             doc_ref.set({"status": new_status, "updatedAt": now}, merge=True)
-        except Exception as exc:
-            print(f"Update call status Firestore warning: {exc}")
+            firestore_updated = True
+        except Exception:
+            logger.exception("Update call status Firestore warning")
+
+    if not sqlite_updated and not firestore_updated:
+        if sqlite_failed:
+            return jsonify({"success": False, "error": "Could not update strategy call status."}), 500
+        return jsonify({"success": False, "error": "Strategy call was not found."}), 404
 
     return jsonify({"success": True, "id": call_id, "status": new_status})
 
