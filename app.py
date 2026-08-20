@@ -10,6 +10,8 @@ from datetime import datetime, timezone, timedelta
 from functools import wraps
 from collections import defaultdict
 import base64
+import secrets
+from werkzeug.security import check_password_hash
 
 try:
     from dotenv import load_dotenv
@@ -34,12 +36,23 @@ app = Flask(__name__)
 def favicon():
     return send_from_directory(os.path.join(app.root_path, "static", "image"), "logo.png", mimetype="image/png")
 
-app.secret_key = os.environ.get("SECRET_KEY", "your-secret-key-change-this-in-production")
-app.config["SESSION_COOKIE_SECURE"] = (
-    os.environ.get("SESSION_COOKIE_SECURE", "").lower() in {"1", "true", "yes"}
-    or os.environ.get("VERCEL_ENV") == "production"
+IS_PRODUCTION = (
+    os.environ.get("VERCEL_ENV") == "production"
     or os.environ.get("FLASK_ENV") == "production"
     or os.environ.get("RENDER", "").lower() == "true"
+)
+
+_secret_key = os.environ.get("SECRET_KEY")
+if not _secret_key:
+    if IS_PRODUCTION:
+        raise RuntimeError("SECRET_KEY must be set in production.")
+    _secret_key = secrets.token_hex(32)
+    print("SECRET_KEY is not set; using an ephemeral key (sessions reset on restart).")
+app.secret_key = _secret_key
+
+app.config["SESSION_COOKIE_SECURE"] = (
+    os.environ.get("SESSION_COOKIE_SECURE", "").lower() in {"1", "true", "yes"}
+    or IS_PRODUCTION
 )
 app.config["SESSION_COOKIE_HTTPONLY"] = True
 app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
@@ -71,16 +84,66 @@ ADMIN_TEAM = [
     {"id": "marcus-tetteh", "email": "marcus@nakconel.com", "name": "Marcus Tetteh", "role": "DevOps Specialist"},
 ]
 
-# Admin Portal Credentials (username: password)
-ADMIN_CREDENTIALS = {
-    "samuel-akinomolafe": "AdminPass1!Samuel",
-    "oreoluwa-farodoye": "AdminPass2!Oreoluwa",
-    "kayode-daniel": "AdminPass3!Kayode",
-    "segun": "AdminPass4!Segun",
-    "samuel-design": "AdminPass5!Samuel",
-    "wonuola": "AdminPass6!Wonuola",
-    "marcus-tetteh": "AdminPass7!Marcus",
-}
+def load_admin_password_hashes():
+    """Load admin portal credentials as {username: password_hash} from the environment.
+
+    ADMIN_PASSWORD_HASHES holds a JSON object of usernames to Werkzeug password
+    hashes (generate_password_hash). Nothing is bundled with the source, so the
+    portal stays closed until credentials are provisioned.
+    """
+    raw = os.environ.get("ADMIN_PASSWORD_HASHES", "").strip()
+    if not raw:
+        return {}
+
+    if os.path.exists(raw):
+        try:
+            with open(raw, "r", encoding="utf-8") as f:
+                raw = f.read().strip()
+        except OSError as exc:
+            print(f"Could not read ADMIN_PASSWORD_HASHES file: {exc}")
+            return {}
+
+    try:
+        data = json.loads(raw)
+    except ValueError:
+        try:
+            data = json.loads(base64.b64decode(raw).decode("utf-8"))
+        except Exception:
+            print("ADMIN_PASSWORD_HASHES is not valid JSON; admin portal login is disabled.")
+            return {}
+
+    if not isinstance(data, dict):
+        print("ADMIN_PASSWORD_HASHES must be a JSON object; admin portal login is disabled.")
+        return {}
+
+    return {str(user).strip(): str(pw_hash) for user, pw_hash in data.items() if str(user).strip() and pw_hash}
+
+
+ADMIN_PASSWORD_HASHES = load_admin_password_hashes()
+if not ADMIN_PASSWORD_HASHES:
+    print("ADMIN_PASSWORD_HASHES is not configured; the admin portal will reject all logins.")
+
+_ADMIN_LOGIN_ATTEMPTS = defaultdict(list)
+ADMIN_LOGIN_MAX_ATTEMPTS = int(os.environ.get("ADMIN_LOGIN_MAX_ATTEMPTS", "5"))
+ADMIN_LOGIN_WINDOW_SECONDS = int(os.environ.get("ADMIN_LOGIN_WINDOW_SECONDS", "300"))
+
+
+def verify_admin_password(username, password):
+    """Constant-time-ish admin credential check against stored password hashes."""
+    stored_hash = ADMIN_PASSWORD_HASHES.get(username)
+    if not stored_hash:
+        # Keep the work comparable for unknown usernames to avoid user enumeration.
+        check_password_hash(
+            "pbkdf2:sha256:600000$decoy$0000000000000000000000000000000000000000000000000000000000000000",
+            password,
+        )
+        return False
+    try:
+        return check_password_hash(stored_hash, password)
+    except ValueError:
+        # Legacy plaintext entries are rejected rather than silently trusted.
+        print(f"Admin password hash for {username} is not a valid Werkzeug hash.")
+        return False
 
 
 def get_admin_emails():
@@ -129,7 +192,7 @@ def require_admin_session(f):
         admin_username = session.get("admin_username")
         if not admin_username:
             return jsonify({"error": "Admin login required"}), 401
-        if admin_username not in ADMIN_CREDENTIALS:
+        if admin_username not in ADMIN_PASSWORD_HASHES:
             return jsonify({"error": "Invalid admin session"}), 403
         request._admin_username = admin_username
         # Get admin info from ADMIN_TEAM
@@ -285,6 +348,19 @@ def optional_auth(f):
         request._user = get_authenticated_user()
         return f(*args, **kwargs)
     return decorated
+
+
+def check_admin_login_attempt():
+    """Throttle admin login attempts per source IP."""
+    key = request.remote_addr or "unknown"
+    now = time.time()
+    attempts = [t for t in _ADMIN_LOGIN_ATTEMPTS[key] if now - t < ADMIN_LOGIN_WINDOW_SECONDS]
+    if len(attempts) >= ADMIN_LOGIN_MAX_ATTEMPTS:
+        _ADMIN_LOGIN_ATTEMPTS[key] = attempts
+        return False, int(ADMIN_LOGIN_WINDOW_SECONDS - (now - attempts[0])) + 1
+    attempts.append(now)
+    _ADMIN_LOGIN_ATTEMPTS[key] = attempts
+    return True, 0
 
 
 def check_rate_limit(client_key, max_requests=15, window_seconds=60):
@@ -699,16 +775,25 @@ def internship_application():
 @app.route("/payment")
 @app.route("/payment.html")
 def payment_page():
-    paystack_public_key = os.environ.get("PAYSTACK_PUBLIC_KEY", "pk_live_eefc2236ca35e9b3d72ee382cba858121bb8edd8")
-    return render_template("payment.html", paystack_public_key=paystack_public_key)
+    return render_template("payment.html", paystack_public_key=os.environ.get("PAYSTACK_PUBLIC_KEY", ""))
 
 @app.route("/thank-you")
 @app.route("/thank-you.html")
 def thank_you_page():
     return render_template("thank-you.html")
 
+PUBLIC_TEMPLATES = {
+    "about.html", "account.html", "admin-login.html", "ai-chat.html", "campaign.html",
+    "campaign-form.html", "career.html", "contact.html", "home.html", "internship-application.html",
+    "login.html", "meet_the_team.html", "register.html", "team-chat.html", "thank-you.html",
+    "training-registration.html", "voice.html",
+}
+
+
 @app.route("/templates/<path:filename>")
 def serve_template_direct(filename):
+    if filename not in PUBLIC_TEMPLATES:
+        return jsonify({"error": "Not found"}), 404
     return render_template(filename)
 
 @app.route("/api/register-training", methods=["POST"])
@@ -748,7 +833,7 @@ def register_training_api():
             )
     except Exception as exc:
         print(f"Error saving training registration: {exc}")
-        return jsonify({"success": False, "error": f"Database error: {exc}"}), 500
+        return jsonify({"success": False, "error": "Could not save the registration. Please try again."}), 500
 
     db = get_firestore_client()
     if db:
@@ -813,7 +898,7 @@ def apply_internship_api():
             )
     except Exception as exc:
         print(f"Error saving internship application: {exc}")
-        return jsonify({"success": False, "error": f"Database error: {exc}"}), 500
+        return jsonify({"success": False, "error": "Could not save the application. Please try again."}), 500
 
     db = get_firestore_client()
     if db:
@@ -834,37 +919,37 @@ def apply_internship_api():
         "redirect_url": f"/thank-you.html?id={reg_id}&type=internship"
     })
 
+def mask_applicant_name(name):
+    """Show only the first name plus an initial so a guessed id leaks little."""
+    parts = [p for p in str(name or "").split() if p]
+    if not parts:
+        return "Applicant"
+    if len(parts) == 1:
+        return parts[0]
+    return f"{parts[0]} {parts[-1][0]}."
+
+
 @app.route("/api/registration/<reg_id>", methods=["GET"])
 def get_registration_api(reg_id):
+    """Public summary of a registration; contact details stay admin-only."""
     try:
         with get_quota_db() as conn:
             row = conn.execute("SELECT * FROM career_registrations WHERE id = ?", (reg_id,)).fetchone()
             if row:
                 res = dict(row)
-                if res.get("details"):
-                    try:
-                        res["detailsParsed"] = json.loads(res["details"])
-                    except Exception:
-                        pass
-                return jsonify({"success": True, "registration": res})
+                return jsonify({"success": True, "registration": {
+                    "id": res.get("id"),
+                    "type": res.get("type"),
+                    "name": mask_applicant_name(res.get("name")),
+                    "program": res.get("program"),
+                    "amount": res.get("amount"),
+                    "status": res.get("status"),
+                    "created_at": res.get("created_at"),
+                }})
     except Exception as exc:
         print(f"Error fetching registration: {exc}")
 
-    is_int = reg_id.startswith("INT")
-    return jsonify({
-        "success": True,
-        "registration": {
-            "id": reg_id,
-            "type": "internship" if is_int else "training",
-            "name": "Applicant",
-            "email": "applicant@nakconel.com",
-            "phone": "+234 800 000 0000",
-            "program": "Nakconel Internship Program" if is_int else "Nakconel Professional Program",
-            "amount": 0 if is_int else 250000,
-            "status": "submitted" if is_int else "pending_payment",
-            "created_at": datetime.now(timezone.utc).isoformat()
-        }
-    })
+    return jsonify({"success": False, "error": "Registration was not found."}), 404
 
 
 @app.route("/api/registration/<reg_id>/initialize-paystack", methods=["POST"])
@@ -883,13 +968,7 @@ def initialize_paystack_registration(reg_id):
         print(f"Error fetching registration for Paystack init: {exc}")
 
     if not reg:
-        reg = {
-            "id": reg_id,
-            "name": "Applicant",
-            "email": "applicant@nakconel.com",
-            "amount": 250000,
-            "program": "Career Program"
-        }
+        return jsonify({"success": False, "error": "Registration was not found."}), 404
 
     email = str(reg.get("email") or "applicant@nakconel.com").strip().lower()
     if "@" not in email:
@@ -923,7 +1002,8 @@ def initialize_paystack_registration(reg_id):
         )
         payload = response.json()
     except Exception as exc:
-        return jsonify({"success": False, "error": f"Could not reach Paystack gateway: {exc}"}), 502
+        print(f"Paystack initialize error: {exc}")
+        return jsonify({"success": False, "error": "Could not reach the Paystack gateway."}), 502
 
     data = payload.get("data") or {}
     authorization_url = data.get("authorization_url")
@@ -947,6 +1027,49 @@ def initialize_paystack_registration(reg_id):
         "authorization_url": authorization_url,
         "reference": reference
     })
+
+
+def paystack_reference_matches_registration(reference, reg_id, metadata=None):
+    """Confirm a Paystack reference was created for this registration."""
+    if not reference or not reg_id:
+        return False
+
+    if (metadata or {}).get("registration_id") == reg_id:
+        return True
+
+    if str(reference).startswith(f"PAY-{reg_id}-"):
+        return True
+
+    try:
+        with get_quota_db() as conn:
+            row = conn.execute(
+                "SELECT payment_reference FROM career_registrations WHERE id = ?", (reg_id,)
+            ).fetchone()
+    except Exception as exc:
+        print(f"Reference ownership lookup failed: {exc}")
+        return False
+
+    return bool(row and row["payment_reference"] and row["payment_reference"] == reference)
+
+
+def paystack_amount_matches_registration(transaction, reg_id):
+    """Confirm the paid amount covers the registration fee."""
+    try:
+        with get_quota_db() as conn:
+            row = conn.execute(
+                "SELECT amount FROM career_registrations WHERE id = ?", (reg_id,)
+            ).fetchone()
+    except Exception as exc:
+        print(f"Amount lookup failed for {reg_id}: {exc}")
+        return False
+
+    if not row:
+        return False
+
+    expected_kobo = round(float(row["amount"] or 0) * 100)
+    paid_kobo = int(transaction.get("amount") or 0)
+    currency_ok = str(transaction.get("currency", "")).upper() == "NGN"
+    return currency_ok and paid_kobo >= expected_kobo
 
 
 @app.route("/api/paystack/callback", methods=["GET", "POST"])
@@ -975,11 +1098,19 @@ def paystack_callback():
     data = payload.get("data") or {}
     if payload.get("status") is True and data.get("status") == "success":
         meta = data.get("metadata") or {}
-        if not reg_id:
-            reg_id = meta.get("registration_id")
+        # Trust the transaction metadata over the caller-supplied id.
+        reg_id = meta.get("registration_id") or reg_id
 
         now = datetime.now(timezone.utc).isoformat()
         if reg_id:
+            if not paystack_reference_matches_registration(reference, reg_id, metadata=meta):
+                print(f"Callback reference {reference} does not belong to registration {reg_id}")
+                return redirect(f"/payment.html?id={reg_id}&error=payment_unverified")
+
+            if not paystack_amount_matches_registration(data, reg_id):
+                print(f"Callback amount mismatch for registration {reg_id}")
+                return redirect(f"/payment.html?id={reg_id}&error=payment_unverified")
+
             try:
                 with get_quota_db() as conn:
                     conn.execute(
@@ -1012,23 +1143,32 @@ def paystack_callback():
 @app.route("/api/registration/<reg_id>/complete-payment", methods=["POST"])
 def complete_payment_api(reg_id):
     data = request.get_json(silent=True) or {}
-    payment_method = str(data.get("paymentMethod") or "paystack").strip()
-    reference = str(data.get("reference") or f"PAY-{int(time.time()*1000)}").strip()
+    reference = str(data.get("reference") or "").strip()
     now = datetime.now(timezone.utc).isoformat()
 
-    # Optional Paystack verification if reference provided
-    if os.environ.get("PAYSTACK_SECRET_KEY") and reference and not reference.startswith("MANUAL-"):
-        try:
-            reg_amount = 250000
-            with get_quota_db() as conn:
-                r = conn.execute("SELECT amount FROM career_registrations WHERE id = ?", (reg_id,)).fetchone()
-                if r and r["amount"]:
-                    reg_amount = r["amount"]
-            ver_res, ver_status = verify_paystack_reference(reference, reg_amount, "NGN")
-            if ver_status != 200:
-                print(f"Paystack warning for registration {reg_id}: {ver_res}")
-        except Exception as exc:
-            print(f"Paystack verification check exception: {exc}")
+    if not reference:
+        return jsonify({"success": False, "error": "A payment reference is required."}), 400
+
+    reg = None
+    try:
+        with get_quota_db() as conn:
+            row = conn.execute("SELECT * FROM career_registrations WHERE id = ?", (reg_id,)).fetchone()
+            if row:
+                reg = dict(row)
+    except Exception as exc:
+        print(f"Error loading registration for payment completion: {exc}")
+        return jsonify({"success": False, "error": "Could not complete the payment. Please try again."}), 500
+
+    if not reg:
+        return jsonify({"success": False, "error": "Registration was not found."}), 404
+
+    verification, verification_status = verify_paystack_reference(reference, reg.get("amount") or 250000, "NGN")
+    if verification_status != 200:
+        print(f"Rejected payment completion for {reg_id}: {verification}")
+        return jsonify({"success": False, "error": "Payment could not be verified."}), 402
+
+    if not paystack_reference_matches_registration(verification.get("reference") or reference, reg_id):
+        return jsonify({"success": False, "error": "Payment reference does not belong to this registration."}), 403
 
     try:
         with get_quota_db() as conn:
@@ -1042,6 +1182,7 @@ def complete_payment_api(reg_id):
             )
     except Exception as exc:
         print(f"Error completing payment: {exc}")
+        return jsonify({"success": False, "error": "Could not complete the payment. Please try again."}), 500
 
     db = get_firestore_client()
     if db:
@@ -1181,15 +1322,21 @@ def admin_page():
 def api_admin_login():
     """Admin portal login with username/password."""
     try:
-        data = request.get_json() or {}
+        data = request.get_json(silent=True) or {}
         username = (data.get("username") or "").strip()
         password = (data.get("password") or "").strip()
 
         if not username or not password:
             return jsonify({"error": "Username and password required"}), 400
 
-        # Check credentials
-        if username not in ADMIN_CREDENTIALS or ADMIN_CREDENTIALS[username] != password:
+        allowed, retry_after = check_admin_login_attempt()
+        if not allowed:
+            return jsonify({"error": "Too many login attempts. Please try again later."}), 429, {"Retry-After": str(retry_after)}
+
+        if not ADMIN_PASSWORD_HASHES:
+            return jsonify({"error": "Admin portal is not configured. Set ADMIN_PASSWORD_HASHES."}), 503
+
+        if not verify_admin_password(username, password):
             return jsonify({"error": "Invalid username or password"}), 401
 
         # Set admin session
@@ -1212,8 +1359,9 @@ def api_admin_login():
             "message": "Login successful"
         }), 200
 
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+    except Exception as exc:
+        print(f"Admin login error: {exc}")
+        return jsonify({"error": "Login failed. Please try again."}), 500
 
 @app.route("/api/admin/check-session", methods=["GET"])
 def api_admin_check_session():
@@ -1472,7 +1620,8 @@ def start_visitor_conversation():
             doc_ref.set(conversation)
             conversation["id"] = conversation_id
     except Exception as exc:
-        return jsonify({"error": str(exc)}), 500
+        print(f"Start conversation error: {exc}")
+        return jsonify({"error": "Could not start the conversation."}), 500
 
     return jsonify({"conversation": json_safe(conversation)})
 
@@ -1491,7 +1640,8 @@ def visitor_messages(conversation_id):
         docs = db.collection("teamConversations").document(conversation_id).collection("messages").stream()
         messages = [json_safe({"id": doc.id, **doc.to_dict()}) for doc in docs]
     except Exception as exc:
-        return jsonify({"error": str(exc)}), 500
+        print(f"Visitor messages error: {exc}")
+        return jsonify({"error": "Could not load messages."}), 500
 
     messages.sort(key=lambda item: item.get("time", ""))
     return jsonify({"messages": messages})
@@ -1536,7 +1686,8 @@ def visitor_send_message(conversation_id):
         msg_ref.set(msg_data)
         conv_ref.set({"lastMessage": last_msg, "lastSender": "visitor", "lastUpdated": now, "status": "open"}, merge=True)
     except Exception as exc:
-        return jsonify({"error": str(exc)}), 500
+        print(f"Visitor send message error: {exc}")
+        return jsonify({"error": "Could not send the message."}), 500
 
     return jsonify({"sent": True, "message": {"id": msg_ref.id, **msg_data}})
 
@@ -1849,8 +2000,8 @@ Only use code blocks for genuine programming help, not design mockups. User's na
 @app.route("/api/generate-image", methods=["POST"])
 @optional_auth
 def generate_image():
-    pollinations_key = os.environ.get("POLLINATIONS_API_KEY") or POLLINATIONS_KEY
-    groq_key = os.environ.get("GROQ_API_KEY") or GROQ_KEY
+    pollinations_key = os.environ.get("POLLINATIONS_API_KEY")
+    groq_key = os.environ.get("GROQ_API_KEY")
 
     # Identify client (authenticated user gets higher rate limits)
     user = getattr(request, '_user', None)
@@ -1881,7 +2032,8 @@ def generate_image():
                       "messages": [
                           {"role": "system", "content": "You write vivid, detailed text-to-image prompts in 2-3 sentences max. IMPORTANT: Output clean prompts without any text, logos, or watermarks. Output ONLY the prompt text, nothing else. Keep it under 60 words."},
                           {"role": "user", "content": prompt}
-                      ]}
+                      ]},
+                timeout=20
             )
             expanded = r.json().get("choices", [{}])[0].get("message", {}).get("content", "").strip()
             if expanded:
@@ -1908,8 +2060,9 @@ def generate_image():
         encoded_prompt = urllib.parse.quote(clean_prompt)
         image_url = f"https://image.pollinations.ai/prompt/{encoded_prompt}?model=flux&width=1024&height=1024&nologo=true&private=true&enhance=false"
         return jsonify({"image": image_url, "promptUsed": final_prompt, "quota": quota})
-    except Exception as e:
-        return jsonify({"error": "Connection error. Please try again."})
+    except Exception as exc:
+        print(f"Image generation error: {exc}")
+        return jsonify({"error": "Connection error. Please try again."}), 502
 
 
 @app.route("/api/music", methods=["POST"])
@@ -2328,5 +2481,19 @@ def admin_update_strategy_call_status(call_id):
     return jsonify({"success": True, "id": call_id, "status": new_status})
 
 
+@app.after_request
+def set_security_headers(response):
+    response.headers.setdefault("X-Content-Type-Options", "nosniff")
+    response.headers.setdefault("X-Frame-Options", "SAMEORIGIN")
+    response.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
+    response.headers.setdefault("Permissions-Policy", "geolocation=(), microphone=(self), camera=()")
+    if IS_PRODUCTION:
+        response.headers.setdefault("Strict-Transport-Security", "max-age=31536000; includeSubDomains")
+    if request.path.startswith("/api/"):
+        response.headers.setdefault("Cache-Control", "no-store")
+    return response
+
+
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", debug=True)
+    debug_enabled = os.environ.get("FLASK_DEBUG", "").lower() in {"1", "true", "yes"} and not IS_PRODUCTION
+    app.run(host=os.environ.get("HOST", "0.0.0.0"), port=int(os.environ.get("PORT", "5000")), debug=debug_enabled)
