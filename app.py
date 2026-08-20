@@ -15,7 +15,6 @@ import base64
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
 
 try:
     from dotenv import load_dotenv
@@ -172,14 +171,13 @@ def get_firebase_public_keys():
             _firebase_public_keys = resp.json()
             _firebase_public_keys_fetched_at = now
             return _firebase_public_keys
-    except Exception:
-        logger.exception("Failed to fetch Firebase public keys")
-    else:
         logger.warning(
             "Firebase public key request returned HTTP %s: %s",
             resp.status_code,
             resp.text[:300]
         )
+    except Exception:
+        logger.exception("Failed to fetch Firebase public keys")
     return None
 
 
@@ -329,86 +327,86 @@ def get_quota_db():
         conn = sqlite3.connect(AI_QUOTA_DB_PATH)
         conn.row_factory = sqlite3.Row
         conn.execute(
-        """
-        CREATE TABLE IF NOT EXISTS ai_quotas (
-            client_key TEXT PRIMARY KEY,
-            period_start TEXT NOT NULL,
-            used INTEGER NOT NULL DEFAULT 0,
-            boost_claimed_on TEXT
-        )
-        """
-        )
-        conn.execute(
-        """
-        CREATE TABLE IF NOT EXISTS ai_subscriptions (
-            reference TEXT PRIMARY KEY,
-            client_key TEXT NOT NULL,
-            email TEXT NOT NULL,
-            plan_id TEXT NOT NULL,
-            plan_name TEXT NOT NULL,
-            amount INTEGER NOT NULL,
-            status TEXT NOT NULL,
-            authorization_url TEXT,
-            paid_at TEXT,
-            starts_at TEXT,
-            expires_at TEXT,
-            created_at TEXT NOT NULL
-        )
-        """
+            """
+            CREATE TABLE IF NOT EXISTS ai_quotas (
+                client_key TEXT PRIMARY KEY,
+                period_start TEXT NOT NULL,
+                used INTEGER NOT NULL DEFAULT 0,
+                boost_claimed_on TEXT
+            )
+            """
         )
         conn.execute(
-        """
-        CREATE TABLE IF NOT EXISTS strategy_calls (
-            id TEXT PRIMARY KEY,
-            name TEXT NOT NULL,
-            email TEXT NOT NULL,
-            phone TEXT,
-            message TEXT NOT NULL,
-            status TEXT NOT NULL DEFAULT 'new',
-            created_at TEXT NOT NULL,
-            updated_at TEXT
-        )
-        """
-        )
-        conn.execute(
-        """
-        CREATE TABLE IF NOT EXISTS career_registrations (
-            id TEXT PRIMARY KEY,
-            type TEXT NOT NULL,
-            name TEXT NOT NULL,
-            email TEXT NOT NULL,
-            phone TEXT,
-            program TEXT NOT NULL,
-            experience_level TEXT,
-            statement TEXT,
-            details TEXT,
-            amount INTEGER NOT NULL DEFAULT 250000,
-            status TEXT NOT NULL DEFAULT 'pending_payment',
-            payment_reference TEXT,
-            paid_at TEXT,
-            created_at TEXT NOT NULL,
-            updated_at TEXT
-        )
-        """
+            """
+            CREATE TABLE IF NOT EXISTS ai_subscriptions (
+                reference TEXT PRIMARY KEY,
+                client_key TEXT NOT NULL,
+                email TEXT NOT NULL,
+                plan_id TEXT NOT NULL,
+                plan_name TEXT NOT NULL,
+                amount INTEGER NOT NULL,
+                status TEXT NOT NULL,
+                authorization_url TEXT,
+                paid_at TEXT,
+                starts_at TEXT,
+                expires_at TEXT,
+                created_at TEXT NOT NULL
+            )
+            """
         )
         conn.execute(
-        """
-        CREATE TABLE IF NOT EXISTS campaign_registrations (
-            id TEXT PRIMARY KEY,
-            uid TEXT NOT NULL,
-            email TEXT NOT NULL,
-            full_name TEXT,
-            business TEXT,
-            challenge TEXT,
-            package_name TEXT,
-            amount REAL,
-            currency TEXT,
-            status TEXT NOT NULL DEFAULT 'pending_payment',
-            payment_reference TEXT,
-            created_at TEXT NOT NULL,
-            raw_json TEXT
+            """
+            CREATE TABLE IF NOT EXISTS strategy_calls (
+                id TEXT PRIMARY KEY,
+                name TEXT NOT NULL,
+                email TEXT NOT NULL,
+                phone TEXT,
+                message TEXT NOT NULL,
+                status TEXT NOT NULL DEFAULT 'new',
+                created_at TEXT NOT NULL,
+                updated_at TEXT
+            )
+            """
         )
-        """
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS career_registrations (
+                id TEXT PRIMARY KEY,
+                type TEXT NOT NULL,
+                name TEXT NOT NULL,
+                email TEXT NOT NULL,
+                phone TEXT,
+                program TEXT NOT NULL,
+                experience_level TEXT,
+                statement TEXT,
+                details TEXT,
+                amount INTEGER NOT NULL DEFAULT 250000,
+                status TEXT NOT NULL DEFAULT 'pending_payment',
+                payment_reference TEXT,
+                paid_at TEXT,
+                created_at TEXT NOT NULL,
+                updated_at TEXT
+            )
+            """
+        )
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS campaign_registrations (
+                id TEXT PRIMARY KEY,
+                uid TEXT NOT NULL,
+                email TEXT NOT NULL,
+                full_name TEXT,
+                business TEXT,
+                challenge TEXT,
+                package_name TEXT,
+                amount REAL,
+                currency TEXT,
+                status TEXT NOT NULL DEFAULT 'pending_payment',
+                payment_reference TEXT,
+                created_at TEXT NOT NULL,
+                raw_json TEXT
+            )
+            """
         )
         yield conn
         conn.commit()
@@ -2316,7 +2314,6 @@ def save_pending_campaign():
             if existing.exists:
                 existing_data = existing.to_dict() or {}
                 if (existing_data.get("status") or "").lower() == "paid":
-                    firestore_saved = True
                     return jsonify({"saved": True, "id": doc_id, "status": "paid"})
             doc_ref.set(registration, merge=True)
             firestore_saved = True
