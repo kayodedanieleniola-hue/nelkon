@@ -165,6 +165,21 @@ def require_admin_session(f):
     return decorated
 
 
+def require_shared_database(f):
+    """Prevent Vercel from accepting submissions into instance-local storage."""
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if IS_VERCEL_DEPLOYMENT and not DATABASE_URL:
+            return jsonify({"error": "Shared database is not configured. Add DATABASE_URL in Vercel and redeploy."}), 503
+        try:
+            with get_quota_db() as conn:
+                conn.execute("SELECT 1")
+        except Exception:
+            return jsonify({"error": "Shared database is unavailable. Check DATABASE_URL and the deployment logs."}), 503
+        return f(*args, **kwargs)
+    return decorated
+
+
 def get_client_key():
     """Get client identifier from request headers or cookies."""
     client_id = request.headers.get("X-NAK-Client-Id") or request.cookies.get("nak_client_id")
@@ -813,6 +828,7 @@ def serve_template_direct(filename):
     return render_template(filename)
 
 @app.route("/api/register-training", methods=["POST"])
+@require_shared_database
 def register_training_api():
     data = request.get_json(silent=True) or request.form.to_dict() or {}
     name = str(data.get("fullName") or data.get("name") or "").strip()
@@ -870,6 +886,7 @@ def register_training_api():
     })
 
 @app.route("/api/apply-internship", methods=["POST"])
+@require_shared_database
 def apply_internship_api():
     data = request.get_json(silent=True) or request.form.to_dict() or {}
     name = str(data.get("fullName") or data.get("name") or data.get("from_name") or "").strip()
@@ -936,6 +953,7 @@ def apply_internship_api():
     })
 
 @app.route("/api/registration/<reg_id>", methods=["GET"])
+@require_shared_database
 def get_registration_api(reg_id):
     try:
         with get_quota_db() as conn:
@@ -969,6 +987,7 @@ def get_registration_api(reg_id):
 
 
 @app.route("/api/registration/<reg_id>/initialize-paystack", methods=["POST"])
+@require_shared_database
 def initialize_paystack_registration(reg_id):
     PAYSTACK_SECRET_KEY = os.environ.get("PAYSTACK_SECRET_KEY")
     if not PAYSTACK_SECRET_KEY:
@@ -1111,6 +1130,7 @@ def paystack_callback():
 
 
 @app.route("/api/registration/<reg_id>/complete-payment", methods=["POST"])
+@require_shared_database
 def complete_payment_api(reg_id):
     data = request.get_json(silent=True) or {}
     payment_method = str(data.get("paymentMethod") or "paystack").strip()
@@ -1162,6 +1182,7 @@ def complete_payment_api(reg_id):
 
 @app.route("/api/admin/career-registrations", methods=["GET"])
 @require_admin_session
+@require_shared_database
 def admin_career_registrations():
     registrations_map = {}
     warning = None
@@ -1220,6 +1241,7 @@ def admin_career_registrations():
 
 @app.route("/api/admin/career-registrations/<reg_id>/status", methods=["POST"])
 @require_admin_session
+@require_shared_database
 def admin_update_career_status(reg_id):
     data = request.get_json(silent=True) or {}
     new_status = str(data.get("status", "")).strip().lower()
@@ -1357,6 +1379,7 @@ def admin_me():
 
 @app.route("/api/admin/summary", methods=["GET"])
 @require_admin_session
+@require_shared_database
 def admin_summary():
     registrations_map = {}
     users_map = {}
@@ -1547,6 +1570,7 @@ def chat_team():
 
 @app.route("/api/chat/conversations", methods=["GET"])
 @require_strict_auth
+@require_shared_database
 def visitor_conversations():
     user = request._user
     try:
@@ -1560,6 +1584,7 @@ def visitor_conversations():
 
 @app.route("/api/chat/conversations", methods=["POST"])
 @require_strict_auth
+@require_shared_database
 def start_visitor_conversation():
     data = request.get_json(silent=True) or {}
     member_id = str(data.get("teamMemberId", "")).strip()
@@ -1603,6 +1628,7 @@ def start_visitor_conversation():
 
 @app.route("/api/chat/conversations/<conversation_id>/messages", methods=["GET"])
 @require_strict_auth
+@require_shared_database
 def visitor_messages(conversation_id):
     user = request._user
     try:
@@ -1619,6 +1645,7 @@ def visitor_messages(conversation_id):
 
 @app.route("/api/chat/conversations/<conversation_id>/messages", methods=["POST"])
 @require_strict_auth
+@require_shared_database
 def visitor_send_message(conversation_id):
     user = request._user
     data = request.get_json(silent=True) or {}
@@ -1660,6 +1687,7 @@ def visitor_send_message(conversation_id):
 
 @app.route("/api/admin/chat/conversations", methods=["GET"])
 @require_admin_session
+@require_shared_database
 def admin_chat_conversations():
     try:
         with get_quota_db() as conn:
@@ -1672,6 +1700,7 @@ def admin_chat_conversations():
 
 @app.route("/api/admin/chat/conversations/<conversation_id>/messages", methods=["GET"])
 @require_admin_session
+@require_shared_database
 def admin_chat_messages(conversation_id):
     try:
         with get_quota_db() as conn:
@@ -1686,6 +1715,7 @@ def admin_chat_messages(conversation_id):
 
 @app.route("/api/admin/chat/conversations/<conversation_id>/messages", methods=["POST"])
 @require_admin_session
+@require_shared_database
 def admin_send_chat_message(conversation_id):
     data = request.get_json(silent=True) or {}
     text = get_chat_message_payload(data)
@@ -1728,6 +1758,7 @@ def admin_send_chat_message(conversation_id):
 
 @app.route("/api/admin/campaign-registrations", methods=["GET"])
 @require_admin_session
+@require_shared_database
 def admin_campaign_registrations():
     registrations_map = {}
     warning = None
@@ -1776,6 +1807,7 @@ def admin_campaign_registrations():
 
 @app.route("/api/admin/users", methods=["GET"])
 @require_admin_session
+@require_shared_database
 def admin_users():
     try:
         with get_quota_db() as conn:
@@ -1791,6 +1823,7 @@ def admin_users():
 
 @app.route("/api/users/sync", methods=["POST"])
 @require_strict_auth
+@require_shared_database
 def sync_website_user():
     """Mirror Firebase-authenticated users into Neon for the admin directory."""
     data = request.get_json(silent=True) or {}
@@ -2130,6 +2163,7 @@ def verify_paystack_payment():
 
 
 @app.route("/api/campaign/register", methods=["POST"])
+@require_shared_database
 def register_campaign():
     data = request.get_json(silent=True) or {}
     required_fields = ["uid", "email", "questions", "package", "paymentReference"]
@@ -2242,6 +2276,7 @@ def register_campaign():
 
 
 @app.route("/api/campaign/pending", methods=["POST"])
+@require_shared_database
 def save_pending_campaign():
     data = request.get_json(silent=True) or {}
     required_fields = ["uid", "email", "questions"]
@@ -2345,6 +2380,7 @@ def save_pending_campaign():
 
 
 @app.route("/api/strategy-call", methods=["POST"])
+@require_shared_database
 def submit_strategy_call():
     data = request.get_json(silent=True) or {}
     name = str(data.get("name") or data.get("from_name") or "").strip()
@@ -2393,6 +2429,7 @@ def submit_strategy_call():
 
 @app.route("/api/admin/strategy-calls", methods=["GET"])
 @require_admin_session
+@require_shared_database
 def admin_strategy_calls():
     calls = []
     db = get_firestore_client()
@@ -2428,6 +2465,7 @@ def admin_strategy_calls():
 
 @app.route("/api/admin/strategy-calls/<call_id>/status", methods=["POST"])
 @require_admin_session
+@require_shared_database
 def admin_update_strategy_call_status(call_id):
     data = request.get_json(silent=True) or {}
     new_status = str(data.get("status", "")).strip().lower()
