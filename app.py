@@ -2403,21 +2403,25 @@ def submit_strategy_call():
         "createdAt": now
     }
 
-    # Always persist locally to SQLite
+    # Persist to Neon. Do not report a successful booking if the shared write fails.
     try:
         with get_quota_db() as conn:
             conn.execute(
                 """
-                INSERT OR REPLACE INTO strategy_calls (id, name, email, phone, message, status, created_at)
+                INSERT INTO strategy_calls (id, name, email, phone, message, status, created_at)
                 VALUES (?, ?, ?, ?, ?, ?, ?)
+                ON CONFLICT (id) DO UPDATE SET
+                    name = EXCLUDED.name, email = EXCLUDED.email, phone = EXCLUDED.phone,
+                    message = EXCLUDED.message, status = EXCLUDED.status,
+                    created_at = EXCLUDED.created_at
                 """,
                 (doc_id, entry["name"], entry["email"], entry["phone"], entry["message"], entry["status"], now)
             )
-    except Exception as exc:
-        print(f"Strategy call SQLite save warning: {exc}")
+    except Exception:
+        return jsonify({"saved": False, "error": "Could not save your strategy-call request. Please try again."}), 503
 
-    # Also persist to Firestore if available
-    db = get_firestore_client()
+    # Firestore is not needed when the shared Neon database is configured.
+    db = None if DATABASE_URL else get_firestore_client()
     if db:
         try:
             db.collection("strategyCalls").document(doc_id).set(entry)
@@ -2432,7 +2436,7 @@ def submit_strategy_call():
 @require_shared_database
 def admin_strategy_calls():
     calls = []
-    db = get_firestore_client()
+    db = None if DATABASE_URL else get_firestore_client()
     if db:
         try:
             docs = db.collection("strategyCalls").stream()
