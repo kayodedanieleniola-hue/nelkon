@@ -105,24 +105,28 @@ export async function signInWithEmail(emailOrUsername, password) {
     }
   }
   const result = await signInWithEmailAndPassword(auth, email, password);
+  await syncAdminDirectory(result.user);
   return result.user;
+}
+
+async function syncAdminDirectory(user, username) {
+  if (!user) return;
+  try {
+    const token = await user.getIdToken();
+    await fetch('/api/users/sync', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ username: username || user.displayName || user.email?.split('@')[0], photoURL: user.photoURL || '' })
+    });
+  } catch (e) {
+    console.warn('Admin directory sync notice:', e);
+  }
 }
 
 export async function signUpWithEmail(email, password, username) {
   const result = await createUserWithEmailAndPassword(auth, email, password);
   const user = result.user;
-  
-  try {
-    await setDoc(doc(db, 'users', user.uid), {
-      uid: user.uid,
-      email: email.toLowerCase(),
-      username: username || email.split('@')[0],
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp()
-    });
-  } catch (e) {
-    console.warn('Firestore user doc creation notice:', e);
-  }
+  await syncAdminDirectory(user, username || email.split('@')[0]);
   
   return user;
 }
@@ -131,22 +135,7 @@ export async function signInWithGoogle() {
   const result = await signInWithPopup(auth, googleProvider);
   const user = result.user;
   
-  try {
-    const userDocRef = doc(db, 'users', user.uid);
-    const userDoc = await getDoc(userDocRef);
-    if (!userDoc.exists()) {
-      await setDoc(userDocRef, {
-        uid: user.uid,
-        email: user.email.toLowerCase(),
-        username: user.displayName || user.email.split('@')[0],
-        photoURL: user.photoURL,
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp()
-      });
-    }
-  } catch (e) {
-    console.warn('Firestore user doc creation notice:', e);
-  }
+  await syncAdminDirectory(user);
   
   return user;
 }

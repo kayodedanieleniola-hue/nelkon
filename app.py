@@ -10,6 +10,18 @@ from datetime import datetime, timezone, timedelta
 from functools import wraps
 from collections import defaultdict
 import base64
+import jwt
+import uuid
+from cryptography import x509
+
+try:
+    import psycopg
+    from psycopg.rows import dict_row
+    HAS_POSTGRES = True
+except ImportError:
+    psycopg = None
+    dict_row = None
+    HAS_POSTGRES = False
 
 try:
     from dotenv import load_dotenv
@@ -63,6 +75,8 @@ AI_QUOTA_DB_PATH = os.environ.get("AI_QUOTA_DB_PATH", os.path.join("/tmp", "nakc
 IS_VERCEL_DEPLOYMENT = bool(os.environ.get("VERCEL") or os.environ.get("VERCEL_ENV"))
 NGN_TO_USD_RATE = float(os.environ.get("NGN_TO_USD_RATE", "0.00065"))
 _NGN_USD_RATE_CACHE = {"rate": NGN_TO_USD_RATE, "fetched_at": 0}
+DATABASE_URL = os.environ.get("DATABASE_URL", "").strip()
+_database_schema_ready = False
 AI_SUBSCRIPTION_PLANS = {
     "weekly": {"name": "Weekly", "amount": 2500, "days": 7},
     "monthly": {"name": "Monthly", "amount": 7500, "days": 30},
@@ -184,10 +198,32 @@ def verify_firebase_id_token(id_token):
     if not id_token:
         return None
     try:
-        decoded = get_firebase_auth().verify_id_token(id_token)
+        firebase_auth_client = get_firebase_auth()
+        if not firebase_auth_client:
+            raise RuntimeError("Firebase Admin is not configured")
+        decoded = firebase_auth_client.verify_id_token(id_token)
         return {"uid": decoded.get("uid"), "email": decoded.get("email")}
     except Exception:
-        return None
+        # Firebase Authentication can still be verified without a Firestore
+        # service-account key. This keeps existing Google/email sign-in working
+        # after the data layer moves to Neon.
+        try:
+            header = jwt.get_unverified_header(id_token)
+            certificate = (get_firebase_public_keys() or {}).get(header.get("kid"))
+            project_id = os.environ.get("FIREBASE_PROJECT_ID", "nakconel-3dfaa")
+            if not certificate:
+                return None
+            public_key = x509.load_pem_x509_certificate(certificate.encode("utf-8")).public_key()
+            decoded = jwt.decode(
+                id_token,
+                public_key,
+                algorithms=["RS256"],
+                audience=project_id,
+                issuer=f"https://securetoken.google.com/{project_id}",
+            )
+            return {"uid": decoded.get("user_id") or decoded.get("sub"), "email": decoded.get("email")}
+        except Exception:
+            return None
 
 
 def parse_firebase_service_account_info(raw_val):
@@ -307,7 +343,64 @@ def check_rate_limit(client_key, max_requests=15, window_seconds=60):
     return True, 0
 
 
+class PostgresConnection:
+    """Compatibility wrapper for existing parameterized SQLite-style queries."""
+    def __init__(self, conn):
+        self.conn = conn
+
+    def execute(self, sql, params=None):
+        if sql.strip().upper() == "BEGIN IMMEDIATE":
+            return self.conn.execute("SELECT 1")
+        return self.conn.execute(sql.replace("?", "%s"), params or ())
+
+    def commit(self):
+        self.conn.commit()
+
+    def rollback(self):
+        self.conn.rollback()
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        try:
+            self.conn.rollback() if exc_type else self.conn.commit()
+        finally:
+            self.conn.close()
+
+
+def initialize_postgres_schema(conn):
+    """Create the shared Neon schema on each new serverless instance."""
+    global _database_schema_ready
+    if _database_schema_ready:
+        return
+    statements = [
+        "CREATE TABLE IF NOT EXISTS ai_quotas (client_key TEXT PRIMARY KEY, period_start TEXT NOT NULL, used INTEGER NOT NULL DEFAULT 0, boost_claimed_on TEXT)",
+        "CREATE TABLE IF NOT EXISTS ai_subscriptions (reference TEXT PRIMARY KEY, client_key TEXT NOT NULL, email TEXT NOT NULL, plan_id TEXT NOT NULL, plan_name TEXT NOT NULL, amount INTEGER NOT NULL, status TEXT NOT NULL, authorization_url TEXT, paid_at TEXT, starts_at TEXT, expires_at TEXT, created_at TEXT NOT NULL)",
+        "CREATE TABLE IF NOT EXISTS strategy_calls (id TEXT PRIMARY KEY, name TEXT NOT NULL, email TEXT NOT NULL, phone TEXT, message TEXT NOT NULL, status TEXT NOT NULL DEFAULT 'new', created_at TEXT NOT NULL, updated_at TEXT)",
+        "CREATE TABLE IF NOT EXISTS career_registrations (id TEXT PRIMARY KEY, type TEXT NOT NULL, name TEXT NOT NULL, email TEXT NOT NULL, phone TEXT, program TEXT NOT NULL, experience_level TEXT, statement TEXT, details TEXT, amount INTEGER NOT NULL DEFAULT 250000, status TEXT NOT NULL DEFAULT 'pending_payment', payment_reference TEXT, paid_at TEXT, created_at TEXT NOT NULL, updated_at TEXT)",
+        "CREATE TABLE IF NOT EXISTS campaign_registrations (id TEXT PRIMARY KEY, uid TEXT NOT NULL, email TEXT NOT NULL, full_name TEXT, business TEXT, challenge TEXT, package_name TEXT, amount DOUBLE PRECISION, currency TEXT, status TEXT NOT NULL DEFAULT 'pending_payment', payment_reference TEXT, created_at TEXT NOT NULL, raw_json TEXT)",
+        "CREATE TABLE IF NOT EXISTS website_users (uid TEXT PRIMARY KEY, email TEXT, username TEXT, photo_url TEXT, created_at TEXT NOT NULL, updated_at TEXT NOT NULL)",
+        "CREATE TABLE IF NOT EXISTS team_conversations (id TEXT PRIMARY KEY, visitor_id TEXT NOT NULL, visitor_email TEXT, visitor_name TEXT, team_member_id TEXT NOT NULL, team_member_name TEXT, team_member_role TEXT, status TEXT NOT NULL DEFAULT 'open', last_message TEXT, last_sender TEXT, last_updated TEXT NOT NULL, created_at TEXT NOT NULL)",
+        "CREATE TABLE IF NOT EXISTS team_messages (id TEXT PRIMARY KEY, conversation_id TEXT NOT NULL REFERENCES team_conversations(id) ON DELETE CASCADE, sender TEXT NOT NULL, sender_name TEXT, text TEXT, attachment_json TEXT, time TEXT NOT NULL)",
+        "CREATE INDEX IF NOT EXISTS team_conversations_visitor_idx ON team_conversations(visitor_id)",
+        "CREATE INDEX IF NOT EXISTS team_messages_conversation_idx ON team_messages(conversation_id, time)",
+    ]
+    for statement in statements:
+        conn.execute(statement)
+    conn.commit()
+    _database_schema_ready = True
+
+
 def get_quota_db():
+    """Use Neon whenever DATABASE_URL is configured; retain SQLite for local fallback."""
+    if DATABASE_URL:
+        if not HAS_POSTGRES:
+            raise RuntimeError("PostgreSQL support is not installed. Redeploy with the updated requirements.txt.")
+        conn = psycopg.connect(DATABASE_URL, row_factory=dict_row)
+        initialize_postgres_schema(conn)
+        return PostgresConnection(conn)
+
     db_dir = os.path.dirname(AI_QUOTA_DB_PATH)
     if db_dir:
         os.makedirs(db_dir, exist_ok=True)
@@ -1072,7 +1165,7 @@ def complete_payment_api(reg_id):
 def admin_career_registrations():
     registrations_map = {}
     warning = None
-    db = get_firestore_client()
+    db = None if DATABASE_URL else get_firestore_client()
     if db:
         try:
             docs = db.collection("careerRegistrations").stream()
@@ -1082,10 +1175,10 @@ def admin_career_registrations():
                 registrations_map[doc.id] = item
         except Exception as exc:
             warning = f"Failed to load career registrations from Firestore: {exc}"
-    else:
+    elif not DATABASE_URL:
         warning = "Firebase Firestore is unconfigured or offline (FIREBASE_SERVICE_ACCOUNT_JSON missing or invalid)."
 
-    if not IS_VERCEL_DEPLOYMENT:
+    if DATABASE_URL or not IS_VERCEL_DEPLOYMENT:
         try:
             with get_quota_db() as conn:
                 rows = conn.execute("SELECT * FROM career_registrations ORDER BY created_at DESC").fetchall()
@@ -1153,7 +1246,9 @@ def admin_update_career_status(reg_id):
 
 @app.route("/contact")
 def contact():
-    return render_template("contact.html")
+    # The old Contact page used Supabase and placeholder replies. Route visitors
+    # to the authenticated team chat, which is stored in the shared Neon database.
+    return redirect("/team-chat")
 
 @app.route("/voice")
 def voice():
@@ -1269,7 +1364,7 @@ def admin_summary():
     career_registrations_map = {}
     error = None
 
-    db = get_firestore_client()
+    db = None if DATABASE_URL else get_firestore_client()
     if db is not None:
         try:
             for doc in db.collection("campaignRegistrations").stream():
@@ -1302,12 +1397,12 @@ def admin_summary():
                 career_registrations_map[doc.id] = d
         except Exception as exc:
             error = f"{error}; careerRegistrations: {exc}" if error else f"careerRegistrations: {exc}"
-    else:
+    elif not DATABASE_URL:
         error = "Firebase Firestore is unconfigured or offline (FIREBASE_SERVICE_ACCOUNT_JSON missing or invalid)."
 
     # Never read instance-local SQLite data in Vercel. It would make one
     # deployed function return records that another function cannot see.
-    if not IS_VERCEL_DEPLOYMENT:
+    if DATABASE_URL or not IS_VERCEL_DEPLOYMENT:
       try:
         with get_quota_db() as conn:
             # Campaign Registrations
@@ -1338,6 +1433,15 @@ def admin_summary():
             for r in career_rows:
                 row_dict = dict(r)
                 career_registrations_map.setdefault(row_dict["id"], row_dict)
+
+            user_rows = conn.execute("SELECT * FROM website_users").fetchall()
+            for r in user_rows:
+                row_dict = dict(r)
+                users_map.setdefault(row_dict["uid"], {
+                    "uid": row_dict["uid"], "email": row_dict["email"],
+                    "username": row_dict["username"], "photoURL": row_dict["photo_url"],
+                    "createdAt": row_dict["created_at"], "updatedAt": row_dict["updated_at"],
+                })
       except Exception as exc:
           print(f"SQLite summary merge error: {exc}")
 
@@ -1416,6 +1520,26 @@ def get_chat_message_payload(data, max_len=1200):
     return text[:max_len]
 
 
+def chat_conversation_from_row(row):
+    return {
+        "id": row["id"], "visitorId": row["visitor_id"], "visitorEmail": row["visitor_email"],
+        "visitorName": row["visitor_name"], "teamMemberId": row["team_member_id"],
+        "teamMemberName": row["team_member_name"], "teamMemberRole": row["team_member_role"],
+        "status": row["status"], "lastMessage": row["last_message"], "lastSender": row["last_sender"],
+        "lastUpdated": row["last_updated"], "createdAt": row["created_at"],
+    }
+
+
+def chat_message_from_row(row):
+    message = {"id": row["id"], "sender": row["sender"], "senderName": row["sender_name"], "text": row["text"], "time": row["time"]}
+    if row["attachment_json"]:
+        try:
+            message["attachment"] = json.loads(row["attachment_json"])
+        except Exception:
+            pass
+    return message
+
+
 @app.route("/api/chat/team", methods=["GET"])
 def chat_team():
     return jsonify({"team": ADMIN_TEAM})
@@ -1425,16 +1549,12 @@ def chat_team():
 @require_strict_auth
 def visitor_conversations():
     user = request._user
-    conversations = []
     try:
-        db = get_firestore_client()
-        if db:
-            docs = db.collection("teamConversations").where("visitorId", "==", user["uid"]).stream()
-            conversations = [json_safe({"id": doc.id, **doc.to_dict()}) for doc in docs]
-    except Exception as exc:
-        print(f"Visitor conversations warning: {exc}")
-
-    conversations.sort(key=lambda item: item.get("lastUpdated", ""), reverse=True)
+        with get_quota_db() as conn:
+            rows = conn.execute("SELECT * FROM team_conversations WHERE visitor_id = ? ORDER BY last_updated DESC", (user["uid"],)).fetchall()
+        conversations = [chat_conversation_from_row(row) for row in rows]
+    except Exception:
+        return jsonify({"error": "Live chat is temporarily unavailable."}), 503
     return jsonify({"conversations": conversations})
 
 
@@ -1465,27 +1585,18 @@ def start_visitor_conversation():
         "createdAt": now
     }
 
-    db = get_firestore_client()
-    if not db:
-        return jsonify({"error": "Live chat service is temporarily unavailable."}), 503
-
     try:
-        doc_ref = db.collection("teamConversations").document(conversation_id)
-        existing = doc_ref.get()
-        if existing.exists:
-            doc_ref.set({
-                "visitorName": visitor_name,
-                "visitorEmail": user.get("email"),
-                "teamMemberName": member["name"],
-                "teamMemberRole": member["role"],
-                "lastUpdated": now
-            }, merge=True)
-            conversation = {"id": conversation_id, **existing.to_dict(), **conversation}
-        else:
-            doc_ref.set(conversation)
-            conversation["id"] = conversation_id
-    except Exception as exc:
-        return jsonify({"error": str(exc)}), 500
+        with get_quota_db() as conn:
+            conn.execute(
+                """INSERT INTO team_conversations (id, visitor_id, visitor_email, visitor_name, team_member_id, team_member_name, team_member_role, status, last_message, last_sender, last_updated, created_at)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                   ON CONFLICT (id) DO UPDATE SET visitor_email = EXCLUDED.visitor_email, visitor_name = EXCLUDED.visitor_name,
+                   team_member_name = EXCLUDED.team_member_name, team_member_role = EXCLUDED.team_member_role, last_updated = EXCLUDED.last_updated""",
+                (conversation_id, user["uid"], user.get("email"), visitor_name, member["id"], member["name"], member["role"], "open", "", "", now, now),
+            )
+        conversation["id"] = conversation_id
+    except Exception:
+        return jsonify({"error": "Could not start the conversation."}), 503
 
     return jsonify({"conversation": json_safe(conversation)})
 
@@ -1494,19 +1605,15 @@ def start_visitor_conversation():
 @require_strict_auth
 def visitor_messages(conversation_id):
     user = request._user
-    db = get_firestore_client()
-    if not db:
-        return jsonify({"messages": []})
     try:
-        conv = db.collection("teamConversations").document(conversation_id).get()
-        if not conv.exists or conv.to_dict().get("visitorId") != user["uid"]:
-            return jsonify({"error": "Conversation was not found."}), 404
-        docs = db.collection("teamConversations").document(conversation_id).collection("messages").stream()
-        messages = [json_safe({"id": doc.id, **doc.to_dict()}) for doc in docs]
-    except Exception as exc:
-        return jsonify({"error": str(exc)}), 500
-
-    messages.sort(key=lambda item: item.get("time", ""))
+        with get_quota_db() as conn:
+            conv = conn.execute("SELECT * FROM team_conversations WHERE id = ?", (conversation_id,)).fetchone()
+            if not conv or conv["visitor_id"] != user["uid"]:
+                return jsonify({"error": "Conversation was not found."}), 404
+            rows = conn.execute("SELECT * FROM team_messages WHERE conversation_id = ? ORDER BY time", (conversation_id,)).fetchall()
+        messages = [chat_message_from_row(row) for row in rows]
+    except Exception:
+        return jsonify({"error": "Could not load messages."}), 503
     return jsonify({"messages": messages})
 
 
@@ -1536,57 +1643,45 @@ def visitor_send_message(conversation_id):
             "size": attachment.get("size")
         }
 
-    db = get_firestore_client()
-    if not db:
-        return jsonify({"error": "Live chat is temporarily offline."}), 503
-
     try:
-        conv_ref = db.collection("teamConversations").document(conversation_id)
-        conv = conv_ref.get()
-        if not conv.exists or conv.to_dict().get("visitorId") != user["uid"]:
-            return jsonify({"error": "Conversation was not found."}), 404
-        msg_ref = conv_ref.collection("messages").document()
-        msg_ref.set(msg_data)
-        conv_ref.set({"lastMessage": last_msg, "lastSender": "visitor", "lastUpdated": now, "status": "open"}, merge=True)
-    except Exception as exc:
-        return jsonify({"error": str(exc)}), 500
+        with get_quota_db() as conn:
+            conv = conn.execute("SELECT visitor_id FROM team_conversations WHERE id = ?", (conversation_id,)).fetchone()
+            if not conv or conv["visitor_id"] != user["uid"]:
+                return jsonify({"error": "Conversation was not found."}), 404
+            message_id = f"MSG-{uuid.uuid4().hex}"
+            conn.execute("INSERT INTO team_messages (id, conversation_id, sender, sender_name, text, attachment_json, time) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                         (message_id, conversation_id, msg_data["sender"], msg_data["senderName"], msg_data["text"], json.dumps(msg_data.get("attachment")) if msg_data.get("attachment") else None, now))
+            conn.execute("UPDATE team_conversations SET last_message = ?, last_sender = ?, last_updated = ?, status = 'open' WHERE id = ?", (last_msg, "visitor", now, conversation_id))
+    except Exception:
+        return jsonify({"error": "Could not send the message."}), 503
 
-    return jsonify({"sent": True, "message": {"id": msg_ref.id, **msg_data}})
+    return jsonify({"sent": True, "message": {"id": message_id, **msg_data}})
 
 
 @app.route("/api/admin/chat/conversations", methods=["GET"])
 @require_admin_session
 def admin_chat_conversations():
-    conversations = []
     try:
-        db = get_firestore_client()
-        if db:
-            docs = db.collection("teamConversations").stream()
-            conversations = [json_safe({"id": doc.id, **doc.to_dict()}) for doc in docs]
-    except Exception as exc:
-        print(f"Admin chat conversations warning: {exc}")
-
-    conversations.sort(key=lambda item: item.get("lastUpdated", ""), reverse=True)
+        with get_quota_db() as conn:
+            rows = conn.execute("SELECT * FROM team_conversations ORDER BY last_updated DESC").fetchall()
+        conversations = [chat_conversation_from_row(row) for row in rows]
+    except Exception:
+        return jsonify({"error": "Could not load conversations."}), 503
     return jsonify({"conversations": conversations})
 
 
 @app.route("/api/admin/chat/conversations/<conversation_id>/messages", methods=["GET"])
 @require_admin_session
 def admin_chat_messages(conversation_id):
-    db = get_firestore_client()
-    if not db:
-        return jsonify({"messages": [], "conversation": None, "warning": "Firebase Firestore is unconfigured."})
     try:
-        conv = db.collection("teamConversations").document(conversation_id).get()
-        if not conv.exists:
-            return jsonify({"error": "Conversation was not found."}), 404
-        docs = db.collection("teamConversations").document(conversation_id).collection("messages").stream()
-        messages = [json_safe({"id": doc.id, **doc.to_dict()}) for doc in docs]
-    except Exception as exc:
-        return jsonify({"error": str(exc)}), 500
-
-    messages.sort(key=lambda item: item.get("time", ""))
-    return jsonify({"messages": messages, "conversation": json_safe({"id": conv.id, **conv.to_dict()})})
+        with get_quota_db() as conn:
+            conv = conn.execute("SELECT * FROM team_conversations WHERE id = ?", (conversation_id,)).fetchone()
+            if not conv:
+                return jsonify({"error": "Conversation was not found."}), 404
+            rows = conn.execute("SELECT * FROM team_messages WHERE conversation_id = ? ORDER BY time", (conversation_id,)).fetchall()
+        return jsonify({"messages": [chat_message_from_row(row) for row in rows], "conversation": chat_conversation_from_row(conv)})
+    except Exception:
+        return jsonify({"error": "Could not load messages."}), 503
 
 
 @app.route("/api/admin/chat/conversations/<conversation_id>/messages", methods=["POST"])
@@ -1616,22 +1711,19 @@ def admin_send_chat_message(conversation_id):
             "size": attachment.get("size")
         }
 
-    db = get_firestore_client()
-    if not db:
-        return jsonify({"error": "Firebase Firestore is unconfigured."}), 503
-
     try:
-        conv_ref = db.collection("teamConversations").document(conversation_id)
-        conv = conv_ref.get()
-        if not conv.exists:
-            return jsonify({"error": "Conversation was not found."}), 404
-        msg_ref = conv_ref.collection("messages").document()
-        msg_ref.set(msg_data)
-        conv_ref.set({"lastMessage": last_msg, "lastSender": "team", "lastUpdated": now, "status": "open"}, merge=True)
-    except Exception as exc:
-        return jsonify({"error": str(exc)}), 500
+        with get_quota_db() as conn:
+            conv = conn.execute("SELECT id FROM team_conversations WHERE id = ?", (conversation_id,)).fetchone()
+            if not conv:
+                return jsonify({"error": "Conversation was not found."}), 404
+            message_id = f"MSG-{uuid.uuid4().hex}"
+            conn.execute("INSERT INTO team_messages (id, conversation_id, sender, sender_name, text, attachment_json, time) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                         (message_id, conversation_id, msg_data["sender"], msg_data["senderName"], msg_data["text"], json.dumps(msg_data.get("attachment")) if msg_data.get("attachment") else None, now))
+            conn.execute("UPDATE team_conversations SET last_message = ?, last_sender = ?, last_updated = ?, status = 'open' WHERE id = ?", (last_msg, "team", now, conversation_id))
+    except Exception:
+        return jsonify({"error": "Could not send the message."}), 503
 
-    return jsonify({"sent": True, "message": {"id": msg_ref.id, **msg_data}})
+    return jsonify({"sent": True, "message": {"id": message_id, **msg_data}})
 
 
 @app.route("/api/admin/campaign-registrations", methods=["GET"])
@@ -1640,14 +1732,14 @@ def admin_campaign_registrations():
     registrations_map = {}
     warning = None
     try:
-        db = get_firestore_client()
+        db = None if DATABASE_URL else get_firestore_client()
         if db:
             docs = db.collection("campaignRegistrations").stream()
             for doc in docs:
                 data = doc.to_dict()
                 data["id"] = doc.id
                 registrations_map[doc.id] = json_safe(data)
-        else:
+        elif not DATABASE_URL:
             warning = "Firebase Firestore is unconfigured or offline (FIREBASE_SERVICE_ACCOUNT_JSON missing or invalid)."
     except Exception as exc:
         print(f"Failed to load campaign registrations from Firestore: {exc}")
@@ -1655,7 +1747,7 @@ def admin_campaign_registrations():
 
     # Vercel's /tmp SQLite storage is per-instance. Only use this local
     # development fallback outside Vercel, where Firestore is the shared source.
-    if not IS_VERCEL_DEPLOYMENT:
+    if DATABASE_URL or not IS_VERCEL_DEPLOYMENT:
       try:
         with get_quota_db() as conn:
             rows = conn.execute("SELECT * FROM campaign_registrations ORDER BY created_at DESC").fetchall()
@@ -1685,33 +1777,39 @@ def admin_campaign_registrations():
 @app.route("/api/admin/users", methods=["GET"])
 @require_admin_session
 def admin_users():
-    users = []
-    warning = None
     try:
-        db = get_firestore_client()
-        if db:
-            docs = db.collection("users").stream()
-            for doc in docs:
-                data = doc.to_dict()
-                users.append({
-                    "uid": doc.id,
-                    "username": data.get("username"),
-                    "email": data.get("email"),
-                    "photoURL": data.get("photoURL"),
-                    "createdAt": json_safe(data.get("createdAt")),
-                    "updatedAt": json_safe(data.get("updatedAt"))
-                })
-        else:
-            warning = "Firebase Firestore is unconfigured or offline (FIREBASE_SERVICE_ACCOUNT_JSON missing or invalid)."
+        with get_quota_db() as conn:
+            rows = conn.execute("SELECT * FROM website_users ORDER BY created_at DESC").fetchall()
+        users = [{
+            "uid": row["uid"], "username": row["username"], "email": row["email"],
+            "photoURL": row["photo_url"], "createdAt": row["created_at"], "updatedAt": row["updated_at"]
+        } for row in rows]
     except Exception as exc:
-        print(f"Failed to load users: {exc}")
-        warning = f"Failed to load users: {exc}"
+        return jsonify({"error": "Could not load users from the shared database."}), 503
+    return jsonify({"users": users})
 
-    users.sort(key=lambda item: item.get("createdAt") or item.get("updatedAt") or "", reverse=True)
-    res = {"users": users}
-    if warning:
-        res["warning"] = warning
-    return jsonify(res)
+
+@app.route("/api/users/sync", methods=["POST"])
+@require_strict_auth
+def sync_website_user():
+    """Mirror Firebase-authenticated users into Neon for the admin directory."""
+    data = request.get_json(silent=True) or {}
+    user = request._user
+    now = datetime.now(timezone.utc).isoformat()
+    username = str(data.get("username") or user.get("email") or "User").strip()[:120]
+    photo_url = str(data.get("photoURL") or "").strip()[:1000]
+    try:
+        with get_quota_db() as conn:
+            conn.execute(
+                """INSERT INTO website_users (uid, email, username, photo_url, created_at, updated_at)
+                   VALUES (?, ?, ?, ?, ?, ?)
+                   ON CONFLICT (uid) DO UPDATE SET email = EXCLUDED.email, username = EXCLUDED.username,
+                   photo_url = EXCLUDED.photo_url, updated_at = EXCLUDED.updated_at""",
+                (user["uid"], user.get("email"), username, photo_url, now, now),
+            )
+    except Exception:
+        return jsonify({"error": "Could not save user profile."}), 503
+    return jsonify({"saved": True})
 
 def call_gemini_text(gemini_key, sys_prompt, messages):
     try:
@@ -2101,9 +2199,16 @@ def register_campaign():
         with get_quota_db() as conn:
             conn.execute(
                 """
-                INSERT OR REPLACE INTO campaign_registrations 
+                INSERT INTO campaign_registrations
                 (id, uid, email, full_name, business, challenge, package_name, amount, currency, status, payment_reference, created_at, raw_json)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ON CONFLICT (id) DO UPDATE SET
+                    uid = EXCLUDED.uid, email = EXCLUDED.email, full_name = EXCLUDED.full_name,
+                    business = EXCLUDED.business, challenge = EXCLUDED.challenge,
+                    package_name = EXCLUDED.package_name, amount = EXCLUDED.amount,
+                    currency = EXCLUDED.currency, status = EXCLUDED.status,
+                    payment_reference = EXCLUDED.payment_reference, created_at = EXCLUDED.created_at,
+                    raw_json = EXCLUDED.raw_json
                 """,
                 (
                     reg_id,
@@ -2192,9 +2297,16 @@ def save_pending_campaign():
         with get_quota_db() as conn:
             conn.execute(
                 """
-                INSERT OR REPLACE INTO campaign_registrations 
+                INSERT INTO campaign_registrations
                 (id, uid, email, full_name, business, challenge, package_name, amount, currency, status, payment_reference, created_at, raw_json)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ON CONFLICT (id) DO UPDATE SET
+                    uid = EXCLUDED.uid, email = EXCLUDED.email, full_name = EXCLUDED.full_name,
+                    business = EXCLUDED.business, challenge = EXCLUDED.challenge,
+                    package_name = EXCLUDED.package_name, amount = EXCLUDED.amount,
+                    currency = EXCLUDED.currency, status = EXCLUDED.status,
+                    payment_reference = EXCLUDED.payment_reference, created_at = EXCLUDED.created_at,
+                    raw_json = EXCLUDED.raw_json
                 """,
                 (
                     doc_id,
@@ -2291,7 +2403,7 @@ def admin_strategy_calls():
         except Exception as exc:
             print(f"Admin strategy calls Firestore fetch warning: {exc}")
 
-    if not calls and not IS_VERCEL_DEPLOYMENT:
+    if not calls and (DATABASE_URL or not IS_VERCEL_DEPLOYMENT):
         # Fallback to local SQLite strategy calls
         try:
             with get_quota_db() as conn:
