@@ -149,10 +149,19 @@ def require_admin_session(f):
     @wraps(f)
     def decorated(*args, **kwargs):
         admin_username = session.get("admin_username")
-        if not admin_username:
+        session_id = session.get("admin_session_id")
+        if not admin_username or not session_id:
             return jsonify({"error": "Admin login required"}), 401
         if admin_username not in ADMIN_CREDENTIALS:
             return jsonify({"error": "Invalid admin session"}), 403
+        try:
+            with get_quota_db() as conn:
+                active = conn.execute("SELECT session_id, username FROM admin_portal_sessions WHERE id = ?", ("primary",)).fetchone()
+        except Exception:
+            return jsonify({"error": "Admin session service is temporarily unavailable."}), 503
+        if not active or active["session_id"] != session_id or active["username"] != admin_username:
+            session.clear()
+            return jsonify({"error": "You were signed out because another admin signed in."}), 401
         request._admin_username = admin_username
         # Get admin info from ADMIN_TEAM
         admin_info = None
@@ -396,6 +405,7 @@ def initialize_postgres_schema(conn):
         "CREATE TABLE IF NOT EXISTS career_registrations (id TEXT PRIMARY KEY, type TEXT NOT NULL, name TEXT NOT NULL, email TEXT NOT NULL, phone TEXT, program TEXT NOT NULL, experience_level TEXT, statement TEXT, details TEXT, amount INTEGER NOT NULL DEFAULT 250000, status TEXT NOT NULL DEFAULT 'pending_payment', payment_reference TEXT, paid_at TEXT, created_at TEXT NOT NULL, updated_at TEXT)",
         "CREATE TABLE IF NOT EXISTS campaign_registrations (id TEXT PRIMARY KEY, uid TEXT NOT NULL, email TEXT NOT NULL, full_name TEXT, business TEXT, challenge TEXT, package_name TEXT, amount DOUBLE PRECISION, currency TEXT, status TEXT NOT NULL DEFAULT 'pending_payment', payment_reference TEXT, created_at TEXT NOT NULL, raw_json TEXT)",
         "CREATE TABLE IF NOT EXISTS website_users (uid TEXT PRIMARY KEY, email TEXT, username TEXT, photo_url TEXT, created_at TEXT NOT NULL, updated_at TEXT NOT NULL)",
+        "CREATE TABLE IF NOT EXISTS admin_portal_sessions (id TEXT PRIMARY KEY, session_id TEXT NOT NULL, username TEXT NOT NULL, created_at TEXT NOT NULL)",
         "CREATE TABLE IF NOT EXISTS team_conversations (id TEXT PRIMARY KEY, visitor_id TEXT NOT NULL, visitor_email TEXT, visitor_name TEXT, team_member_id TEXT NOT NULL, team_member_name TEXT, team_member_role TEXT, status TEXT NOT NULL DEFAULT 'open', last_message TEXT, last_sender TEXT, last_updated TEXT NOT NULL, created_at TEXT NOT NULL)",
         "CREATE TABLE IF NOT EXISTS team_messages (id TEXT PRIMARY KEY, conversation_id TEXT NOT NULL REFERENCES team_conversations(id) ON DELETE CASCADE, sender TEXT NOT NULL, sender_name TEXT, text TEXT, attachment_json TEXT, time TEXT NOT NULL)",
         "CREATE INDEX IF NOT EXISTS team_conversations_visitor_idx ON team_conversations(visitor_id)",
