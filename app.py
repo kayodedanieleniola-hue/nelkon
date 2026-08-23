@@ -1379,10 +1379,28 @@ def api_admin_login():
 
 @app.route("/api/admin/check-session", methods=["GET"])
 def api_admin_check_session():
-    """Check if admin is logged in via session."""
+    """Check that this browser owns the one active admin portal session."""
     admin_username = session.get("admin_username")
-    if not admin_username:
+    session_id = session.get("admin_session_id")
+    if not admin_username or not session_id:
         return jsonify({"loggedIn": False}), 401
+
+    try:
+        with get_quota_db() as conn:
+            active = conn.execute(
+                "SELECT session_id, username FROM admin_portal_sessions WHERE id = ?",
+                ("primary",),
+            ).fetchone()
+    except Exception:
+        return jsonify({"loggedIn": False, "error": "Admin session service is temporarily unavailable."}), 503
+
+    if (
+        not active
+        or active["session_id"] != session_id
+        or active["username"] != admin_username
+    ):
+        session.clear()
+        return jsonify({"loggedIn": False, "error": "You were signed out because another admin signed in."}), 401
     
     # Find admin info
     admin_info = None
@@ -1401,7 +1419,18 @@ def api_admin_check_session():
 
 @app.route("/api/admin/sign-out", methods=["POST"])
 def api_admin_sign_out():
-    """Sign out the admin user."""
+    """Sign out this browser and clear the shared session if it owns it."""
+    session_id = session.get("admin_session_id")
+    if session_id:
+        try:
+            with get_quota_db() as conn:
+                conn.execute(
+                    "DELETE FROM admin_portal_sessions WHERE id = ? AND session_id = ?",
+                    ("primary", session_id),
+                )
+        except Exception:
+            # The local cookie must still be cleared even if the database is unavailable.
+            pass
     session.clear()
     return jsonify({"message": "Signed out successfully"}), 200
 
