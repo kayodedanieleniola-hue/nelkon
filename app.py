@@ -513,6 +513,16 @@ def get_quota_db():
         )
         """
     )
+    conn.execute(
+        """
+        CREATE TABLE IF NOT EXISTS admin_portal_sessions (
+            id TEXT PRIMARY KEY,
+            session_id TEXT NOT NULL,
+            username TEXT NOT NULL,
+            created_at TEXT NOT NULL
+        )
+        """
+    )
     return conn
 
 
@@ -1322,9 +1332,31 @@ def api_admin_login():
         if username not in ADMIN_CREDENTIALS or ADMIN_CREDENTIALS[username] != password:
             return jsonify({"error": "Invalid username or password"}), 401
 
-        # Set admin session
+        # Create the one active admin portal session. Protected admin routes
+        # validate this record so that signing in elsewhere invalidates the
+        # previous browser session.
+        if IS_VERCEL_DEPLOYMENT and not DATABASE_URL:
+            return jsonify({"error": "Shared database is not configured. Add DATABASE_URL in Vercel and redeploy."}), 503
+
+        session_id = uuid.uuid4().hex
+        now = datetime.now(timezone.utc).isoformat()
+        try:
+            with get_quota_db() as conn:
+                conn.execute(
+                    """INSERT INTO admin_portal_sessions (id, session_id, username, created_at)
+                       VALUES (?, ?, ?, ?)
+                       ON CONFLICT (id) DO UPDATE SET session_id = EXCLUDED.session_id,
+                           username = EXCLUDED.username, created_at = EXCLUDED.created_at""",
+                    ("primary", session_id, username, now),
+                )
+        except Exception:
+            app.logger.exception("[NAKCONEL] Could not create admin portal session")
+            return jsonify({"error": "Admin session service is temporarily unavailable."}), 503
+
+        # Set the signed browser session only after the shared record exists.
         session.clear()
         session["admin_username"] = username
+        session["admin_session_id"] = session_id
         session.permanent = True
         session.modified = True
         
