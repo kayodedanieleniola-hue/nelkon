@@ -2290,7 +2290,7 @@ def save_pending_campaign():
         return jsonify({"saved": False, "error": "Campaign questions are incomplete."}), 400
 
     now = datetime.now(timezone.utc).isoformat()
-    doc_id = f"pending-{str(data['uid']).strip()}"
+    doc_id = f"cmp-{int(time.time()*1000)}-{uuid.uuid4().hex[:6]}"
     registration = {
         "id": doc_id,
         "uid": str(data["uid"]),
@@ -2372,12 +2372,12 @@ def save_pending_campaign():
             if existing.exists:
                 existing_data = existing.to_dict() or {}
                 if (existing_data.get("status") or "").lower() == "paid":
-                    return jsonify({"saved": True, "id": doc_id, "status": "paid"})
+                    return jsonify({"saved": True, "id": doc_id, "pendingId": doc_id, "status": "paid"})
             doc_ref.set(registration, merge=True)
         except Exception as exc:
             print(f"Pending campaign registration Firestore save warning: {exc}")
 
-    return jsonify({"saved": True, "id": doc_id, "status": "pending_payment"})
+    return jsonify({"saved": True, "id": doc_id, "pendingId": doc_id, "status": "pending_payment"})
 
 
 @app.route("/api/strategy-call", methods=["POST"])

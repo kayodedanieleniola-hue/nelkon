@@ -177,6 +177,9 @@
 }
 .chat-attachment-file:hover { background: rgba(201, 154, 74, 0.2); }
 
+.panel-foot{padding:12px 20px;border-top:1px solid var(--border);text-align:center;background:rgba(201,154,74,.03)}
+.btn-see-more{background:rgba(201,154,74,.12);border:1px solid var(--border);color:var(--bronze-light);padding:8px 20px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s ease}
+.btn-see-more:hover{background:rgba(201,154,74,.28);border-color:var(--bronze);color:var(--white);transform:translateY(-1px)}
 @media(max-width:1100px){.cards{grid-template-columns:repeat(3,1fr)}}
 @media(max-width:980px){.cards{grid-template-columns:1fr 1fr}.grid{grid-template-columns:1fr}.hero{display:block}.nav-actions{flex-wrap:wrap;justify-content:flex-end}}
 @media(max-width:560px){.cards{grid-template-columns:1fr}.topbar-in{height:auto;padding:12px 18px;align-items:flex-start}.brand img{height:46px}.page{padding:28px 16px 60px}}
@@ -251,6 +254,9 @@
               </tbody>
             </table>
           </div>
+          <div class="panel-foot" id="careerFoot" style="display:none;">
+            <button type="button" class="btn-see-more" id="careerSeeMoreBtn">See More ▼</button>
+          </div>
         </section>
 
         <!-- Strategy Call Bookings Panel -->
@@ -261,6 +267,9 @@
               <thead><tr><th>Client Name</th><th>Operational Focus / Message</th><th>Status</th><th>Date</th><th>Action</th></tr></thead>
               <tbody id="callsRows"><tr><td colspan="5" class="muted">Loading strategy calls...</td></tr></tbody>
             </table>
+          </div>
+          <div class="panel-foot" id="callsFoot" style="display:none;">
+            <button type="button" class="btn-see-more" id="callsSeeMoreBtn">See More ▼</button>
           </div>
         </section>
 
@@ -273,6 +282,9 @@
               <tbody id="campaignRows"><tr><td colspan="5" class="muted">Loading submissions...</td></tr></tbody>
             </table>
           </div>
+          <div class="panel-foot" id="campaignFoot" style="display:none;">
+            <button type="button" class="btn-see-more" id="campaignSeeMoreBtn">See More ▼</button>
+          </div>
         </section>
       </div>
 
@@ -282,6 +294,9 @@
           <div class="panel-head"><h2>Admin Chat Inbox</h2><span id="chatMeta">Click to pop up</span></div>
           <div class="admin-chat">
             <div class="chat-list" id="chatRows"><div class="chat-empty">Loading conversations...</div></div>
+          </div>
+          <div class="panel-foot" id="chatsFoot" style="display:none;">
+            <button type="button" class="btn-see-more" id="chatsSeeMoreBtn">See More ▼</button>
           </div>
         </section>
 
@@ -295,6 +310,9 @@
         <section class="panel">
           <div class="panel-head"><h2>Recent Signups</h2><span id="usersMeta">Firebase users</span></div>
           <div class="user-list" id="userRows"><div class="user-row"><span>Loading users...</span></div></div>
+          <div class="panel-foot" id="usersFoot" style="display:none;">
+            <button type="button" class="btn-see-more" id="usersSeeMoreBtn">See More ▼</button>
+          </div>
         </section>
       </aside>
     </div>
@@ -555,12 +573,55 @@ function fmtChatTime(value){
   return Number.isNaN(date.getTime()) ? '' : date.toLocaleString();
 }
 
-async function loadAdminChats(){
-  const data = await adminFetch('/api/admin/chat/conversations');
-  const rows = data.conversations || [];
+const panelState = {
+  career: { expanded: false, limit: 5, data: [] },
+  calls: { expanded: false, limit: 5, data: [] },
+  campaign: { expanded: false, limit: 5, data: [] },
+  users: { expanded: false, limit: 5, data: [] },
+  chats: { expanded: false, limit: 5, data: [] }
+};
+
+function updatePanelFooter(sectionKey, totalCount) {
+  const foot = document.getElementById(`${sectionKey}Foot`);
+  const btn = document.getElementById(`${sectionKey}SeeMoreBtn`);
+  if (!foot || !btn) return;
+  const st = panelState[sectionKey];
+  if (totalCount > st.limit) {
+    foot.style.display = 'block';
+    if (st.expanded) {
+      btn.textContent = 'Show Less ▲';
+    } else {
+      const remaining = totalCount - st.limit;
+      btn.textContent = `See More (${remaining} remaining) ▼`;
+    }
+  } else {
+    foot.style.display = 'none';
+  }
+}
+
+function bindSeeMoreButtons() {
+  ['career', 'calls', 'campaign', 'users', 'chats'].forEach(key => {
+    const btn = document.getElementById(`${key}SeeMoreBtn`);
+    if (btn && !btn._seeMoreBound) {
+      btn._seeMoreBound = true;
+      btn.addEventListener('click', () => {
+        panelState[key].expanded = !panelState[key].expanded;
+        if (key === 'campaign') renderCampaigns();
+        else if (key === 'career') renderCareerRegistrations();
+        else if (key === 'calls') renderStrategyCalls();
+        else if (key === 'users') renderUsers();
+        else if (key === 'chats') renderAdminChatsList();
+      });
+    }
+  });
+}
+
+function renderAdminChatsList() {
+  const rows = panelState.chats.data || [];
   document.getElementById('chatMeta').textContent = `${rows.length} conversations (Click to open)`;
+  const visibleChats = panelState.chats.expanded ? rows : rows.slice(0, panelState.chats.limit);
   const list = document.getElementById('chatRows');
-  list.innerHTML = rows.length ? rows.map(item => `
+  list.innerHTML = visibleChats.length ? visibleChats.map(item => `
     <div class="chat-row ${item.id === activeChatId ? 'active' : ''}" data-id="${esc(item.id)}" data-name="${esc(item.visitorName || item.visitorEmail || 'Website visitor')}" data-meta="${esc(item.visitorEmail || '')} • ${esc(item.teamMemberName || 'Team')}">
       <div>
         <strong>${esc(item.visitorName || item.visitorEmail || 'Website visitor')}</strong>
@@ -570,6 +631,13 @@ async function loadAdminChats(){
     </div>
   `).join('') : '<div class="chat-empty">No team conversations yet.</div>';
   list.querySelectorAll('.chat-row').forEach(row => row.addEventListener('click', () => openAdminChatModal(row.dataset.id, row.dataset.name, row.dataset.meta)));
+  updatePanelFooter('chats', rows.length);
+}
+
+async function loadAdminChats(){
+  const data = await adminFetch('/api/admin/chat/conversations');
+  panelState.chats.data = data.conversations || [];
+  renderAdminChatsList();
 }
 
 async function openAdminChatModal(id, visitorName, visitorMeta){
@@ -695,14 +763,14 @@ async function updateCallStatus(callId, newStatus){
   }
 }
 
-async function loadStrategyCalls(){
-  const data = await adminFetch('/api/admin/strategy-calls');
-  const rows = data.strategyCalls || [];
+function renderStrategyCalls(){
+  const rows = panelState.calls.data || [];
   document.getElementById('callsCount').textContent = rows.length;
   document.getElementById('callsMeta').textContent = `${rows.length} total inquiries`;
   
+  const visibleCalls = panelState.calls.expanded ? rows : rows.slice(0, panelState.calls.limit);
   const tbody = document.getElementById('callsRows');
-  tbody.innerHTML = rows.length ? rows.map(item => {
+  tbody.innerHTML = visibleCalls.length ? visibleCalls.map(item => {
     const statusClass = item.status === 'completed' ? 'badge-completed' : item.status === 'contacted' ? 'badge-contacted' : 'badge-new';
     return `<tr>
       <td><strong>${esc(item.name || 'Unknown')}</strong><br><span class="muted">${esc(item.email)}</span></td>
@@ -716,10 +784,58 @@ async function loadStrategyCalls(){
       </td>
     </tr>`;
   }).join('') : '<tr><td colspan="5" class="muted">No strategy call bookings recorded yet.</td></tr>';
+  updatePanelFooter('calls', rows.length);
+}
+
+async function loadStrategyCalls(){
+  const data = await adminFetch('/api/admin/strategy-calls');
+  panelState.calls.data = data.strategyCalls || [];
+  renderStrategyCalls();
+}
+
+async function renderCampaigns(){
+  const rows = panelState.campaign.data || [];
+  document.getElementById('campaignMeta').textContent = `${rows.length} total`;
+  const visibleRows = panelState.campaign.expanded ? rows : rows.slice(0, panelState.campaign.limit);
+  
+  const campaignParts = visibleRows.length ? await Promise.all(visibleRows.map(async item => {
+    const q = item.questions || {};
+    const pkg = item.package || {};
+    const pay = item.payment || {};
+    const status = (item.status || (pay.reference ? 'paid' : 'pending_payment')).toLowerCase();
+    const isPaid = status === 'paid';
+    const pkgPrice = pkg.currency ? fmtCampaignMoney(pkg.amount || pkg.usd || pkg.ngn, pkg.currency) : await fmtNgnAsLocal(pkg.ngn);
+    const payAmount = pay.amount ? Number(pay.amount) / 100 : 0;
+    const payLocal = isPaid ? fmtCampaignMoney(payAmount, pay.currency || pkg.currency) : 'Pending payment';
+    const payClass = isPaid ? 'badge-completed' : 'badge-contacted';
+    const payLabel = isPaid ? 'Paid' : 'Pending';
+    return `<tr>
+      <td><strong>${esc(q.fullName || item.email || 'Unknown')}</strong><br><span class="muted">${esc(item.email || '')}</span></td>
+      <td><strong>${esc(q.business || '-')}</strong><br><span class="muted">${esc(q.challenge || '-')}</span></td>
+      <td><span class="chip">${esc(pkg.name || 'Not selected yet')}</span><br><span class="muted">${esc(pkgPrice)}</span></td>
+      <td><span class="${payClass}">${payLabel}</span><br><strong>${esc(pay.reference || item.id || '-')}</strong><br><span class="muted">${esc(payLocal)}</span></td>
+      <td>${esc(fmtDate(item.createdAt || pay.paidAt))}</td>
+    </tr>`;
+  })) : [];
+
+  document.getElementById('campaignRows').innerHTML = campaignParts.length ? campaignParts.join('') : '<tr><td colspan="5" class="muted">No campaign submissions yet.</td></tr>';
+  updatePanelFooter('campaign', rows.length);
+}
+
+function renderUsers(){
+  const userRows = panelState.users.data || [];
+  document.getElementById('usersMeta').textContent = `${userRows.length} total`;
+  const visibleUsers = panelState.users.expanded ? userRows : userRows.slice(0, panelState.users.limit);
+
+  document.getElementById('userRows').innerHTML = visibleUsers.length ? visibleUsers.map(user => (
+    `<div class="user-row"><div><strong>${esc(user.username || user.email || 'Unknown')}</strong><br><span>${esc(user.email || user.uid)}</span></div></div>`
+  )).join('') : '<div class="user-row"><span>No users recorded yet.</span></div>';
+  updatePanelFooter('users', userRows.length);
 }
 
 async function loadAdmin(){
   try{
+    bindSeeMoreButtons();
     const me = await adminFetch('/api/admin/me');
     gate.style.display = 'none';
     dashboard.style.display = 'block';
@@ -759,34 +875,11 @@ async function loadAdmin(){
     document.getElementById('revenueCount').title = `Approximate conversion from NGN to your local currency`;
     document.getElementById('callsCount').textContent = summary.strategyCalls || 0;
 
-    const rows = registrations.registrations || [];
-    document.getElementById('campaignMeta').textContent = `${rows.length} total`;
-    const campaignParts = rows.length ? await Promise.all(rows.map(async item => {
-      const q = item.questions || {};
-      const pkg = item.package || {};
-      const pay = item.payment || {};
-      const status = (item.status || (pay.reference ? 'paid' : 'pending_payment')).toLowerCase();
-      const isPaid = status === 'paid';
-      const pkgPrice = pkg.currency ? fmtCampaignMoney(pkg.amount || pkg.usd || pkg.ngn, pkg.currency) : await fmtNgnAsLocal(pkg.ngn);
-      const payAmount = pay.amount ? Number(pay.amount) / 100 : 0;
-      const payLocal = isPaid ? fmtCampaignMoney(payAmount, pay.currency || pkg.currency) : 'Pending payment';
-      const payClass = isPaid ? 'badge-completed' : 'badge-contacted';
-      const payLabel = isPaid ? 'Paid' : 'Pending';
-      return `<tr>
-        <td><strong>${esc(q.fullName || item.email || 'Unknown')}</strong><br><span class="muted">${esc(item.email || '')}</span></td>
-        <td><strong>${esc(q.business || '-')}</strong><br><span class="muted">${esc(q.challenge || '-')}</span></td>
-        <td><span class="chip">${esc(pkg.name || 'Not selected yet')}</span><br><span class="muted">${esc(pkgPrice)}</span></td>
-        <td><span class="${payClass}">${payLabel}</span><br><strong>${esc(pay.reference || item.id || '-')}</strong><br><span class="muted">${esc(payLocal)}</span></td>
-        <td>${esc(fmtDate(item.createdAt || pay.paidAt))}</td>
-      </tr>`;
-    })) : [];
-    document.getElementById('campaignRows').innerHTML = campaignParts.length ? campaignParts.join('') : '<tr><td colspan="5" class="muted">No campaign submissions yet.</td></tr>';
+    panelState.campaign.data = registrations.registrations || [];
+    await renderCampaigns();
 
-    const userRows = users.users || [];
-    document.getElementById('usersMeta').textContent = `${userRows.length} total`;
-    document.getElementById('userRows').innerHTML = userRows.length ? userRows.slice(0, 8).map(user => (
-      `<div class="user-row"><div><strong>${esc(user.username || user.email || 'Unknown')}</strong><br><span>${esc(user.email || user.uid)}</span></div></div>`
-    )).join('') : '<div class="user-row"><span>No users recorded yet.</span></div>';
+    panelState.users.data = users.users || [];
+    renderUsers();
 
     const teamData = me.team || [];
     document.getElementById('teamMeta').textContent = `${teamData.length} people`;
@@ -817,13 +910,12 @@ async function updateCareerStatus(regId, newStatus){
   }
 }
 
-async function loadCareerRegistrations(){
-  const data = await adminFetch('/api/admin/career-registrations');
-  const rows = data.registrations || [];
-  document.getElementById('careerMeta').textContent = `${rows.length} total (${data.pendingCount || 0} pending / ${data.approvedCount || 0} approved)`;
-  
+function renderCareerRegistrations(){
+  const rows = panelState.career.data || [];
+  const visibleCareer = panelState.career.expanded ? rows : rows.slice(0, panelState.career.limit);
+
   const tbody = document.getElementById('careerRows');
-  tbody.innerHTML = rows.length ? rows.map(item => {
+  tbody.innerHTML = visibleCareer.length ? visibleCareer.map(item => {
     const st = (item.status || 'pending_payment').toLowerCase();
     const isIntern = (item.type || '').toLowerCase() === 'internship' || (item.id || '').startsWith('INT');
     const isApproved = st === 'paid' || st === 'approved' || (isIntern && st === 'submitted');
@@ -873,6 +965,15 @@ async function loadCareerRegistrations(){
       <td>${actionBtn}</td>
     </tr>`;
   }).join('') : '<tr><td colspan="6" class="muted">No training or internship applications recorded yet.</td></tr>';
+  updatePanelFooter('career', rows.length);
+}
+
+async function loadCareerRegistrations(){
+  const data = await adminFetch('/api/admin/career-registrations');
+  const rows = data.registrations || [];
+  panelState.career.data = rows;
+  document.getElementById('careerMeta').textContent = `${rows.length} total (${data.pendingCount || 0} pending / ${data.approvedCount || 0} approved)`;
+  renderCareerRegistrations();
 }
 
 // Check if admin is logged in
