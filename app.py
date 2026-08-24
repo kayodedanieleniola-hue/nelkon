@@ -149,19 +149,10 @@ def require_admin_session(f):
     @wraps(f)
     def decorated(*args, **kwargs):
         admin_username = session.get("admin_username")
-        session_id = session.get("admin_session_id")
-        if not admin_username or not session_id:
+        if not admin_username:
             return jsonify({"error": "Admin login required"}), 401
         if admin_username not in ADMIN_CREDENTIALS:
             return jsonify({"error": "Invalid admin session"}), 403
-        try:
-            with get_quota_db() as conn:
-                active = conn.execute("SELECT session_id, username FROM admin_portal_sessions WHERE id = ?", ("primary",)).fetchone()
-        except Exception:
-            return jsonify({"error": "Admin session service is temporarily unavailable."}), 503
-        if not active or active["session_id"] != session_id or active["username"] != admin_username:
-            session.clear()
-            return jsonify({"error": "You were signed out because another admin signed in."}), 401
         request._admin_username = admin_username
         # Get admin info from ADMIN_TEAM
         admin_info = None
@@ -510,16 +501,6 @@ def get_quota_db():
             payment_reference TEXT,
             created_at TEXT NOT NULL,
             raw_json TEXT
-        )
-        """
-    )
-    conn.execute(
-        """
-        CREATE TABLE IF NOT EXISTS admin_portal_sessions (
-            id TEXT PRIMARY KEY,
-            session_id TEXT NOT NULL,
-            username TEXT NOT NULL,
-            created_at TEXT NOT NULL
         )
         """
     )
@@ -1332,31 +1313,9 @@ def api_admin_login():
         if username not in ADMIN_CREDENTIALS or ADMIN_CREDENTIALS[username] != password:
             return jsonify({"error": "Invalid username or password"}), 401
 
-        # Create the one active admin portal session. Protected admin routes
-        # validate this record so that signing in elsewhere invalidates the
-        # previous browser session.
-        if IS_VERCEL_DEPLOYMENT and not DATABASE_URL:
-            return jsonify({"error": "Shared database is not configured. Add DATABASE_URL in Vercel and redeploy."}), 503
-
-        session_id = uuid.uuid4().hex
-        now = datetime.now(timezone.utc).isoformat()
-        try:
-            with get_quota_db() as conn:
-                conn.execute(
-                    """INSERT INTO admin_portal_sessions (id, session_id, username, created_at)
-                       VALUES (?, ?, ?, ?)
-                       ON CONFLICT (id) DO UPDATE SET session_id = EXCLUDED.session_id,
-                           username = EXCLUDED.username, created_at = EXCLUDED.created_at""",
-                    ("primary", session_id, username, now),
-                )
-        except Exception:
-            app.logger.exception("[NAKCONEL] Could not create admin portal session")
-            return jsonify({"error": "Admin session service is temporarily unavailable."}), 503
-
-        # Set the signed browser session only after the shared record exists.
+        # Set admin session
         session.clear()
         session["admin_username"] = username
-        session["admin_session_id"] = session_id
         session.permanent = True
         session.modified = True
         
@@ -1379,28 +1338,10 @@ def api_admin_login():
 
 @app.route("/api/admin/check-session", methods=["GET"])
 def api_admin_check_session():
-    """Check that this browser owns the one active admin portal session."""
+    """Check if admin is logged in via session."""
     admin_username = session.get("admin_username")
-    session_id = session.get("admin_session_id")
-    if not admin_username or not session_id:
+    if not admin_username:
         return jsonify({"loggedIn": False}), 401
-
-    try:
-        with get_quota_db() as conn:
-            active = conn.execute(
-                "SELECT session_id, username FROM admin_portal_sessions WHERE id = ?",
-                ("primary",),
-            ).fetchone()
-    except Exception:
-        return jsonify({"loggedIn": False, "error": "Admin session service is temporarily unavailable."}), 503
-
-    if (
-        not active
-        or active["session_id"] != session_id
-        or active["username"] != admin_username
-    ):
-        session.clear()
-        return jsonify({"loggedIn": False, "error": "You were signed out because another admin signed in."}), 401
     
     # Find admin info
     admin_info = None
@@ -1419,18 +1360,7 @@ def api_admin_check_session():
 
 @app.route("/api/admin/sign-out", methods=["POST"])
 def api_admin_sign_out():
-    """Sign out this browser and clear the shared session if it owns it."""
-    session_id = session.get("admin_session_id")
-    if session_id:
-        try:
-            with get_quota_db() as conn:
-                conn.execute(
-                    "DELETE FROM admin_portal_sessions WHERE id = ? AND session_id = ?",
-                    ("primary", session_id),
-                )
-        except Exception:
-            # The local cookie must still be cleared even if the database is unavailable.
-            pass
+    """Sign out the admin user."""
     session.clear()
     return jsonify({"message": "Signed out successfully"}), 200
 
