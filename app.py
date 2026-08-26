@@ -87,9 +87,9 @@ ADMIN_TEAM = [
     {"id": "samuel-akinomolafe", "email": "samuel.akinomolafe@nakconel.com", "name": "Samuel Akinomolafe", "role": "Founder"},
     {"id": "oreoluwa-farodoye", "email": "oreoluwa@nakconel.com", "name": "Oreoluwa Farodoye A", "role": "Project Manager - Nakconel"},
     {"id": "kayode-daniel", "email": "kayode@nakconel.com", "name": "Kayode Daniel E", "role": "Full-Stack Developer"},
-    {"id": "segun", "email": "segun@nakconel.com", "name": "Segun", "role": "Content Designer"},
+    {"id": "oluwasegun", "email": "oluwasegun@nakconel.com", "name": "Oluwasegun", "role": "Content Designer"},
     {"id": "samuel-design", "email": "samuel.d@nakconel.com", "name": "Samuel", "role": "Content and Graphics Designer"},
-    {"id": "wonuola", "email": "wonuola@nakconel.com", "name": "Wonuola", "role": "Intern-Content Design"},
+    {"id": "akinwonuola", "email": "akinwonuola@nakconel.com", "name": "Akinwonuola", "role": "Intern-Content Design"},
     {"id": "marcus-tetteh", "email": "marcus@nakconel.com", "name": "Marcus Tetteh", "role": "DevOps Specialist"},
 ]
 
@@ -98,9 +98,9 @@ ADMIN_CREDENTIALS = {
     "samuel-akinomolafe": "AdminPass1!Samuel",
     "oreoluwa-farodoye": "AdminPass2!Oreoluwa",
     "kayode-daniel": "AdminPass3!Kayode",
-    "segun": "AdminPass4!Segun",
+    "oluwasegun": "AdminPass4!Segun",
     "samuel-design": "AdminPass5!Samuel",
-    "wonuola": "AdminPass6!Wonuola",
+    "akinwonuola": "AdminPass6!Wonuola",
     "marcus-tetteh": "AdminPass7!Marcus",
 }
 
