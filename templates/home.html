@@ -2,7 +2,7 @@
 <html lang="en">
 
 <head>
-    <script src="/static/js/error-logger.js" defer></script>
+  <script src="/static/js/error-logger.js" defer></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>NAKCONEL — Brand Management & AI Strategy Company</title>
@@ -1163,6 +1163,76 @@
       line-height: 1.6;
     }
 
+    .career-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      background: rgba(201, 154, 74, 0.12);
+      border: 1px solid rgba(201, 154, 74, 0.28);
+      border-radius: 20px;
+      color: var(--bronze-light);
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      width: fit-content;
+    }
+
+    .career-features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin: 10px 0;
+    }
+
+    .career-feature-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px 14px;
+      background: rgba(0, 0, 0, 0.25);
+      border: 1px solid rgba(201, 154, 74, 0.12);
+      border-radius: var(--rs);
+    }
+
+    .career-feature-item .career-icon {
+      font-size: 20px;
+      line-height: 1;
+    }
+
+    .career-feature-item strong {
+      display: block;
+      color: var(--white);
+      font-size: 14px;
+      margin-bottom: 2px;
+    }
+
+    .career-feature-item p {
+      font-size: 12px;
+      color: var(--muted);
+      margin: 0;
+      line-height: 1.4;
+    }
+
+    .career-cta-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 8px;
+    }
+
+    .secondary-cta {
+      background: transparent !important;
+      border: 1px solid var(--bronze) !important;
+      color: var(--bronze-light) !important;
+    }
+
+    .secondary-cta:hover {
+      background: rgba(201, 154, 74, 0.15) !important;
+      color: var(--white) !important;
+    }
+
     @media (max-width: 768px) {
       .campaign-block {
         grid-template-columns: 1fr;
@@ -1980,7 +2050,7 @@
         <li><a href="#services">Pillars</a></li>
         <li><a href="#markets">Global Footprints</a></li>
         <li><a href="#work">Showcase</a></li>
-        <li><a href="#join-our-ecosystem">Career</a></li>
+        <li><a href="#career">Career</a></li>
         <li><a href="#contact">Contact</a></li>
       </ul>
       <div style="display:flex;align-items:center;gap:12px;">
@@ -1996,7 +2066,8 @@
               <div class="nav-dd-email"></div>
             </div>
             <a href="/account" class="nav-dd-item">◉ &nbsp;My Account</a>
-            <a href="/ai-chat" class="nav-dd-item" onclick="alert('Nakconel AI Chat is Coming Soon!'); return false;">◈ &nbsp;AI Chat</a>
+            <a href="/ai-chat" class="nav-dd-item" onclick="alert('Nakconel AI Chat is Coming Soon!'); return false;">◈
+              &nbsp;AI Chat</a>
             <div style="height:1px;background:rgba(201,154,74,0.12);margin:6px 8px;"></div>
             <a class="nav-dd-item danger" onclick="nakSignOut()">↩ &nbsp;Sign Out</a>
           </div>
@@ -2205,32 +2276,24 @@
             dashboards, and clean business automation models.</p>
         </div>
       </div>
+    </div>
+  </section>
 
-      <div class="pillar-row" id="join-our-ecosystem">
-        <div class="pillar-img-frame">
-          <img src="/static/image/career-hero.jpg" alt="Join Our Ecosystem">
-        </div>
-        <div class="pillar-content-box">
-          <div class="pillar-icon-badge">🎓</div>
-          <h3>Join Our Ecosystem</h3>
-          <span class="training-badge">Corporate Framework</span>
-          <p>Interactive corporate workshops, executive AI adoption masterclasses, brand strategy sessions, and hands-on
-            skill development tailored for modern growth teams.</p>
-          <a href="career.html" class="explore-btn" style="text-decoration:none;">Register Trainees / Internship</a>
-        </div>
+  <section class="sec" id="career" style="border-top:1px solid var(--border);">
+    <div class="sec-head">
+      <span class="tag">Career Pathways</span>
+      <h2 class="sec-title">Build Your Future With Us.</h2>
+    </div>
+    <div class="campaign-block">
+      <div class="campaign-img-container">
+        <img src="/static/image/career-hero.jpg" alt="Career at Nakconel" class="campaign-full-img">
       </div>
+      <div class="campaign-info">
+        <span class="career-badge">✦ Join Our Ecosystem</span>
+        <h3>Shape the Next Era of Innovation</h3>
+        <p>Gain job-ready technical and strategic skills through hands-on corporate projects, executive mentorship, and direct team integration.</p>
 
-      <div class="pillar-row">
-        <div class="pillar-img-frame">
-          <img src="/static/image/career-hero.jpg" alt="Career Opportunity">
-        </div>
-        <div class="pillar-content-box">
-          <div class="pillar-icon-badge">🚀</div>
-          <h3>Career Opportunity</h3>
-          <span class="training-badge">Talent & Growth Track</span>
-          <p>Explore hands-on training, internship placements, and structured mentorship programs designed to launch your career in brand management and AI innovation.</p>
-          <a href="career.html" class="explore-btn" style="text-decoration:none;">Explore Career Opportunities</a>
-        </div>
+        <a href="career.html" class="explore-btn" style="text-decoration:none;">Explore Now</a>
       </div>
     </div>
   </section>
@@ -2308,7 +2371,8 @@
   <div class="chat-choice-pop" id="chatChoicePop" aria-hidden="true">
     <a href="/ai-chat" class="chat-choice-item" onclick="alert('Nakconel AI Chat is Coming Soon!'); return false;">
       <span class="chat-choice-icon">AI</span>
-      <span class="chat-choice-text"><strong>Chat with Nakconel AI</strong><span>Brand strategy assistant (Coming Soon)</span></span>
+      <span class="chat-choice-text"><strong>Chat with Nakconel AI</strong><span>Brand strategy assistant (Coming
+          Soon)</span></span>
     </a>
     <a href="/chat" class="chat-choice-item">
       <span class="chat-choice-icon">TM</span>
