@@ -4,38 +4,394 @@
     <script src="/static/js/error-logger.js" defer></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin Dashboard - NAKCONEL</title>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<title>Admin Control Center (Excel Workbook) - NAKCONEL</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 
-:root{--wine-deep:#1B0404;--wine-mid:#3D0A0A;--ground:#0A0202;--bronze:#C99A4A;--bronze-light:#E8C57A;--bronze-dim:#8B6A2E;--cream:#F5E8C7;--white:#FDFAF4;--muted:rgba(245,232,199,.58);--border:rgba(201,154,74,.16);--card:rgba(61,10,10,.48);--good:#91d99b;--bad:#e8a0a0}
-*{box-sizing:border-box;margin:0;padding:0}body{font-family:Poppins,sans-serif;background:radial-gradient(ellipse 70% 50% at 50% 25%,var(--wine-mid),transparent 72%),radial-gradient(ellipse 130% 110% at 50% 50%,var(--wine-deep),var(--ground));color:var(--white);min-height:100vh}a{color:inherit;text-decoration:none}button{font:inherit}
-.topbar{position:sticky;top:0;z-index:20;background:rgba(10,2,2,.78);backdrop-filter:blur(16px);border-bottom:1px solid var(--border)}.topbar-in{max-width:1400px;margin:0 auto;height:76px;padding:0 24px;display:flex;align-items:center;justify-content:space-between;gap:18px}.brand{display:flex;align-items:center;gap:12px}.brand img{height:56px;width:auto}.brand strong{font-family:'Poppins',sans-serif;font-weight:800;font-size:20px}.brand span{color:var(--bronze-light)}.nav-actions{display:flex;align-items:center;gap:10px}.btn{border:1px solid var(--border);background:rgba(255,255,255,.03);color:var(--cream);padding:10px 14px;border-radius:8px;cursor:pointer;transition:all .2s ease}.btn.primary{background:linear-gradient(135deg,var(--bronze),var(--bronze-dim));color:var(--wine-deep);border-color:transparent;font-weight:700}.btn:hover{border-color:rgba(201,154,74,.35)}
-.page{max-width:1400px;margin:0 auto;padding:36px 24px 80px}.hero{display:flex;justify-content:space-between;gap:24px;align-items:flex-end;margin-bottom:26px}.eyebrow{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--bronze-light);font-weight:700}.hero h1{font-family:'Poppins',sans-serif;font-weight:800;font-size:clamp(30px,5vw,48px);margin:8px 0}.hero p{color:var(--muted);max-width:720px;line-height:1.7}.status{font-size:13px;color:var(--muted)}
-.gate{max-width:520px;margin:90px auto;border:1px solid var(--border);background:var(--card);border-radius:12px;padding:34px;text-align:center}.gate h1{font-family:'Poppins',sans-serif;font-weight:800;margin-bottom:10px}.gate p{color:var(--muted);line-height:1.7;margin-bottom:22px}.error{display:none;color:var(--bad);background:rgba(232,160,160,.1);border:1px solid rgba(232,160,160,.22);border-radius:8px;padding:12px;margin-top:14px;font-size:13px}.error.show{display:block}
-.dashboard{display:none}.cards{display:grid;grid-template-columns:repeat(5,1fr);gap:16px;margin-bottom:26px}.card{border:1px solid var(--border);background:var(--card);border-radius:10px;padding:20px}.card small{display:block;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:1px}.card b{display:block;font-family:'Poppins',sans-serif;font-weight:800;font-size:28px;margin-top:8px;color:var(--bronze-light)}
-.grid{display:grid;grid-template-columns:2fr 1fr;gap:18px}.panel{border:1px solid var(--border);background:rgba(10,2,2,.34);border-radius:10px;overflow:hidden;margin-bottom:18px}.panel-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px 20px;border-bottom:1px solid var(--border)}.panel-head h2{font-size:17px}.panel-head span{color:var(--muted);font-size:12px}.table-wrap{overflow:auto}.data-table{width:100%;border-collapse:collapse;min-width:760px}.data-table th,.data-table td{padding:14px 16px;border-bottom:1px solid rgba(201,154,74,.1);text-align:left;font-size:13px;vertical-align:top}.data-table th{color:var(--bronze-light);font-size:11px;text-transform:uppercase;letter-spacing:1px;background:rgba(201,154,74,.04)}.data-table td{color:var(--cream)}.muted{color:var(--muted)}.chip{display:inline-flex;border:1px solid rgba(201,154,74,.28);background:rgba(201,154,74,.08);color:var(--bronze-light);padding:4px 8px;border-radius:999px;font-size:11px}
-.side-stack{display:flex;flex-direction:column;gap:18px}.team-list,.user-list{display:flex;flex-direction:column}.team-row,.user-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 16px;border-bottom:1px solid rgba(201,154,74,.1)}.team-row:last-child,.user-row:last-child{border-bottom:0}.team-row strong,.user-row strong{font-size:13px}.team-row span,.user-row span{font-size:12px;color:var(--muted)}
+:root {
+  --wine-deep: #1B0404;
+  --wine-mid: #3D0A0A;
+  --ground: #0A0202;
+  --bronze: #C99A4A;
+  --bronze-light: #E8C57A;
+  --bronze-dim: #8B6A2E;
+  --excel-green: #107C41;
+  --excel-green-light: #21a366;
+  --cream: #F5E8C7;
+  --white: #FDFAF4;
+  --muted: rgba(245, 232, 199, 0.58);
+  --border: rgba(201, 154, 74, 0.18);
+  --grid-border: rgba(201, 154, 74, 0.12);
+  --card: rgba(61, 10, 10, 0.48);
+  --good: #91d99b;
+  --bad: #e8a0a0;
+  --cell-bg-even: rgba(27, 4, 4, 0.55);
+  --cell-bg-odd: rgba(10, 2, 2, 0.75);
+  --cell-hover: rgba(201, 154, 74, 0.12);
+}
 
-.badge-new { background: rgba(232, 160, 160, 0.18); color: #f7a3a3; border: 1px solid rgba(232, 160, 160, 0.3); padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; }
-.badge-contacted { background: rgba(239, 210, 139, 0.18); color: #efd28b; border: 1px solid rgba(239, 210, 139, 0.3); padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; }
-.badge-completed { background: rgba(145, 217, 155, 0.18); color: #a3f7ad; border: 1px solid rgba(145, 217, 155, 0.3); padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Poppins,sans-serif;background:radial-gradient(ellipse 70% 50% at 50% 25%,var(--wine-mid),transparent 72%),radial-gradient(ellipse 130% 110% at 50% 50%,var(--wine-deep),var(--ground));color:var(--white);min-height:100vh}
+a{color:inherit;text-decoration:none}
+button{font:inherit}
 
-.admin-chat{display:flex;flex-direction:column;min-height:300px}.chat-list{max-height:360px;overflow:auto}.chat-row{padding:14px 16px;border-bottom:1px solid rgba(201,154,74,.1);cursor:pointer;transition:background .2s;display:flex;justify-content:space-between;align-items:center}.chat-row:hover,.chat-row.active{background:rgba(201,154,74,.12)}.chat-row strong{display:block;font-size:13px;color:var(--bronze-light)}.chat-row span{display:block;color:var(--muted);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:220px}.chat-empty{padding:18px;color:var(--muted);font-size:13px;line-height:1.7}
+/* Topbar */
+.topbar{position:sticky;top:0;z-index:20;background:rgba(10,2,2,.88);backdrop-filter:blur(16px);border-bottom:1px solid var(--border)}
+.topbar-in{max-width:1600px;margin:0 auto;height:72px;padding:0 24px;display:flex;align-items:center;justify-content:space-between;gap:18px}
+.brand{display:flex;align-items:center;gap:12px}
+.brand img{height:50px;width:auto}
+.brand strong{font-family:'Poppins',sans-serif;font-weight:800;font-size:20px}
+.brand span{color:var(--bronze-light)}
+.brand-excel-badge{background:var(--excel-green);color:#fff;font-size:11px;font-weight:700;padding:2px 8px;border-radius:4px;letter-spacing:0.5px;margin-left:6px;font-family:'JetBrains Mono',monospace}
+.nav-actions{display:flex;align-items:center;gap:10px}
+.btn{border:1px solid var(--border);background:rgba(255,255,255,.03);color:var(--cream);padding:9px 15px;border-radius:8px;cursor:pointer;transition:all .2s ease;font-size:13px;display:inline-flex;align-items:center;gap:6px}
+.btn.primary{background:linear-gradient(135deg,var(--bronze),var(--bronze-dim));color:var(--wine-deep);border-color:transparent;font-weight:700}
+.btn.excel-btn{background:var(--excel-green);color:#fff;border-color:var(--excel-green-light);font-weight:600}
+.btn.excel-btn:hover{background:var(--excel-green-light)}
+.btn:hover{border-color:rgba(201,154,74,.4)}
 
-/* Pop-Up Modal Overlay for Admin Chat */
+/* Layout Page */
+.page{max-width:1600px;margin:0 auto;padding:24px 20px 80px}
+.hero{display:flex;justify-content:space-between;gap:24px;align-items:flex-end;margin-bottom:20px}
+.eyebrow{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--bronze-light);font-weight:700}
+.hero h1{font-family:'Poppins',sans-serif;font-weight:800;font-size:clamp(26px,4vw,40px);margin:4px 0}
+.hero p{color:var(--muted);max-width:720px;font-size:14px;line-height:1.6}
+.status{font-size:13px;color:var(--muted)}
+
+/* Gate / Auth prompt */
+.gate{max-width:520px;margin:90px auto;border:1px solid var(--border);background:var(--card);border-radius:12px;padding:34px;text-align:center}
+.gate h1{font-family:'Poppins',sans-serif;font-weight:800;margin-bottom:10px}
+.gate p{color:var(--muted);line-height:1.7;margin-bottom:22px}
+.error{display:none;color:var(--bad);background:rgba(232,160,160,.1);border:1px solid rgba(232,160,160,.22);border-radius:8px;padding:12px;margin-top:14px;font-size:13px}
+.error.show{display:block}
+
+.dashboard{display:none}
+
+/* Top Metric Cards */
+.cards{display:grid;grid-template-columns:repeat(6,1fr);gap:14px;margin-bottom:22px}
+.card{border:1px solid var(--border);background:var(--card);border-radius:10px;padding:16px}
+.card small{display:block;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:1px}
+.card b{display:block;font-family:'Poppins',sans-serif;font-weight:800;font-size:24px;margin-top:6px;color:var(--bronze-light)}
+
+/* =========================================================
+   EXCEL WORKBOOK SHEET SYSTEM & TOOLBAR
+   ========================================================= */
+.excel-workbook {
+  border: 1px solid var(--border);
+  background: rgba(10, 2, 2, 0.75);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.6);
+}
+
+/* Formula & Utility Toolbar */
+.excel-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 18px;
+  background: rgba(27, 4, 4, 0.85);
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+
+.excel-formula-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 280px;
+}
+
+.excel-fx-icon {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--excel-green-light);
+  background: rgba(16, 124, 65, 0.15);
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid rgba(16, 124, 65, 0.3);
+}
+
+.excel-search-input {
+  width: 100%;
+  background: rgba(10, 2, 2, 0.6);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px 14px;
+  color: var(--white);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  transition: all 0.2s ease;
+}
+
+.excel-search-input:focus {
+  outline: none;
+  border-color: var(--excel-green-light);
+  box-shadow: 0 0 0 2px rgba(16, 124, 65, 0.25);
+}
+
+.excel-actions-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sheet-counter-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: var(--muted);
+  background: rgba(201, 154, 74, 0.08);
+  border: 1px solid var(--border);
+  padding: 6px 12px;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+/* Worksheet Navigation Tabs */
+.excel-tab-bar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 14px 0 14px;
+  background: rgba(15, 3, 3, 0.95);
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.excel-tab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border);
+  border-bottom: none;
+  border-radius: 8px 8px 0 0;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.excel-tab:hover {
+  color: var(--white);
+  background: rgba(201, 154, 74, 0.1);
+}
+
+.excel-tab.active {
+  color: var(--bronze-light);
+  background: rgba(61, 10, 10, 0.9);
+  border-color: var(--bronze);
+  border-bottom: 3px solid var(--excel-green-light);
+  font-weight: 700;
+}
+
+.excel-tab .tab-count {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  background: rgba(201, 154, 74, 0.2);
+  color: var(--cream);
+  padding: 2px 7px;
+  border-radius: 999px;
+}
+
+.excel-tab.active .tab-count {
+  background: var(--excel-green);
+  color: #fff;
+}
+
+/* Worksheets View Container */
+.worksheet-panel {
+  display: none;
+  animation: fadeIn 0.2s ease;
+}
+
+.worksheet-panel.active {
+  display: block;
+}
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+/* =========================================================
+   EXCEL SPREADSHEET TABLE GRID STYLING
+   ========================================================= */
+.excel-table-wrap {
+  width: 100%;
+  overflow: auto;
+  max-height: 650px;
+}
+
+.excel-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 13px;
+  min-width: 900px;
+}
+
+.excel-table th,
+.excel-table td {
+  padding: 10px 14px;
+  border-right: 1px solid var(--grid-border);
+  border-bottom: 1px solid var(--grid-border);
+  text-align: left;
+  vertical-align: middle;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Header Row (Column Labels A, B, C...) */
+.excel-table thead tr:first-child th {
+  background: rgba(35, 8, 8, 0.95);
+  color: var(--bronze-light);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  border-bottom: 2px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+/* Row Number Column (#1, #2, #3...) */
+.excel-table th.col-row-idx,
+.excel-table td.cell-row-idx {
+  width: 50px;
+  min-width: 50px;
+  max-width: 60px;
+  text-align: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--muted);
+  background: rgba(20, 4, 4, 0.9) !important;
+  border-right: 2px solid var(--border) !important;
+  user-select: none;
+}
+
+/* Alternating Row Colors & Hover State */
+.excel-table tbody tr:nth-child(even) td { background: var(--cell-bg-even); }
+.excel-table tbody tr:nth-child(odd) td { background: var(--cell-bg-odd); }
+
+.excel-table tbody tr:hover td {
+  background: var(--cell-hover) !important;
+}
+
+.excel-table tbody tr.clickable-row {
+  cursor: pointer;
+}
+
+/* Monospace cell utility */
+.cell-mono {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+}
+
+/* Status Badges */
+.badge-new { background: rgba(232, 160, 160, 0.18); color: #f7a3a3; border: 1px solid rgba(232, 160, 160, 0.3); padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; display: inline-block; }
+.badge-contacted { background: rgba(239, 210, 139, 0.18); color: #efd28b; border: 1px solid rgba(239, 210, 139, 0.3); padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; display: inline-block; }
+.badge-completed { background: rgba(16, 124, 65, 0.25); color: #8cf0b4; border: 1px solid rgba(33, 163, 102, 0.4); padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; display: inline-block; }
+
+.chip { display: inline-flex; border: 1px solid rgba(201,154,74,.28); background: rgba(201,154,74,.08); color: var(--bronze-light); padding: 3px 8px; border-radius: 999px; font-size: 11px; }
+
+/* Admin Chat Listing in Worksheet */
+.admin-chat-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+/* =========================================================
+   POP-UP RECORD INSPECTOR MODAL & CHAT OVERLAY
+   ========================================================= */
 .modal-overlay {
   display: none;
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
   z-index: 1000;
-  background: rgba(10, 2, 2, 0.85);
+  background: rgba(10, 2, 2, 0.88);
   backdrop-filter: blur(14px);
   padding: 24px;
   justify-content: center;
   align-items: center;
 }
 .modal-overlay.active { display: flex; }
+
+.inspector-modal-window {
+  width: 100%;
+  max-width: 720px;
+  max-height: 85vh;
+  background: var(--wine-deep);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.85);
+  overflow: hidden;
+  animation: modalRise 0.25s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+@keyframes modalRise { from { opacity: 0; transform: scale(0.96) translateY(20px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 24px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(61, 10, 10, 0.65);
+}
+.modal-header h3 { font-size: 18px; color: var(--bronze-light); font-weight: 700; margin: 0; }
+.modal-header p { font-size: 12px; color: var(--muted); margin-top: 3px; }
+
+.modal-close-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--white);
+  font-size: 18px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: all 0.2s;
+}
+.modal-close-btn:hover { background: rgba(201, 154, 74, 0.2); border-color: var(--bronze); color: var(--bronze-light); }
+
+.inspector-body {
+  padding: 24px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.inspector-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.inspector-field {
+  background: rgba(10, 2, 2, 0.45);
+  border: 1px solid var(--grid-border);
+  padding: 12px 14px;
+  border-radius: 8px;
+}
+.inspector-field.full-width { grid-column: span 2; }
+.inspector-label { font-size: 11px; text-transform: uppercase; color: var(--bronze-light); font-weight: 600; letter-spacing: 0.8px; margin-bottom: 4px; display: block; }
+.inspector-value { font-size: 13px; color: var(--cream); word-break: break-word; line-height: 1.5; }
+
+/* Chat Modal Window Specifics */
 .chat-modal-window {
   width: 100%;
   max-width: 960px;
@@ -48,33 +404,7 @@
   flex-direction: column;
   box-shadow: 0 30px 90px rgba(0, 0, 0, 0.85);
   overflow: hidden;
-  animation: modalRise 0.3s cubic-bezier(0.25, 1, 0.5, 1);
 }
-@keyframes modalRise { from { opacity: 0; transform: scale(0.96) translateY(20px); } to { opacity: 1; transform: scale(1) translateY(0); } }
-.modal-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 20px 24px;
-  border-bottom: 1px solid var(--border);
-  background: rgba(61, 10, 10, 0.65);
-}
-.modal-header h3 { font-size: 18px; color: var(--bronze-light); font-weight: 700; margin: 0; }
-.modal-header p { font-size: 12px; color: var(--muted); margin-top: 3px; }
-.modal-close-btn {
-  background: transparent;
-  border: 1px solid var(--border);
-  color: var(--white);
-  font-size: 20px;
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  cursor: pointer;
-  display: grid;
-  place-items: center;
-  transition: all 0.2s;
-}
-.modal-close-btn:hover { background: rgba(201, 154, 74, 0.2); border-color: var(--bronze); color: var(--bronze-light); }
 
 .modal-body-messages {
   flex: 1;
@@ -149,49 +479,24 @@
   align-items: center;
   gap: 6px;
   white-space: nowrap;
-  transition: all 0.2s;
 }
-.modal-attach-btn:hover { background: rgba(201, 154, 74, 0.25); border-color: var(--bronze); }
 
-.chat-attachment-img {
-  max-width: 280px;
-  max-height: 220px;
-  border-radius: 8px;
-  border: 1px solid rgba(201, 154, 74, 0.3);
-  margin-top: 8px;
-  cursor: pointer;
-  display: block;
-}
-.chat-attachment-file {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: 8px;
-  padding: 8px 12px;
-  background: rgba(0, 0, 0, 0.35);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  color: var(--bronze-light);
-  font-size: 13px;
-  text-decoration: none;
-}
-.chat-attachment-file:hover { background: rgba(201, 154, 74, 0.2); }
-
-.panel-foot{padding:12px 20px;border-top:1px solid var(--border);text-align:center;background:rgba(201,154,74,.03)}
-.btn-see-more{background:rgba(201,154,74,.12);border:1px solid var(--border);color:var(--bronze-light);padding:8px 20px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s ease}
-.btn-see-more:hover{background:rgba(201,154,74,.28);border-color:var(--bronze);color:var(--white);transform:translateY(-1px)}
 @media(max-width:1100px){.cards{grid-template-columns:repeat(3,1fr)}}
-@media(max-width:980px){.cards{grid-template-columns:1fr 1fr}.grid{grid-template-columns:1fr}.hero{display:block}.nav-actions{flex-wrap:wrap;justify-content:flex-end}}
-@media(max-width:560px){.cards{grid-template-columns:1fr}.topbar-in{height:auto;padding:12px 18px;align-items:flex-start}.brand img{height:46px}.page{padding:28px 16px 60px}}
+@media(max-width:768px){.cards{grid-template-columns:1fr 1fr}.hero{display:block}.nav-actions{flex-wrap:wrap;justify-content:flex-end}}
 </style>
 </head>
 <body>
+
 <header class="topbar">
   <div class="topbar-in">
-    <a class="brand" href="/home"><img src="/static/image/logo.png" alt="NAKCONEL"><strong>Admin <span>Control Center</span></strong></a>
+    <a class="brand" href="/home">
+      <img src="/static/image/logo.png" alt="NAKCONEL">
+      <strong>Admin <span>Control Center</span></strong>
+      <span class="brand-excel-badge">EXCEL WORKBOOK</span>
+    </a>
     <div class="nav-actions">
       <a class="btn" href="/home">Home</a>
-      <button class="btn" id="refreshBtn" type="button">Refresh</button>
+      <button class="btn" id="refreshBtn" type="button">🔄 Refresh Data</button>
       <button class="btn primary" id="signOutBtn" type="button">Sign Out</button>
     </div>
   </div>
@@ -199,127 +504,235 @@
 
 <main class="page">
   <section class="gate" id="gate">
-    <h1>Admin Access</h1>
-    <p>Use your admin username and password to access the control center.</p>
+    <h1>Admin Access Required</h1>
+    <p>Use your admin credentials to access the master control workbook.</p>
     <a class="btn primary" href="/admin-login">Sign In to Admin Portal</a>
     <div class="error" id="gateError"></div>
   </section>
 
   <section class="dashboard" id="dashboard">
     <div id="adminWarningBanner" style="display:none; background: rgba(239, 210, 139, 0.15); border: 1px solid rgba(239, 210, 139, 0.35); color: #efd28b; padding: 12px 18px; border-radius: 10px; margin-bottom: 20px; font-size: 13px; align-items: center; justify-content: space-between; gap: 12px;">
-      <span id="adminWarningText">⚠️ Firestore connection notice</span>
+      <span id="adminWarningText">⚠️ Database connection notice</span>
       <button type="button" onclick="document.getElementById('adminWarningBanner').style.display='none'" style="background:none; border:none; color:inherit; cursor:pointer; font-weight:bold; font-size:16px;">✕</button>
     </div>
 
     <div class="hero">
       <div>
-        <div class="eyebrow">NAKCONEL Control Center</div>
-        <h1>Everything Comes Here</h1>
-        <p>Monitor campaign entries, manage strategy calls, see user growth, and reply to visitors in the high-res message portal.</p>
+        <div class="eyebrow">NAKCONEL Control Center &bull; Spreadsheet Edition</div>
+        <h1>Submission Master Sheets</h1>
+        <p>Interactive workbook view for training applications, strategy bookings, campaign responses, and team support chat.</p>
       </div>
-      <div class="status" id="adminStatus">Loading...</div>
+      <div class="status" id="adminStatus">Loading workbook...</div>
     </div>
 
-    <div class="cards" style="grid-template-columns: repeat(6, 1fr);">
+    <!-- Summary Metric Cards -->
+    <div class="cards">
       <div class="card"><small>Training & Career</small><b id="careerCount">0</b></div>
       <div class="card"><small>Campaign Submissions</small><b id="campaignCount">0</b></div>
       <div class="card"><small>Strategy Call Bookings</small><b id="callsCount">0</b></div>
       <div class="card"><small>Registered Users</small><b id="userCount">0</b></div>
-      <div class="card"><small>Revenue</small><b id="revenueCount">0</b></div>
+      <div class="card"><small>Estimated Revenue</small><b id="revenueCount">0</b></div>
       <div class="card"><small>Configured Admins</small><b id="adminCount">0</b></div>
     </div>
 
-    <div class="grid">
-      <div>
-        <!-- Training & Career Registrations Panel -->
-        <section class="panel">
-          <div class="panel-head">
-            <h2>Training & Career Applications</h2>
-            <span id="careerMeta">Newest first</span>
-          </div>
-          <div class="table-wrap">
-            <table class="data-table">
-              <thead>
-                <tr>
-                  <th>Applicant Info</th>
-                  <th>Program / Track</th>
-                  <th>Registration Details</th>
-                  <th>Status</th>
-                  <th>Date</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody id="careerRows">
-                <tr><td colspan="6" class="muted">Loading training & career applications...</td></tr>
-              </tbody>
-            </table>
-          </div>
-          <div class="panel-foot" id="careerFoot" style="display:none;">
-            <button type="button" class="btn-see-more" id="careerSeeMoreBtn">See More ▼</button>
-          </div>
-        </section>
-
-        <!-- Strategy Call Bookings Panel -->
-        <section class="panel">
-          <div class="panel-head"><h2>Booked Strategy Calls</h2><span id="callsMeta">Newest first</span></div>
-          <div class="table-wrap">
-            <table class="data-table">
-              <thead><tr><th>Client Name</th><th>Operational Focus / Message</th><th>Status</th><th>Date</th><th>Action</th></tr></thead>
-              <tbody id="callsRows"><tr><td colspan="5" class="muted">Loading strategy calls...</td></tr></tbody>
-            </table>
-          </div>
-          <div class="panel-foot" id="callsFoot" style="display:none;">
-            <button type="button" class="btn-see-more" id="callsSeeMoreBtn">See More ▼</button>
-          </div>
-        </section>
-
-        <!-- Campaign Submissions Panel -->
-        <section class="panel">
-          <div class="panel-head"><h2>Campaign Submissions</h2><span id="campaignMeta">Newest first</span></div>
-          <div class="table-wrap">
-            <table class="data-table">
-              <thead><tr><th>Name</th><th>Business / Challenge</th><th>Package</th><th>Payment</th><th>Date</th></tr></thead>
-              <tbody id="campaignRows"><tr><td colspan="5" class="muted">Loading submissions...</td></tr></tbody>
-            </table>
-          </div>
-          <div class="panel-foot" id="campaignFoot" style="display:none;">
-            <button type="button" class="btn-see-more" id="campaignSeeMoreBtn">See More ▼</button>
-          </div>
-        </section>
+    <!-- MAIN EXCEL WORKBOOK CONTAINER -->
+    <div class="excel-workbook">
+      
+      <!-- Excel Navigation Tabs -->
+      <div class="excel-tab-bar">
+        <button type="button" class="excel-tab active" data-sheet="career">
+          <span>🎓 Career & Training</span>
+          <span class="tab-count" id="tabCountCareer">0</span>
+        </button>
+        <button type="button" class="excel-tab" data-sheet="calls">
+          <span>💼 Strategy Calls</span>
+          <span class="tab-count" id="tabCountCalls">0</span>
+        </button>
+        <button type="button" class="excel-tab" data-sheet="campaign">
+          <span>📣 Campaign Submissions</span>
+          <span class="tab-count" id="tabCountCampaign">0</span>
+        </button>
+        <button type="button" class="excel-tab" data-sheet="chats">
+          <span>💬 Visitor Support Inbox</span>
+          <span class="tab-count" id="tabCountChats">0</span>
+        </button>
+        <button type="button" class="excel-tab" data-sheet="users">
+          <span>👥 Registered Users</span>
+          <span class="tab-count" id="tabCountUsers">0</span>
+        </button>
+        <button type="button" class="excel-tab" data-sheet="team">
+          <span>🛡️ Admin Team</span>
+          <span class="tab-count" id="tabCountTeam">7</span>
+        </button>
       </div>
 
-      <aside class="side-stack">
-        <!-- Admin Chat Panel -->
-        <section class="panel">
-          <div class="panel-head"><h2>Admin Chat Inbox</h2><span id="chatMeta">Click to pop up</span></div>
-          <div class="admin-chat">
-            <div class="chat-list" id="chatRows"><div class="chat-empty">Loading conversations...</div></div>
-          </div>
-          <div class="panel-foot" id="chatsFoot" style="display:none;">
-            <button type="button" class="btn-see-more" id="chatsSeeMoreBtn">See More ▼</button>
-          </div>
-        </section>
+      <!-- Formula Bar & Sheet Utilities -->
+      <div class="excel-toolbar">
+        <div class="excel-formula-bar">
+          <span class="excel-fx-icon">fx</span>
+          <input type="text" id="sheetSearchInput" class="excel-search-input" placeholder="Filter rows in active worksheet (e.g. name, email, program, status)...">
+        </div>
+        <div class="excel-actions-right">
+          <span class="sheet-counter-badge" id="activeSheetSummary">Sheet: Career Applications</span>
+          <button type="button" class="btn excel-btn" id="exportCsvBtn">📥 Export CSV (.csv)</button>
+        </div>
+      </div>
 
-        <section class="panel">
-          <div class="panel-head"><h2>Admin Team</h2><span id="teamMeta">7 people</span></div>
-          <div class="team-list" id="teamRows">
-            <div class="team-row"><span>Loading...</span></div>
-          </div>
-        </section>
+      <!-- WORKSHEET 1: CAREER & TRAINING APPLICATIONS -->
+      <div class="worksheet-panel active" id="sheet-career">
+        <div class="excel-table-wrap">
+          <table class="excel-table">
+            <thead>
+              <tr>
+                <th class="col-row-idx">#</th>
+                <th>Applicant Name</th>
+                <th>Email Address</th>
+                <th>Phone</th>
+                <th>Type / Track</th>
+                <th>Program Title</th>
+                <th>Status</th>
+                <th>Submission ID</th>
+                <th>Date Submitted</th>
+                <th>Cell Action</th>
+              </tr>
+            </thead>
+            <tbody id="careerRows">
+              <tr><td colspan="10" style="text-align:center; padding:24px;" class="muted">Loading training & career submissions...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
 
-        <section class="panel">
-          <div class="panel-head"><h2>Recent Signups</h2><span id="usersMeta">Firebase users</span></div>
-          <div class="user-list" id="userRows"><div class="user-row"><span>Loading users...</span></div></div>
-          <div class="panel-foot" id="usersFoot" style="display:none;">
-            <button type="button" class="btn-see-more" id="usersSeeMoreBtn">See More ▼</button>
-          </div>
-        </section>
-      </aside>
+      <!-- WORKSHEET 2: STRATEGY CALL BOOKINGS -->
+      <div class="worksheet-panel" id="sheet-calls">
+        <div class="excel-table-wrap">
+          <table class="excel-table">
+            <thead>
+              <tr>
+                <th class="col-row-idx">#</th>
+                <th>Client Name</th>
+                <th>Email Address</th>
+                <th>Operational Focus / Inquiry</th>
+                <th>Status</th>
+                <th>Booking ID</th>
+                <th>Date Booked</th>
+                <th>Cell Action</th>
+              </tr>
+            </thead>
+            <tbody id="callsRows">
+              <tr><td colspan="8" style="text-align:center; padding:24px;" class="muted">Loading strategy call bookings...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- WORKSHEET 3: CAMPAIGN SUBMISSIONS -->
+      <div class="worksheet-panel" id="sheet-campaign">
+        <div class="excel-table-wrap">
+          <table class="excel-table">
+            <thead>
+              <tr>
+                <th class="col-row-idx">#</th>
+                <th>Full Name</th>
+                <th>Email Address</th>
+                <th>Business Name</th>
+                <th>Primary Challenge</th>
+                <th>Package Selected</th>
+                <th>Package Price</th>
+                <th>Payment Status</th>
+                <th>Pay Reference</th>
+                <th>Submission Date</th>
+              </tr>
+            </thead>
+            <tbody id="campaignRows">
+              <tr><td colspan="10" style="text-align:center; padding:24px;" class="muted">Loading campaign submissions...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- WORKSHEET 4: VISITOR SUPPORT CHAT INBOX -->
+      <div class="worksheet-panel" id="sheet-chats">
+        <div class="excel-table-wrap">
+          <table class="excel-table">
+            <thead>
+              <tr>
+                <th class="col-row-idx">#</th>
+                <th>Visitor Name</th>
+                <th>Visitor Email</th>
+                <th>Last Message Preview</th>
+                <th>Assigned Agent</th>
+                <th>Chat ID</th>
+                <th>Cell Action</th>
+              </tr>
+            </thead>
+            <tbody id="chatRows">
+              <tr><td colspan="7" style="text-align:center; padding:24px;" class="muted">Loading chat inbox...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- WORKSHEET 5: REGISTERED USERS -->
+      <div class="worksheet-panel" id="sheet-users">
+        <div class="excel-table-wrap">
+          <table class="excel-table">
+            <thead>
+              <tr>
+                <th class="col-row-idx">#</th>
+                <th>User Name / Email</th>
+                <th>Firebase User ID (UID)</th>
+                <th>Email Verified</th>
+              </tr>
+            </thead>
+            <tbody id="userRows">
+              <tr><td colspan="4" style="text-align:center; padding:24px;" class="muted">Loading user accounts...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- WORKSHEET 6: ADMIN TEAM -->
+      <div class="worksheet-panel" id="sheet-team">
+        <div class="excel-table-wrap">
+          <table class="excel-table">
+            <thead>
+              <tr>
+                <th class="col-row-idx">#</th>
+                <th>Admin Name</th>
+                <th>Official Email</th>
+                <th>Role Title</th>
+                <th>Access Tier</th>
+              </tr>
+            </thead>
+            <tbody id="teamRows">
+              <tr><td colspan="5" style="text-align:center; padding:24px;" class="muted">Loading admin team...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
     </div>
   </section>
 </main>
 
-<!-- Large Pop-up Chat Modal Overlay -->
+<!-- POP-UP ROW RECORD INSPECTOR MODAL -->
+<div class="modal-overlay" id="recordInspectorModal">
+  <div class="inspector-modal-window">
+    <div class="modal-header">
+      <div>
+        <h3 id="inspectorTitle">Submission Details</h3>
+        <p id="inspectorSubtitle">Row record detail inspector</p>
+      </div>
+      <button class="modal-close-btn" id="closeInspectorBtn" type="button" title="Close Inspector">✕</button>
+    </div>
+    <div class="inspector-body" id="inspectorContent">
+      <!-- Dynamic key value inspector -->
+    </div>
+  </div>
+</div>
+
+<!-- LARGE POP-UP CHAT MODAL OVERLAY -->
 <div class="modal-overlay" id="chatModalOverlay">
   <div class="chat-modal-window">
     <div class="modal-header">
@@ -351,8 +764,6 @@
 </div>
 
 <script>
-// Diagnostics for administrators: intentionally excludes credentials, tokens,
-// messages, and other dashboard data from the browser console.
 function logAdminError(context, error, details = {}) {
   console.error(`[NAKCONEL Admin] ${context}`, {
     message: error instanceof Error ? error.message : String(error),
@@ -376,12 +787,23 @@ const gate = document.getElementById('gate');
 const dashboard = document.getElementById('dashboard');
 const gateError = document.getElementById('gateError');
 const chatModalOverlay = document.getElementById('chatModalOverlay');
+const recordInspectorModal = document.getElementById('recordInspectorModal');
 const modalFileInput = document.getElementById('modalFileInput');
 const attachmentPreviewBar = document.getElementById('attachmentPreviewBar');
 
+let activeSheet = 'career';
 let activeChatId = null;
 let chatPollTimer = null;
 let currentAttachment = null;
+
+let masterData = {
+  career: [],
+  calls: [],
+  campaign: [],
+  chats: [],
+  users: [],
+  team: []
+};
 
 function fmtNgn(value){ return Number(value || 0).toLocaleString('en-NG'); }
 function fmtDate(value){
@@ -398,30 +820,7 @@ let exchangeRates = null;
 
 const LOCALE_TO_CURRENCY = {
   'en': 'USD', 'en-US': 'USD', 'en-GB': 'GBP', 'en-NG': 'NGN', 'en-ZA': 'ZAR',
-  'en-KE': 'KES', 'en-GH': 'GHS', 'en-AU': 'AUD', 'en-CA': 'CAD', 'en-IN': 'INR',
-  'en-PH': 'PHP', 'en-EG': 'EGP', 'en-DZ': 'DZD', 'en-MA': 'MAD', 'en-TZ': 'TZS',
-  'en-ET': 'ETB', 'en-RW': 'RWF', 'en-UG': 'UGX', 'en-ZW': 'ZWL', 'en-NA': 'NAD',
-  'en-BW': 'BWP', 'en-MU': 'MUR', 'en-CM': 'XAF', 'en-SN': 'XOF', 'en-CI': 'XOF',
-  'de': 'EUR', 'de-DE': 'EUR', 'de-AT': 'EUR', 'de-CH': 'CHF',
-  'fr': 'EUR', 'fr-FR': 'EUR', 'fr-CA': 'CAD', 'fr-BE': 'EUR', 'fr-CH': 'CHF',
-  'es': 'EUR', 'es-ES': 'EUR', 'es-MX': 'MXN', 'es-AR': 'ARS', 'es-CO': 'COP',
-  'it': 'EUR', 'it-IT': 'EUR', 'it-CH': 'CHF',
-  'pt': 'BRL', 'pt-BR': 'BRL', 'pt-PT': 'EUR',
-  'nl': 'EUR', 'nl-NL': 'EUR', 'nl-BE': 'EUR',
-  'ar': 'USD', 'ar-SA': 'SAR', 'ar-AE': 'AED', 'ar-EG': 'EGP', 'ar-QA': 'QAR',
-  'ar-KW': 'KWD', 'ar-BH': 'BHD', 'ar-OM': 'OMR', 'ar-JO': 'JOD', 'ar-LB': 'LBP',
-  'zh': 'CNY', 'zh-CN': 'CNY', 'zh-HK': 'HKD', 'zh-TW': 'TWD', 'zh-SG': 'SGD',
-  'ja': 'JPY', 'ja-JP': 'JPY',
-  'ko': 'KRW', 'ko-KR': 'KRW',
-  'hi': 'INR', 'hi-IN': 'INR',
-  'tr': 'TRY', 'tr-TR': 'TRY',
-  'ru': 'RUB', 'ru-RU': 'RUB',
-  'pl': 'PLN', 'pl-PL': 'PLN',
-  'th': 'THB', 'th-TH': 'THB',
-  'vi': 'VND', 'vi-VN': 'VND',
-  'id': 'IDR', 'id-ID': 'IDR',
-  'ms': 'MYR', 'ms-MY': 'MYR',
-  'tl': 'PHP', 'tl-PH': 'PHP',
+  'en-KE': 'KES', 'en-GH': 'GHS', 'de': 'EUR', 'fr': 'EUR', 'es': 'EUR'
 };
 
 function detectUserCurrency(){
@@ -429,9 +828,6 @@ function detectUserCurrency(){
     const locale = navigator.language || navigator.userLanguage || 'en';
     const direct = LOCALE_TO_CURRENCY[locale];
     if (direct) return direct;
-    const prefix = locale.split('-')[0];
-    const langMatch = LOCALE_TO_CURRENCY[prefix];
-    if (langMatch) return langMatch;
     if (locale.startsWith('en')) return 'USD';
   } catch (e) {}
   return 'USD';
@@ -449,20 +845,7 @@ async function fetchExchangeRates(){
       return exchangeRates;
     }
   } catch (e) {}
-
-  exchangeRates = {
-    rates: {
-      USD: 0.00065,
-      GBP: 0.00050,
-      EUR: 0.00059,
-      NGN: 1.0,
-      ZAR: 0.012,
-      KES: 0.084,
-      GHS: 0.010,
-      CAD: 0.00088,
-      AUD: 0.00098
-    }
-  };
+  exchangeRates = { rates: { USD: 0.00065, GBP: 0.00050, EUR: 0.00059, NGN: 1.0 } };
   return exchangeRates;
 }
 
@@ -470,45 +853,22 @@ async function convertNgnToLocal(ngnAmount){
   const rates = await fetchExchangeRates();
   const targetCurrency = detectUserCurrency();
   userCurrency = targetCurrency;
-  if (!rates || targetCurrency === 'NGN') {
-    return { amount: ngnAmount, currency: 'NGN', symbol: '₦' };
-  }
+  if (!rates || targetCurrency === 'NGN') return { amount: ngnAmount, currency: 'NGN', symbol: '₦' };
   const rate = rates.rates[targetCurrency];
-  if (rate) {
-    const converted = ngnAmount * rate;
-    const symbol = getCurrencySymbol(targetCurrency);
-    return { amount: converted, currency: targetCurrency, symbol: symbol };
-  }
-  const usdAmount = ngnAmount * (rates.rates['USD'] || 0.00065);
-  return { amount: usdAmount, currency: 'USD', symbol: '$' };
+  if (rate) return { amount: ngnAmount * rate, currency: targetCurrency, symbol: getCurrencySymbol(targetCurrency) };
+  return { amount: ngnAmount * 0.00065, currency: 'USD', symbol: '$' };
 }
 
 function getCurrencySymbol(currencyCode){
-  const symbols = {
-    'USD': '$', 'EUR': '€', 'GBP': '£', 'NGN': '₦', 'ZAR': 'R', 'KES': 'KSh',
-    'GHS': 'GH₵', 'AUD': 'A$', 'CAD': 'C$', 'INR': '₹', 'PHP': '₱', 'EGP': 'E£',
-    'DZD': 'د.ج', 'MAD': 'MAD', 'TZS': 'TSh', 'ETB': 'Br', 'RWF': 'RF', 'UGX': 'USh',
-    'ZWL': 'Z$', 'NAD': 'N$', 'BWP': 'P', 'MUR': 'Rs', 'XAF': 'FCFA', 'XOF': 'CFA',
-    'CHF': 'CHF', 'MXN': 'MX$', 'ARS': 'AR$', 'COP': 'CO$', 'BRL': 'R$', 'TRY': '₺',
-    'RUB': '₽', 'PLN': 'zł', 'THB': '฿', 'VND': '₫', 'IDR': 'Rp', 'MYR': 'RM',
-    'CNY': '¥', 'HKD': 'HK$', 'TWD': 'NT$', 'SGD': 'S$', 'JPY': '¥', 'KRW': '₩',
-    'SAR': '﷼', 'AED': 'د.إ', 'QAR': '﷼', 'KWD': 'KD', 'BHD': 'BD', 'OMR': 'OMR',
-    'JOD': 'JD', 'LBP': 'L£'
-  };
+  const symbols = { 'USD': '$', 'EUR': '€', 'GBP': '£', 'NGN': '₦', 'ZAR': 'R', 'KES': 'KSh', 'GHS': 'GH₵' };
   return symbols[currencyCode] || currencyCode + ' ';
 }
 
 function fmtLocal(value){
   if (userCurrency === 'NGN') return fmtNgn(value);
   try {
-    return new Intl.NumberFormat(undefined, {
-      style: 'currency',
-      currency: userCurrency,
-      maximumFractionDigits: 0
-    }).format(value);
-  } catch (e) {
-    return `${getCurrencySymbol(userCurrency)}${Number(value || 0).toLocaleString()}`;
-  }
+    return new Intl.NumberFormat(undefined, { style: 'currency', currency: userCurrency, maximumFractionDigits: 0 }).format(value);
+  } catch (e) { return `${getCurrencySymbol(userCurrency)}${Number(value || 0).toLocaleString()}`; }
 }
 
 function fmtCampaignMoney(amount, currency){
@@ -516,14 +876,8 @@ function fmtCampaignMoney(amount, currency){
   const value = Number(amount || 0);
   if (!code) return '-';
   try {
-    return new Intl.NumberFormat(undefined, {
-      style: 'currency',
-      currency: code,
-      maximumFractionDigits: 0
-    }).format(value);
-  } catch (e) {
-    return `${code} ${value.toLocaleString()}`;
-  }
+    return new Intl.NumberFormat(undefined, { style: 'currency', currency: code, maximumFractionDigits: 0 }).format(value);
+  } catch (e) { return `${code} ${value.toLocaleString()}`; }
 }
 
 async function fmtNgnAsLocal(ngnValue){
@@ -542,9 +896,8 @@ async function adminFetch(url, options = {}){
   }
 
   let data;
-  try {
-    data = await res.json();
-  } catch (error) {
+  try { data = await res.json(); }
+  catch (error) {
     logAdminError('Invalid JSON response', error, { url, method: options.method || 'GET', status: res.status });
     throw new Error(`The server returned an invalid response (HTTP ${res.status}).`);
   }
@@ -552,9 +905,7 @@ async function adminFetch(url, options = {}){
   if(!res.ok) {
     const requestError = new Error(data.error || 'Admin request failed.');
     logAdminError('Admin API request failed', requestError, { url, method: options.method || 'GET', status: res.status });
-    if (res.status === 401 || res.status === 403) {
-      showError(data.error || 'Admin access required. Please sign in.');
-    }
+    if (res.status === 401 || res.status === 403) showError(data.error || 'Admin access required. Please sign in.');
     throw requestError;
   }
   return data;
@@ -573,70 +924,396 @@ function fmtChatTime(value){
   return Number.isNaN(date.getTime()) ? '' : date.toLocaleString();
 }
 
-const panelState = {
-  career: { expanded: false, limit: 5, data: [] },
-  calls: { expanded: false, limit: 5, data: [] },
-  campaign: { expanded: false, limit: 5, data: [] },
-  users: { expanded: false, limit: 5, data: [] },
-  chats: { expanded: false, limit: 5, data: [] }
+/* =========================================================
+   WORKSHEET TAB & SEARCH MANAGEMENT
+   ========================================================= */
+const TAB_LABELS = {
+  career: 'Sheet: Career & Training Applications',
+  calls: 'Sheet: Strategy Call Bookings',
+  campaign: 'Sheet: Campaign Submissions',
+  chats: 'Sheet: Visitor Support Inbox',
+  users: 'Sheet: Registered Users',
+  team: 'Sheet: Admin Team'
 };
 
-function updatePanelFooter(sectionKey, totalCount) {
-  const foot = document.getElementById(`${sectionKey}Foot`);
-  const btn = document.getElementById(`${sectionKey}SeeMoreBtn`);
-  if (!foot || !btn) return;
-  const st = panelState[sectionKey];
-  if (totalCount > st.limit) {
-    foot.style.display = 'block';
-    if (st.expanded) {
-      btn.textContent = 'Show Less ▲';
-    } else {
-      const remaining = totalCount - st.limit;
-      btn.textContent = `See More (${remaining} remaining) ▼`;
-    }
-  } else {
-    foot.style.display = 'none';
-  }
+document.querySelectorAll('.excel-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.excel-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.worksheet-panel').forEach(p => p.classList.remove('active'));
+    
+    tab.classList.add('active');
+    activeSheet = tab.dataset.sheet;
+    const panel = document.getElementById(`sheet-${activeSheet}`);
+    if (panel) panel.classList.add('active');
+
+    document.getElementById('activeSheetSummary').textContent = TAB_LABELS[activeSheet] || activeSheet;
+    document.getElementById('sheetSearchInput').value = '';
+    renderActiveSheet();
+  });
+});
+
+document.getElementById('sheetSearchInput').addEventListener('input', () => {
+  renderActiveSheet();
+});
+
+function getSearchQuery() {
+  return document.getElementById('sheetSearchInput').value.trim().toLowerCase();
 }
 
-function bindSeeMoreButtons() {
-  ['career', 'calls', 'campaign', 'users', 'chats'].forEach(key => {
-    const btn = document.getElementById(`${key}SeeMoreBtn`);
-    if (btn && !btn._seeMoreBound) {
-      btn._seeMoreBound = true;
-      btn.addEventListener('click', () => {
-        panelState[key].expanded = !panelState[key].expanded;
-        if (key === 'campaign') renderCampaigns();
-        else if (key === 'career') renderCareerRegistrations();
-        else if (key === 'calls') renderStrategyCalls();
-        else if (key === 'users') renderUsers();
-        else if (key === 'chats') renderAdminChatsList();
-      });
-    }
+function renderActiveSheet() {
+  if (activeSheet === 'career') renderCareerRegistrations();
+  else if (activeSheet === 'calls') renderStrategyCalls();
+  else if (activeSheet === 'campaign') renderCampaigns();
+  else if (activeSheet === 'chats') renderAdminChatsList();
+  else if (activeSheet === 'users') renderUsers();
+  else if (activeSheet === 'team') renderTeam();
+}
+
+/* =========================================================
+   CSV EXPORT GENERATOR (Excel Compatible)
+   ========================================================= */
+document.getElementById('exportCsvBtn').addEventListener('click', () => {
+  let headers = [];
+  let rows = [];
+  const q = getSearchQuery();
+
+  if (activeSheet === 'career') {
+    headers = ['ID', 'Name', 'Email', 'Phone', 'Type', 'Program', 'Status', 'Date'];
+    const filtered = (masterData.career || []).filter(item => !q || JSON.stringify(item).toLowerCase().includes(q));
+    rows = filtered.map(item => [item.id, item.name, item.email, item.phone, item.type, item.program, item.status, item.created_at || item.createdAt]);
+  } else if (activeSheet === 'calls') {
+    headers = ['ID', 'Client Name', 'Email', 'Inquiry / Focus', 'Status', 'Date Booked'];
+    const filtered = (masterData.calls || []).filter(item => !q || JSON.stringify(item).toLowerCase().includes(q));
+    rows = filtered.map(item => [item.id, item.name, item.email, item.message, item.status, item.createdAt]);
+  } else if (activeSheet === 'campaign') {
+    headers = ['ID', 'Full Name', 'Email', 'Business', 'Challenge', 'Package', 'Payment Status', 'Reference', 'Date'];
+    const filtered = (masterData.campaign || []).filter(item => !q || JSON.stringify(item).toLowerCase().includes(q));
+    rows = filtered.map(item => {
+      const qst = item.questions || {};
+      const pkg = item.package || {};
+      const pay = item.payment || {};
+      return [item.id, qst.fullName || item.email, item.email, qst.business, qst.challenge, pkg.name, item.status || (pay.reference ? 'paid' : 'pending'), pay.reference, item.createdAt];
+    });
+  } else if (activeSheet === 'chats') {
+    headers = ['Chat ID', 'Visitor Name', 'Visitor Email', 'Last Message', 'Assigned Agent'];
+    const filtered = (masterData.chats || []).filter(item => !q || JSON.stringify(item).toLowerCase().includes(q));
+    rows = filtered.map(item => [item.id, item.visitorName, item.visitorEmail, item.lastMessage, item.teamMemberName]);
+  } else if (activeSheet === 'users') {
+    headers = ['Username / Email', 'Firebase UID', 'Email'];
+    const filtered = (masterData.users || []).filter(item => !q || JSON.stringify(item).toLowerCase().includes(q));
+    rows = filtered.map(item => [item.username || item.email, item.uid || item.id, item.email]);
+  } else if (activeSheet === 'team') {
+    headers = ['ID', 'Name', 'Email', 'Role'];
+    rows = (masterData.team || []).map(item => [item.id, item.name, item.email, item.role]);
+  }
+
+  if (!rows.length) {
+    alert('No rows available in current view to export.');
+    return;
+  }
+
+  let csvContent = 'data:text/csv;charset=utf-8,';
+  csvContent += headers.map(h => `"${String(h).replace(/"/g, '""')}"`).join(',') + '\r\n';
+  rows.forEach(r => {
+    csvContent += r.map(v => `"${String(v ?? '').replace(/"/g, '""')}"`).join(',') + '\r\n';
+  });
+
+  const encodedUri = encodeURI(csvContent);
+  const link = document.createElement('a');
+  link.setAttribute('href', encodedUri);
+  link.setAttribute('download', `nakconel_${activeSheet}_sheet_${new Date().toISOString().slice(0,10)}.csv`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+});
+
+/* =========================================================
+   ROW RECORD INSPECTOR POPUP
+   ========================================================= */
+function openRecordInspector(title, subtitle, fieldsObj) {
+  document.getElementById('inspectorTitle').textContent = title || 'Record Details';
+  document.getElementById('inspectorSubtitle').textContent = subtitle || 'Full details inspector';
+  
+  const container = document.getElementById('inspectorContent');
+  let html = '<div class="inspector-grid">';
+  
+  for (const [key, value] of Object.entries(fieldsObj)) {
+    if (value === undefined || value === null || value === '') continue;
+    const isWide = String(value).length > 60 || typeof value === 'object';
+    const displayVal = typeof value === 'object' ? JSON.stringify(value, null, 2) : String(value);
+    html += `
+      <div class="inspector-field ${isWide ? 'full-width' : ''}">
+        <span class="inspector-label">${esc(key)}</span>
+        <div class="inspector-value">${esc(displayVal)}</div>
+      </div>
+    `;
+  }
+  html += '</div>';
+  container.innerHTML = html;
+  recordInspectorModal.classList.add('active');
+}
+
+document.getElementById('closeInspectorBtn').addEventListener('click', () => {
+  recordInspectorModal.classList.remove('active');
+});
+recordInspectorModal.addEventListener('click', (e) => {
+  if (e.target === recordInspectorModal) recordInspectorModal.classList.remove('active');
+});
+
+/* =========================================================
+   WORKSHEET 1: CAREER & TRAINING RENDERING
+   ========================================================= */
+function renderCareerRegistrations(){
+  const rows = masterData.career || [];
+  document.getElementById('tabCountCareer').textContent = rows.length;
+  const q = getSearchQuery();
+
+  const filtered = rows.filter(item => {
+    if (!q) return true;
+    const textStr = `${item.name} ${item.email} ${item.phone} ${item.program} ${item.type} ${item.status} ${item.id}`.toLowerCase();
+    return textStr.includes(q);
+  });
+
+  const tbody = document.getElementById('careerRows');
+  tbody.innerHTML = filtered.length ? filtered.map((item, idx) => {
+    const st = (item.status || 'pending_payment').toLowerCase();
+    const isIntern = (item.type || '').toLowerCase() === 'internship' || (item.id || '').startsWith('INT');
+    const isApproved = st === 'paid' || st === 'approved' || (isIntern && st === 'submitted');
+    
+    let statusBadge = isIntern 
+      ? (st === 'approved' ? '<span class="badge-completed">Approved / Shortlisted ✓</span>' : '<span class="badge-completed">Application Received ✓</span>')
+      : (isApproved ? '<span class="badge-completed">Approved & Paid ✓</span>' : '<span class="badge-new">Pending Payment ⏳</span>');
+
+    let actionBtn = isIntern 
+      ? (st === 'approved'
+        ? `<button class="btn" style="padding:4px 8px;font-size:11px" onclick="event.stopPropagation(); updateCareerStatus('${esc(item.id)}', 'submitted')">Mark Received ⏳</button>`
+        : `<button class="btn primary" style="padding:4px 8px;font-size:11px" onclick="event.stopPropagation(); updateCareerStatus('${esc(item.id)}', 'approved')">Approve / Shortlist ✓</button>`)
+      : (isApproved 
+        ? `<button class="btn" style="padding:4px 8px;font-size:11px" onclick="event.stopPropagation(); updateCareerStatus('${esc(item.id)}', 'pending_payment')">Mark Pending ⏳</button>`
+        : `<button class="btn primary" style="padding:4px 8px;font-size:11px" onclick="event.stopPropagation(); updateCareerStatus('${esc(item.id)}', 'approved')">Mark Approved ✓</button>`);
+
+    return `<tr class="clickable-row" onclick="inspectCareerRecord('${esc(item.id)}')">
+      <td class="cell-row-idx">${idx + 1}</td>
+      <td><strong>${esc(item.name || 'Applicant')}</strong></td>
+      <td class="cell-mono">${esc(item.email || '-')}</td>
+      <td class="cell-mono">${esc(item.phone || '-')}</td>
+      <td><span class="chip">${esc((item.type || 'registration').toUpperCase())}</span></td>
+      <td><strong>${esc(item.program || 'Career Track')}</strong></td>
+      <td>${statusBadge}</td>
+      <td class="cell-mono">#${esc(item.id)}</td>
+      <td class="cell-mono">${esc(fmtDate(item.created_at || item.createdAt))}</td>
+      <td>${actionBtn}</td>
+    </tr>`;
+  }).join('') : '<tr><td colspan="10" style="text-align:center; padding:24px;" class="muted">No matching training or career submissions found.</td></tr>';
+}
+
+function inspectCareerRecord(id) {
+  const item = (masterData.career || []).find(r => String(r.id) === String(id));
+  if (!item) return;
+  const d = item.detailsParsed || {};
+  openRecordInspector(`Applicant: ${item.name || 'Unknown'}`, `Submission #${item.id}`, {
+    "Applicant Name": item.name,
+    "Email Address": item.email,
+    "Phone Number": item.phone,
+    "Program / Track": item.program,
+    "Application Type": item.type,
+    "Current Status": item.status,
+    "Age / Gender": `${d.age || '-'} / ${d.gender || '-'}`,
+    "Residential Address": d.address,
+    "Guardian Contact": d.guardianName ? `${d.guardianName} (${d.guardianPhone || '-'})` : null,
+    "Weekly Commitment": d.commitment,
+    "Available Days": d.availableDays,
+    "Applicant Statement": item.statement || d.comments,
+    "Submission ID": item.id,
+    "Created Date": fmtDate(item.created_at || item.createdAt)
   });
 }
 
+async function loadCareerRegistrations(){
+  const data = await adminFetch('/api/admin/career-registrations');
+  masterData.career = data.registrations || [];
+  renderCareerRegistrations();
+}
+
+async function updateCareerStatus(regId, newStatus){
+  try {
+    await adminFetch(`/api/admin/career-registrations/${encodeURIComponent(regId)}/status`, {
+      method: 'POST',
+      body: JSON.stringify({ status: newStatus })
+    });
+    await loadCareerRegistrations();
+    loadAdminSummary();
+  } catch(err) {
+    logAdminError('Could not update career registration status', err, { registrationId: regId });
+    alert(err.message || 'Status update failed.');
+  }
+}
+
+/* =========================================================
+   WORKSHEET 2: STRATEGY CALL BOOKINGS RENDERING
+   ========================================================= */
+function renderStrategyCalls(){
+  const rows = masterData.calls || [];
+  document.getElementById('tabCountCalls').textContent = rows.length;
+  const q = getSearchQuery();
+
+  const filtered = rows.filter(item => {
+    if (!q) return true;
+    const textStr = `${item.name} ${item.email} ${item.message} ${item.status} ${item.id}`.toLowerCase();
+    return textStr.includes(q);
+  });
+
+  const tbody = document.getElementById('callsRows');
+  tbody.innerHTML = filtered.length ? filtered.map((item, idx) => {
+    const statusClass = item.status === 'completed' ? 'badge-completed' : item.status === 'contacted' ? 'badge-contacted' : 'badge-new';
+    return `<tr class="clickable-row" onclick="inspectCallRecord('${esc(item.id)}')">
+      <td class="cell-row-idx">${idx + 1}</td>
+      <td><strong>${esc(item.name || 'Unknown')}</strong></td>
+      <td class="cell-mono">${esc(item.email || '-')}</td>
+      <td style="max-width:300px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${esc(item.message || '-')}</td>
+      <td><span class="${statusClass}">${esc(item.status || 'new')}</span></td>
+      <td class="cell-mono">#${esc(item.id)}</td>
+      <td class="cell-mono">${esc(fmtDate(item.createdAt))}</td>
+      <td>
+        <button class="btn" style="padding:4px 8px;font-size:11px" onclick="event.stopPropagation(); updateCallStatus('${esc(item.id)}', '${item.status === 'new' ? 'contacted' : 'completed'}')">
+          Mark ${item.status === 'new' ? 'Contacted' : 'Completed'}
+        </button>
+      </td>
+    </tr>`;
+  }).join('') : '<tr><td colspan="8" style="text-align:center; padding:24px;" class="muted">No matching strategy call bookings found.</td></tr>';
+}
+
+function inspectCallRecord(id) {
+  const item = (masterData.calls || []).find(r => String(r.id) === String(id));
+  if (!item) return;
+  openRecordInspector(`Client: ${item.name || 'Unknown'}`, `Strategy Call #${item.id}`, {
+    "Client Name": item.name,
+    "Email Address": item.email,
+    "Current Status": item.status,
+    "Message / Operational Focus": item.message,
+    "Booking ID": item.id,
+    "Date Booked": fmtDate(item.createdAt)
+  });
+}
+
+async function loadStrategyCalls(){
+  const data = await adminFetch('/api/admin/strategy-calls');
+  masterData.calls = data.strategyCalls || [];
+  renderStrategyCalls();
+}
+
+async function updateCallStatus(callId, newStatus){
+  try {
+    await adminFetch(`/api/admin/strategy-calls/${encodeURIComponent(callId)}/status`, {
+      method: 'POST',
+      body: JSON.stringify({ status: newStatus })
+    });
+    await loadStrategyCalls();
+  } catch(err) {
+    alert(err.message || 'Status update failed.');
+  }
+}
+
+/* =========================================================
+   WORKSHEET 3: CAMPAIGN SUBMISSIONS RENDERING
+   ========================================================= */
+async function renderCampaigns(){
+  const rows = masterData.campaign || [];
+  document.getElementById('tabCountCampaign').textContent = rows.length;
+  const q = getSearchQuery();
+
+  const filtered = rows.filter(item => {
+    if (!q) return true;
+    const textStr = JSON.stringify(item).toLowerCase();
+    return textStr.includes(q);
+  });
+
+  const campaignParts = filtered.length ? await Promise.all(filtered.map(async (item, idx) => {
+    const qst = item.questions || {};
+    const pkg = item.package || {};
+    const pay = item.payment || {};
+    const status = (item.status || (pay.reference ? 'paid' : 'pending_payment')).toLowerCase();
+    const isPaid = status === 'paid';
+    const pkgPrice = pkg.currency ? fmtCampaignMoney(pkg.amount || pkg.usd || pkg.ngn, pkg.currency) : await fmtNgnAsLocal(pkg.ngn);
+    const payClass = isPaid ? 'badge-completed' : 'badge-contacted';
+    const payLabel = isPaid ? 'Paid' : 'Pending Payment';
+    
+    return `<tr class="clickable-row" onclick="inspectCampaignRecord('${esc(item.id)}')">
+      <td class="cell-row-idx">${idx + 1}</td>
+      <td><strong>${esc(qst.fullName || item.email || 'Unknown')}</strong></td>
+      <td class="cell-mono">${esc(item.email || '-')}</td>
+      <td><strong>${esc(qst.business || '-')}</strong></td>
+      <td style="max-width:240px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${esc(qst.challenge || '-')}</td>
+      <td><span class="chip">${esc(pkg.name || 'Not selected')}</span></td>
+      <td class="cell-mono">${esc(pkgPrice)}</td>
+      <td><span class="${payClass}">${payLabel}</span></td>
+      <td class="cell-mono">${esc(pay.reference || item.id || '-')}</td>
+      <td class="cell-mono">${esc(fmtDate(item.createdAt || pay.paidAt))}</td>
+    </tr>`;
+  })) : [];
+
+  document.getElementById('campaignRows').innerHTML = campaignParts.length ? campaignParts.join('') : '<tr><td colspan="10" style="text-align:center; padding:24px;" class="muted">No matching campaign submissions found.</td></tr>';
+}
+
+function inspectCampaignRecord(id) {
+  const item = (masterData.campaign || []).find(r => String(r.id) === String(id));
+  if (!item) return;
+  const qst = item.questions || {};
+  const pkg = item.package || {};
+  const pay = item.payment || {};
+  
+  openRecordInspector(`Campaign Submission: ${qst.fullName || item.email}`, `Record ID #${item.id}`, {
+    "Full Name": qst.fullName || item.email,
+    "Email": item.email,
+    "Business Name": qst.business,
+    "Business Challenge": qst.challenge,
+    "Target Audience": qst.audience,
+    "Main Goal": qst.goal,
+    "Selected Package": pkg.name,
+    "Package Details": pkg.summary,
+    "Payment Reference": pay.reference,
+    "Payment Amount": pay.amount ? `${pay.amount / 100} ${pay.currency || ''}` : null,
+    "Created Date": fmtDate(item.createdAt)
+  });
+}
+
+async function loadCampaigns(){
+  const data = await adminFetch('/api/admin/campaign-registrations');
+  masterData.campaign = data.registrations || [];
+  await renderCampaigns();
+}
+
+/* =========================================================
+   WORKSHEET 4: VISITOR SUPPORT CHAT INBOX
+   ========================================================= */
 function renderAdminChatsList() {
-  const rows = panelState.chats.data || [];
-  document.getElementById('chatMeta').textContent = `${rows.length} conversations (Click to open)`;
-  const visibleChats = panelState.chats.expanded ? rows : rows.slice(0, panelState.chats.limit);
+  const rows = masterData.chats || [];
+  document.getElementById('tabCountChats').textContent = rows.length;
+  const q = getSearchQuery();
+
+  const filtered = rows.filter(item => {
+    if (!q) return true;
+    const textStr = `${item.visitorName} ${item.visitorEmail} ${item.lastMessage} ${item.teamMemberName}`.toLowerCase();
+    return textStr.includes(q);
+  });
+
   const list = document.getElementById('chatRows');
-  list.innerHTML = visibleChats.length ? visibleChats.map(item => `
-    <div class="chat-row ${item.id === activeChatId ? 'active' : ''}" data-id="${esc(item.id)}" data-name="${esc(item.visitorName || item.visitorEmail || 'Website visitor')}" data-meta="${esc(item.visitorEmail || '')} • ${esc(item.teamMemberName || 'Team')}">
-      <div>
-        <strong>${esc(item.visitorName || item.visitorEmail || 'Website visitor')}</strong>
-        <span>${esc(item.lastMessage || 'No messages yet')}</span>
-      </div>
-      <span class="chip">Reply ↗</span>
-    </div>
-  `).join('') : '<div class="chat-empty">No team conversations yet.</div>';
-  list.querySelectorAll('.chat-row').forEach(row => row.addEventListener('click', () => openAdminChatModal(row.dataset.id, row.dataset.name, row.dataset.meta)));
-  updatePanelFooter('chats', rows.length);
+  list.innerHTML = filtered.length ? filtered.map((item, idx) => `
+    <tr class="clickable-row" onclick="openAdminChatModal('${esc(item.id)}', '${esc(item.visitorName || item.visitorEmail || 'Website Visitor')}', '${esc(item.visitorEmail || '')}')">
+      <td class="cell-row-idx">${idx + 1}</td>
+      <td><strong>${esc(item.visitorName || 'Website Visitor')}</strong></td>
+      <td class="cell-mono">${esc(item.visitorEmail || '-')}</td>
+      <td style="max-width:320px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${esc(item.lastMessage || 'No messages yet')}</td>
+      <td><span class="chip">${esc(item.teamMemberName || 'Team')}</span></td>
+      <td class="cell-mono">#${esc(item.id)}</td>
+      <td><button class="btn primary" style="padding:4px 10px; font-size:11px;">Open Chat ↗</button></td>
+    </tr>
+  `).join('') : '<tr><td colspan="7" style="text-align:center; padding:24px;" class="muted">No matching conversations found.</td></tr>';
 }
 
 async function loadAdminChats(){
   const data = await adminFetch('/api/admin/chat/conversations');
-  panelState.chats.data = data.conversations || [];
+  masterData.chats = data.conversations || [];
   renderAdminChatsList();
 }
 
@@ -667,9 +1344,9 @@ function renderAttachmentHTML(attachment){
   const name = esc(attachment.name || 'Attachment');
   const type = esc(attachment.type || '');
   if(type.startsWith('image/') || url.startsWith('data:image/')){
-    return `<a href="${url}" target="_blank"><img src="${url}" alt="${name}" class="chat-attachment-img"></a>`;
+    return `<a href="${url}" target="_blank"><img src="${url}" alt="${name}" style="max-width:280px; max-height:200px; border-radius:8px; margin-top:8px; display:block;"></a>`;
   }
-  return `<a href="${url}" download="${name}" target="_blank" class="chat-attachment-file">📎 Download ${name}</a>`;
+  return `<a href="${url}" download="${name}" target="_blank" style="display:inline-block; margin-top:8px; padding:6px 10px; background:rgba(0,0,0,0.4); border-radius:6px; color:var(--bronze-light); font-size:12px;">📎 Download ${name}</a>`;
 }
 
 async function loadAdminChatMessages(){
@@ -692,23 +1369,14 @@ async function loadAdminChatMessages(){
   }
 }
 
-// File Attachment Handler
 document.getElementById('modalAttachBtn').addEventListener('click', () => modalFileInput.click());
 modalFileInput.addEventListener('change', (e) => {
   const file = e.target.files[0];
   if(!file) return;
-  if(file.size > 8 * 1024 * 1024){
-    alert('File size exceeds maximum limit of 8MB.');
-    return;
-  }
+  if(file.size > 8 * 1024 * 1024){ alert('File size exceeds maximum limit of 8MB.'); return; }
   const reader = new FileReader();
   reader.onload = (event) => {
-    currentAttachment = {
-      url: event.target.result,
-      name: file.name,
-      type: file.type,
-      size: file.size
-    };
+    currentAttachment = { url: event.target.result, name: file.name, type: file.type, size: file.size };
     document.getElementById('attachmentPreviewText').textContent = `📎 ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
     attachmentPreviewBar.classList.add('active');
   };
@@ -731,7 +1399,6 @@ document.getElementById('modalChatForm').addEventListener('submit', async (e) =>
 
   const payload = { text };
   if(currentAttachment) payload.attachment = currentAttachment;
-
   input.value = '';
   const sentAttach = currentAttachment;
   clearAttachment();
@@ -750,240 +1417,93 @@ document.getElementById('modalChatForm').addEventListener('submit', async (e) =>
   }
 });
 
-// Update Strategy Call Status
-async function updateCallStatus(callId, newStatus){
-  try {
-    await adminFetch(`/api/admin/strategy-calls/${encodeURIComponent(callId)}/status`, {
-      method: 'POST',
-      body: JSON.stringify({ status: newStatus })
-    });
-    await loadStrategyCalls();
-  } catch(err) {
-    alert(err.message || 'Status update failed.');
-  }
-}
-
-function renderStrategyCalls(){
-  const rows = panelState.calls.data || [];
-  document.getElementById('callsCount').textContent = rows.length;
-  document.getElementById('callsMeta').textContent = `${rows.length} total inquiries`;
-  
-  const visibleCalls = panelState.calls.expanded ? rows : rows.slice(0, panelState.calls.limit);
-  const tbody = document.getElementById('callsRows');
-  tbody.innerHTML = visibleCalls.length ? visibleCalls.map(item => {
-    const statusClass = item.status === 'completed' ? 'badge-completed' : item.status === 'contacted' ? 'badge-contacted' : 'badge-new';
-    return `<tr>
-      <td><strong>${esc(item.name || 'Unknown')}</strong><br><span class="muted">${esc(item.email)}</span></td>
-      <td><strong>${esc(item.message || '-')}</strong></td>
-      <td><span class="${statusClass}">${esc(item.status || 'new')}</span></td>
-      <td>${esc(fmtDate(item.createdAt))}</td>
-      <td>
-        <button class="btn" style="padding:4px 8px;font-size:11px" onclick="updateCallStatus('${esc(item.id)}', '${item.status === 'new' ? 'contacted' : 'completed'}')">
-          Mark ${item.status === 'new' ? 'Contacted' : 'Completed'}
-        </button>
-      </td>
-    </tr>`;
-  }).join('') : '<tr><td colspan="5" class="muted">No strategy call bookings recorded yet.</td></tr>';
-  updatePanelFooter('calls', rows.length);
-}
-
-async function loadStrategyCalls(){
-  const data = await adminFetch('/api/admin/strategy-calls');
-  panelState.calls.data = data.strategyCalls || [];
-  renderStrategyCalls();
-}
-
-async function renderCampaigns(){
-  const rows = panelState.campaign.data || [];
-  document.getElementById('campaignMeta').textContent = `${rows.length} total`;
-  const visibleRows = panelState.campaign.expanded ? rows : rows.slice(0, panelState.campaign.limit);
-  
-  const campaignParts = visibleRows.length ? await Promise.all(visibleRows.map(async item => {
-    const q = item.questions || {};
-    const pkg = item.package || {};
-    const pay = item.payment || {};
-    const status = (item.status || (pay.reference ? 'paid' : 'pending_payment')).toLowerCase();
-    const isPaid = status === 'paid';
-    const pkgPrice = pkg.currency ? fmtCampaignMoney(pkg.amount || pkg.usd || pkg.ngn, pkg.currency) : await fmtNgnAsLocal(pkg.ngn);
-    const payAmount = pay.amount ? Number(pay.amount) / 100 : 0;
-    const payLocal = isPaid ? fmtCampaignMoney(payAmount, pay.currency || pkg.currency) : 'Pending payment';
-    const payClass = isPaid ? 'badge-completed' : 'badge-contacted';
-    const payLabel = isPaid ? 'Paid' : 'Pending';
-    return `<tr>
-      <td><strong>${esc(q.fullName || item.email || 'Unknown')}</strong><br><span class="muted">${esc(item.email || '')}</span></td>
-      <td><strong>${esc(q.business || '-')}</strong><br><span class="muted">${esc(q.challenge || '-')}</span></td>
-      <td><span class="chip">${esc(pkg.name || 'Not selected yet')}</span><br><span class="muted">${esc(pkgPrice)}</span></td>
-      <td><span class="${payClass}">${payLabel}</span><br><strong>${esc(pay.reference || item.id || '-')}</strong><br><span class="muted">${esc(payLocal)}</span></td>
-      <td>${esc(fmtDate(item.createdAt || pay.paidAt))}</td>
-    </tr>`;
-  })) : [];
-
-  document.getElementById('campaignRows').innerHTML = campaignParts.length ? campaignParts.join('') : '<tr><td colspan="5" class="muted">No campaign submissions yet.</td></tr>';
-  updatePanelFooter('campaign', rows.length);
-}
-
+/* =========================================================
+   WORKSHEET 5 & 6: USERS & TEAM RENDERING
+   ========================================================= */
 function renderUsers(){
-  const userRows = panelState.users.data || [];
-  document.getElementById('usersMeta').textContent = `${userRows.length} total`;
-  const visibleUsers = panelState.users.expanded ? userRows : userRows.slice(0, panelState.users.limit);
+  const rows = masterData.users || [];
+  document.getElementById('tabCountUsers').textContent = rows.length;
+  const q = getSearchQuery();
 
-  document.getElementById('userRows').innerHTML = visibleUsers.length ? visibleUsers.map(user => (
-    `<div class="user-row"><div><strong>${esc(user.username || user.email || 'Unknown')}</strong><br><span>${esc(user.email || user.uid)}</span></div></div>`
-  )).join('') : '<div class="user-row"><span>No users recorded yet.</span></div>';
-  updatePanelFooter('users', userRows.length);
+  const filtered = rows.filter(user => {
+    if (!q) return true;
+    return `${user.username} ${user.email} ${user.uid}`.toLowerCase().includes(q);
+  });
+
+  document.getElementById('userRows').innerHTML = filtered.length ? filtered.map((user, idx) => `
+    <tr>
+      <td class="cell-row-idx">${idx + 1}</td>
+      <td><strong>${esc(user.username || user.email || 'Registered User')}</strong></td>
+      <td class="cell-mono">${esc(user.uid || user.id || '-')}</td>
+      <td><span class="badge-completed">Verified Sync ✓</span></td>
+    </tr>
+  `).join('') : '<tr><td colspan="4" style="text-align:center; padding:24px;" class="muted">No matching registered users found.</td></tr>';
+}
+
+function renderTeam(){
+  const rows = masterData.team || [];
+  document.getElementById('tabCountTeam').textContent = rows.length;
+  
+  document.getElementById('teamRows').innerHTML = rows.length ? rows.map((member, idx) => `
+    <tr>
+      <td class="cell-row-idx">${idx + 1}</td>
+      <td><strong>${esc(member.name)}</strong></td>
+      <td class="cell-mono">${esc(member.email)}</td>
+      <td><strong>${esc(member.role)}</strong></td>
+      <td><span class="chip">Full Access Admin</span></td>
+    </tr>
+  `).join('') : '<tr><td colspan="5" style="text-align:center; padding:24px;" class="muted">No admin team configured.</td></tr>';
+}
+
+/* =========================================================
+   INITIAL DATA LOAD & SUMMARY SYNC
+   ========================================================= */
+async function loadAdminSummary() {
+  try {
+    const summary = await adminFetch('/api/admin/summary');
+    document.getElementById('careerCount').textContent = summary.careerRegistrations || 0;
+    document.getElementById('campaignCount').textContent = summary.campaignRegistrations || 0;
+    document.getElementById('callsCount').textContent = summary.strategyCalls || 0;
+    document.getElementById('userCount').textContent = summary.registeredUsers || 0;
+    const revenueLocal = await fmtNgnAsLocal(summary.totalRevenueNgn || 0);
+    document.getElementById('revenueCount').textContent = revenueLocal;
+  } catch(e) { logAdminError('Summary load failed', e); }
 }
 
 async function loadAdmin(){
   try{
-    bindSeeMoreButtons();
     const me = await adminFetch('/api/admin/me');
     gate.style.display = 'none';
     dashboard.style.display = 'block';
     document.getElementById('adminStatus').textContent = `Signed in as ${me.name}`;
     document.getElementById('adminCount').textContent = me.configuredAdmins || 7;
+    masterData.team = me.team || [];
+    renderTeam();
 
-    const [summaryRes, registrationsRes, usersRes] = await Promise.allSettled([
-      adminFetch('/api/admin/summary'),
-      adminFetch('/api/admin/campaign-registrations'),
-      adminFetch('/api/admin/users')
+    await Promise.allSettled([
+      loadAdminSummary(),
+      loadCareerRegistrations(),
+      loadStrategyCalls(),
+      loadCampaigns(),
+      loadAdminChats(),
+      adminFetch('/api/admin/users').then(res => {
+        masterData.users = res.users || [];
+        renderUsers();
+      })
     ]);
-
-    const summary = summaryRes.status === 'fulfilled' ? summaryRes.value : {};
-    const registrations = registrationsRes.status === 'fulfilled' ? registrationsRes.value : { registrations: [] };
-    const users = usersRes.status === 'fulfilled' ? usersRes.value : { users: [] };
-
-    const warningText = summary.warning || registrations.warning || users.warning ||
-      (summaryRes.status === 'rejected' ? summaryRes.reason.message : null) ||
-      (usersRes.status === 'rejected' ? usersRes.reason.message : null);
-
-    if (warningText) {
-      const banner = document.getElementById('adminWarningBanner');
-      const bannerText = document.getElementById('adminWarningText');
-      if (banner && bannerText) {
-        bannerText.textContent = `⚠️ ${warningText}`;
-        banner.style.display = 'flex';
-      }
-    }
-
-    document.getElementById('careerCount').textContent = summary.careerRegistrations || 0;
-    document.getElementById('careerCount').title = `${summary.pendingCareerPayments || 0} pending payment / ${summary.approvedCareerRegistrations || 0} approved`;
-    document.getElementById('campaignCount').textContent = summary.campaignRegistrations || 0;
-    document.getElementById('campaignCount').title = `${summary.pendingCampaignPayments || 0} pending payment / ${summary.paidCampaignRegistrations || 0} paid`;
-    document.getElementById('userCount').textContent = summary.registeredUsers || 0;
-    const revenueLocal = await fmtNgnAsLocal(summary.totalRevenueNgn || 0);
-    document.getElementById('revenueCount').textContent = revenueLocal;
-    document.getElementById('revenueCount').title = `Approximate conversion from NGN to your local currency`;
-    document.getElementById('callsCount').textContent = summary.strategyCalls || 0;
-
-    panelState.campaign.data = registrations.registrations || [];
-    await renderCampaigns();
-
-    panelState.users.data = users.users || [];
-    renderUsers();
-
-    const teamData = me.team || [];
-    document.getElementById('teamMeta').textContent = `${teamData.length} people`;
-    document.getElementById('teamRows').innerHTML = teamData.length ? teamData.map(member => 
-      `<div class="team-row"><div><strong>${esc(member.name)}</strong><br><span>${esc(member.role)}</span></div><span class="chip">Admin</span></div>`
-    ).join('') : '<div class="team-row"><span>No team members.</span></div>';
-
-    try { await loadCareerRegistrations(); } catch(e) { logAdminError('Could not load career registrations', e); }
-    try { await loadStrategyCalls(); } catch(e) { logAdminError('Could not load strategy calls', e); }
-    try { await loadAdminChats(); } catch(e) { logAdminError('Could not load team conversations', e); }
-  }catch(err){
+  } catch(err){
     logAdminError('Could not load admin dashboard', err);
     showError(err.message);
   }
 }
 
-async function updateCareerStatus(regId, newStatus){
-  try {
-    await adminFetch(`/api/admin/career-registrations/${encodeURIComponent(regId)}/status`, {
-      method: 'POST',
-      body: JSON.stringify({ status: newStatus })
-    });
-    await loadCareerRegistrations();
-    loadAdmin();
-  } catch(err) {
-    logAdminError('Could not update career registration status', err, { registrationId: regId });
-    alert(err.message || 'Status update failed.');
-  }
-}
-
-function renderCareerRegistrations(){
-  const rows = panelState.career.data || [];
-  const visibleCareer = panelState.career.expanded ? rows : rows.slice(0, panelState.career.limit);
-
-  const tbody = document.getElementById('careerRows');
-  tbody.innerHTML = visibleCareer.length ? visibleCareer.map(item => {
-    const st = (item.status || 'pending_payment').toLowerCase();
-    const isIntern = (item.type || '').toLowerCase() === 'internship' || (item.id || '').startsWith('INT');
-    const isApproved = st === 'paid' || st === 'approved' || (isIntern && st === 'submitted');
-    
-    let statusBadge = '';
-    if (isIntern) {
-      if (st === 'approved') {
-        statusBadge = '<span class="badge-completed">Shortlisted / Approved ✓</span>';
-      } else {
-        statusBadge = '<span class="badge-completed">Application Received ✓</span>';
-      }
-    } else {
-      statusBadge = isApproved ? '<span class="badge-completed">Approved & Paid ✓</span>' : '<span class="badge-new">Pending Payment ⏳</span>';
-    }
-
-    const d = item.detailsParsed || {};
-    const typeLabel = (item.type || 'registration').toUpperCase();
-    
-    let detailsHtml = '';
-    if (d.age || d.gender || d.address || d.guardianName) {
-      detailsHtml += `<small class="muted">Age/Gender: ${esc(d.age || '-')}/${esc(d.gender || '-')}</small><br>`;
-      if (d.address) detailsHtml += `<small class="muted">Address: ${esc(d.address)}</small><br>`;
-      if (d.guardianName) detailsHtml += `<small class="muted">Guardian: ${esc(d.guardianName)} (${esc(d.guardianPhone || '-')})</small><br>`;
-    }
-    if (d.commitment) detailsHtml += `<small class="muted">Commitment: ${esc(d.commitment)}</small><br>`;
-    if (d.availableDays) detailsHtml += `<small class="muted">Days: ${esc(d.availableDays)}</small><br>`;
-    if (item.statement || d.comments) detailsHtml += `<strong>Statement:</strong> <span class="muted">${esc(item.statement || d.comments)}</span>`;
-    if (!detailsHtml) detailsHtml = '<span class="muted">-</span>';
-
-    let actionBtn = '';
-    if (isIntern) {
-      actionBtn = (st === 'approved') 
-        ? `<button class="btn" style="padding:4px 8px;font-size:11px" onclick="updateCareerStatus('${esc(item.id)}', 'submitted')">Mark Received ⏳</button>`
-        : `<button class="btn primary" style="padding:4px 8px;font-size:11px" onclick="updateCareerStatus('${esc(item.id)}', 'approved')">Approve / Shortlist ✓</button>`;
-    } else {
-      actionBtn = isApproved 
-        ? `<button class="btn" style="padding:4px 8px;font-size:11px" onclick="updateCareerStatus('${esc(item.id)}', 'pending_payment')">Mark Pending ⏳</button>`
-        : `<button class="btn primary" style="padding:4px 8px;font-size:11px" onclick="updateCareerStatus('${esc(item.id)}', 'approved')">Mark Approved ✓</button>`;
-    }
-
-    return `<tr>
-      <td><strong>${esc(item.name || 'Applicant')}</strong><br><span class="muted">${esc(item.email)}</span><br><small>${esc(item.phone || '-')}</small></td>
-      <td><strong>${esc(item.program || 'Career Program')}</strong><br><span class="chip">${esc(typeLabel)}</span></td>
-      <td style="max-width:320px;">${detailsHtml}</td>
-      <td>${statusBadge}<br><small class="muted">#${esc(item.id)}</small></td>
-      <td>${esc(fmtDate(item.created_at || item.createdAt))}</td>
-      <td>${actionBtn}</td>
-    </tr>`;
-  }).join('') : '<tr><td colspan="6" class="muted">No training or internship applications recorded yet.</td></tr>';
-  updatePanelFooter('career', rows.length);
-}
-
-async function loadCareerRegistrations(){
-  const data = await adminFetch('/api/admin/career-registrations');
-  const rows = data.registrations || [];
-  panelState.career.data = rows;
-  document.getElementById('careerMeta').textContent = `${rows.length} total (${data.pendingCount || 0} pending / ${data.approvedCount || 0} approved)`;
-  renderCareerRegistrations();
-}
-
-// Check if admin is logged in
 async function checkAdminSession(){
   try {
     await adminFetch('/api/admin/check-session');
     loadAdmin();
   } catch (err) {
     logAdminError('Admin session check failed', err);
-    showError('Please sign in to access the admin dashboard.');
+    showError('Please sign in to access the admin control center.');
   }
 }
 
@@ -996,7 +1516,7 @@ document.getElementById('signOutBtn').addEventListener('click', async () => {
     window.location.href = '/admin-login';
   } catch (err) {
     logAdminError('Could not sign out', err);
-    alert(err.message || 'Sign out failed. Please try again.');
+    alert(err.message || 'Sign out failed.');
   }
 });
 </script>
