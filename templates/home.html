@@ -1163,6 +1163,37 @@
       line-height: 1.6;
     }
 
+    /* --- CAREER PATHWAYS --- */
+    .career-pathways {
+      position: relative;
+      isolation: isolate;
+      overflow: hidden;
+      padding: clamp(56px, 7vw, 80px) 24px;
+      background-image: linear-gradient(90deg, rgba(10, 2, 2, 0.94) 0%, rgba(27, 4, 4, 0.8) 52%, rgba(10, 2, 2, 0.62) 100%), url('/static/image/career-pathways.jpeg');
+      background-position: center 45%;
+      background-size: cover;
+      border-radius: var(--r);
+    }
+
+    .career-pathways .sec-head {
+      max-width: 620px;
+      margin-bottom: 32px;
+    }
+
+    .career-pathways .campaign-block {
+      grid-template-columns: 1fr;
+      max-width: 620px;
+      background: rgba(10, 2, 2, 0.65);
+    }
+
+    .career-pathways .campaign-img-container {
+      display: none;
+    }
+
+    .career-pathways .campaign-info {
+      padding: clamp(32px, 5vw, 48px);
+    }
+
     .career-badge {
       display: inline-flex;
       align-items: center;
@@ -1404,7 +1435,7 @@
       background: linear-gradient(135deg, var(--nakconel-red), rgba(10, 2, 2, 0.6));
       border: 1px solid var(--border);
       border-radius: var(--r);
-      padding: 64px;
+      padding: clamp(32px, 5vw, 64px);
       backdrop-filter: blur(8px);
     }
 
@@ -1525,6 +1556,16 @@
       line-height: 1.6;
       margin: 16px 0 24px 0;
       max-width: 320px;
+    }
+
+    .ft-contact-email {
+      color: var(--bronze-light);
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .ft-contact-email:hover {
+      color: var(--white);
     }
 
     .ft-col h5 {
@@ -1880,8 +1921,8 @@
 
       .ct-box {
         grid-template-columns: 1fr;
-        gap: 48px;
-        padding: 40px 24px;
+        gap: 32px;
+        padding: 32px;
       }
     }
 
@@ -2279,15 +2320,12 @@
     </div>
   </section>
 
-  <section class="sec" id="career" style="border-top:1px solid var(--border);">
+  <section class="sec career-pathways" id="career">
     <div class="sec-head">
       <span class="tag">Career Pathways</span>
       <h2 class="sec-title">Build Your Future With Us.</h2>
     </div>
     <div class="campaign-block">
-      <div class="campaign-img-container">
-        <img src="/static/image/career-hero.jpg" alt="Career at Nakconel" class="campaign-full-img">
-      </div>
       <div class="campaign-info">
         <span class="career-badge">✦ Join Our Ecosystem</span>
         <h3>Shape the Next Era of Innovation</h3>
@@ -2306,7 +2344,6 @@
         <p>Schedule a consult call with our strategy partners to review positioning pipelines, technology
           configurations, and corporate AI alignment models.</p>
         <div class="ct-lines">
-          <div class="ct-l"><span>✉</span> nakconelcompany@gmail.com</div>
           <div class="ct-l"><span>⚲</span> Remote / Global Systems Desk</div>
         </div>
       </div>
@@ -2338,6 +2375,7 @@
         </div>
         <p class="ft-desc">Combining brand strategy, content design, and enterprise technology with deep cultural
           intelligence.</p>
+        <a class="ft-contact-email" href="mailto:nakconelcompany@gmail.com">nakconelcompany@gmail.com</a>
       </div>
       <div class="ft-col">
         <h5>Pillars</h5>
@@ -2431,8 +2469,8 @@
         document.body.classList.remove('loading-active');
       }
     }
-    window.addEventListener('load', () => { setTimeout(clearAndDeactivateLoader, 2700); });
-    setTimeout(clearAndDeactivateLoader, 3400);
+    window.addEventListener('load', () => { setTimeout(clearAndDeactivateLoader, 500); });
+    setTimeout(clearAndDeactivateLoader, 800);
 
     // ABOUT DROPDOWN LOGIC (links inside now navigate to their own pages)
     const aboutDropBtn = document.getElementById('aboutDropBtn');
