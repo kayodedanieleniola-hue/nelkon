@@ -334,7 +334,7 @@
       max-width: 1400px;
       margin: 0 auto;
       padding: 0 24px;
-      height: 84px;
+      height: 68px;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -1851,6 +1851,29 @@
       background: rgba(201, 154, 74, .1);
     }
 
+    .chat-choice-item.is-disabled {
+      cursor: not-allowed;
+      opacity: .72;
+      pointer-events: none;
+    }
+
+    .chat-choice-item .coming-soon {
+      font-weight: 800;
+      color: var(--bronze-light);
+    }
+
+    .ai-chat-fab:not(.chat-open) {
+      animation: none;
+    }
+
+    .ai-chat-fab:not(.chat-open)::before,
+    .ai-chat-fab:not(.chat-open) .ai-chat-fab-ring,
+    .ai-chat-fab:not(.chat-open) .ai-chat-fab-shine::before,
+    .ai-chat-fab:not(.chat-open) .ai-chat-fab-icon,
+    .ai-chat-fab:not(.chat-open) .ai-chat-fab-badge {
+      animation-play-state: paused;
+    }
+
     .chat-choice-icon {
       width: 38px;
       height: 38px;
@@ -1945,10 +1968,10 @@
 
       .nav-links {
         position: fixed;
-        top: 84px;
+        top: 68px;
         left: -100%;
         width: 100%;
-        height: calc(100vh - 84px);
+        height: calc(100vh - 68px);
         background: rgba(27, 4, 4, 0.98);
         backdrop-filter: blur(24px);
         flex-direction: column;
@@ -2119,8 +2142,7 @@
               <div class="nav-dd-email"></div>
             </div>
             <a href="/account" class="nav-dd-item">◉ &nbsp;My Account</a>
-            <a href="/ai-chat" class="nav-dd-item" onclick="alert('Nakconel AI Chat is Coming Soon!'); return false;">◈
-              &nbsp;AI Chat</a>
+            <span class="nav-dd-item is-disabled" aria-disabled="true">AI Chat — <strong>Coming Soon</strong></span>
             <div style="height:1px;background:rgba(201,154,74,0.12);margin:6px 8px;"></div>
             <a class="nav-dd-item danger" onclick="nakSignOut()">↩ &nbsp;Sign Out</a>
           </div>
@@ -2418,11 +2440,11 @@
   </footer>
 
   <div class="chat-choice-pop" id="chatChoicePop" aria-hidden="true">
-    <a href="/ai-chat" class="chat-choice-item" onclick="alert('Nakconel AI Chat is Coming Soon!'); return false;">
+    <span class="chat-choice-item is-disabled" aria-disabled="true">
       <span class="chat-choice-icon">AI</span>
       <span class="chat-choice-text"><strong>Chat with Nakconel AI</strong><span>Brand strategy assistant (Coming
-          Soon)</span></span>
-    </a>
+          <span class="coming-soon">Soon</span>)</span></span>
+    </span>
     <a href="/chat" class="chat-choice-item">
       <span class="chat-choice-icon">TM</span>
       <span class="chat-choice-text"><strong>Chat with the team</strong><span>Message a Nakconel team
@@ -2459,12 +2481,14 @@
       if (fab.contains(event.target)) {
         const open = !pop.classList.contains('open');
         pop.classList.toggle('open', open);
+        fab.classList.toggle('chat-open', open);
         fab.setAttribute('aria-expanded', String(open));
         pop.setAttribute('aria-hidden', String(!open));
         return;
       }
       if (!pop.contains(event.target)) {
         pop.classList.remove('open');
+        fab.classList.remove('chat-open');
         fab.setAttribute('aria-expanded', 'false');
         pop.setAttribute('aria-hidden', 'true');
       }
