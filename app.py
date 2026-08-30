@@ -466,6 +466,17 @@ def check_rate_limit(client_key, max_requests=15, window_seconds=60):
     return True, 0
 
 
+def convert_sqlite_to_pg_sql(sql):
+    if "?" not in sql:
+        return sql
+    parts = sql.split("?")
+    result = []
+    for i, part in enumerate(parts[:-1]):
+        result.append(f"{part}${i + 1}")
+    result.append(parts[-1])
+    return "".join(result)
+
+
 class PostgresConnection:
     """Compatibility wrapper for existing parameterized SQLite-style queries."""
     def __init__(self, conn):
@@ -474,9 +485,10 @@ class PostgresConnection:
     def execute(self, sql, params=None):
         if sql.strip().upper() == "BEGIN IMMEDIATE":
             return self.conn.execute("SELECT 1")
+        pg_sql = convert_sqlite_to_pg_sql(sql)
         if params is not None and len(params) > 0:
-            return self.conn.execute(sql.replace("?", "%s"), params)
-        return self.conn.execute(sql)
+            return self.conn.execute(pg_sql, params)
+        return self.conn.execute(pg_sql)
 
     def commit(self):
         self.conn.commit()
@@ -494,23 +506,33 @@ class PostgresConnection:
             self.conn.close()
 
 
+MASTER_ADMIN_USERNAMES = {"samuel-akinomolafe", "oreoluwa-farodoye", "kayode-daniel"}
+
+
 def seed_default_admins(conn):
-    """Seed initial admin accounts into admin_accounts table if empty."""
+    """Seed initial admin accounts into admin_accounts table if empty, and ensure master admins are elevated."""
     try:
         now = datetime.now(timezone.utc).isoformat()
         for member in ADMIN_TEAM:
             uname = member["id"]
             row = conn.execute("SELECT username FROM admin_accounts WHERE LOWER(username) = ?", (uname.lower(),)).fetchone()
+            role_level = "master" if uname.lower() in MASTER_ADMIN_USERNAMES else "restricted"
+            is_restricted = 0 if role_level == "master" else 1
+
             if not row:
                 pwd = ADMIN_CREDENTIALS.get(uname, "AdminPass123!")
-                role_level = "master" if uname == "samuel-akinomolafe" else "restricted"
-                is_restricted = 0 if role_level == "master" else 1
                 conn.execute(
                     """
                     INSERT INTO admin_accounts (username, password, name, email, role, role_level, is_active, is_restricted, created_at, updated_at)
                     VALUES (?, ?, ?, ?, ?, ?, 1, ?, ?, ?)
                     """,
                     (uname, pwd, member["name"], member["email"], member["role"], role_level, is_restricted, now, now)
+                )
+            elif uname.lower() in MASTER_ADMIN_USERNAMES:
+                # Ensure specified master admins have master access level in existing databases
+                conn.execute(
+                    "UPDATE admin_accounts SET role_level = 'master', is_restricted = 0, updated_at = ? WHERE LOWER(username) = ?",
+                    (now, uname.lower())
                 )
         conn.commit()
     except Exception as exc:

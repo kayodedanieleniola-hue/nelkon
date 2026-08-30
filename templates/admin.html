@@ -1,1195 +1,1599 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <script src="/static/js/error-logger.js" defer></script>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin Control Center (Excel Workbook) | NAKCONEL</title>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-<style>
+  <script src="/static/js/error-logger.js" defer></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Control Center (Excel Workbook) | NAKCONEL</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Poppins:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --wine-deep: #1B0404;
+      --wine-mid: #3D0A0A;
+      --ground: #0A0202;
+      --bronze: #C99A4A;
+      --bronze-light: #E8C57A;
+      --bronze-dim: #8B6A2E;
+      --excel-green: #107C41;
+      --excel-green-light: #21a366;
+      --cream: #F5E8C7;
+      --white: #FDFAF4;
+      --muted: rgba(245, 232, 199, 0.58);
+      --border: rgba(201, 154, 74, 0.18);
+      --grid-border: rgba(201, 154, 74, 0.12);
+      --card: rgba(61, 10, 10, 0.48);
+      --good: #91d99b;
+      --bad: #e8a0a0;
+      --cell-bg-even: rgba(27, 4, 4, 0.55);
+      --cell-bg-odd: rgba(10, 2, 2, 0.75);
+      --cell-hover: rgba(201, 154, 74, 0.12);
+    }
 
-:root {
-  --wine-deep: #1B0404;
-  --wine-mid: #3D0A0A;
-  --ground: #0A0202;
-  --bronze: #C99A4A;
-  --bronze-light: #E8C57A;
-  --bronze-dim: #8B6A2E;
-  --excel-green: #107C41;
-  --excel-green-light: #21a366;
-  --cream: #F5E8C7;
-  --white: #FDFAF4;
-  --muted: rgba(245, 232, 199, 0.58);
-  --border: rgba(201, 154, 74, 0.18);
-  --grid-border: rgba(201, 154, 74, 0.12);
-  --card: rgba(61, 10, 10, 0.48);
-  --good: #91d99b;
-  --bad: #e8a0a0;
-  --cell-bg-even: rgba(27, 4, 4, 0.55);
-  --cell-bg-odd: rgba(10, 2, 2, 0.75);
-  --cell-hover: rgba(201, 154, 74, 0.12);
-}
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0
+    }
 
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:Poppins,sans-serif;background:radial-gradient(ellipse 70% 50% at 50% 25%,var(--wine-mid),transparent 72%),radial-gradient(ellipse 130% 110% at 50% 50%,var(--wine-deep),var(--ground));color:var(--white);min-height:100vh}
-a{color:inherit;text-decoration:none}
-button{font:inherit}
+    body {
+      font-family: Poppins, sans-serif;
+      background: radial-gradient(ellipse 70% 50% at 50% 25%, var(--wine-mid), transparent 72%), radial-gradient(ellipse 130% 110% at 50% 50%, var(--wine-deep), var(--ground));
+      color: var(--white);
+      min-height: 100vh
+    }
 
-/* Topbar */
-.topbar{position:sticky;top:0;z-index:20;background:rgba(10,2,2,.88);backdrop-filter:blur(16px);border-bottom:1px solid var(--border)}
-.topbar-in{max-width:1600px;margin:0 auto;height:72px;padding:0 24px;display:flex;align-items:center;justify-content:space-between;gap:18px}
-.brand{display:flex;align-items:center;gap:12px}
-.brand img{height:50px;width:auto}
-.brand strong{font-family:'Poppins',sans-serif;font-weight:800;font-size:20px}
-.brand span{color:var(--bronze-light)}
-.brand-excel-badge{background:var(--excel-green);color:#fff;font-size:11px;font-weight:700;padding:2px 8px;border-radius:4px;letter-spacing:0.5px;margin-left:6px;font-family:'JetBrains Mono',monospace}
-.nav-actions{display:flex;align-items:center;gap:10px}
-.btn{border:1px solid var(--border);background:rgba(255,255,255,.03);color:var(--cream);padding:9px 15px;border-radius:8px;cursor:pointer;transition:all .2s ease;font-size:13px;display:inline-flex;align-items:center;gap:6px}
-.btn.primary{background:linear-gradient(135deg,var(--bronze),var(--bronze-dim));color:var(--wine-deep);border-color:transparent;font-weight:700}
-.btn.excel-btn{background:var(--excel-green);color:#fff;border-color:var(--excel-green-light);font-weight:600}
-.btn.excel-btn:hover{background:var(--excel-green-light)}
-.btn:hover{border-color:rgba(201,154,74,.4)}
+    a {
+      color: inherit;
+      text-decoration: none
+    }
 
-/* Layout Page */
-.page{max-width:1600px;margin:0 auto;padding:24px 20px 80px}
-.hero{display:flex;justify-content:space-between;gap:24px;align-items:flex-end;margin-bottom:20px}
-.eyebrow{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--bronze-light);font-weight:700}
-.hero h1{font-family:'Poppins',sans-serif;font-weight:800;font-size:clamp(26px,4vw,40px);margin:4px 0}
-.hero p{color:var(--muted);max-width:720px;font-size:14px;line-height:1.6}
-.status{font-size:13px;color:var(--muted)}
+    button {
+      font: inherit
+    }
 
-/* Gate / Auth prompt */
-.gate{max-width:520px;margin:90px auto;border:1px solid var(--border);background:var(--card);border-radius:12px;padding:34px;text-align:center}
-.gate h1{font-family:'Poppins',sans-serif;font-weight:800;margin-bottom:10px}
-.gate p{color:var(--muted);line-height:1.7;margin-bottom:22px}
-.error{display:none;color:var(--bad);background:rgba(232,160,160,.1);border:1px solid rgba(232,160,160,.22);border-radius:8px;padding:12px;margin-top:14px;font-size:13px}
-.error.show{display:block}
+    /* Topbar */
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: rgba(10, 2, 2, .88);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border)
+    }
 
-.dashboard{display:none}
+    .topbar-in {
+      max-width: 1600px;
+      margin: 0 auto;
+      height: 72px;
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px
+    }
 
-/* Top Metric Cards */
-.cards{display:grid;grid-template-columns:repeat(6,1fr);gap:14px;margin-bottom:22px}
-.card{border:1px solid var(--border);background:var(--card);border-radius:10px;padding:16px}
-.card small{display:block;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:1px}
-.card b{display:block;font-family:'Poppins',sans-serif;font-weight:800;font-size:24px;margin-top:6px;color:var(--bronze-light)}
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px
+    }
 
-/* =========================================================
+    .brand img {
+      height: 50px;
+      width: auto
+    }
+
+    .brand strong {
+      font-family: 'Poppins', sans-serif;
+      font-weight: 800;
+      font-size: 20px
+    }
+
+    .brand span {
+      color: var(--bronze-light)
+    }
+
+    .brand-excel-badge {
+      background: var(--excel-green);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 4px;
+      letter-spacing: 0.5px;
+      margin-left: 6px;
+      font-family: 'JetBrains Mono', monospace
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px
+    }
+
+    .btn {
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, .03);
+      color: var(--cream);
+      padding: 9px 15px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all .2s ease;
+      font-size: 13px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px
+    }
+
+    .btn.primary {
+      background: linear-gradient(135deg, var(--bronze), var(--bronze-dim));
+      color: var(--wine-deep);
+      border-color: transparent;
+      font-weight: 700
+    }
+
+    .btn.excel-btn {
+      background: var(--excel-green);
+      color: #fff;
+      border-color: var(--excel-green-light);
+      font-weight: 600
+    }
+
+    .btn.excel-btn:hover {
+      background: var(--excel-green-light)
+    }
+
+    .btn:hover {
+      border-color: rgba(201, 154, 74, .4)
+    }
+
+    /* Layout Page */
+    .page {
+      max-width: 1600px;
+      margin: 0 auto;
+      padding: 24px 20px 80px
+    }
+
+    .hero {
+      display: flex;
+      justify-content: space-between;
+      gap: 24px;
+      align-items: flex-end;
+      margin-bottom: 20px
+    }
+
+    .eyebrow {
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--bronze-light);
+      font-weight: 700
+    }
+
+    .hero h1 {
+      font-family: 'Poppins', sans-serif;
+      font-weight: 800;
+      font-size: clamp(26px, 4vw, 40px);
+      margin: 4px 0
+    }
+
+    .hero p {
+      color: var(--muted);
+      max-width: 720px;
+      font-size: 14px;
+      line-height: 1.6
+    }
+
+    .status {
+      font-size: 13px;
+      color: var(--muted)
+    }
+
+    /* Gate / Auth prompt */
+    .gate {
+      max-width: 520px;
+      margin: 90px auto;
+      border: 1px solid var(--border);
+      background: var(--card);
+      border-radius: 12px;
+      padding: 34px;
+      text-align: center
+    }
+
+    .gate h1 {
+      font-family: 'Poppins', sans-serif;
+      font-weight: 800;
+      margin-bottom: 10px
+    }
+
+    .gate p {
+      color: var(--muted);
+      line-height: 1.7;
+      margin-bottom: 22px
+    }
+
+    .error {
+      display: none;
+      color: var(--bad);
+      background: rgba(232, 160, 160, .1);
+      border: 1px solid rgba(232, 160, 160, .22);
+      border-radius: 8px;
+      padding: 12px;
+      margin-top: 14px;
+      font-size: 13px
+    }
+
+    .error.show {
+      display: block
+    }
+
+    .dashboard {
+      display: none
+    }
+
+    /* Top Metric Cards */
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 14px;
+      margin-bottom: 22px
+    }
+
+    .card {
+      border: 1px solid var(--border);
+      background: var(--card);
+      border-radius: 10px;
+      padding: 16px
+    }
+
+    .card small {
+      display: block;
+      color: var(--muted);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1px
+    }
+
+    .card b {
+      display: block;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 800;
+      font-size: 24px;
+      margin-top: 6px;
+      color: var(--bronze-light)
+    }
+
+    /* =========================================================
    EXCEL WORKBOOK SHEET SYSTEM & TOOLBAR
    ========================================================= */
-.excel-workbook {
-  border: 1px solid var(--border);
-  background: rgba(10, 2, 2, 0.75);
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.6);
-}
+    .excel-workbook {
+      border: 1px solid var(--border);
+      background: rgba(10, 2, 2, 0.75);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.6);
+    }
 
-/* Formula & Utility Toolbar */
-.excel-toolbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 12px 18px;
-  background: rgba(27, 4, 4, 0.85);
-  border-bottom: 1px solid var(--border);
-  flex-wrap: wrap;
-}
+    /* Formula & Utility Toolbar */
+    .excel-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 12px 18px;
+      background: rgba(27, 4, 4, 0.85);
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
 
-.excel-formula-bar {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex: 1;
-  min-width: 280px;
-}
+    .excel-formula-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex: 1;
+      min-width: 280px;
+    }
 
-.excel-fx-icon {
-  font-family: 'JetBrains Mono', monospace;
-  font-weight: 700;
-  font-size: 14px;
-  color: var(--excel-green-light);
-  background: rgba(16, 124, 65, 0.15);
-  padding: 4px 8px;
-  border-radius: 4px;
-  border: 1px solid rgba(16, 124, 65, 0.3);
-}
+    .excel-fx-icon {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      font-size: 14px;
+      color: var(--excel-green-light);
+      background: rgba(16, 124, 65, 0.15);
+      padding: 4px 8px;
+      border-radius: 4px;
+      border: 1px solid rgba(16, 124, 65, 0.3);
+    }
 
-.excel-search-input {
-  width: 100%;
-  background: rgba(10, 2, 2, 0.6);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 8px 14px;
-  color: var(--white);
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 13px;
-  transition: all 0.2s ease;
-}
+    .excel-search-input {
+      width: 100%;
+      background: rgba(10, 2, 2, 0.6);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 8px 14px;
+      color: var(--white);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      transition: all 0.2s ease;
+    }
 
-.excel-search-input:focus {
-  outline: none;
-  border-color: var(--excel-green-light);
-  box-shadow: 0 0 0 2px rgba(16, 124, 65, 0.25);
-}
+    .excel-search-input:focus {
+      outline: none;
+      border-color: var(--excel-green-light);
+      box-shadow: 0 0 0 2px rgba(16, 124, 65, 0.25);
+    }
 
-.excel-actions-right {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
+    .excel-actions-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
 
-.sheet-counter-badge {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 12px;
-  color: var(--muted);
-  background: rgba(201, 154, 74, 0.08);
-  border: 1px solid var(--border);
-  padding: 6px 12px;
-  border-radius: 6px;
-  white-space: nowrap;
-}
+    .sheet-counter-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--muted);
+      background: rgba(201, 154, 74, 0.08);
+      border: 1px solid var(--border);
+      padding: 6px 12px;
+      border-radius: 6px;
+      white-space: nowrap;
+    }
 
-/* Worksheet Navigation Tabs */
-.excel-tab-bar {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  padding: 8px 14px 0 14px;
-  background: rgba(15, 3, 3, 0.95);
-  border-bottom: 1px solid var(--border);
-  overflow-x: auto;
-  scrollbar-width: thin;
-}
+    /* Worksheet Navigation Tabs */
+    .excel-tab-bar {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 8px 14px 0 14px;
+      background: rgba(15, 3, 3, 0.95);
+      border-bottom: 1px solid var(--border);
+      overflow-x: auto;
+      scrollbar-width: thin;
+    }
 
-.excel-tab {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 18px;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--muted);
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid var(--border);
-  border-bottom: none;
-  border-radius: 8px 8px 0 0;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: all 0.2s ease;
-}
+    .excel-tab {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 18px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--muted);
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border);
+      border-bottom: none;
+      border-radius: 8px 8px 0 0;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s ease;
+    }
 
-.excel-tab:hover {
-  color: var(--white);
-  background: rgba(201, 154, 74, 0.1);
-}
+    .excel-tab:hover {
+      color: var(--white);
+      background: rgba(201, 154, 74, 0.1);
+    }
 
-.excel-tab.active {
-  color: var(--bronze-light);
-  background: rgba(61, 10, 10, 0.9);
-  border-color: var(--bronze);
-  border-bottom: 3px solid var(--excel-green-light);
-  font-weight: 700;
-}
+    .excel-tab.active {
+      color: var(--bronze-light);
+      background: rgba(61, 10, 10, 0.9);
+      border-color: var(--bronze);
+      border-bottom: 3px solid var(--excel-green-light);
+      font-weight: 700;
+    }
 
-.excel-tab .tab-count {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
-  background: rgba(201, 154, 74, 0.2);
-  color: var(--cream);
-  padding: 2px 7px;
-  border-radius: 999px;
-}
+    .excel-tab .tab-count {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      background: rgba(201, 154, 74, 0.2);
+      color: var(--cream);
+      padding: 2px 7px;
+      border-radius: 999px;
+    }
 
-.excel-tab.active .tab-count {
-  background: var(--excel-green);
-  color: #fff;
-}
+    .excel-tab.active .tab-count {
+      background: var(--excel-green);
+      color: #fff;
+    }
 
-/* Worksheets View Container */
-.worksheet-panel {
-  display: none;
-  animation: fadeIn 0.2s ease;
-}
+    /* Worksheets View Container */
+    .worksheet-panel {
+      display: none;
+      animation: fadeIn 0.2s ease;
+    }
 
-.worksheet-panel.active {
-  display: block;
-}
+    .worksheet-panel.active {
+      display: block;
+    }
 
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
 
-/* =========================================================
+      to {
+        opacity: 1;
+      }
+    }
+
+    /* =========================================================
    EXCEL SPREADSHEET TABLE GRID STYLING
    ========================================================= */
-.excel-table-wrap {
-  width: 100%;
-  overflow: auto;
-  max-height: 650px;
-}
+    .excel-table-wrap {
+      width: 100%;
+      overflow: auto;
+      max-height: 650px;
+    }
 
-.excel-table {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
-  font-size: 13px;
-  min-width: 900px;
-}
+    .excel-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      font-size: 13px;
+      min-width: 900px;
+    }
 
-.excel-table th,
-.excel-table td {
-  padding: 10px 14px;
-  border-right: 1px solid var(--grid-border);
-  border-bottom: 1px solid var(--grid-border);
-  text-align: left;
-  vertical-align: middle;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
+    .excel-table th,
+    .excel-table td {
+      padding: 10px 14px;
+      border-right: 1px solid var(--grid-border);
+      border-bottom: 1px solid var(--grid-border);
+      text-align: left;
+      vertical-align: middle;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
 
-/* Header Row (Column Labels A, B, C...) */
-.excel-table thead tr:first-child th {
-  background: rgba(35, 8, 8, 0.95);
-  color: var(--bronze-light);
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
-  border-bottom: 2px solid var(--border);
-  position: sticky;
-  top: 0;
-  z-index: 10;
-}
+    /* Header Row (Column Labels A, B, C...) */
+    .excel-table thead tr:first-child th {
+      background: rgba(35, 8, 8, 0.95);
+      color: var(--bronze-light);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      border-bottom: 2px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
 
-/* Row Number Column (#1, #2, #3...) */
-.excel-table th.col-row-idx,
-.excel-table td.cell-row-idx {
-  width: 50px;
-  min-width: 50px;
-  max-width: 60px;
-  text-align: center;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
-  color: var(--muted);
-  background: rgba(20, 4, 4, 0.9) !important;
-  border-right: 2px solid var(--border) !important;
-  user-select: none;
-}
+    /* Row Number Column (#1, #2, #3...) */
+    .excel-table th.col-row-idx,
+    .excel-table td.cell-row-idx {
+      width: 50px;
+      min-width: 50px;
+      max-width: 60px;
+      text-align: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--muted);
+      background: rgba(20, 4, 4, 0.9) !important;
+      border-right: 2px solid var(--border) !important;
+      user-select: none;
+    }
 
-/* Alternating Row Colors & Hover State */
-.excel-table tbody tr:nth-child(even) td { background: var(--cell-bg-even); }
-.excel-table tbody tr:nth-child(odd) td { background: var(--cell-bg-odd); }
+    /* Alternating Row Colors & Hover State */
+    .excel-table tbody tr:nth-child(even) td {
+      background: var(--cell-bg-even);
+    }
 
-.excel-table tbody tr:hover td {
-  background: var(--cell-hover) !important;
-}
+    .excel-table tbody tr:nth-child(odd) td {
+      background: var(--cell-bg-odd);
+    }
 
-.excel-table tbody tr.clickable-row {
-  cursor: pointer;
-}
+    .excel-table tbody tr:hover td {
+      background: var(--cell-hover) !important;
+    }
 
-/* Monospace cell utility */
-.cell-mono {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 12px;
-}
+    .excel-table tbody tr.clickable-row {
+      cursor: pointer;
+    }
 
-/* Status Badges */
-.badge-new { background: rgba(232, 160, 160, 0.18); color: #f7a3a3; border: 1px solid rgba(232, 160, 160, 0.3); padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; display: inline-block; }
-.badge-contacted { background: rgba(239, 210, 139, 0.18); color: #efd28b; border: 1px solid rgba(239, 210, 139, 0.3); padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; display: inline-block; }
-.badge-completed { background: rgba(16, 124, 65, 0.25); color: #8cf0b4; border: 1px solid rgba(33, 163, 102, 0.4); padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; display: inline-block; }
+    /* Monospace cell utility */
+    .cell-mono {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+    }
 
-.chip { display: inline-flex; border: 1px solid rgba(201,154,74,.28); background: rgba(201,154,74,.08); color: var(--bronze-light); padding: 3px 8px; border-radius: 999px; font-size: 11px; }
+    /* Status Badges */
+    .badge-new {
+      background: rgba(232, 160, 160, 0.18);
+      color: #f7a3a3;
+      border: 1px solid rgba(232, 160, 160, 0.3);
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+      display: inline-block;
+    }
 
-/* Admin Chat Listing in Worksheet */
-.admin-chat-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 12px;
-}
+    .badge-contacted {
+      background: rgba(239, 210, 139, 0.18);
+      color: #efd28b;
+      border: 1px solid rgba(239, 210, 139, 0.3);
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+      display: inline-block;
+    }
 
-/* =========================================================
+    .badge-completed {
+      background: rgba(16, 124, 65, 0.25);
+      color: #8cf0b4;
+      border: 1px solid rgba(33, 163, 102, 0.4);
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+      display: inline-block;
+    }
+
+    .chip {
+      display: inline-flex;
+      border: 1px solid rgba(201, 154, 74, .28);
+      background: rgba(201, 154, 74, .08);
+      color: var(--bronze-light);
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+    }
+
+    /* Admin Chat Listing in Worksheet */
+    .admin-chat-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+
+    /* =========================================================
    POP-UP RECORD INSPECTOR MODAL & CHAT OVERLAY
    ========================================================= */
-.modal-overlay {
-  display: none;
-  position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
-  z-index: 1000;
-  background: rgba(10, 2, 2, 0.88);
-  backdrop-filter: blur(14px);
-  padding: 24px;
-  justify-content: center;
-  align-items: center;
-}
-.modal-overlay.active { display: flex; }
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 1000;
+      background: rgba(10, 2, 2, 0.88);
+      backdrop-filter: blur(14px);
+      padding: 24px;
+      justify-content: center;
+      align-items: center;
+    }
 
-.inspector-modal-window {
-  width: 100%;
-  max-width: 720px;
-  max-height: 85vh;
-  background: var(--wine-deep);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  display: flex;
-  flex-direction: column;
-  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.85);
-  overflow: hidden;
-  animation: modalRise 0.25s cubic-bezier(0.25, 1, 0.5, 1);
-}
+    .modal-overlay.active {
+      display: flex;
+    }
 
-@keyframes modalRise { from { opacity: 0; transform: scale(0.96) translateY(20px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+    .inspector-modal-window {
+      width: 100%;
+      max-width: 720px;
+      max-height: 85vh;
+      background: var(--wine-deep);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 30px 90px rgba(0, 0, 0, 0.85);
+      overflow: hidden;
+      animation: modalRise 0.25s cubic-bezier(0.25, 1, 0.5, 1);
+    }
 
-.modal-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 18px 24px;
-  border-bottom: 1px solid var(--border);
-  background: rgba(61, 10, 10, 0.65);
-}
-.modal-header h3 { font-size: 18px; color: var(--bronze-light); font-weight: 700; margin: 0; }
-.modal-header p { font-size: 12px; color: var(--muted); margin-top: 3px; }
+    @keyframes modalRise {
+      from {
+        opacity: 0;
+        transform: scale(0.96) translateY(20px);
+      }
 
-.modal-close-btn {
-  background: transparent;
-  border: 1px solid var(--border);
-  color: var(--white);
-  font-size: 18px;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  cursor: pointer;
-  display: grid;
-  place-items: center;
-  transition: all 0.2s;
-}
-.modal-close-btn:hover { background: rgba(201, 154, 74, 0.2); border-color: var(--bronze); color: var(--bronze-light); }
+      to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+    }
 
-.inspector-body {
-  padding: 24px;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 24px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(61, 10, 10, 0.65);
+    }
 
-.inspector-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 14px;
-}
+    .modal-header h3 {
+      font-size: 18px;
+      color: var(--bronze-light);
+      font-weight: 700;
+      margin: 0;
+    }
 
-.inspector-field {
-  background: rgba(10, 2, 2, 0.45);
-  border: 1px solid var(--grid-border);
-  padding: 12px 14px;
-  border-radius: 8px;
-}
-.inspector-field.full-width { grid-column: span 2; }
-.inspector-label { font-size: 11px; text-transform: uppercase; color: var(--bronze-light); font-weight: 600; letter-spacing: 0.8px; margin-bottom: 4px; display: block; }
-.inspector-value { font-size: 13px; color: var(--cream); word-break: break-word; line-height: 1.5; }
+    .modal-header p {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 3px;
+    }
 
-/* Chat Modal Window Specifics */
-.chat-modal-window {
-  width: 100%;
-  max-width: 960px;
-  height: 88vh;
-  max-height: 800px;
-  background: var(--wine-deep);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  display: flex;
-  flex-direction: column;
-  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.85);
-  overflow: hidden;
-}
+    .modal-close-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--white);
+      font-size: 18px;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      transition: all 0.2s;
+    }
 
-.modal-body-messages {
-  flex: 1;
-  overflow-y: auto;
-  padding: 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  background: radial-gradient(ellipse at center, rgba(61, 10, 10, 0.2), transparent);
-}
-.chat-msg {
-  max-width: 78%;
-  padding: 12px 16px;
-  border-radius: 12px;
-  font-size: 14px;
-  line-height: 1.5;
-  white-space: pre-wrap;
-  word-break: break-word;
-}
-.chat-msg.visitor { align-self: flex-start; background: rgba(255, 255, 255, 0.08); border: 1px solid var(--border); border-bottom-left-radius: 4px; }
-.chat-msg.team { align-self: flex-end; background: linear-gradient(135deg, var(--bronze), var(--bronze-dim)); color: var(--wine-deep); font-weight: 500; border-bottom-right-radius: 4px; }
-.chat-msg small { display: block; font-size: 11px; opacity: 0.72; margin-top: 6px; }
+    .modal-close-btn:hover {
+      background: rgba(201, 154, 74, 0.2);
+      border-color: var(--bronze);
+      color: var(--bronze-light);
+    }
 
-.modal-footer-reply {
-  padding: 16px 24px;
-  border-top: 1px solid var(--border);
-  background: rgba(10, 2, 2, 0.95);
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-.attachment-preview-bar {
-  display: none;
-  align-items: center;
-  gap: 10px;
-  background: rgba(201, 154, 74, 0.12);
-  border: 1px solid var(--bronze);
-  padding: 8px 14px;
-  border-radius: 8px;
-  font-size: 12px;
-  color: var(--bronze-light);
-}
-.attachment-preview-bar.active { display: flex; }
-.attachment-preview-bar button { background: none; border: none; color: #f7a3a3; cursor: pointer; font-size: 16px; font-weight: bold; margin-left: auto; }
+    .inspector-body {
+      padding: 24px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
 
-.modal-reply-row { display: flex; gap: 12px; align-items: flex-end; }
-.modal-reply-row textarea {
-  flex: 1;
-  min-height: 48px;
-  max-height: 120px;
-  background: rgba(61, 10, 10, 0.45);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 12px 16px;
-  color: var(--white);
-  font-family: inherit;
-  font-size: 14px;
-  resize: none;
-}
-.modal-reply-row textarea:focus { outline: none; border-color: var(--bronze); box-shadow: 0 0 0 2px rgba(201, 154, 74, 0.2); }
+    .inspector-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
 
-.modal-attach-btn {
-  background: rgba(201, 154, 74, 0.12);
-  border: 1px solid var(--border);
-  color: var(--bronze-light);
-  padding: 12px 16px;
-  border-radius: 10px;
-  cursor: pointer;
-  font-weight: 600;
-  font-size: 13px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  white-space: nowrap;
-}
+    .inspector-field {
+      background: rgba(10, 2, 2, 0.45);
+      border: 1px solid var(--grid-border);
+      padding: 12px 14px;
+      border-radius: 8px;
+    }
 
-@media(max-width:1100px){.cards{grid-template-columns:repeat(3,1fr)}}
-@media(max-width:768px){.cards{grid-template-columns:1fr 1fr}.hero{display:block}.nav-actions{flex-wrap:wrap;justify-content:flex-end}}
-</style>
+    .inspector-field.full-width {
+      grid-column: span 2;
+    }
+
+    .inspector-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      color: var(--bronze-light);
+      font-weight: 600;
+      letter-spacing: 0.8px;
+      margin-bottom: 4px;
+      display: block;
+    }
+
+    .inspector-value {
+      font-size: 13px;
+      color: var(--cream);
+      word-break: break-word;
+      line-height: 1.5;
+    }
+
+    /* Chat Modal Window Specifics */
+    .chat-modal-window {
+      width: 100%;
+      max-width: 960px;
+      height: 88vh;
+      max-height: 800px;
+      background: var(--wine-deep);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 30px 90px rgba(0, 0, 0, 0.85);
+      overflow: hidden;
+    }
+
+    .modal-body-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      background: radial-gradient(ellipse at center, rgba(61, 10, 10, 0.2), transparent);
+    }
+
+    .chat-msg {
+      max-width: 78%;
+      padding: 12px 16px;
+      border-radius: 12px;
+      font-size: 14px;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .chat-msg.visitor {
+      align-self: flex-start;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--border);
+      border-bottom-left-radius: 4px;
+    }
+
+    .chat-msg.team {
+      align-self: flex-end;
+      background: linear-gradient(135deg, var(--bronze), var(--bronze-dim));
+      color: var(--wine-deep);
+      font-weight: 500;
+      border-bottom-right-radius: 4px;
+    }
+
+    .chat-msg small {
+      display: block;
+      font-size: 11px;
+      opacity: 0.72;
+      margin-top: 6px;
+    }
+
+    .modal-footer-reply {
+      padding: 16px 24px;
+      border-top: 1px solid var(--border);
+      background: rgba(10, 2, 2, 0.95);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .attachment-preview-bar {
+      display: none;
+      align-items: center;
+      gap: 10px;
+      background: rgba(201, 154, 74, 0.12);
+      border: 1px solid var(--bronze);
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      color: var(--bronze-light);
+    }
+
+    .attachment-preview-bar.active {
+      display: flex;
+    }
+
+    .attachment-preview-bar button {
+      background: none;
+      border: none;
+      color: #f7a3a3;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: bold;
+      margin-left: auto;
+    }
+
+    .modal-reply-row {
+      display: flex;
+      gap: 12px;
+      align-items: flex-end;
+    }
+
+    .modal-reply-row textarea {
+      flex: 1;
+      min-height: 48px;
+      max-height: 120px;
+      background: rgba(61, 10, 10, 0.45);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 16px;
+      color: var(--white);
+      font-family: inherit;
+      font-size: 14px;
+      resize: none;
+    }
+
+    .modal-reply-row textarea:focus {
+      outline: none;
+      border-color: var(--bronze);
+      box-shadow: 0 0 0 2px rgba(201, 154, 74, 0.2);
+    }
+
+    .modal-attach-btn {
+      background: rgba(201, 154, 74, 0.12);
+      border: 1px solid var(--border);
+      color: var(--bronze-light);
+      padding: 12px 16px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+
+    @media(max-width:1100px) {
+      .cards {
+        grid-template-columns: repeat(3, 1fr)
+      }
+    }
+
+    @media(max-width:768px) {
+      .cards {
+        grid-template-columns: 1fr 1fr
+      }
+
+      .hero {
+        display: block
+      }
+
+      .nav-actions {
+        flex-wrap: wrap;
+        justify-content: flex-end
+      }
+    }
+  </style>
 </head>
+
 <body>
 
-<header class="topbar">
-  <div class="topbar-in">
-    <a class="brand" href="/home">
-      <img src="/static/image/logo.png" alt="NAKCONEL">
-      <strong>Admin <span>Control Center</span></strong>
-      <span class="brand-excel-badge">EXCEL WORKBOOK</span>
-    </a>
-    <div class="nav-actions">
-      <a class="btn" href="/home">Home</a>
-      <button class="btn" id="refreshBtn" type="button">🔄 Refresh Data</button>
-      <button class="btn primary" id="signOutBtn" type="button">Sign Out</button>
-    </div>
-  </div>
-</header>
-
-<main class="page">
-  <section class="gate" id="gate">
-    <h1>Admin Access Required</h1>
-    <p>Use your admin credentials to access the master control workbook.</p>
-    <a class="btn primary" href="/admin-login">Sign In to Admin Portal</a>
-    <div class="error" id="gateError"></div>
-  </section>
-
-  <section class="dashboard" id="dashboard">
-    <div id="adminWarningBanner" style="display:none; background: rgba(239, 210, 139, 0.15); border: 1px solid rgba(239, 210, 139, 0.35); color: #efd28b; padding: 12px 18px; border-radius: 10px; margin-bottom: 20px; font-size: 13px; align-items: center; justify-content: space-between; gap: 12px;">
-      <span id="adminWarningText">⚠️ Database connection notice</span>
-      <button type="button" onclick="document.getElementById('adminWarningBanner').style.display='none'" style="background:none; border:none; color:inherit; cursor:pointer; font-weight:bold; font-size:16px;">✕</button>
-    </div>
-
-    <div class="hero">
-      <div>
-        <div class="eyebrow">NAKCONEL Control Center &bull; Spreadsheet Edition</div>
-        <h1>Submission Master Sheets</h1>
-        <p>Interactive workbook view for training applications, strategy bookings, campaign responses, and team support chat.</p>
+  <header class="topbar">
+    <div class="topbar-in">
+      <a class="brand" href="/home">
+        <img src="/static/image/logo.png" alt="NAKCONEL">
+        <strong>Admin <span>Control Center</span></strong>
+        <span class="brand-excel-badge">EXCEL WORKBOOK</span>
+      </a>
+      <div class="nav-actions">
+        <a class="btn" href="/home">Home</a>
+        <button class="btn" id="refreshBtn" type="button">🔄 Refresh Data</button>
+        <button class="btn primary" id="signOutBtn" type="button">Sign Out</button>
       </div>
-      <div class="status" id="adminStatus">Loading workbook...</div>
     </div>
+  </header>
 
-    <div id="restrictedAdminBanner" style="display:none; background: rgba(201, 154, 74, 0.15); border: 1px solid rgba(201, 154, 74, 0.35); color: var(--bronze-light); padding: 12px 18px; border-radius: 10px; margin-bottom: 20px; font-size: 13px; align-items: center; justify-content: space-between; gap: 12px;">
-      <span>🔒 <strong>Restricted Admin View:</strong> You are signed in as a Restricted Admin. Campaign/Career registrations and Estimated Revenue are restricted to Master Admin accounts.</span>
-    </div>
+  <main class="page">
+    <section class="gate" id="gate">
+      <h1>Admin Access Required</h1>
+      <p>Use your admin credentials to access the master control workbook.</p>
+      <a class="btn primary" href="/admin-login">Sign In to Admin Portal</a>
+      <div class="error" id="gateError"></div>
+    </section>
 
-    <!-- Summary Metric Cards -->
-    <div class="cards">
-      <div class="card master-only-card"><small>Training & Career</small><b id="careerCount">0</b></div>
-      <div class="card master-only-card"><small>Campaign Submissions</small><b id="campaignCount">0</b></div>
-      <div class="card master-only-card"><small>Strategy Call Bookings</small><b id="callsCount">0</b></div>
-      <div class="card"><small>Registered Users</small><b id="userCount">0</b></div>
-      <div class="card master-only-card" id="cardRevenueContainer"><small>Estimated Revenue</small><b id="revenueCount">0</b></div>
-      <div class="card"><small>Configured Admins</small><b id="adminCount">0</b></div>
-    </div>
-
-    <!-- MAIN EXCEL WORKBOOK CONTAINER -->
-    <div class="excel-workbook">
-      
-      <!-- Excel Navigation Tabs -->
-      <div class="excel-tab-bar">
-        <button type="button" class="excel-tab active master-only-tab" data-sheet="career">
-          <span>🎓 Career & Training</span>
-          <span class="tab-count" id="tabCountCareer">0</span>
-        </button>
-        <button type="button" class="excel-tab master-only-tab" data-sheet="calls">
-          <span>💼 Strategy Calls</span>
-          <span class="tab-count" id="tabCountCalls">0</span>
-        </button>
-        <button type="button" class="excel-tab master-only-tab" data-sheet="campaign">
-          <span>📣 Campaign Submissions</span>
-          <span class="tab-count" id="tabCountCampaign">0</span>
-        </button>
-        <button type="button" class="excel-tab" data-sheet="chats">
-          <span>💬 Visitor Support Inbox</span>
-          <span class="tab-count" id="tabCountChats">0</span>
-        </button>
-        <button type="button" class="excel-tab" data-sheet="users">
-          <span>👥 Registered Users</span>
-          <span class="tab-count" id="tabCountUsers">0</span>
-        </button>
-        <button type="button" class="excel-tab" data-sheet="team">
-          <span>🛡️ Admin Team</span>
-          <span class="tab-count" id="tabCountTeam">0</span>
-        </button>
+    <section class="dashboard" id="dashboard">
+      <div id="adminWarningBanner"
+        style="display:none; background: rgba(239, 210, 139, 0.15); border: 1px solid rgba(239, 210, 139, 0.35); color: #efd28b; padding: 12px 18px; border-radius: 10px; margin-bottom: 20px; font-size: 13px; align-items: center; justify-content: space-between; gap: 12px;">
+        <span id="adminWarningText">⚠️ Database connection notice</span>
+        <button type="button" onclick="document.getElementById('adminWarningBanner').style.display='none'"
+          style="background:none; border:none; color:inherit; cursor:pointer; font-weight:bold; font-size:16px;">✕</button>
       </div>
 
-      <!-- Formula Bar & Sheet Utilities -->
-      <div class="excel-toolbar">
-        <div class="excel-formula-bar">
-          <span class="excel-fx-icon">fx</span>
-          <input type="text" id="sheetSearchInput" class="excel-search-input" placeholder="Filter rows in active worksheet (e.g. name, email, program, status)...">
+      <div class="hero">
+        <div>
+          <div class="eyebrow">NAKCONEL Control Center &bull; Spreadsheet Edition</div>
+          <h1>Submission Master Sheets</h1>
+          <p>Interactive workbook view for training applications, strategy bookings, campaign responses, and team
+            support chat.</p>
         </div>
-        <div class="excel-actions-right">
-          <button type="button" class="btn primary master-only-btn" id="openRegisterAdminBtn" style="display:none; padding:7px 12px; font-size:12px;">➕ Register New Admin</button>
-          <span class="sheet-counter-badge" id="activeSheetSummary">Sheet: Career Applications</span>
-          <button type="button" class="btn excel-btn" id="exportCsvBtn">📥 Export CSV (.csv)</button>
+        <div class="status" id="adminStatus">Loading workbook...</div>
+      </div>
+
+      <div id="restrictedAdminBanner"
+        style="display:none; background: rgba(201, 154, 74, 0.15); border: 1px solid rgba(201, 154, 74, 0.35); color: var(--bronze-light); padding: 12px 18px; border-radius: 10px; margin-bottom: 20px; font-size: 13px; align-items: center; justify-content: space-between; gap: 12px;">
+        <span>🔒 <strong>Restricted Admin View:</strong> You are signed in as a Restricted Admin. Campaign/Career
+          registrations and Estimated Revenue are restricted to Master Admin accounts.</span>
+      </div>
+
+      <!-- Summary Metric Cards -->
+      <div class="cards">
+        <div class="card master-only-card"><small>Training & Career</small><b id="careerCount">0</b></div>
+        <div class="card master-only-card"><small>Campaign Submissions</small><b id="campaignCount">0</b></div>
+        <div class="card master-only-card"><small>Strategy Call Bookings</small><b id="callsCount">0</b></div>
+        <div class="card"><small>Registered Users</small><b id="userCount">0</b></div>
+        <div class="card master-only-card" id="cardRevenueContainer"><small>Estimated Revenue</small><b
+            id="revenueCount">0</b></div>
+        <div class="card"><small>Configured Admins</small><b id="adminCount">0</b></div>
+      </div>
+
+      <!-- MAIN EXCEL WORKBOOK CONTAINER -->
+      <div class="excel-workbook">
+
+        <!-- Excel Navigation Tabs -->
+        <div class="excel-tab-bar">
+          <button type="button" class="excel-tab active master-only-tab" data-sheet="career">
+            <span>🎓 Career & Training</span>
+            <span class="tab-count" id="tabCountCareer">0</span>
+          </button>
+          <button type="button" class="excel-tab master-only-tab" data-sheet="calls">
+            <span>💼 Strategy Calls</span>
+            <span class="tab-count" id="tabCountCalls">0</span>
+          </button>
+          <button type="button" class="excel-tab master-only-tab" data-sheet="campaign">
+            <span>📣 Campaign Submissions</span>
+            <span class="tab-count" id="tabCountCampaign">0</span>
+          </button>
+          <button type="button" class="excel-tab" data-sheet="chats">
+            <span>💬 Visitor Support Inbox</span>
+            <span class="tab-count" id="tabCountChats">0</span>
+          </button>
+          <button type="button" class="excel-tab" data-sheet="users">
+            <span>👥 Registered Users</span>
+            <span class="tab-count" id="tabCountUsers">0</span>
+          </button>
+          <button type="button" class="excel-tab" data-sheet="team">
+            <span>🛡️ Admin Team</span>
+            <span class="tab-count" id="tabCountTeam">0</span>
+          </button>
         </div>
-      </div>
 
-      <!-- WORKSHEET 1: CAREER & TRAINING APPLICATIONS -->
-      <div class="worksheet-panel active" id="sheet-career">
-        <div class="excel-table-wrap">
-          <table class="excel-table">
-            <thead>
-              <tr>
-                <th class="col-row-idx">#</th>
-                <th>Applicant Name</th>
-                <th>Email Address</th>
-                <th>Phone</th>
-                <th>Type / Track</th>
-                <th>Program Title</th>
-                <th>Status</th>
-                <th>Submission ID</th>
-                <th>Date Submitted</th>
-                <th>Cell Action</th>
-              </tr>
-            </thead>
-            <tbody id="careerRows">
-              <tr><td colspan="10" style="text-align:center; padding:24px;" class="muted">Loading training & career submissions...</td></tr>
-            </tbody>
-          </table>
+        <!-- Formula Bar & Sheet Utilities -->
+        <div class="excel-toolbar">
+          <div class="excel-formula-bar">
+            <span class="excel-fx-icon">fx</span>
+            <input type="text" id="sheetSearchInput" class="excel-search-input"
+              placeholder="Filter rows in active worksheet (e.g. name, email, program, status)...">
+          </div>
+          <div class="excel-actions-right">
+            <button type="button" class="btn primary master-only-btn" id="openRegisterAdminBtn"
+              style="display:none; padding:7px 12px; font-size:12px;">➕ Register New Admin</button>
+            <span class="sheet-counter-badge" id="activeSheetSummary">Sheet: Career Applications</span>
+            <button type="button" class="btn excel-btn" id="exportCsvBtn">📥 Export CSV (.csv)</button>
+          </div>
         </div>
-      </div>
 
-      <!-- WORKSHEET 2: STRATEGY CALL BOOKINGS -->
-      <div class="worksheet-panel" id="sheet-calls">
-        <div class="excel-table-wrap">
-          <table class="excel-table">
-            <thead>
-              <tr>
-                <th class="col-row-idx">#</th>
-                <th>Client Name</th>
-                <th>Email Address</th>
-                <th>Operational Focus / Inquiry</th>
-                <th>Status</th>
-                <th>Booking ID</th>
-                <th>Date Booked</th>
-                <th>Cell Action</th>
-              </tr>
-            </thead>
-            <tbody id="callsRows">
-              <tr><td colspan="8" style="text-align:center; padding:24px;" class="muted">Loading strategy call bookings...</td></tr>
-            </tbody>
-          </table>
+        <!-- WORKSHEET 1: CAREER & TRAINING APPLICATIONS -->
+        <div class="worksheet-panel active" id="sheet-career">
+          <div class="excel-table-wrap">
+            <table class="excel-table">
+              <thead>
+                <tr>
+                  <th class="col-row-idx">#</th>
+                  <th>Applicant Name</th>
+                  <th>Email Address</th>
+                  <th>Phone</th>
+                  <th>Type / Track</th>
+                  <th>Program Title</th>
+                  <th>Status</th>
+                  <th>Submission ID</th>
+                  <th>Date Submitted</th>
+                  <th>Cell Action</th>
+                </tr>
+              </thead>
+              <tbody id="careerRows">
+                <tr>
+                  <td colspan="10" style="text-align:center; padding:24px;" class="muted">Loading training & career
+                    submissions...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
 
-      <!-- WORKSHEET 3: CAMPAIGN SUBMISSIONS -->
-      <div class="worksheet-panel" id="sheet-campaign">
-        <div class="excel-table-wrap">
-          <table class="excel-table">
-            <thead>
-              <tr>
-                <th class="col-row-idx">#</th>
-                <th>Full Name</th>
-                <th>Email Address</th>
-                <th>Business Name</th>
-                <th>Primary Challenge</th>
-                <th>Package Selected</th>
-                <th>Package Price</th>
-                <th>Payment Status</th>
-                <th>Pay Reference</th>
-                <th>Submission Date</th>
-              </tr>
-            </thead>
-            <tbody id="campaignRows">
-              <tr><td colspan="10" style="text-align:center; padding:24px;" class="muted">Loading campaign submissions...</td></tr>
-            </tbody>
-          </table>
+        <!-- WORKSHEET 2: STRATEGY CALL BOOKINGS -->
+        <div class="worksheet-panel" id="sheet-calls">
+          <div class="excel-table-wrap">
+            <table class="excel-table">
+              <thead>
+                <tr>
+                  <th class="col-row-idx">#</th>
+                  <th>Client Name</th>
+                  <th>Email Address</th>
+                  <th>Operational Focus / Inquiry</th>
+                  <th>Status</th>
+                  <th>Booking ID</th>
+                  <th>Date Booked</th>
+                  <th>Cell Action</th>
+                </tr>
+              </thead>
+              <tbody id="callsRows">
+                <tr>
+                  <td colspan="8" style="text-align:center; padding:24px;" class="muted">Loading strategy call
+                    bookings...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
 
-      <!-- WORKSHEET 4: VISITOR SUPPORT CHAT INBOX -->
-      <div class="worksheet-panel" id="sheet-chats">
-        <div class="excel-table-wrap">
-          <table class="excel-table">
-            <thead>
-              <tr>
-                <th class="col-row-idx">#</th>
-                <th>Visitor Name</th>
-                <th>Visitor Email</th>
-                <th>Last Message Preview</th>
-                <th>Assigned Agent</th>
-                <th>Chat ID</th>
-                <th>Cell Action</th>
-              </tr>
-            </thead>
-            <tbody id="chatRows">
-              <tr><td colspan="7" style="text-align:center; padding:24px;" class="muted">Loading chat inbox...</td></tr>
-            </tbody>
-          </table>
+        <!-- WORKSHEET 3: CAMPAIGN SUBMISSIONS -->
+        <div class="worksheet-panel" id="sheet-campaign">
+          <div class="excel-table-wrap">
+            <table class="excel-table">
+              <thead>
+                <tr>
+                  <th class="col-row-idx">#</th>
+                  <th>Full Name</th>
+                  <th>Email Address</th>
+                  <th>Business Name</th>
+                  <th>Primary Challenge</th>
+                  <th>Package Selected</th>
+                  <th>Package Price</th>
+                  <th>Payment Status</th>
+                  <th>Pay Reference</th>
+                  <th>Submission Date</th>
+                </tr>
+              </thead>
+              <tbody id="campaignRows">
+                <tr>
+                  <td colspan="10" style="text-align:center; padding:24px;" class="muted">Loading campaign
+                    submissions...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
 
-      <!-- WORKSHEET 5: REGISTERED USERS -->
-      <div class="worksheet-panel" id="sheet-users">
-        <div class="excel-table-wrap">
-          <table class="excel-table">
-            <thead>
-              <tr>
-                <th class="col-row-idx">#</th>
-                <th>User Name</th>
-                <th>Email Address</th>
-                <th>Firebase User ID (UID)</th>
-                <th>Email Verification</th>
-                <th>Activities & Monitor</th>
-                <th>Cell Action</th>
-              </tr>
-            </thead>
-            <tbody id="userRows">
-              <tr><td colspan="7" style="text-align:center; padding:24px;" class="muted">Loading user accounts...</td></tr>
-            </tbody>
-          </table>
+        <!-- WORKSHEET 4: VISITOR SUPPORT CHAT INBOX -->
+        <div class="worksheet-panel" id="sheet-chats">
+          <div class="excel-table-wrap">
+            <table class="excel-table">
+              <thead>
+                <tr>
+                  <th class="col-row-idx">#</th>
+                  <th>Visitor Name</th>
+                  <th>Visitor Email</th>
+                  <th>Last Message Preview</th>
+                  <th>Assigned Agent</th>
+                  <th>Chat ID</th>
+                  <th>Cell Action</th>
+                </tr>
+              </thead>
+              <tbody id="chatRows">
+                <tr>
+                  <td colspan="7" style="text-align:center; padding:24px;" class="muted">Loading chat inbox...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
 
-      <!-- WORKSHEET 6: ADMIN TEAM -->
-      <div class="worksheet-panel" id="sheet-team">
-        <div class="excel-table-wrap">
-          <table class="excel-table">
-            <thead>
-              <tr>
-                <th class="col-row-idx">#</th>
-                <th>Admin Name & Username</th>
-                <th>Official Email</th>
-                <th>Role Title</th>
-                <th>Access Tier</th>
-                <th>Account Status</th>
-                <th>Cell Action</th>
-              </tr>
-            </thead>
-            <tbody id="teamRows">
-              <tr><td colspan="7" style="text-align:center; padding:24px;" class="muted">Loading admin team...</td></tr>
-            </tbody>
-          </table>
+        <!-- WORKSHEET 5: REGISTERED USERS -->
+        <div class="worksheet-panel" id="sheet-users">
+          <div class="excel-table-wrap">
+            <table class="excel-table">
+              <thead>
+                <tr>
+                  <th class="col-row-idx">#</th>
+                  <th>User Name</th>
+                  <th>Email Address</th>
+                  <th>Firebase User ID (UID)</th>
+                  <th>Email Verification</th>
+                  <th>Activities & Monitor</th>
+                  <th>Cell Action</th>
+                </tr>
+              </thead>
+              <tbody id="userRows">
+                <tr>
+                  <td colspan="7" style="text-align:center; padding:24px;" class="muted">Loading user accounts...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
 
-    </div>
-  </section>
-</main>
+        <!-- WORKSHEET 6: ADMIN TEAM -->
+        <div class="worksheet-panel" id="sheet-team">
+          <div class="excel-table-wrap">
+            <table class="excel-table">
+              <thead>
+                <tr>
+                  <th class="col-row-idx">#</th>
+                  <th>Admin Name & Username</th>
+                  <th>Official Email</th>
+                  <th>Role Title</th>
+                  <th>Access Tier</th>
+                  <th>Account Status</th>
+                  <th>Cell Action</th>
+                </tr>
+              </thead>
+              <tbody id="teamRows">
+                <tr>
+                  <td colspan="7" style="text-align:center; padding:24px;" class="muted">Loading admin team...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
 
-<!-- MODAL 1: REGISTER NEW ADMIN MODAL -->
-<div class="modal-overlay" id="registerAdminModal">
-  <div class="inspector-modal-window" style="max-width:480px;">
-    <div class="modal-header">
-      <div>
-        <h3>Register New Admin Account</h3>
-        <p>Master Admin &bull; Admin Account Control</p>
       </div>
-      <button class="modal-close-btn" id="closeRegisterAdminBtn" type="button">✕</button>
-    </div>
-    <form id="registerAdminForm" style="padding:24px; display:flex; flex-direction:column; gap:16px;">
-      <div>
-        <label style="font-size:11px; text-transform:uppercase; color:var(--bronze-light); font-weight:600; display:block; margin-bottom:6px;">Username</label>
-        <input type="text" id="regAdminUsername" required placeholder="e.g. john-doe" style="width:100%; padding:10px 14px; background:rgba(10,2,2,0.6); border:1px solid var(--border); border-radius:6px; color:#fff;">
-      </div>
-      <div>
-        <label style="font-size:11px; text-transform:uppercase; color:var(--bronze-light); font-weight:600; display:block; margin-bottom:6px;">Password</label>
-        <input type="password" id="regAdminPassword" required placeholder="Enter strong password" style="width:100%; padding:10px 14px; background:rgba(10,2,2,0.6); border:1px solid var(--border); border-radius:6px; color:#fff;">
-      </div>
-      <div>
-        <label style="font-size:11px; text-transform:uppercase; color:var(--bronze-light); font-weight:600; display:block; margin-bottom:6px;">Full Name</label>
-        <input type="text" id="regAdminName" required placeholder="e.g. John Doe" style="width:100%; padding:10px 14px; background:rgba(10,2,2,0.6); border:1px solid var(--border); border-radius:6px; color:#fff;">
-      </div>
-      <div>
-        <label style="font-size:11px; text-transform:uppercase; color:var(--bronze-light); font-weight:600; display:block; margin-bottom:6px;">Official Email</label>
-        <input type="email" id="regAdminEmail" required placeholder="e.g. john@nakconel.com" style="width:100%; padding:10px 14px; background:rgba(10,2,2,0.6); border:1px solid var(--border); border-radius:6px; color:#fff;">
-      </div>
-      <div>
-        <label style="font-size:11px; text-transform:uppercase; color:var(--bronze-light); font-weight:600; display:block; margin-bottom:6px;">Role Title</label>
-        <input type="text" id="regAdminRole" required placeholder="e.g. Content Designer" style="width:100%; padding:10px 14px; background:rgba(10,2,2,0.6); border:1px solid var(--border); border-radius:6px; color:#fff;">
-      </div>
-      <div>
-        <label style="font-size:11px; text-transform:uppercase; color:var(--bronze-light); font-weight:600; display:block; margin-bottom:6px;">Access Level & Permission</label>
-        <select id="regAdminRoleLevel" style="width:100%; padding:10px 14px; background:rgba(10,2,2,0.8); border:1px solid var(--border); border-radius:6px; color:#fff; font-family:inherit;">
-          <option value="restricted">Restricted Admin (No Submissions/Revenue Access)</option>
-          <option value="master">Master Admin (Full Access to Everything)</option>
-        </select>
-      </div>
-      <button type="submit" class="btn primary" style="margin-top:8px; padding:12px; width:100%;">Create Admin Account</button>
-    </form>
-  </div>
-</div>
+    </section>
+  </main>
 
-<!-- MODAL 2: USER TIMED DEACTIVATION MODAL -->
-<div class="modal-overlay" id="userDeactivateModal">
-  <div class="inspector-modal-window" style="max-width:440px;">
-    <div class="modal-header">
-      <div>
-        <h3 id="deactModalUserTitle">Deactivate User Account</h3>
-        <p>Master Admin &bull; Timed Account Deactivation</p>
+  <!-- MODAL 1: REGISTER NEW ADMIN MODAL -->
+  <div class="modal-overlay" id="registerAdminModal">
+    <div class="inspector-modal-window" style="max-width:480px;">
+      <div class="modal-header">
+        <div>
+          <h3>Register New Admin Account</h3>
+          <p>Master Admin &bull; Admin Account Control</p>
+        </div>
+        <button class="modal-close-btn" id="closeRegisterAdminBtn" type="button">✕</button>
       </div>
-      <button class="modal-close-btn" id="closeUserDeactivateBtn" type="button">✕</button>
-    </div>
-    <form id="userDeactivateForm" style="padding:24px; display:flex; flex-direction:column; gap:16px;">
-      <input type="hidden" id="deactModalUid">
-      <div>
-        <label style="font-size:11px; text-transform:uppercase; color:var(--bronze-light); font-weight:600; display:block; margin-bottom:6px;">How many days do you want to deactivate the account?</label>
-        <input type="number" id="deactDaysInput" required min="1" max="3650" value="7" style="width:100%; padding:10px 14px; background:rgba(10,2,2,0.6); border:1px solid var(--border); border-radius:6px; color:#fff; font-size:16px; font-weight:bold;">
-      </div>
-      <div>
-        <label style="font-size:11px; text-transform:uppercase; color:var(--bronze-light); font-weight:600; display:block; margin-bottom:6px;">Deactivation Reason</label>
-        <input type="text" id="deactReasonInput" placeholder="e.g. Suspicious activity detected" value="Suspicious activity monitored" style="width:100%; padding:10px 14px; background:rgba(10,2,2,0.6); border:1px solid var(--border); border-radius:6px; color:#fff;">
-      </div>
-      <button type="submit" class="btn primary" style="background:#e8a0a0; color:#1b0404; border-color:#e8a0a0; font-weight:bold; margin-top:8px; padding:12px; width:100%;">Confirm Deactivation</button>
-    </form>
-  </div>
-</div>
-
-<!-- MODAL 3: USER ACTIVITY MONITOR LOG MODAL -->
-<div class="modal-overlay" id="userActivityModal">
-  <div class="inspector-modal-window" style="max-width:680px;">
-    <div class="modal-header">
-      <div>
-        <h3 id="activityModalUserTitle">User Activity Monitor</h3>
-        <p id="activityModalUserSub">Audit log and activity history</p>
-      </div>
-      <button class="modal-close-btn" id="closeUserActivityBtn" type="button">✕</button>
-    </div>
-    <div class="inspector-body" id="userActivityContent" style="padding:20px; max-height:60vh; overflow-y:auto;">
-      <div class="muted" style="text-align:center;">Loading activity log...</div>
-    </div>
-  </div>
-</div>
-  </section>
-</main>
-
-<!-- POP-UP ROW RECORD INSPECTOR MODAL -->
-<div class="modal-overlay" id="recordInspectorModal">
-  <div class="inspector-modal-window">
-    <div class="modal-header">
-      <div>
-        <h3 id="inspectorTitle">Submission Details</h3>
-        <p id="inspectorSubtitle">Row record detail inspector</p>
-      </div>
-      <button class="modal-close-btn" id="closeInspectorBtn" type="button" title="Close Inspector">✕</button>
-    </div>
-    <div class="inspector-body" id="inspectorContent">
-      <!-- Dynamic key value inspector -->
-    </div>
-  </div>
-</div>
-
-<!-- LARGE POP-UP CHAT MODAL OVERLAY -->
-<div class="modal-overlay" id="chatModalOverlay">
-  <div class="chat-modal-window">
-    <div class="modal-header">
-      <div>
-        <h3 id="modalVisitorName">Visitor Conversation</h3>
-        <p id="modalVisitorMeta">Connecting...</p>
-      </div>
-      <button class="modal-close-btn" id="modalCloseBtn" type="button" title="Close Pop-Up">✕</button>
-    </div>
-    
-    <div class="modal-body-messages" id="modalChatMessages">
-      <div class="chat-empty">Loading message transcript...</div>
-    </div>
-
-    <div class="modal-footer-reply">
-      <div class="attachment-preview-bar" id="attachmentPreviewBar">
-        <span id="attachmentPreviewText">📎 file.png</span>
-        <button type="button" id="removeAttachmentBtn">✕</button>
-      </div>
-
-      <form class="modal-reply-row" id="modalChatForm">
-        <input type="file" id="modalFileInput" style="display:none">
-        <button class="modal-attach-btn" type="button" id="modalAttachBtn">📎 Attach</button>
-        <textarea id="modalChatInput" placeholder="Type your reply here..." required></textarea>
-        <button class="btn primary" type="submit" id="modalSendBtn">Send Reply</button>
+      <form id="registerAdminForm" style="padding:24px; display:flex; flex-direction:column; gap:16px;">
+        <div>
+          <label
+            style="font-size:11px; text-transform:uppercase; color:var(--bronze-light); font-weight:600; display:block; margin-bottom:6px;">Username</label>
+          <input type="text" id="regAdminUsername" required placeholder="e.g. john-doe"
+            style="width:100%; padding:10px 14px; background:rgba(10,2,2,0.6); border:1px solid var(--border); border-radius:6px; color:#fff;">
+        </div>
+        <div>
+          <label
+            style="font-size:11px; text-transform:uppercase; color:var(--bronze-light); font-weight:600; display:block; margin-bottom:6px;">Password</label>
+          <input type="password" id="regAdminPassword" required placeholder="Enter strong password"
+            style="width:100%; padding:10px 14px; background:rgba(10,2,2,0.6); border:1px solid var(--border); border-radius:6px; color:#fff;">
+        </div>
+        <div>
+          <label
+            style="font-size:11px; text-transform:uppercase; color:var(--bronze-light); font-weight:600; display:block; margin-bottom:6px;">Full
+            Name</label>
+          <input type="text" id="regAdminName" required placeholder="e.g. John Doe"
+            style="width:100%; padding:10px 14px; background:rgba(10,2,2,0.6); border:1px solid var(--border); border-radius:6px; color:#fff;">
+        </div>
+        <div>
+          <label
+            style="font-size:11px; text-transform:uppercase; color:var(--bronze-light); font-weight:600; display:block; margin-bottom:6px;">Official
+            Email</label>
+          <input type="email" id="regAdminEmail" required placeholder="e.g. john@nakconel.com"
+            style="width:100%; padding:10px 14px; background:rgba(10,2,2,0.6); border:1px solid var(--border); border-radius:6px; color:#fff;">
+        </div>
+        <div>
+          <label
+            style="font-size:11px; text-transform:uppercase; color:var(--bronze-light); font-weight:600; display:block; margin-bottom:6px;">Role
+            Title</label>
+          <input type="text" id="regAdminRole" required placeholder="e.g. Content Designer"
+            style="width:100%; padding:10px 14px; background:rgba(10,2,2,0.6); border:1px solid var(--border); border-radius:6px; color:#fff;">
+        </div>
+        <div>
+          <label
+            style="font-size:11px; text-transform:uppercase; color:var(--bronze-light); font-weight:600; display:block; margin-bottom:6px;">Access
+            Level & Permission</label>
+          <select id="regAdminRoleLevel"
+            style="width:100%; padding:10px 14px; background:rgba(10,2,2,0.8); border:1px solid var(--border); border-radius:6px; color:#fff; font-family:inherit;">
+            <option value="restricted">Restricted Admin (No Submissions/Revenue Access)</option>
+            <option value="master">Master Admin (Full Access to Everything)</option>
+          </select>
+        </div>
+        <button type="submit" class="btn primary" style="margin-top:8px; padding:12px; width:100%;">Create Admin
+          Account</button>
       </form>
     </div>
   </div>
-</div>
 
-<script>
-function logAdminError(context, error, details = {}) {
-  console.error(`[NAKCONEL Admin] ${context}`, {
-    message: error instanceof Error ? error.message : String(error),
-    ...details
-  });
-}
+  <!-- MODAL 2: USER TIMED DEACTIVATION MODAL -->
+  <div class="modal-overlay" id="userDeactivateModal">
+    <div class="inspector-modal-window" style="max-width:440px;">
+      <div class="modal-header">
+        <div>
+          <h3 id="deactModalUserTitle">Deactivate User Account</h3>
+          <p>Master Admin &bull; Timed Account Deactivation</p>
+        </div>
+        <button class="modal-close-btn" id="closeUserDeactivateBtn" type="button">✕</button>
+      </div>
+      <form id="userDeactivateForm" style="padding:24px; display:flex; flex-direction:column; gap:16px;">
+        <input type="hidden" id="deactModalUid">
+        <div>
+          <label
+            style="font-size:11px; text-transform:uppercase; color:var(--bronze-light); font-weight:600; display:block; margin-bottom:6px;">How
+            many days do you want to deactivate the account?</label>
+          <input type="number" id="deactDaysInput" required min="1" max="3650" value="7"
+            style="width:100%; padding:10px 14px; background:rgba(10,2,2,0.6); border:1px solid var(--border); border-radius:6px; color:#fff; font-size:16px; font-weight:bold;">
+        </div>
+        <div>
+          <label
+            style="font-size:11px; text-transform:uppercase; color:var(--bronze-light); font-weight:600; display:block; margin-bottom:6px;">Deactivation
+            Reason</label>
+          <input type="text" id="deactReasonInput" placeholder="e.g. Suspicious activity detected"
+            value="Suspicious activity monitored"
+            style="width:100%; padding:10px 14px; background:rgba(10,2,2,0.6); border:1px solid var(--border); border-radius:6px; color:#fff;">
+        </div>
+        <button type="submit" class="btn primary"
+          style="background:#e8a0a0; color:#1b0404; border-color:#e8a0a0; font-weight:bold; margin-top:8px; padding:12px; width:100%;">Confirm
+          Deactivation</button>
+      </form>
+    </div>
+  </div>
 
-window.addEventListener('error', (event) => {
-  logAdminError('Unhandled page error', event.error || event.message, {
-    source: event.filename,
-    line: event.lineno,
-    column: event.colno
-  });
-});
+  <!-- MODAL 3: USER ACTIVITY MONITOR LOG MODAL -->
+  <div class="modal-overlay" id="userActivityModal">
+    <div class="inspector-modal-window" style="max-width:680px;">
+      <div class="modal-header">
+        <div>
+          <h3 id="activityModalUserTitle">User Activity Monitor</h3>
+          <p id="activityModalUserSub">Audit log and activity history</p>
+        </div>
+        <button class="modal-close-btn" id="closeUserActivityBtn" type="button">✕</button>
+      </div>
+      <div class="inspector-body" id="userActivityContent" style="padding:20px; max-height:60vh; overflow-y:auto;">
+        <div class="muted" style="text-align:center;">Loading activity log...</div>
+      </div>
+    </div>
+  </div>
+  </section>
+  </main>
 
-window.addEventListener('unhandledrejection', (event) => {
-  logAdminError('Unhandled promise rejection', event.reason);
-});
+  <!-- POP-UP ROW RECORD INSPECTOR MODAL -->
+  <div class="modal-overlay" id="recordInspectorModal">
+    <div class="inspector-modal-window">
+      <div class="modal-header">
+        <div>
+          <h3 id="inspectorTitle">Submission Details</h3>
+          <p id="inspectorSubtitle">Row record detail inspector</p>
+        </div>
+        <button class="modal-close-btn" id="closeInspectorBtn" type="button" title="Close Inspector">✕</button>
+      </div>
+      <div class="inspector-body" id="inspectorContent">
+        <!-- Dynamic key value inspector -->
+      </div>
+    </div>
+  </div>
 
-const gate = document.getElementById('gate');
-const dashboard = document.getElementById('dashboard');
-const gateError = document.getElementById('gateError');
-const chatModalOverlay = document.getElementById('chatModalOverlay');
-const recordInspectorModal = document.getElementById('recordInspectorModal');
-const modalFileInput = document.getElementById('modalFileInput');
-const attachmentPreviewBar = document.getElementById('attachmentPreviewBar');
+  <!-- LARGE POP-UP CHAT MODAL OVERLAY -->
+  <div class="modal-overlay" id="chatModalOverlay">
+    <div class="chat-modal-window">
+      <div class="modal-header">
+        <div>
+          <h3 id="modalVisitorName">Visitor Conversation</h3>
+          <p id="modalVisitorMeta">Connecting...</p>
+        </div>
+        <button class="modal-close-btn" id="modalCloseBtn" type="button" title="Close Pop-Up">✕</button>
+      </div>
 
-let activeSheet = 'career';
-let activeChatId = null;
-let chatPollTimer = null;
-let currentAttachment = null;
+      <div class="modal-body-messages" id="modalChatMessages">
+        <div class="chat-empty">Loading message transcript...</div>
+      </div>
 
-let masterData = {
-  career: [],
-  calls: [],
-  campaign: [],
-  chats: [],
-  users: [],
-  team: []
-};
+      <div class="modal-footer-reply">
+        <div class="attachment-preview-bar" id="attachmentPreviewBar">
+          <span id="attachmentPreviewText">📎 file.png</span>
+          <button type="button" id="removeAttachmentBtn">✕</button>
+        </div>
 
-function fmtNgn(value){ return Number(value || 0).toLocaleString('en-NG'); }
-function fmtDate(value){
-  if(!value) return '-';
-  const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? value : date.toLocaleString();
-}
-function esc(value){
-  return String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
-}
+        <form class="modal-reply-row" id="modalChatForm">
+          <input type="file" id="modalFileInput" style="display:none">
+          <button class="modal-attach-btn" type="button" id="modalAttachBtn">📎 Attach</button>
+          <textarea id="modalChatInput" placeholder="Type your reply here..." required></textarea>
+          <button class="btn primary" type="submit" id="modalSendBtn">Send Reply</button>
+        </form>
+      </div>
+    </div>
+  </div>
 
-let userCurrency = 'USD';
-let exchangeRates = null;
+  <script>
+    function logAdminError(context, error, details = {}) {
+      console.error(`[NAKCONEL Admin] ${context}`, {
+        message: error instanceof Error ? error.message : String(error),
+        ...details
+      });
+    }
 
-const LOCALE_TO_CURRENCY = {
-  'en': 'USD', 'en-US': 'USD', 'en-GB': 'GBP', 'en-NG': 'NGN', 'en-ZA': 'ZAR',
-  'en-KE': 'KES', 'en-GH': 'GHS', 'de': 'EUR', 'fr': 'EUR', 'es': 'EUR'
-};
+    window.addEventListener('error', (event) => {
+      logAdminError('Unhandled page error', event.error || event.message, {
+        source: event.filename,
+        line: event.lineno,
+        column: event.colno
+      });
+    });
 
-function detectUserCurrency(){
-  try {
-    const locale = navigator.language || navigator.userLanguage || 'en';
-    const direct = LOCALE_TO_CURRENCY[locale];
-    if (direct) return direct;
-    if (locale.startsWith('en')) return 'USD';
-  } catch (e) {}
-  return 'USD';
-}
+    window.addEventListener('unhandledrejection', (event) => {
+      logAdminError('Unhandled promise rejection', event.reason);
+    });
 
-async function fetchExchangeRates(){
-  if (exchangeRates) return exchangeRates;
-  try {
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 3000);
-    const res = await fetch('https://api.exchangerate-api.com/v4/latest/NGN', { signal: controller.signal });
-    clearTimeout(timer);
-    if (res.ok) {
-      exchangeRates = await res.json();
+    const gate = document.getElementById('gate');
+    const dashboard = document.getElementById('dashboard');
+    const gateError = document.getElementById('gateError');
+    const chatModalOverlay = document.getElementById('chatModalOverlay');
+    const recordInspectorModal = document.getElementById('recordInspectorModal');
+    const modalFileInput = document.getElementById('modalFileInput');
+    const attachmentPreviewBar = document.getElementById('attachmentPreviewBar');
+
+    let activeSheet = 'career';
+    let activeChatId = null;
+    let chatPollTimer = null;
+    let currentAttachment = null;
+
+    let masterData = {
+      career: [],
+      calls: [],
+      campaign: [],
+      chats: [],
+      users: [],
+      team: []
+    };
+
+    function fmtNgn(value) { return Number(value || 0).toLocaleString('en-NG'); }
+    function fmtDate(value) {
+      if (!value) return '-';
+      const date = new Date(value);
+      return Number.isNaN(date.getTime()) ? value : date.toLocaleString();
+    }
+    function esc(value) {
+      return String(value ?? '').replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+    }
+
+    let userCurrency = 'USD';
+    let exchangeRates = null;
+
+    const LOCALE_TO_CURRENCY = {
+      'en': 'USD', 'en-US': 'USD', 'en-GB': 'GBP', 'en-NG': 'NGN', 'en-ZA': 'ZAR',
+      'en-KE': 'KES', 'en-GH': 'GHS', 'de': 'EUR', 'fr': 'EUR', 'es': 'EUR'
+    };
+
+    function detectUserCurrency() {
+      try {
+        const locale = navigator.language || navigator.userLanguage || 'en';
+        const direct = LOCALE_TO_CURRENCY[locale];
+        if (direct) return direct;
+        if (locale.startsWith('en')) return 'USD';
+      } catch (e) { }
+      return 'USD';
+    }
+
+    async function fetchExchangeRates() {
+      if (exchangeRates) return exchangeRates;
+      try {
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), 3000);
+        const res = await fetch('https://api.exchangerate-api.com/v4/latest/NGN', { signal: controller.signal });
+        clearTimeout(timer);
+        if (res.ok) {
+          exchangeRates = await res.json();
+          return exchangeRates;
+        }
+      } catch (e) { }
+      exchangeRates = { rates: { USD: 0.00065, GBP: 0.00050, EUR: 0.00059, NGN: 1.0 } };
       return exchangeRates;
     }
-  } catch (e) {}
-  exchangeRates = { rates: { USD: 0.00065, GBP: 0.00050, EUR: 0.00059, NGN: 1.0 } };
-  return exchangeRates;
-}
 
-async function convertNgnToLocal(ngnAmount){
-  const rates = await fetchExchangeRates();
-  const targetCurrency = detectUserCurrency();
-  userCurrency = targetCurrency;
-  if (!rates || targetCurrency === 'NGN') return { amount: ngnAmount, currency: 'NGN', symbol: '₦' };
-  const rate = rates.rates[targetCurrency];
-  if (rate) return { amount: ngnAmount * rate, currency: targetCurrency, symbol: getCurrencySymbol(targetCurrency) };
-  return { amount: ngnAmount * 0.00065, currency: 'USD', symbol: '$' };
-}
+    async function convertNgnToLocal(ngnAmount) {
+      const rates = await fetchExchangeRates();
+      const targetCurrency = detectUserCurrency();
+      userCurrency = targetCurrency;
+      if (!rates || targetCurrency === 'NGN') return { amount: ngnAmount, currency: 'NGN', symbol: '₦' };
+      const rate = rates.rates[targetCurrency];
+      if (rate) return { amount: ngnAmount * rate, currency: targetCurrency, symbol: getCurrencySymbol(targetCurrency) };
+      return { amount: ngnAmount * 0.00065, currency: 'USD', symbol: '$' };
+    }
 
-function getCurrencySymbol(currencyCode){
-  const symbols = { 'USD': '$', 'EUR': '€', 'GBP': '£', 'NGN': '₦', 'ZAR': 'R', 'KES': 'KSh', 'GHS': 'GH₵' };
-  return symbols[currencyCode] || currencyCode + ' ';
-}
+    function getCurrencySymbol(currencyCode) {
+      const symbols = { 'USD': '$', 'EUR': '€', 'GBP': '£', 'NGN': '₦', 'ZAR': 'R', 'KES': 'KSh', 'GHS': 'GH₵' };
+      return symbols[currencyCode] || currencyCode + ' ';
+    }
 
-function fmtLocal(value){
-  if (userCurrency === 'NGN') return fmtNgn(value);
-  try {
-    return new Intl.NumberFormat(undefined, { style: 'currency', currency: userCurrency, maximumFractionDigits: 0 }).format(value);
-  } catch (e) { return `${getCurrencySymbol(userCurrency)}${Number(value || 0).toLocaleString()}`; }
-}
+    function fmtLocal(value) {
+      if (userCurrency === 'NGN') return fmtNgn(value);
+      try {
+        return new Intl.NumberFormat(undefined, { style: 'currency', currency: userCurrency, maximumFractionDigits: 0 }).format(value);
+      } catch (e) { return `${getCurrencySymbol(userCurrency)}${Number(value || 0).toLocaleString()}`; }
+    }
 
-function fmtCampaignMoney(amount, currency){
-  const code = String(currency || '').toUpperCase();
-  const value = Number(amount || 0);
-  if (!code) return '-';
-  try {
-    return new Intl.NumberFormat(undefined, { style: 'currency', currency: code, maximumFractionDigits: 0 }).format(value);
-  } catch (e) { return `${code} ${value.toLocaleString()}`; }
-}
+    function fmtCampaignMoney(amount, currency) {
+      const code = String(currency || '').toUpperCase();
+      const value = Number(amount || 0);
+      if (!code) return '-';
+      try {
+        return new Intl.NumberFormat(undefined, { style: 'currency', currency: code, maximumFractionDigits: 0 }).format(value);
+      } catch (e) { return `${code} ${value.toLocaleString()}`; }
+    }
 
-async function fmtNgnAsLocal(ngnValue){
-  const converted = await convertNgnToLocal(ngnValue);
-  if (converted.currency === 'NGN') return `NGN ${fmtNgn(converted.amount)}`;
-  return fmtLocal(converted.amount);
-}
+    async function fmtNgnAsLocal(ngnValue) {
+      const converted = await convertNgnToLocal(ngnValue);
+      if (converted.currency === 'NGN') return `NGN ${fmtNgn(converted.amount)}`;
+      return fmtLocal(converted.amount);
+    }
 
-async function adminFetch(url, options = {}){
-  let res;
-  try {
-    res = await fetch(url, {...options, headers: {'Content-Type': 'application/json', ...(options.headers || {})}, credentials: 'include', cache: 'no-store'});
-  } catch (error) {
-    logAdminError('Network request failed', error, { url, method: options.method || 'GET' });
-    throw error;
-  }
+    async function adminFetch(url, options = {}) {
+      let res;
+      try {
+        res = await fetch(url, { ...options, headers: { 'Content-Type': 'application/json', ...(options.headers || {}) }, credentials: 'include', cache: 'no-store' });
+      } catch (error) {
+        logAdminError('Network request failed', error, { url, method: options.method || 'GET' });
+        throw error;
+      }
 
-  let data;
-  try { data = await res.json(); }
-  catch (error) {
-    logAdminError('Invalid JSON response', error, { url, method: options.method || 'GET', status: res.status });
-    throw new Error(`The server returned an invalid response (HTTP ${res.status}).`);
-  }
+      let data;
+      try { data = await res.json(); }
+      catch (error) {
+        logAdminError('Invalid JSON response', error, { url, method: options.method || 'GET', status: res.status });
+        throw new Error(`The server returned an invalid response (HTTP ${res.status}).`);
+      }
 
-  if(!res.ok) {
-    const requestError = new Error(data.error || 'Admin request failed.');
-    logAdminError('Admin API request failed', requestError, { url, method: options.method || 'GET', status: res.status });
-    if (res.status === 401 || res.status === 403) showError(data.error || 'Admin access required. Please sign in.');
-    throw requestError;
-  }
-  return data;
-}
+      if (!res.ok) {
+        const requestError = new Error(data.error || 'Admin request failed.');
+        logAdminError('Admin API request failed', requestError, { url, method: options.method || 'GET', status: res.status });
+        if (res.status === 401 || res.status === 403) showError(data.error || 'Admin access required. Please sign in.');
+        throw requestError;
+      }
+      return data;
+    }
 
-function showError(message){
-  clearInterval(chatPollTimer);
-  gate.style.display = 'block';
-  dashboard.style.display = 'none';
-  gateError.textContent = message;
-  gateError.classList.add('show');
-}
+    function showError(message) {
+      clearInterval(chatPollTimer);
+      gate.style.display = 'block';
+      dashboard.style.display = 'none';
+      gateError.textContent = message;
+      gateError.classList.add('show');
+    }
 
-function fmtChatTime(value){
-  const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? '' : date.toLocaleString();
-}
+    function fmtChatTime(value) {
+      const date = new Date(value);
+      return Number.isNaN(date.getTime()) ? '' : date.toLocaleString();
+    }
 
-/* =========================================================
-   WORKSHEET TAB & SEARCH MANAGEMENT
-   ========================================================= */
-const TAB_LABELS = {
-  career: 'Sheet: Career & Training Applications',
-  calls: 'Sheet: Strategy Call Bookings',
-  campaign: 'Sheet: Campaign Submissions',
-  chats: 'Sheet: Visitor Support Inbox',
-  users: 'Sheet: Registered Users',
-  team: 'Sheet: Admin Team'
-};
+    /* =========================================================
+       WORKSHEET TAB & SEARCH MANAGEMENT
+       ========================================================= */
+    const TAB_LABELS = {
+      career: 'Sheet: Career & Training Applications',
+      calls: 'Sheet: Strategy Call Bookings',
+      campaign: 'Sheet: Campaign Submissions',
+      chats: 'Sheet: Visitor Support Inbox',
+      users: 'Sheet: Registered Users',
+      team: 'Sheet: Admin Team'
+    };
 
-document.querySelectorAll('.excel-tab').forEach(tab => {
-  tab.addEventListener('click', () => {
-    document.querySelectorAll('.excel-tab').forEach(t => t.classList.remove('active'));
-    document.querySelectorAll('.worksheet-panel').forEach(p => p.classList.remove('active'));
-    
-    tab.classList.add('active');
-    activeSheet = tab.dataset.sheet;
-    const panel = document.getElementById(`sheet-${activeSheet}`);
-    if (panel) panel.classList.add('active');
+    document.querySelectorAll('.excel-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.excel-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.worksheet-panel').forEach(p => p.classList.remove('active'));
 
-    document.getElementById('activeSheetSummary').textContent = TAB_LABELS[activeSheet] || activeSheet;
-    document.getElementById('sheetSearchInput').value = '';
-    renderActiveSheet();
-  });
-});
+        tab.classList.add('active');
+        activeSheet = tab.dataset.sheet;
+        const panel = document.getElementById(`sheet-${activeSheet}`);
+        if (panel) panel.classList.add('active');
 
-document.getElementById('sheetSearchInput').addEventListener('input', () => {
-  renderActiveSheet();
-});
-
-function getSearchQuery() {
-  return document.getElementById('sheetSearchInput').value.trim().toLowerCase();
-}
-
-function renderActiveSheet() {
-  if (activeSheet === 'career') renderCareerRegistrations();
-  else if (activeSheet === 'calls') renderStrategyCalls();
-  else if (activeSheet === 'campaign') renderCampaigns();
-  else if (activeSheet === 'chats') renderAdminChatsList();
-  else if (activeSheet === 'users') renderUsers();
-  else if (activeSheet === 'team') renderTeam();
-}
-
-/* =========================================================
-   CSV EXPORT GENERATOR (Excel Compatible)
-   ========================================================= */
-document.getElementById('exportCsvBtn').addEventListener('click', () => {
-  let headers = [];
-  let rows = [];
-  const q = getSearchQuery();
-
-  if (activeSheet === 'career') {
-    headers = ['ID', 'Name', 'Email', 'Phone', 'Type', 'Program', 'Status', 'Date'];
-    const filtered = (masterData.career || []).filter(item => !q || JSON.stringify(item).toLowerCase().includes(q));
-    rows = filtered.map(item => [item.id, item.name, item.email, item.phone, item.type, item.program, item.status, item.created_at || item.createdAt]);
-  } else if (activeSheet === 'calls') {
-    headers = ['ID', 'Client Name', 'Email', 'Inquiry / Focus', 'Status', 'Date Booked'];
-    const filtered = (masterData.calls || []).filter(item => !q || JSON.stringify(item).toLowerCase().includes(q));
-    rows = filtered.map(item => [item.id, item.name, item.email, item.message, item.status, item.createdAt]);
-  } else if (activeSheet === 'campaign') {
-    headers = ['ID', 'Full Name', 'Email', 'Business', 'Challenge', 'Package', 'Payment Status', 'Reference', 'Date'];
-    const filtered = (masterData.campaign || []).filter(item => !q || JSON.stringify(item).toLowerCase().includes(q));
-    rows = filtered.map(item => {
-      const qst = item.questions || {};
-      const pkg = item.package || {};
-      const pay = item.payment || {};
-      return [item.id, qst.fullName || item.email, item.email, qst.business, qst.challenge, pkg.name, item.status || (pay.reference ? 'paid' : 'pending'), pay.reference, item.createdAt];
+        document.getElementById('activeSheetSummary').textContent = TAB_LABELS[activeSheet] || activeSheet;
+        document.getElementById('sheetSearchInput').value = '';
+        renderActiveSheet();
+      });
     });
-  } else if (activeSheet === 'chats') {
-    headers = ['Chat ID', 'Visitor Name', 'Visitor Email', 'Last Message', 'Assigned Agent'];
-    const filtered = (masterData.chats || []).filter(item => !q || JSON.stringify(item).toLowerCase().includes(q));
-    rows = filtered.map(item => [item.id, item.visitorName, item.visitorEmail, item.lastMessage, item.teamMemberName]);
-  } else if (activeSheet === 'users') {
-    headers = ['User Name', 'Email Address', 'Firebase User ID (UID)', 'Email Verified', 'Deactivation Status', 'Deactivated Until'];
-    const filtered = (masterData.users || []).filter(item => !q || JSON.stringify(item).toLowerCase().includes(q));
-    rows = filtered.map(item => [item.username || item.email, item.email, item.uid, item.emailVerified ? 'Verified' : 'Unverified', item.isDeactivated ? 'Deactivated' : 'Active', item.deactivatedUntil || 'N/A']);
-  } else if (activeSheet === 'team') {
-    headers = ['Username', 'Full Name', 'Official Email', 'Role Title', 'Access Tier', 'Account Status'];
-    const filtered = (masterData.team || []).filter(item => !q || JSON.stringify(item).toLowerCase().includes(q));
-    rows = filtered.map(item => [item.username || item.id, item.name, item.email, item.role, (item.role_level || 'restricted') === 'master' ? 'Master Admin' : 'Restricted Admin', item.is_active !== 0 ? 'Active' : 'Deactivated']);
-  }
 
-  if (!rows.length) {
-    alert('No rows available in current view to export.');
-    return;
-  }
+    document.getElementById('sheetSearchInput').addEventListener('input', () => {
+      renderActiveSheet();
+    });
 
-  let csvContent = 'data:text/csv;charset=utf-8,';
-  csvContent += headers.map(h => `"${String(h).replace(/"/g, '""')}"`).join(',') + '\r\n';
-  rows.forEach(r => {
-    csvContent += r.map(v => `"${String(v ?? '').replace(/"/g, '""')}"`).join(',') + '\r\n';
-  });
+    function getSearchQuery() {
+      return document.getElementById('sheetSearchInput').value.trim().toLowerCase();
+    }
 
-  const encodedUri = encodeURI(csvContent);
-  const link = document.createElement('a');
-  link.setAttribute('href', encodedUri);
-  link.setAttribute('download', `nakconel_${activeSheet}_sheet_${new Date().toISOString().slice(0,10)}.csv`);
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-});
+    function renderActiveSheet() {
+      if (activeSheet === 'career') renderCareerRegistrations();
+      else if (activeSheet === 'calls') renderStrategyCalls();
+      else if (activeSheet === 'campaign') renderCampaigns();
+      else if (activeSheet === 'chats') renderAdminChatsList();
+      else if (activeSheet === 'users') renderUsers();
+      else if (activeSheet === 'team') renderTeam();
+    }
 
-/* =========================================================
-   ROW RECORD INSPECTOR POPUP
-   ========================================================= */
-function openRecordInspector(title, subtitle, fieldsObj) {
-  document.getElementById('inspectorTitle').textContent = title || 'Record Details';
-  document.getElementById('inspectorSubtitle').textContent = subtitle || 'Full details inspector';
-  
-  const container = document.getElementById('inspectorContent');
-  let html = '<div class="inspector-grid">';
-  
-  for (const [key, value] of Object.entries(fieldsObj)) {
-    if (value === undefined || value === null || value === '') continue;
-    const isWide = String(value).length > 60 || typeof value === 'object';
-    const displayVal = typeof value === 'object' ? JSON.stringify(value, null, 2) : String(value);
-    html += `
+    /* =========================================================
+       CSV EXPORT GENERATOR (Excel Compatible)
+       ========================================================= */
+    document.getElementById('exportCsvBtn').addEventListener('click', () => {
+      let headers = [];
+      let rows = [];
+      const q = getSearchQuery();
+
+      if (activeSheet === 'career') {
+        headers = ['ID', 'Name', 'Email', 'Phone', 'Type', 'Program', 'Status', 'Date'];
+        const filtered = (masterData.career || []).filter(item => !q || JSON.stringify(item).toLowerCase().includes(q));
+        rows = filtered.map(item => [item.id, item.name, item.email, item.phone, item.type, item.program, item.status, item.created_at || item.createdAt]);
+      } else if (activeSheet === 'calls') {
+        headers = ['ID', 'Client Name', 'Email', 'Inquiry / Focus', 'Status', 'Date Booked'];
+        const filtered = (masterData.calls || []).filter(item => !q || JSON.stringify(item).toLowerCase().includes(q));
+        rows = filtered.map(item => [item.id, item.name, item.email, item.message, item.status, item.createdAt]);
+      } else if (activeSheet === 'campaign') {
+        headers = ['ID', 'Full Name', 'Email', 'Business', 'Challenge', 'Package', 'Payment Status', 'Reference', 'Date'];
+        const filtered = (masterData.campaign || []).filter(item => !q || JSON.stringify(item).toLowerCase().includes(q));
+        rows = filtered.map(item => {
+          const qst = item.questions || {};
+          const pkg = item.package || {};
+          const pay = item.payment || {};
+          return [item.id, qst.fullName || item.email, item.email, qst.business, qst.challenge, pkg.name, item.status || (pay.reference ? 'paid' : 'pending'), pay.reference, item.createdAt];
+        });
+      } else if (activeSheet === 'chats') {
+        headers = ['Chat ID', 'Visitor Name', 'Visitor Email', 'Last Message', 'Assigned Agent'];
+        const filtered = (masterData.chats || []).filter(item => !q || JSON.stringify(item).toLowerCase().includes(q));
+        rows = filtered.map(item => [item.id, item.visitorName, item.visitorEmail, item.lastMessage, item.teamMemberName]);
+      } else if (activeSheet === 'users') {
+        headers = ['User Name', 'Email Address', 'Firebase User ID (UID)', 'Email Verified', 'Deactivation Status', 'Deactivated Until'];
+        const filtered = (masterData.users || []).filter(item => !q || JSON.stringify(item).toLowerCase().includes(q));
+        rows = filtered.map(item => [item.username || item.email, item.email, item.uid, item.emailVerified ? 'Verified' : 'Unverified', item.isDeactivated ? 'Deactivated' : 'Active', item.deactivatedUntil || 'N/A']);
+      } else if (activeSheet === 'team') {
+        headers = ['Username', 'Full Name', 'Official Email', 'Role Title', 'Access Tier', 'Account Status'];
+        const filtered = (masterData.team || []).filter(item => !q || JSON.stringify(item).toLowerCase().includes(q));
+        rows = filtered.map(item => [item.username || item.id, item.name, item.email, item.role, (item.role_level || 'restricted') === 'master' ? 'Master Admin' : 'Restricted Admin', item.is_active !== 0 ? 'Active' : 'Deactivated']);
+      }
+
+      if (!rows.length) {
+        alert('No rows available in current view to export.');
+        return;
+      }
+
+      let csvContent = 'data:text/csv;charset=utf-8,';
+      csvContent += headers.map(h => `"${String(h).replace(/"/g, '""')}"`).join(',') + '\r\n';
+      rows.forEach(r => {
+        csvContent += r.map(v => `"${String(v ?? '').replace(/"/g, '""')}"`).join(',') + '\r\n';
+      });
+
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement('a');
+      link.setAttribute('href', encodedUri);
+      link.setAttribute('download', `nakconel_${activeSheet}_sheet_${new Date().toISOString().slice(0, 10)}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    });
+
+    /* =========================================================
+       ROW RECORD INSPECTOR POPUP
+       ========================================================= */
+    function openRecordInspector(title, subtitle, fieldsObj) {
+      document.getElementById('inspectorTitle').textContent = title || 'Record Details';
+      document.getElementById('inspectorSubtitle').textContent = subtitle || 'Full details inspector';
+
+      const container = document.getElementById('inspectorContent');
+      let html = '<div class="inspector-grid">';
+
+      for (const [key, value] of Object.entries(fieldsObj)) {
+        if (value === undefined || value === null || value === '') continue;
+        const isWide = String(value).length > 60 || typeof value === 'object';
+        const displayVal = typeof value === 'object' ? JSON.stringify(value, null, 2) : String(value);
+        html += `
       <div class="inspector-field ${isWide ? 'full-width' : ''}">
         <span class="inspector-label">${esc(key)}</span>
         <div class="inspector-value">${esc(displayVal)}</div>
       </div>
     `;
-  }
-  html += '</div>';
-  container.innerHTML = html;
-  recordInspectorModal.classList.add('active');
-}
+      }
+      html += '</div>';
+      container.innerHTML = html;
+      recordInspectorModal.classList.add('active');
+    }
 
-document.getElementById('closeInspectorBtn').addEventListener('click', () => {
-  recordInspectorModal.classList.remove('active');
-});
-recordInspectorModal.addEventListener('click', (e) => {
-  if (e.target === recordInspectorModal) recordInspectorModal.classList.remove('active');
-});
+    document.getElementById('closeInspectorBtn').addEventListener('click', () => {
+      recordInspectorModal.classList.remove('active');
+    });
+    recordInspectorModal.addEventListener('click', (e) => {
+      if (e.target === recordInspectorModal) recordInspectorModal.classList.remove('active');
+    });
 
-/* =========================================================
-   WORKSHEET 1: CAREER & TRAINING RENDERING
-   ========================================================= */
-function renderCareerRegistrations(){
-  const rows = masterData.career || [];
-  document.getElementById('tabCountCareer').textContent = rows.length;
-  const q = getSearchQuery();
+    /* =========================================================
+       WORKSHEET 1: CAREER & TRAINING RENDERING
+       ========================================================= */
+    function renderCareerRegistrations() {
+      const rows = masterData.career || [];
+      document.getElementById('tabCountCareer').textContent = rows.length;
+      const q = getSearchQuery();
 
-  const filtered = rows.filter(item => {
-    if (!q) return true;
-    const textStr = `${item.name} ${item.email} ${item.phone} ${item.program} ${item.type} ${item.status} ${item.id}`.toLowerCase();
-    return textStr.includes(q);
-  });
+      const filtered = rows.filter(item => {
+        if (!q) return true;
+        const textStr = `${item.name} ${item.email} ${item.phone} ${item.program} ${item.type} ${item.status} ${item.id}`.toLowerCase();
+        return textStr.includes(q);
+      });
 
-  const tbody = document.getElementById('careerRows');
-  tbody.innerHTML = filtered.length ? filtered.map((item, idx) => {
-    const st = (item.status || 'pending_payment').toLowerCase();
-    const isIntern = (item.type || '').toLowerCase() === 'internship' || (item.id || '').startsWith('INT');
-    const isApproved = st === 'paid' || st === 'approved' || (isIntern && st === 'submitted');
-    
-    let statusBadge = isIntern 
-      ? (st === 'approved' ? '<span class="badge-completed">Approved / Shortlisted ✓</span>' : '<span class="badge-completed">Application Received ✓</span>')
-      : (isApproved ? '<span class="badge-completed">Approved & Paid ✓</span>' : '<span class="badge-new">Pending Payment ⏳</span>');
+      const tbody = document.getElementById('careerRows');
+      tbody.innerHTML = filtered.length ? filtered.map((item, idx) => {
+        const st = (item.status || 'pending_payment').toLowerCase();
+        const isIntern = (item.type || '').toLowerCase() === 'internship' || (item.id || '').startsWith('INT');
+        const isApproved = st === 'paid' || st === 'approved' || (isIntern && st === 'submitted');
 
-    let actionBtn = isIntern 
-      ? (st === 'approved'
-        ? `<button class="btn" style="padding:4px 8px;font-size:11px" onclick="event.stopPropagation(); updateCareerStatus('${esc(item.id)}', 'submitted')">Mark Received ⏳</button>`
-        : `<button class="btn primary" style="padding:4px 8px;font-size:11px" onclick="event.stopPropagation(); updateCareerStatus('${esc(item.id)}', 'approved')">Approve / Shortlist ✓</button>`)
-      : (isApproved 
-        ? `<button class="btn" style="padding:4px 8px;font-size:11px" onclick="event.stopPropagation(); updateCareerStatus('${esc(item.id)}', 'pending_payment')">Mark Pending ⏳</button>`
-        : `<button class="btn primary" style="padding:4px 8px;font-size:11px" onclick="event.stopPropagation(); updateCareerStatus('${esc(item.id)}', 'approved')">Mark Approved ✓</button>`);
+        let statusBadge = isIntern
+          ? (st === 'approved' ? '<span class="badge-completed">Approved / Shortlisted ✓</span>' : '<span class="badge-completed">Application Received ✓</span>')
+          : (isApproved ? '<span class="badge-completed">Approved & Paid ✓</span>' : '<span class="badge-new">Pending Payment ⏳</span>');
 
-    return `<tr class="clickable-row" onclick="inspectCareerRecord('${esc(item.id)}')">
+        let actionBtn = isIntern
+          ? (st === 'approved'
+            ? `<button class="btn" style="padding:4px 8px;font-size:11px" onclick="event.stopPropagation(); updateCareerStatus('${esc(item.id)}', 'submitted')">Mark Received ⏳</button>`
+            : `<button class="btn primary" style="padding:4px 8px;font-size:11px" onclick="event.stopPropagation(); updateCareerStatus('${esc(item.id)}', 'approved')">Approve / Shortlist ✓</button>`)
+          : (isApproved
+            ? `<button class="btn" style="padding:4px 8px;font-size:11px" onclick="event.stopPropagation(); updateCareerStatus('${esc(item.id)}', 'pending_payment')">Mark Pending ⏳</button>`
+            : `<button class="btn primary" style="padding:4px 8px;font-size:11px" onclick="event.stopPropagation(); updateCareerStatus('${esc(item.id)}', 'approved')">Mark Approved ✓</button>`);
+
+        return `<tr class="clickable-row" onclick="inspectCareerRecord('${esc(item.id)}')">
       <td class="cell-row-idx">${idx + 1}</td>
       <td><strong>${esc(item.name || 'Applicant')}</strong></td>
       <td class="cell-mono">${esc(item.email || '-')}</td>
@@ -1201,69 +1605,69 @@ function renderCareerRegistrations(){
       <td class="cell-mono">${esc(fmtDate(item.created_at || item.createdAt))}</td>
       <td>${actionBtn}</td>
     </tr>`;
-  }).join('') : '<tr><td colspan="10" style="text-align:center; padding:24px;" class="muted">No matching training or career submissions found.</td></tr>';
-}
+      }).join('') : '<tr><td colspan="10" style="text-align:center; padding:24px;" class="muted">No matching training or career submissions found.</td></tr>';
+    }
 
-function inspectCareerRecord(id) {
-  const item = (masterData.career || []).find(r => String(r.id) === String(id));
-  if (!item) return;
-  const d = item.detailsParsed || {};
-  openRecordInspector(`Applicant: ${item.name || 'Unknown'}`, `Submission #${item.id}`, {
-    "Applicant Name": item.name,
-    "Email Address": item.email,
-    "Phone Number": item.phone,
-    "Program / Track": item.program,
-    "Application Type": item.type,
-    "Current Status": item.status,
-    "Age / Gender": `${d.age || '-'} / ${d.gender || '-'}`,
-    "Residential Address": d.address,
-    "Guardian Contact": d.guardianName ? `${d.guardianName} (${d.guardianPhone || '-'})` : null,
-    "Weekly Commitment": d.commitment,
-    "Available Days": d.availableDays,
-    "Applicant Statement": item.statement || d.comments,
-    "Submission ID": item.id,
-    "Created Date": fmtDate(item.created_at || item.createdAt)
-  });
-}
+    function inspectCareerRecord(id) {
+      const item = (masterData.career || []).find(r => String(r.id) === String(id));
+      if (!item) return;
+      const d = item.detailsParsed || {};
+      openRecordInspector(`Applicant: ${item.name || 'Unknown'}`, `Submission #${item.id}`, {
+        "Applicant Name": item.name,
+        "Email Address": item.email,
+        "Phone Number": item.phone,
+        "Program / Track": item.program,
+        "Application Type": item.type,
+        "Current Status": item.status,
+        "Age / Gender": `${d.age || '-'} / ${d.gender || '-'}`,
+        "Residential Address": d.address,
+        "Guardian Contact": d.guardianName ? `${d.guardianName} (${d.guardianPhone || '-'})` : null,
+        "Weekly Commitment": d.commitment,
+        "Available Days": d.availableDays,
+        "Applicant Statement": item.statement || d.comments,
+        "Submission ID": item.id,
+        "Created Date": fmtDate(item.created_at || item.createdAt)
+      });
+    }
 
-async function loadCareerRegistrations(){
-  const data = await adminFetch('/api/admin/career-registrations');
-  masterData.career = data.registrations || [];
-  renderCareerRegistrations();
-}
+    async function loadCareerRegistrations() {
+      const data = await adminFetch('/api/admin/career-registrations');
+      masterData.career = data.registrations || [];
+      renderCareerRegistrations();
+    }
 
-async function updateCareerStatus(regId, newStatus){
-  try {
-    await adminFetch(`/api/admin/career-registrations/${encodeURIComponent(regId)}/status`, {
-      method: 'POST',
-      body: JSON.stringify({ status: newStatus })
-    });
-    await loadCareerRegistrations();
-    loadAdminSummary();
-  } catch(err) {
-    logAdminError('Could not update career registration status', err, { registrationId: regId });
-    alert(err.message || 'Status update failed.');
-  }
-}
+    async function updateCareerStatus(regId, newStatus) {
+      try {
+        await adminFetch(`/api/admin/career-registrations/${encodeURIComponent(regId)}/status`, {
+          method: 'POST',
+          body: JSON.stringify({ status: newStatus })
+        });
+        await loadCareerRegistrations();
+        loadAdminSummary();
+      } catch (err) {
+        logAdminError('Could not update career registration status', err, { registrationId: regId });
+        alert(err.message || 'Status update failed.');
+      }
+    }
 
-/* =========================================================
-   WORKSHEET 2: STRATEGY CALL BOOKINGS RENDERING
-   ========================================================= */
-function renderStrategyCalls(){
-  const rows = masterData.calls || [];
-  document.getElementById('tabCountCalls').textContent = rows.length;
-  const q = getSearchQuery();
+    /* =========================================================
+       WORKSHEET 2: STRATEGY CALL BOOKINGS RENDERING
+       ========================================================= */
+    function renderStrategyCalls() {
+      const rows = masterData.calls || [];
+      document.getElementById('tabCountCalls').textContent = rows.length;
+      const q = getSearchQuery();
 
-  const filtered = rows.filter(item => {
-    if (!q) return true;
-    const textStr = `${item.name} ${item.email} ${item.message} ${item.status} ${item.id}`.toLowerCase();
-    return textStr.includes(q);
-  });
+      const filtered = rows.filter(item => {
+        if (!q) return true;
+        const textStr = `${item.name} ${item.email} ${item.message} ${item.status} ${item.id}`.toLowerCase();
+        return textStr.includes(q);
+      });
 
-  const tbody = document.getElementById('callsRows');
-  tbody.innerHTML = filtered.length ? filtered.map((item, idx) => {
-    const statusClass = item.status === 'completed' ? 'badge-completed' : item.status === 'contacted' ? 'badge-contacted' : 'badge-new';
-    return `<tr class="clickable-row" onclick="inspectCallRecord('${esc(item.id)}')">
+      const tbody = document.getElementById('callsRows');
+      tbody.innerHTML = filtered.length ? filtered.map((item, idx) => {
+        const statusClass = item.status === 'completed' ? 'badge-completed' : item.status === 'contacted' ? 'badge-contacted' : 'badge-new';
+        return `<tr class="clickable-row" onclick="inspectCallRecord('${esc(item.id)}')">
       <td class="cell-row-idx">${idx + 1}</td>
       <td><strong>${esc(item.name || 'Unknown')}</strong></td>
       <td class="cell-mono">${esc(item.email || '-')}</td>
@@ -1277,65 +1681,65 @@ function renderStrategyCalls(){
         </button>
       </td>
     </tr>`;
-  }).join('') : '<tr><td colspan="8" style="text-align:center; padding:24px;" class="muted">No matching strategy call bookings found.</td></tr>';
-}
+      }).join('') : '<tr><td colspan="8" style="text-align:center; padding:24px;" class="muted">No matching strategy call bookings found.</td></tr>';
+    }
 
-function inspectCallRecord(id) {
-  const item = (masterData.calls || []).find(r => String(r.id) === String(id));
-  if (!item) return;
-  openRecordInspector(`Client: ${item.name || 'Unknown'}`, `Strategy Call #${item.id}`, {
-    "Client Name": item.name,
-    "Email Address": item.email,
-    "Current Status": item.status,
-    "Message / Operational Focus": item.message,
-    "Booking ID": item.id,
-    "Date Booked": fmtDate(item.createdAt)
-  });
-}
+    function inspectCallRecord(id) {
+      const item = (masterData.calls || []).find(r => String(r.id) === String(id));
+      if (!item) return;
+      openRecordInspector(`Client: ${item.name || 'Unknown'}`, `Strategy Call #${item.id}`, {
+        "Client Name": item.name,
+        "Email Address": item.email,
+        "Current Status": item.status,
+        "Message / Operational Focus": item.message,
+        "Booking ID": item.id,
+        "Date Booked": fmtDate(item.createdAt)
+      });
+    }
 
-async function loadStrategyCalls(){
-  const data = await adminFetch('/api/admin/strategy-calls');
-  masterData.calls = data.strategyCalls || [];
-  renderStrategyCalls();
-}
+    async function loadStrategyCalls() {
+      const data = await adminFetch('/api/admin/strategy-calls');
+      masterData.calls = data.strategyCalls || [];
+      renderStrategyCalls();
+    }
 
-async function updateCallStatus(callId, newStatus){
-  try {
-    await adminFetch(`/api/admin/strategy-calls/${encodeURIComponent(callId)}/status`, {
-      method: 'POST',
-      body: JSON.stringify({ status: newStatus })
-    });
-    await loadStrategyCalls();
-  } catch(err) {
-    alert(err.message || 'Status update failed.');
-  }
-}
+    async function updateCallStatus(callId, newStatus) {
+      try {
+        await adminFetch(`/api/admin/strategy-calls/${encodeURIComponent(callId)}/status`, {
+          method: 'POST',
+          body: JSON.stringify({ status: newStatus })
+        });
+        await loadStrategyCalls();
+      } catch (err) {
+        alert(err.message || 'Status update failed.');
+      }
+    }
 
-/* =========================================================
-   WORKSHEET 3: CAMPAIGN SUBMISSIONS RENDERING
-   ========================================================= */
-async function renderCampaigns(){
-  const rows = masterData.campaign || [];
-  document.getElementById('tabCountCampaign').textContent = rows.length;
-  const q = getSearchQuery();
+    /* =========================================================
+       WORKSHEET 3: CAMPAIGN SUBMISSIONS RENDERING
+       ========================================================= */
+    async function renderCampaigns() {
+      const rows = masterData.campaign || [];
+      document.getElementById('tabCountCampaign').textContent = rows.length;
+      const q = getSearchQuery();
 
-  const filtered = rows.filter(item => {
-    if (!q) return true;
-    const textStr = JSON.stringify(item).toLowerCase();
-    return textStr.includes(q);
-  });
+      const filtered = rows.filter(item => {
+        if (!q) return true;
+        const textStr = JSON.stringify(item).toLowerCase();
+        return textStr.includes(q);
+      });
 
-  const campaignParts = filtered.length ? await Promise.all(filtered.map(async (item, idx) => {
-    const qst = item.questions || {};
-    const pkg = item.package || {};
-    const pay = item.payment || {};
-    const status = (item.status || (pay.reference ? 'paid' : 'pending_payment')).toLowerCase();
-    const isPaid = status === 'paid';
-    const pkgPrice = pkg.currency ? fmtCampaignMoney(pkg.amount || pkg.usd || pkg.ngn, pkg.currency) : await fmtNgnAsLocal(pkg.ngn);
-    const payClass = isPaid ? 'badge-completed' : 'badge-contacted';
-    const payLabel = isPaid ? 'Paid' : 'Pending Payment';
-    
-    return `<tr class="clickable-row" onclick="inspectCampaignRecord('${esc(item.id)}')">
+      const campaignParts = filtered.length ? await Promise.all(filtered.map(async (item, idx) => {
+        const qst = item.questions || {};
+        const pkg = item.package || {};
+        const pay = item.payment || {};
+        const status = (item.status || (pay.reference ? 'paid' : 'pending_payment')).toLowerCase();
+        const isPaid = status === 'paid';
+        const pkgPrice = pkg.currency ? fmtCampaignMoney(pkg.amount || pkg.usd || pkg.ngn, pkg.currency) : await fmtNgnAsLocal(pkg.ngn);
+        const payClass = isPaid ? 'badge-completed' : 'badge-contacted';
+        const payLabel = isPaid ? 'Paid' : 'Pending Payment';
+
+        return `<tr class="clickable-row" onclick="inspectCampaignRecord('${esc(item.id)}')">
       <td class="cell-row-idx">${idx + 1}</td>
       <td><strong>${esc(qst.fullName || item.email || 'Unknown')}</strong></td>
       <td class="cell-mono">${esc(item.email || '-')}</td>
@@ -1347,55 +1751,55 @@ async function renderCampaigns(){
       <td class="cell-mono">${esc(pay.reference || item.id || '-')}</td>
       <td class="cell-mono">${esc(fmtDate(item.createdAt || pay.paidAt))}</td>
     </tr>`;
-  })) : [];
+      })) : [];
 
-  document.getElementById('campaignRows').innerHTML = campaignParts.length ? campaignParts.join('') : '<tr><td colspan="10" style="text-align:center; padding:24px;" class="muted">No matching campaign submissions found.</td></tr>';
-}
+      document.getElementById('campaignRows').innerHTML = campaignParts.length ? campaignParts.join('') : '<tr><td colspan="10" style="text-align:center; padding:24px;" class="muted">No matching campaign submissions found.</td></tr>';
+    }
 
-function inspectCampaignRecord(id) {
-  const item = (masterData.campaign || []).find(r => String(r.id) === String(id));
-  if (!item) return;
-  const qst = item.questions || {};
-  const pkg = item.package || {};
-  const pay = item.payment || {};
-  
-  openRecordInspector(`Campaign Submission: ${qst.fullName || item.email}`, `Record ID #${item.id}`, {
-    "Full Name": qst.fullName || item.email,
-    "Email": item.email,
-    "Business Name": qst.business,
-    "Business Challenge": qst.challenge,
-    "Target Audience": qst.audience,
-    "Main Goal": qst.goal,
-    "Selected Package": pkg.name,
-    "Package Details": pkg.summary,
-    "Payment Reference": pay.reference,
-    "Payment Amount": pay.amount ? `${pay.amount / 100} ${pay.currency || ''}` : null,
-    "Created Date": fmtDate(item.createdAt)
-  });
-}
+    function inspectCampaignRecord(id) {
+      const item = (masterData.campaign || []).find(r => String(r.id) === String(id));
+      if (!item) return;
+      const qst = item.questions || {};
+      const pkg = item.package || {};
+      const pay = item.payment || {};
 
-async function loadCampaigns(){
-  const data = await adminFetch('/api/admin/campaign-registrations');
-  masterData.campaign = data.registrations || [];
-  await renderCampaigns();
-}
+      openRecordInspector(`Campaign Submission: ${qst.fullName || item.email}`, `Record ID #${item.id}`, {
+        "Full Name": qst.fullName || item.email,
+        "Email": item.email,
+        "Business Name": qst.business,
+        "Business Challenge": qst.challenge,
+        "Target Audience": qst.audience,
+        "Main Goal": qst.goal,
+        "Selected Package": pkg.name,
+        "Package Details": pkg.summary,
+        "Payment Reference": pay.reference,
+        "Payment Amount": pay.amount ? `${pay.amount / 100} ${pay.currency || ''}` : null,
+        "Created Date": fmtDate(item.createdAt)
+      });
+    }
 
-/* =========================================================
-   WORKSHEET 4: VISITOR SUPPORT CHAT INBOX
-   ========================================================= */
-function renderAdminChatsList() {
-  const rows = masterData.chats || [];
-  document.getElementById('tabCountChats').textContent = rows.length;
-  const q = getSearchQuery();
+    async function loadCampaigns() {
+      const data = await adminFetch('/api/admin/campaign-registrations');
+      masterData.campaign = data.registrations || [];
+      await renderCampaigns();
+    }
 
-  const filtered = rows.filter(item => {
-    if (!q) return true;
-    const textStr = `${item.visitorName} ${item.visitorEmail} ${item.lastMessage} ${item.teamMemberName}`.toLowerCase();
-    return textStr.includes(q);
-  });
+    /* =========================================================
+       WORKSHEET 4: VISITOR SUPPORT CHAT INBOX
+       ========================================================= */
+    function renderAdminChatsList() {
+      const rows = masterData.chats || [];
+      document.getElementById('tabCountChats').textContent = rows.length;
+      const q = getSearchQuery();
 
-  const list = document.getElementById('chatRows');
-  list.innerHTML = filtered.length ? filtered.map((item, idx) => `
+      const filtered = rows.filter(item => {
+        if (!q) return true;
+        const textStr = `${item.visitorName} ${item.visitorEmail} ${item.lastMessage} ${item.teamMemberName}`.toLowerCase();
+        return textStr.includes(q);
+      });
+
+      const list = document.getElementById('chatRows');
+      list.innerHTML = filtered.length ? filtered.map((item, idx) => `
     <tr class="clickable-row" onclick="openAdminChatModal('${esc(item.id)}', '${esc(item.visitorName || item.visitorEmail || 'Website Visitor')}', '${esc(item.visitorEmail || '')}')">
       <td class="cell-row-idx">${idx + 1}</td>
       <td><strong>${esc(item.visitorName || 'Website Visitor')}</strong></td>
@@ -1406,191 +1810,191 @@ function renderAdminChatsList() {
       <td><button class="btn primary" style="padding:4px 10px; font-size:11px;">Open Chat ↗</button></td>
     </tr>
   `).join('') : '<tr><td colspan="7" style="text-align:center; padding:24px;" class="muted">No matching conversations found.</td></tr>';
-}
+    }
 
-async function loadAdminChats(){
-  const data = await adminFetch('/api/admin/chat/conversations');
-  masterData.chats = data.conversations || [];
-  renderAdminChatsList();
-}
+    async function loadAdminChats() {
+      const data = await adminFetch('/api/admin/chat/conversations');
+      masterData.chats = data.conversations || [];
+      renderAdminChatsList();
+    }
 
-async function openAdminChatModal(id, visitorName, visitorMeta){
-  activeChatId = id;
-  document.getElementById('modalVisitorName').textContent = visitorName || 'Visitor Conversation';
-  document.getElementById('modalVisitorMeta').textContent = visitorMeta || 'Team Inbox';
-  chatModalOverlay.classList.add('active');
-  
-  await loadAdminChatMessages();
-  clearInterval(chatPollTimer);
-  chatPollTimer = setInterval(loadAdminChatMessages, 3500);
-}
+    async function openAdminChatModal(id, visitorName, visitorMeta) {
+      activeChatId = id;
+      document.getElementById('modalVisitorName').textContent = visitorName || 'Visitor Conversation';
+      document.getElementById('modalVisitorMeta').textContent = visitorMeta || 'Team Inbox';
+      chatModalOverlay.classList.add('active');
 
-function closeAdminChatModal(){
-  chatModalOverlay.classList.remove('active');
-  clearInterval(chatPollTimer);
-  activeChatId = null;
-  clearAttachment();
-}
+      await loadAdminChatMessages();
+      clearInterval(chatPollTimer);
+      chatPollTimer = setInterval(loadAdminChatMessages, 3500);
+    }
 
-document.getElementById('modalCloseBtn').addEventListener('click', closeAdminChatModal);
-chatModalOverlay.addEventListener('click', (e) => { if(e.target === chatModalOverlay) closeAdminChatModal(); });
+    function closeAdminChatModal() {
+      chatModalOverlay.classList.remove('active');
+      clearInterval(chatPollTimer);
+      activeChatId = null;
+      clearAttachment();
+    }
 
-function renderAttachmentHTML(attachment){
-  if(!attachment || !attachment.url) return '';
-  const url = esc(attachment.url);
-  const name = esc(attachment.name || 'Attachment');
-  const type = esc(attachment.type || '');
-  if(type.startsWith('image/') || url.startsWith('data:image/')){
-    return `<a href="${url}" target="_blank"><img src="${url}" alt="${name}" style="max-width:280px; max-height:200px; border-radius:8px; margin-top:8px; display:block;"></a>`;
-  }
-  return `<a href="${url}" download="${name}" target="_blank" style="display:inline-block; margin-top:8px; padding:6px 10px; background:rgba(0,0,0,0.4); border-radius:6px; color:var(--bronze-light); font-size:12px;">📎 Download ${name}</a>`;
-}
+    document.getElementById('modalCloseBtn').addEventListener('click', closeAdminChatModal);
+    chatModalOverlay.addEventListener('click', (e) => { if (e.target === chatModalOverlay) closeAdminChatModal(); });
 
-async function loadAdminChatMessages(){
-  if(!activeChatId) return;
-  try {
-    const data = await adminFetch(`/api/admin/chat/conversations/${encodeURIComponent(activeChatId)}/messages`);
-    const messages = data.messages || [];
-    document.getElementById('modalChatMessages').innerHTML = messages.length ? messages.map(msg => `
+    function renderAttachmentHTML(attachment) {
+      if (!attachment || !attachment.url) return '';
+      const url = esc(attachment.url);
+      const name = esc(attachment.name || 'Attachment');
+      const type = esc(attachment.type || '');
+      if (type.startsWith('image/') || url.startsWith('data:image/')) {
+        return `<a href="${url}" target="_blank"><img src="${url}" alt="${name}" style="max-width:280px; max-height:200px; border-radius:8px; margin-top:8px; display:block;"></a>`;
+      }
+      return `<a href="${url}" download="${name}" target="_blank" style="display:inline-block; margin-top:8px; padding:6px 10px; background:rgba(0,0,0,0.4); border-radius:6px; color:var(--bronze-light); font-size:12px;">📎 Download ${name}</a>`;
+    }
+
+    async function loadAdminChatMessages() {
+      if (!activeChatId) return;
+      try {
+        const data = await adminFetch(`/api/admin/chat/conversations/${encodeURIComponent(activeChatId)}/messages`);
+        const messages = data.messages || [];
+        document.getElementById('modalChatMessages').innerHTML = messages.length ? messages.map(msg => `
       <div class="chat-msg ${msg.sender === 'team' ? 'team' : 'visitor'}">
         ${esc(msg.text || '')}
         ${renderAttachmentHTML(msg.attachment)}
         <small>${esc(msg.senderName || '')} • ${esc(fmtChatTime(msg.time))}</small>
       </div>
     `).join('') : '<div class="chat-empty">No messages yet in this conversation.</div>';
-    const box = document.getElementById('modalChatMessages');
-    box.scrollTop = box.scrollHeight;
-  } catch (err) {
-    clearInterval(chatPollTimer);
-    throw err;
-  }
-}
-
-document.getElementById('modalAttachBtn').addEventListener('click', () => modalFileInput.click());
-modalFileInput.addEventListener('change', (e) => {
-  const file = e.target.files[0];
-  if(!file) return;
-  if(file.size > 8 * 1024 * 1024){ alert('File size exceeds maximum limit of 8MB.'); return; }
-  const reader = new FileReader();
-  reader.onload = (event) => {
-    currentAttachment = { url: event.target.result, name: file.name, type: file.type, size: file.size };
-    document.getElementById('attachmentPreviewText').textContent = `📎 ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
-    attachmentPreviewBar.classList.add('active');
-  };
-  reader.readAsDataURL(file);
-});
-
-function clearAttachment(){
-  currentAttachment = null;
-  modalFileInput.value = '';
-  attachmentPreviewBar.classList.remove('active');
-}
-
-document.getElementById('removeAttachmentBtn').addEventListener('click', clearAttachment);
-
-document.getElementById('modalChatForm').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const input = document.getElementById('modalChatInput');
-  const text = input.value.trim();
-  if((!text && !currentAttachment) || !activeChatId) return;
-
-  const payload = { text };
-  if(currentAttachment) payload.attachment = currentAttachment;
-  input.value = '';
-  const sentAttach = currentAttachment;
-  clearAttachment();
-
-  try {
-    await adminFetch(`/api/admin/chat/conversations/${encodeURIComponent(activeChatId)}/messages`, {
-      method: 'POST',
-      body: JSON.stringify(payload)
-    });
-    await loadAdminChatMessages();
-    await loadAdminChats();
-  } catch(err) {
-    input.value = text;
-    currentAttachment = sentAttach;
-    showError(err.message);
-  }
-});
-
-/* =========================================================
-   MASTER ADMIN PERMISSIONS & WORKBOOK INITIALIZATION
-   ========================================================= */
-let currentAdmin = { is_master: false, is_restricted: true, username: '' };
-
-function applyAdminPermissions(me) {
-  currentAdmin = me || { is_master: false, is_restricted: true, username: '' };
-  
-  const isMaster = Boolean(currentAdmin.is_master);
-  const banner = document.getElementById('restrictedAdminBanner');
-  const regBtn = document.getElementById('openRegisterAdminBtn');
-  const revenueCard = document.getElementById('cardRevenueContainer');
-
-  if (isMaster) {
-    if (banner) banner.style.display = 'none';
-    if (regBtn) regBtn.style.display = 'inline-flex';
-    document.querySelectorAll('.master-only-card').forEach(el => el.style.display = 'block');
-    document.querySelectorAll('.master-only-tab').forEach(el => el.style.display = 'inline-flex');
-  } else {
-    if (banner) banner.style.display = 'flex';
-    if (regBtn) regBtn.style.display = 'none';
-    document.querySelectorAll('.master-only-card').forEach(el => el.style.display = 'none');
-    document.querySelectorAll('.master-only-tab').forEach(el => el.style.display = 'none');
-    
-    document.getElementById('revenueCount').textContent = 'Restricted';
-
-    // If current tab is restricted, auto-switch to Registered Users sheet
-    if (['career', 'calls', 'campaign'].includes(activeSheet)) {
-      const userTab = document.querySelector('.excel-tab[data-sheet="users"]');
-      if (userTab) userTab.click();
+        const box = document.getElementById('modalChatMessages');
+        box.scrollTop = box.scrollHeight;
+      } catch (err) {
+        clearInterval(chatPollTimer);
+        throw err;
+      }
     }
-  }
-}
 
-/* =========================================================
-   WORKSHEET 5: REGISTERED USERS RENDERING & MONITORING
-   ========================================================= */
-function renderUsers(){
-  const rows = masterData.users || [];
-  document.getElementById('tabCountUsers').textContent = rows.length;
-  const q = getSearchQuery();
+    document.getElementById('modalAttachBtn').addEventListener('click', () => modalFileInput.click());
+    modalFileInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      if (file.size > 8 * 1024 * 1024) { alert('File size exceeds maximum limit of 8MB.'); return; }
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        currentAttachment = { url: event.target.result, name: file.name, type: file.type, size: file.size };
+        document.getElementById('attachmentPreviewText').textContent = `📎 ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+        attachmentPreviewBar.classList.add('active');
+      };
+      reader.readAsDataURL(file);
+    });
 
-  const filtered = rows.filter(user => {
-    if (!q) return true;
-    return `${user.username} ${user.email} ${user.uid}`.toLowerCase().includes(q);
-  });
+    function clearAttachment() {
+      currentAttachment = null;
+      modalFileInput.value = '';
+      attachmentPreviewBar.classList.remove('active');
+    }
 
-  const tbody = document.getElementById('userRows');
-  tbody.innerHTML = filtered.length ? filtered.map((user, idx) => {
-    const isDeact = Boolean(user.isDeactivated);
-    const deactUntil = user.deactivatedUntil ? user.deactivatedUntil.slice(0, 10) : '';
-    
-    let statusBadge = isDeact 
-      ? `<span class="badge-new">Deactivated (until ${esc(deactUntil)}) 🔴</span>`
-      : `<span class="badge-completed">Active Account 🟢</span>`;
+    document.getElementById('removeAttachmentBtn').addEventListener('click', clearAttachment);
 
-    let emailBadge = user.emailVerified 
-      ? `<span class="badge-completed">Verified ✓</span>`
-      : `<span class="badge-contacted">Unverified ⏳</span>`;
+    document.getElementById('modalChatForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const input = document.getElementById('modalChatInput');
+      const text = input.value.trim();
+      if ((!text && !currentAttachment) || !activeChatId) return;
 
-    let actionBtns = '';
-    if (currentAdmin.is_master) {
-      const deactBtn = isDeact
-        ? `<button class="btn" style="padding:3px 8px; font-size:11px; background:rgba(145,217,155,0.2); color:#91d99b; border-color:#91d99b;" onclick="reactivateUserAccount('${esc(user.uid)}')">Reactivate 🟢</button>`
-        : `<button class="btn" style="padding:3px 8px; font-size:11px; background:rgba(232,160,160,0.18); color:#f7a3a3; border-color:#e8a0a0;" onclick="openDeactivateUserModal('${esc(user.uid)}', '${esc(user.username || user.email)}')">Deactivate 🚫</button>`;
+      const payload = { text };
+      if (currentAttachment) payload.attachment = currentAttachment;
+      input.value = '';
+      const sentAttach = currentAttachment;
+      clearAttachment();
 
-      actionBtns = `
+      try {
+        await adminFetch(`/api/admin/chat/conversations/${encodeURIComponent(activeChatId)}/messages`, {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+        await loadAdminChatMessages();
+        await loadAdminChats();
+      } catch (err) {
+        input.value = text;
+        currentAttachment = sentAttach;
+        showError(err.message);
+      }
+    });
+
+    /* =========================================================
+       MASTER ADMIN PERMISSIONS & WORKBOOK INITIALIZATION
+       ========================================================= */
+    let currentAdmin = { is_master: false, is_restricted: true, username: '' };
+
+    function applyAdminPermissions(me) {
+      currentAdmin = me || { is_master: false, is_restricted: true, username: '' };
+
+      const isMaster = Boolean(currentAdmin.is_master);
+      const banner = document.getElementById('restrictedAdminBanner');
+      const regBtn = document.getElementById('openRegisterAdminBtn');
+      const revenueCard = document.getElementById('cardRevenueContainer');
+
+      if (isMaster) {
+        if (banner) banner.style.display = 'none';
+        if (regBtn) regBtn.style.display = 'inline-flex';
+        document.querySelectorAll('.master-only-card').forEach(el => el.style.display = 'block');
+        document.querySelectorAll('.master-only-tab').forEach(el => el.style.display = 'inline-flex');
+      } else {
+        if (banner) banner.style.display = 'flex';
+        if (regBtn) regBtn.style.display = 'none';
+        document.querySelectorAll('.master-only-card').forEach(el => el.style.display = 'none');
+        document.querySelectorAll('.master-only-tab').forEach(el => el.style.display = 'none');
+
+        document.getElementById('revenueCount').textContent = 'Restricted';
+
+        // If current tab is restricted, auto-switch to Registered Users sheet
+        if (['career', 'calls', 'campaign'].includes(activeSheet)) {
+          const userTab = document.querySelector('.excel-tab[data-sheet="users"]');
+          if (userTab) userTab.click();
+        }
+      }
+    }
+
+    /* =========================================================
+       WORKSHEET 5: REGISTERED USERS RENDERING & MONITORING
+       ========================================================= */
+    function renderUsers() {
+      const rows = masterData.users || [];
+      document.getElementById('tabCountUsers').textContent = rows.length;
+      const q = getSearchQuery();
+
+      const filtered = rows.filter(user => {
+        if (!q) return true;
+        return `${user.username} ${user.email} ${user.uid}`.toLowerCase().includes(q);
+      });
+
+      const tbody = document.getElementById('userRows');
+      tbody.innerHTML = filtered.length ? filtered.map((user, idx) => {
+        const isDeact = Boolean(user.isDeactivated);
+        const deactUntil = user.deactivatedUntil ? user.deactivatedUntil.slice(0, 10) : '';
+
+        let statusBadge = isDeact
+          ? `<span class="badge-new">Deactivated (until ${esc(deactUntil)}) 🔴</span>`
+          : `<span class="badge-completed">Active Account 🟢</span>`;
+
+        let emailBadge = user.emailVerified
+          ? `<span class="badge-completed">Verified ✓</span>`
+          : `<span class="badge-contacted">Unverified ⏳</span>`;
+
+        let actionBtns = '';
+        if (currentAdmin.is_master) {
+          const deactBtn = isDeact
+            ? `<button class="btn" style="padding:3px 8px; font-size:11px; background:rgba(145,217,155,0.2); color:#91d99b; border-color:#91d99b;" onclick="reactivateUserAccount('${esc(user.uid)}')">Reactivate 🟢</button>`
+            : `<button class="btn" style="padding:3px 8px; font-size:11px; background:rgba(232,160,160,0.18); color:#f7a3a3; border-color:#e8a0a0;" onclick="openDeactivateUserModal('${esc(user.uid)}', '${esc(user.username || user.email)}')">Deactivate 🚫</button>`;
+
+          actionBtns = `
         <div style="display:flex; gap:6px; align-items:center;">
           ${deactBtn}
           <button class="btn" style="padding:3px 8px; font-size:11px; color:#f7a3a3;" onclick="deleteUserAccount('${esc(user.uid)}', '${esc(user.username || user.email)}')">Delete 🗑️</button>
         </div>
       `;
-    } else {
-      actionBtns = `<span class="muted">Restricted Mode</span>`;
-    }
+        } else {
+          actionBtns = `<span class="muted">Restricted Mode</span>`;
+        }
 
-    return `<tr>
+        return `<tr>
       <td class="cell-row-idx">${idx + 1}</td>
       <td><strong>${esc(user.username || user.email || 'User')}</strong></td>
       <td class="cell-mono">${esc(user.email || '-')}</td>
@@ -1604,72 +2008,72 @@ function renderUsers(){
       </td>
       <td>${actionBtns}</td>
     </tr>`;
-  }).join('') : '<tr><td colspan="7" style="text-align:center; padding:24px;" class="muted">No matching registered users found.</td></tr>';
-}
+      }).join('') : '<tr><td colspan="7" style="text-align:center; padding:24px;" class="muted">No matching registered users found.</td></tr>';
+    }
 
-/* User Deactivation & Activity Modals */
-const userDeactivateModal = document.getElementById('userDeactivateModal');
-const userActivityModal = document.getElementById('userActivityModal');
-const registerAdminModal = document.getElementById('registerAdminModal');
+    /* User Deactivation & Activity Modals */
+    const userDeactivateModal = document.getElementById('userDeactivateModal');
+    const userActivityModal = document.getElementById('userActivityModal');
+    const registerAdminModal = document.getElementById('registerAdminModal');
 
-function openDeactivateUserModal(uid, name) {
-  document.getElementById('deactModalUid').value = uid;
-  document.getElementById('deactModalUserTitle').textContent = `Deactivate: ${name}`;
-  userDeactivateModal.classList.add('active');
-}
+    function openDeactivateUserModal(uid, name) {
+      document.getElementById('deactModalUid').value = uid;
+      document.getElementById('deactModalUserTitle').textContent = `Deactivate: ${name}`;
+      userDeactivateModal.classList.add('active');
+    }
 
-document.getElementById('closeUserDeactivateBtn').addEventListener('click', () => {
-  userDeactivateModal.classList.remove('active');
-});
-
-document.getElementById('userDeactivateForm').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const uid = document.getElementById('deactModalUid').value;
-  const days = document.getElementById('deactDaysInput').value;
-  const reason = document.getElementById('deactReasonInput').value;
-
-  try {
-    await adminFetch(`/api/admin/users/${encodeURIComponent(uid)}/deactivate`, {
-      method: 'POST',
-      body: JSON.stringify({ days: parseInt(days, 10), reason })
+    document.getElementById('closeUserDeactivateBtn').addEventListener('click', () => {
+      userDeactivateModal.classList.remove('active');
     });
-    userDeactivateModal.classList.remove('active');
-    await loadAdminUsers();
-  } catch (err) {
-    alert(err.message || 'Failed to deactivate account.');
-  }
-});
 
-async function reactivateUserAccount(uid) {
-  try {
-    await adminFetch(`/api/admin/users/${encodeURIComponent(uid)}/reactivate`, { method: 'POST' });
-    await loadAdminUsers();
-  } catch (err) {
-    alert(err.message || 'Failed to reactivate account.');
-  }
-}
+    document.getElementById('userDeactivateForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const uid = document.getElementById('deactModalUid').value;
+      const days = document.getElementById('deactDaysInput').value;
+      const reason = document.getElementById('deactReasonInput').value;
 
-async function deleteUserAccount(uid, name) {
-  if (!confirm(`Are you sure you want to permanently delete user account '${name}'? This action cannot be undone.`)) return;
-  try {
-    await adminFetch(`/api/admin/users/${encodeURIComponent(uid)}`, { method: 'DELETE' });
-    await loadAdminUsers();
-  } catch (err) {
-    alert(err.message || 'Failed to delete user account.');
-  }
-}
+      try {
+        await adminFetch(`/api/admin/users/${encodeURIComponent(uid)}/deactivate`, {
+          method: 'POST',
+          body: JSON.stringify({ days: parseInt(days, 10), reason })
+        });
+        userDeactivateModal.classList.remove('active');
+        await loadAdminUsers();
+      } catch (err) {
+        alert(err.message || 'Failed to deactivate account.');
+      }
+    });
 
-async function openUserActivityModal(uid, name) {
-  document.getElementById('activityModalUserTitle').textContent = `Activity Monitor: ${name}`;
-  document.getElementById('activityModalUserSub').textContent = `Firebase UID: ${uid}`;
-  const container = document.getElementById('userActivityContent');
-  container.innerHTML = '<div class="muted" style="text-align:center;">Loading activity log...</div>';
-  userActivityModal.classList.add('active');
+    async function reactivateUserAccount(uid) {
+      try {
+        await adminFetch(`/api/admin/users/${encodeURIComponent(uid)}/reactivate`, { method: 'POST' });
+        await loadAdminUsers();
+      } catch (err) {
+        alert(err.message || 'Failed to reactivate account.');
+      }
+    }
 
-  try {
-    const data = await adminFetch(`/api/admin/users/${encodeURIComponent(uid)}/activities`);
-    const logs = data.activities || [];
-    container.innerHTML = logs.length ? `
+    async function deleteUserAccount(uid, name) {
+      if (!confirm(`Are you sure you want to permanently delete user account '${name}'? This action cannot be undone.`)) return;
+      try {
+        await adminFetch(`/api/admin/users/${encodeURIComponent(uid)}`, { method: 'DELETE' });
+        await loadAdminUsers();
+      } catch (err) {
+        alert(err.message || 'Failed to delete user account.');
+      }
+    }
+
+    async function openUserActivityModal(uid, name) {
+      document.getElementById('activityModalUserTitle').textContent = `Activity Monitor: ${name}`;
+      document.getElementById('activityModalUserSub').textContent = `Firebase UID: ${uid}`;
+      const container = document.getElementById('userActivityContent');
+      container.innerHTML = '<div class="muted" style="text-align:center;">Loading activity log...</div>';
+      userActivityModal.classList.add('active');
+
+      try {
+        const data = await adminFetch(`/api/admin/users/${encodeURIComponent(uid)}/activities`);
+        const logs = data.activities || [];
+        container.innerHTML = logs.length ? `
       <div style="display:flex; flex-direction:column; gap:10px;">
         ${logs.map(log => `
           <div style="background:rgba(10,2,2,0.6); border:1px solid var(--border); padding:10px 14px; border-radius:8px;">
@@ -1682,74 +2086,74 @@ async function openUserActivityModal(uid, name) {
         `).join('')}
       </div>
     ` : '<div class="muted" style="text-align:center; padding:24px;">No recent activities logged for this user account.</div>';
-  } catch (err) {
-    container.innerHTML = `<div class="error show">${esc(err.message)}</div>`;
-  }
-}
+      } catch (err) {
+        container.innerHTML = `<div class="error show">${esc(err.message)}</div>`;
+      }
+    }
 
-document.getElementById('closeUserActivityBtn').addEventListener('click', () => {
-  userActivityModal.classList.remove('active');
-});
+    document.getElementById('closeUserActivityBtn').addEventListener('click', () => {
+      userActivityModal.classList.remove('active');
+    });
 
-async function loadAdminUsers(){
-  try {
-    const res = await adminFetch('/api/admin/users');
-    masterData.users = res.users || [];
-    renderUsers();
-  } catch(err) {
-    logAdminError('Failed to load users', err);
-  }
-}
+    async function loadAdminUsers() {
+      try {
+        const res = await adminFetch('/api/admin/users');
+        masterData.users = res.users || [];
+        renderUsers();
+      } catch (err) {
+        logAdminError('Failed to load users', err);
+      }
+    }
 
-/* =========================================================
-   WORKSHEET 6: ADMIN TEAM & MANAGEMENT RENDERING
-   ========================================================= */
-function renderTeam(){
-  const rows = masterData.team || [];
-  document.getElementById('tabCountTeam').textContent = rows.length;
-  const q = getSearchQuery();
+    /* =========================================================
+       WORKSHEET 6: ADMIN TEAM & MANAGEMENT RENDERING
+       ========================================================= */
+    function renderTeam() {
+      const rows = masterData.team || [];
+      document.getElementById('tabCountTeam').textContent = rows.length;
+      const q = getSearchQuery();
 
-  const filtered = rows.filter(member => {
-    if (!q) return true;
-    return `${member.name} ${member.email} ${member.role} ${member.username || member.id}`.toLowerCase().includes(q);
-  });
+      const filtered = rows.filter(member => {
+        if (!q) return true;
+        return `${member.name} ${member.email} ${member.role} ${member.username || member.id}`.toLowerCase().includes(q);
+      });
 
-  const tbody = document.getElementById('teamRows');
-  tbody.innerHTML = filtered.length ? filtered.map((member, idx) => {
-    const isMasterRole = (member.role_level || (member.id === 'samuel-akinomolafe' ? 'master' : 'restricted')) === 'master';
-    const isActive = member.is_active !== 0;
+      const tbody = document.getElementById('teamRows');
+      tbody.innerHTML = filtered.length ? filtered.map((member, idx) => {
+        const isMasterRole = (member.role_level || (member.id === 'samuel-akinomolafe' ? 'master' : 'restricted')) === 'master';
+        const isActive = member.is_active !== 0;
 
-    let tierBadge = isMasterRole
-      ? `<span class="chip" style="background:rgba(201,154,74,0.25); color:var(--bronze-light); border-color:var(--bronze);">⭐ Master Admin</span>`
-      : `<span class="chip">🔒 Restricted Admin</span>`;
+        let tierBadge = isMasterRole
+          ? `<span class="chip" style="background:rgba(201,154,74,0.25); color:var(--bronze-light); border-color:var(--bronze);">⭐ Master Admin</span>`
+          : `<span class="chip">🔒 Restricted Admin</span>`;
 
-    let statusBadge = isActive
-      ? `<span class="badge-completed">Active 🟢</span>`
-      : `<span class="badge-new">Deactivated 🔴</span>`;
+        let statusBadge = isActive
+          ? `<span class="badge-completed">Active 🟢</span>`
+          : `<span class="badge-new">Deactivated 🔴</span>`;
 
-    let actionBtns = '';
-    const uname = member.username || member.id;
-    if (currentAdmin.is_master && uname !== currentAdmin.username) {
-      const roleToggle = isMasterRole
-        ? `<button class="btn" style="padding:3px 8px; font-size:11px;" onclick="updateAdminAccountStatus('${esc(uname)}', {role_level:'restricted'})">Make Restricted 🔒</button>`
-        : `<button class="btn primary" style="padding:3px 8px; font-size:11px;" onclick="updateAdminAccountStatus('${esc(uname)}', {role_level:'master'})">Make Master ⭐</button>`;
+        let actionBtns = '';
+        const uname = member.username || member.id;
+        if (currentAdmin.is_master && uname !== currentAdmin.username) {
+          const roleToggle = isMasterRole
+            ? `<button class="btn" style="padding:3px 8px; font-size:11px;" onclick="updateAdminAccountStatus('${esc(uname)}', {role_level:'restricted'})">Make Restricted 🔒</button>`
+            : `<button class="btn primary" style="padding:3px 8px; font-size:11px;" onclick="updateAdminAccountStatus('${esc(uname)}', {role_level:'master'})">Make Master ⭐</button>`;
 
-      const activeToggle = isActive
-        ? `<button class="btn" style="padding:3px 8px; font-size:11px; color:#f7a3a3;" onclick="updateAdminAccountStatus('${esc(uname)}', {is_active:0})">Deactivate 🔴</button>`
-        : `<button class="btn primary" style="padding:3px 8px; font-size:11px;" onclick="updateAdminAccountStatus('${esc(uname)}', {is_active:1})">Reactivate 🟢</button>`;
+          const activeToggle = isActive
+            ? `<button class="btn" style="padding:3px 8px; font-size:11px; color:#f7a3a3;" onclick="updateAdminAccountStatus('${esc(uname)}', {is_active:0})">Deactivate 🔴</button>`
+            : `<button class="btn primary" style="padding:3px 8px; font-size:11px;" onclick="updateAdminAccountStatus('${esc(uname)}', {is_active:1})">Reactivate 🟢</button>`;
 
-      actionBtns = `
+          actionBtns = `
         <div style="display:flex; gap:6px; align-items:center;">
           ${roleToggle}
           ${activeToggle}
           <button class="btn" style="padding:3px 8px; font-size:11px; color:#f7a3a3;" onclick="deleteAdminAccount('${esc(uname)}')">Delete 🗑️</button>
         </div>
       `;
-    } else {
-      actionBtns = `<span class="muted">${uname === currentAdmin.username ? 'Current Account' : 'View Only'}</span>`;
-    }
+        } else {
+          actionBtns = `<span class="muted">${uname === currentAdmin.username ? 'Current Account' : 'View Only'}</span>`;
+        }
 
-    return `<tr>
+        return `<tr>
       <td class="cell-row-idx">${idx + 1}</td>
       <td><strong>${esc(member.name)}</strong> <small class="cell-mono muted">(@${esc(uname)})</small></td>
       <td class="cell-mono">${esc(member.email)}</td>
@@ -1758,142 +2162,143 @@ function renderTeam(){
       <td>${statusBadge}</td>
       <td>${actionBtns}</td>
     </tr>`;
-  }).join('') : '<tr><td colspan="7" style="text-align:center; padding:24px;" class="muted">No admin team accounts found.</td></tr>';
-}
-
-/* Register New Admin Modal & Submit Handlers */
-const openRegisterAdminBtn = document.getElementById('openRegisterAdminBtn');
-if (openRegisterAdminBtn) {
-  openRegisterAdminBtn.addEventListener('click', () => {
-    registerAdminModal.classList.add('active');
-  });
-}
-
-document.getElementById('closeRegisterAdminBtn').addEventListener('click', () => {
-  registerAdminModal.classList.remove('active');
-});
-
-document.getElementById('registerAdminForm').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const username = document.getElementById('regAdminUsername').value.trim();
-  const password = document.getElementById('regAdminPassword').value.trim();
-  const name = document.getElementById('regAdminName').value.trim();
-  const email = document.getElementById('regAdminEmail').value.trim();
-  const role = document.getElementById('regAdminRole').value.trim();
-  const role_level = document.getElementById('regAdminRoleLevel').value;
-
-  try {
-    const res = await adminFetch('/api/admin/team/register', {
-      method: 'POST',
-      body: JSON.stringify({ username, password, name, email, role, role_level })
-    });
-    alert(res.message || 'Admin registered successfully!');
-    registerAdminModal.classList.remove('active');
-    document.getElementById('registerAdminForm').reset();
-    await loadAdmin();
-  } catch (err) {
-    alert(err.message || 'Failed to register admin.');
-  }
-});
-
-async function updateAdminAccountStatus(username, updatePayload) {
-  try {
-    await adminFetch(`/api/admin/team/${encodeURIComponent(username)}/status`, {
-      method: 'POST',
-      body: JSON.stringify(updatePayload)
-    });
-    await loadAdmin();
-  } catch (err) {
-    alert(err.message || 'Failed to update admin account status.');
-  }
-}
-
-async function deleteAdminAccount(username) {
-  if (!confirm(`Are you sure you want to permanently delete admin account '@${username}'?`)) return;
-  try {
-    await adminFetch(`/api/admin/team/${encodeURIComponent(username)}`, { method: 'DELETE' });
-    await loadAdmin();
-  } catch (err) {
-    alert(err.message || 'Failed to delete admin account.');
-  }
-}
-
-/* =========================================================
-   INITIAL DATA LOAD & SUMMARY SYNC
-   ========================================================= */
-async function loadAdminSummary() {
-  try {
-    const summary = await adminFetch('/api/admin/summary');
-    document.getElementById('careerCount').textContent = summary.careerRegistrations || 0;
-    document.getElementById('campaignCount').textContent = summary.campaignRegistrations || 0;
-    document.getElementById('callsCount').textContent = summary.strategyCalls || 0;
-    document.getElementById('userCount').textContent = summary.registeredUsers || 0;
-    
-    if (summary.totalRevenueNgn !== null && summary.totalRevenueNgn !== undefined) {
-      const revenueLocal = await fmtNgnAsLocal(summary.totalRevenueNgn || 0);
-      document.getElementById('revenueCount').textContent = revenueLocal;
-    } else {
-      document.getElementById('revenueCount').textContent = 'Restricted';
-    }
-  } catch(e) { logAdminError('Summary load failed', e); }
-}
-
-async function loadAdmin(){
-  try{
-    const me = await adminFetch('/api/admin/me');
-    gate.style.display = 'none';
-    dashboard.style.display = 'block';
-    
-    applyAdminPermissions(me);
-
-    document.getElementById('adminStatus').textContent = `Signed in as ${me.name} (${me.is_master ? 'Master Admin' : 'Restricted Admin'})`;
-    document.getElementById('adminCount').textContent = me.configuredAdmins || (me.team ? me.team.length : 0);
-    masterData.team = me.team || [];
-    renderTeam();
-
-    const fetchTasks = [
-      loadAdminSummary(),
-      loadAdminChats(),
-      loadAdminUsers()
-    ];
-
-    if (me.is_master) {
-      fetchTasks.push(
-        loadCareerRegistrations(),
-        loadStrategyCalls(),
-        loadCampaigns()
-      );
+      }).join('') : '<tr><td colspan="7" style="text-align:center; padding:24px;" class="muted">No admin team accounts found.</td></tr>';
     }
 
-    await Promise.allSettled(fetchTasks);
-  } catch(err){
-    logAdminError('Could not load admin dashboard', err);
-    showError(err.message);
-  }
-}
+    /* Register New Admin Modal & Submit Handlers */
+    const openRegisterAdminBtn = document.getElementById('openRegisterAdminBtn');
+    if (openRegisterAdminBtn) {
+      openRegisterAdminBtn.addEventListener('click', () => {
+        registerAdminModal.classList.add('active');
+      });
+    }
 
-async function checkAdminSession(){
-  try {
-    await adminFetch('/api/admin/check-session');
-    loadAdmin();
-  } catch (err) {
-    logAdminError('Admin session check failed', err);
-    showError('Please sign in to access the admin control center.');
-  }
-}
+    document.getElementById('closeRegisterAdminBtn').addEventListener('click', () => {
+      registerAdminModal.classList.remove('active');
+    });
 
-checkAdminSession();
-document.getElementById('refreshBtn').addEventListener('click', loadAdmin);
+    document.getElementById('registerAdminForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const username = document.getElementById('regAdminUsername').value.trim();
+      const password = document.getElementById('regAdminPassword').value.trim();
+      const name = document.getElementById('regAdminName').value.trim();
+      const email = document.getElementById('regAdminEmail').value.trim();
+      const role = document.getElementById('regAdminRole').value.trim();
+      const role_level = document.getElementById('regAdminRoleLevel').value;
 
-document.getElementById('signOutBtn').addEventListener('click', async () => {
-  try {
-    await adminFetch('/api/admin/sign-out', { method: 'POST' });
-    window.location.href = '/admin-login';
-  } catch (err) {
-    logAdminError('Could not sign out', err);
-    alert(err.message || 'Sign out failed.');
-  }
-});
-</script>
+      try {
+        const res = await adminFetch('/api/admin/team/register', {
+          method: 'POST',
+          body: JSON.stringify({ username, password, name, email, role, role_level })
+        });
+        alert(res.message || 'Admin registered successfully!');
+        registerAdminModal.classList.remove('active');
+        document.getElementById('registerAdminForm').reset();
+        await loadAdmin();
+      } catch (err) {
+        alert(err.message || 'Failed to register admin.');
+      }
+    });
+
+    async function updateAdminAccountStatus(username, updatePayload) {
+      try {
+        await adminFetch(`/api/admin/team/${encodeURIComponent(username)}/status`, {
+          method: 'POST',
+          body: JSON.stringify(updatePayload)
+        });
+        await loadAdmin();
+      } catch (err) {
+        alert(err.message || 'Failed to update admin account status.');
+      }
+    }
+
+    async function deleteAdminAccount(username) {
+      if (!confirm(`Are you sure you want to permanently delete admin account '@${username}'?`)) return;
+      try {
+        await adminFetch(`/api/admin/team/${encodeURIComponent(username)}`, { method: 'DELETE' });
+        await loadAdmin();
+      } catch (err) {
+        alert(err.message || 'Failed to delete admin account.');
+      }
+    }
+
+    /* =========================================================
+       INITIAL DATA LOAD & SUMMARY SYNC
+       ========================================================= */
+    async function loadAdminSummary() {
+      try {
+        const summary = await adminFetch('/api/admin/summary');
+        document.getElementById('careerCount').textContent = summary.careerRegistrations || 0;
+        document.getElementById('campaignCount').textContent = summary.campaignRegistrations || 0;
+        document.getElementById('callsCount').textContent = summary.strategyCalls || 0;
+        document.getElementById('userCount').textContent = summary.registeredUsers || 0;
+
+        if (summary.totalRevenueNgn !== null && summary.totalRevenueNgn !== undefined) {
+          const revenueLocal = await fmtNgnAsLocal(summary.totalRevenueNgn || 0);
+          document.getElementById('revenueCount').textContent = revenueLocal;
+        } else {
+          document.getElementById('revenueCount').textContent = 'Restricted';
+        }
+      } catch (e) { logAdminError('Summary load failed', e); }
+    }
+
+    async function loadAdmin() {
+      try {
+        const me = await adminFetch('/api/admin/me');
+        gate.style.display = 'none';
+        dashboard.style.display = 'block';
+
+        applyAdminPermissions(me);
+
+        document.getElementById('adminStatus').textContent = `Signed in as ${me.name} (${me.is_master ? 'Master Admin' : 'Restricted Admin'})`;
+        document.getElementById('adminCount').textContent = me.configuredAdmins || (me.team ? me.team.length : 0);
+        masterData.team = me.team || [];
+        renderTeam();
+
+        const fetchTasks = [
+          loadAdminSummary(),
+          loadAdminChats(),
+          loadAdminUsers()
+        ];
+
+        if (me.is_master) {
+          fetchTasks.push(
+            loadCareerRegistrations(),
+            loadStrategyCalls(),
+            loadCampaigns()
+          );
+        }
+
+        await Promise.allSettled(fetchTasks);
+      } catch (err) {
+        logAdminError('Could not load admin dashboard', err);
+        showError(err.message);
+      }
+    }
+
+    async function checkAdminSession() {
+      try {
+        await adminFetch('/api/admin/check-session');
+        loadAdmin();
+      } catch (err) {
+        logAdminError('Admin session check failed', err);
+        showError('Please sign in to access the admin control center.');
+      }
+    }
+
+    checkAdminSession();
+    document.getElementById('refreshBtn').addEventListener('click', loadAdmin);
+
+    document.getElementById('signOutBtn').addEventListener('click', async () => {
+      try {
+        await adminFetch('/api/admin/sign-out', { method: 'POST' });
+        window.location.href = '/admin-login';
+      } catch (err) {
+        logAdminError('Could not sign out', err);
+        alert(err.message || 'Sign out failed.');
+      }
+    });
+  </script>
 </body>
+
 </html>
