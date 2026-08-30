@@ -105,6 +105,34 @@ ADMIN_CREDENTIALS = {
 }
 
 
+def get_admin_account(username):
+    if not username:
+        return None
+    username_clean = str(username).strip().lower()
+    try:
+        with get_quota_db() as conn:
+            row = conn.execute("SELECT * FROM admin_accounts WHERE LOWER(username) = ?", (username_clean,)).fetchone()
+            if row:
+                return dict(row)
+    except Exception as exc:
+        print(f"Error fetching admin account from DB: {exc}")
+
+    for member in ADMIN_TEAM:
+        if member["id"].lower() == username_clean:
+            role_level = "master" if username_clean == "samuel-akinomolafe" else "restricted"
+            return {
+                "username": member["id"],
+                "password": ADMIN_CREDENTIALS.get(member["id"], ""),
+                "name": member["name"],
+                "email": member["email"],
+                "role": member["role"],
+                "role_level": role_level,
+                "is_active": 1,
+                "is_restricted": 1 if role_level == "restricted" else 0,
+            }
+    return None
+
+
 def get_admin_emails():
     emails = set()
 
@@ -124,6 +152,15 @@ def is_admin_user(user):
 
 
 def get_team_member(member_id):
+    account = get_admin_account(member_id)
+    if account:
+        return {
+            "id": account["username"],
+            "name": account["name"],
+            "email": account["email"],
+            "role": account["role"],
+            "role_level": account.get("role_level", "restricted")
+        }
     for member in ADMIN_TEAM:
         if member["id"] == member_id:
             return member
@@ -151,18 +188,84 @@ def require_admin_session(f):
         admin_username = session.get("admin_username")
         if not admin_username:
             return jsonify({"error": "Admin login required"}), 401
-        if admin_username not in ADMIN_CREDENTIALS:
+
+        admin_acc = get_admin_account(admin_username)
+        if not admin_acc:
             return jsonify({"error": "Invalid admin session"}), 403
-        request._admin_username = admin_username
-        # Get admin info from ADMIN_TEAM
-        admin_info = None
-        for member in ADMIN_TEAM:
-            if member["id"] == admin_username:
-                admin_info = member
-                break
-        request._admin_info = admin_info
+
+        if admin_acc.get("is_active") == 0:
+            return jsonify({"error": "This admin account has been deactivated by Master Admin."}), 403
+
+        request._admin_username = admin_acc["username"]
+        request._admin_info = admin_acc
+        request._is_master = (admin_acc.get("role_level") == "master")
+        request._is_restricted = bool(admin_acc.get("is_restricted"))
         return f(*args, **kwargs)
     return decorated
+
+
+def require_master_admin(f):
+    """Decorator to require Master Admin access for sensitive operations."""
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        admin_username = session.get("admin_username")
+        if not admin_username:
+            return jsonify({"error": "Admin login required"}), 401
+
+        admin_acc = get_admin_account(admin_username)
+        if not admin_acc or admin_acc.get("is_active") == 0:
+            return jsonify({"error": "Invalid admin session"}), 403
+
+        if admin_acc.get("role_level") != "master":
+            return jsonify({"error": "Master Admin access required to view registrations or manage admins."}), 403
+
+        request._admin_username = admin_acc["username"]
+        request._admin_info = admin_acc
+        request._is_master = True
+        request._is_restricted = False
+        return f(*args, **kwargs)
+    return decorated
+
+
+def log_user_activity(uid, activity_type, description, ip_address=None):
+    """Record user activity for monitoring suspicious or normal behavior."""
+    if not uid:
+        return
+    now = datetime.now(timezone.utc).isoformat()
+    act_id = f"ACT-{uuid.uuid4().hex[:12]}"
+    try:
+        with get_quota_db() as conn:
+            conn.execute(
+                """
+                INSERT INTO user_activities (id, uid, activity_type, description, ip_address, created_at)
+                VALUES (?, ?, ?, ?, ?, ?)
+                """,
+                (act_id, str(uid), str(activity_type), str(description), ip_address or get_client_key(), now)
+            )
+    except Exception as exc:
+        print(f"Error logging user activity: {exc}")
+
+
+def check_user_deactivation(uid):
+    """Check if a registered user's account is currently deactivated."""
+    if not uid:
+        return True, None
+    try:
+        with get_quota_db() as conn:
+            row = conn.execute("SELECT is_deactivated, deactivated_until, deactivation_reason FROM website_users WHERE uid = ?", (str(uid),)).fetchone()
+            if row and row["is_deactivated"] == 1:
+                until = row["deactivated_until"]
+                now_str = datetime.now(timezone.utc).isoformat()
+                if until and now_str > until:
+                    # Deactivation duration expired: auto-reactivate!
+                    conn.execute("UPDATE website_users SET is_deactivated = 0, deactivated_until = NULL WHERE uid = ?", (str(uid),))
+                    return True, None
+                reason = row["deactivation_reason"] or "Suspicious or administrative deactivation"
+                until_fmt = until[:10] if until else "indefinitely"
+                return False, f"Your account has been deactivated until {until_fmt}. Reason: {reason}"
+    except Exception as exc:
+        print(f"Error checking user deactivation: {exc}")
+    return True, None
 
 
 def require_shared_database(f):
@@ -332,6 +435,11 @@ def require_strict_auth(f):
         user = get_authenticated_user()
         if not user:
             return jsonify({"error": "Authentication required", "reply": "Please sign in to continue."}), 401
+        
+        is_ok, deact_msg = check_user_deactivation(user.get("uid"))
+        if not is_ok:
+            return jsonify({"error": "Account Deactivated", "reply": deact_msg}), 403
+
         request._user = user
         return f(*args, **kwargs)
     return decorated
@@ -384,6 +492,30 @@ class PostgresConnection:
             self.conn.close()
 
 
+def seed_default_admins(conn):
+    """Seed initial admin accounts into admin_accounts table if empty."""
+    try:
+        row = conn.execute("SELECT COUNT(*) as count FROM admin_accounts").fetchone()
+        count = row["count"] if isinstance(row, dict) else (row[0] if row else 0)
+        if count == 0:
+            now = datetime.now(timezone.utc).isoformat()
+            for member in ADMIN_TEAM:
+                uname = member["id"]
+                pwd = ADMIN_CREDENTIALS.get(uname, "AdminPass123!")
+                role_level = "master" if uname == "samuel-akinomolafe" else "restricted"
+                is_restricted = 0 if role_level == "master" else 1
+                conn.execute(
+                    """
+                    INSERT INTO admin_accounts (username, password, name, email, role, role_level, is_active, is_restricted, created_at, updated_at)
+                    VALUES (?, ?, ?, ?, ?, ?, 1, ?, ?, ?)
+                    """,
+                    (uname, pwd, member["name"], member["email"], member["role"], role_level, is_restricted, now, now)
+                )
+            conn.commit()
+    except Exception as exc:
+        print(f"Seed default admins warning: {exc}")
+
+
 def initialize_postgres_schema(conn):
     """Create the shared Neon schema on each new serverless instance."""
     global _database_schema_ready
@@ -395,16 +527,36 @@ def initialize_postgres_schema(conn):
         "CREATE TABLE IF NOT EXISTS strategy_calls (id TEXT PRIMARY KEY, name TEXT NOT NULL, email TEXT NOT NULL, phone TEXT, message TEXT NOT NULL, status TEXT NOT NULL DEFAULT 'new', created_at TEXT NOT NULL, updated_at TEXT)",
         "CREATE TABLE IF NOT EXISTS career_registrations (id TEXT PRIMARY KEY, type TEXT NOT NULL, name TEXT NOT NULL, email TEXT NOT NULL, phone TEXT, program TEXT NOT NULL, experience_level TEXT, statement TEXT, details TEXT, amount INTEGER NOT NULL DEFAULT 250000, status TEXT NOT NULL DEFAULT 'pending_payment', payment_reference TEXT, paid_at TEXT, created_at TEXT NOT NULL, updated_at TEXT)",
         "CREATE TABLE IF NOT EXISTS campaign_registrations (id TEXT PRIMARY KEY, uid TEXT NOT NULL, email TEXT NOT NULL, full_name TEXT, business TEXT, challenge TEXT, package_name TEXT, amount DOUBLE PRECISION, currency TEXT, status TEXT NOT NULL DEFAULT 'pending_payment', payment_reference TEXT, created_at TEXT NOT NULL, raw_json TEXT)",
-        "CREATE TABLE IF NOT EXISTS website_users (uid TEXT PRIMARY KEY, email TEXT, username TEXT, photo_url TEXT, created_at TEXT NOT NULL, updated_at TEXT NOT NULL)",
+        "CREATE TABLE IF NOT EXISTS website_users (uid TEXT PRIMARY KEY, email TEXT, username TEXT, photo_url TEXT, email_verified INTEGER NOT NULL DEFAULT 0, is_deactivated INTEGER NOT NULL DEFAULT 0, deactivated_until TEXT, deactivation_reason TEXT, created_at TEXT NOT NULL, updated_at TEXT NOT NULL)",
+        "CREATE TABLE IF NOT EXISTS admin_accounts (username TEXT PRIMARY KEY, password TEXT NOT NULL, name TEXT NOT NULL, email TEXT NOT NULL, role TEXT NOT NULL, role_level TEXT NOT NULL DEFAULT 'restricted', is_active INTEGER NOT NULL DEFAULT 1, is_restricted INTEGER NOT NULL DEFAULT 0, created_at TEXT NOT NULL, updated_at TEXT NOT NULL)",
+        "CREATE TABLE IF NOT EXISTS user_activities (id TEXT PRIMARY KEY, uid TEXT NOT NULL, activity_type TEXT NOT NULL, description TEXT NOT NULL, ip_address TEXT, created_at TEXT NOT NULL)",
         "CREATE TABLE IF NOT EXISTS admin_portal_sessions (id TEXT PRIMARY KEY, session_id TEXT NOT NULL, username TEXT NOT NULL, created_at TEXT NOT NULL)",
         "CREATE TABLE IF NOT EXISTS team_conversations (id TEXT PRIMARY KEY, visitor_id TEXT NOT NULL, visitor_email TEXT, visitor_name TEXT, team_member_id TEXT NOT NULL, team_member_name TEXT, team_member_role TEXT, status TEXT NOT NULL DEFAULT 'open', last_message TEXT, last_sender TEXT, last_updated TEXT NOT NULL, created_at TEXT NOT NULL)",
         "CREATE TABLE IF NOT EXISTS team_messages (id TEXT PRIMARY KEY, conversation_id TEXT NOT NULL REFERENCES team_conversations(id) ON DELETE CASCADE, sender TEXT NOT NULL, sender_name TEXT, text TEXT, attachment_json TEXT, time TEXT NOT NULL)",
         "CREATE INDEX IF NOT EXISTS team_conversations_visitor_idx ON team_conversations(visitor_id)",
         "CREATE INDEX IF NOT EXISTS team_messages_conversation_idx ON team_messages(conversation_id, time)",
+        "CREATE INDEX IF NOT EXISTS user_activities_uid_idx ON user_activities(uid, created_at DESC)",
     ]
     for statement in statements:
-        conn.execute(statement)
+        try:
+            conn.execute(statement)
+        except Exception:
+            pass
+
+    # Ensure added columns exist if table was created earlier
+    for col_def in [
+        "ALTER TABLE website_users ADD COLUMN email_verified INTEGER NOT NULL DEFAULT 0",
+        "ALTER TABLE website_users ADD COLUMN is_deactivated INTEGER NOT NULL DEFAULT 0",
+        "ALTER TABLE website_users ADD COLUMN deactivated_until TEXT",
+        "ALTER TABLE website_users ADD COLUMN deactivation_reason TEXT"
+    ]:
+        try:
+            conn.execute(col_def)
+        except Exception:
+            pass
+
     conn.commit()
+    seed_default_admins(conn)
     _database_schema_ready = True
 
 
@@ -504,6 +656,62 @@ def get_quota_db():
         )
         """
     )
+    conn.execute(
+        """
+        CREATE TABLE IF NOT EXISTS website_users (
+            uid TEXT PRIMARY KEY,
+            email TEXT,
+            username TEXT,
+            photo_url TEXT,
+            email_verified INTEGER NOT NULL DEFAULT 0,
+            is_deactivated INTEGER NOT NULL DEFAULT 0,
+            deactivated_until TEXT,
+            deactivation_reason TEXT,
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL
+        )
+        """
+    )
+    conn.execute(
+        """
+        CREATE TABLE IF NOT EXISTS admin_accounts (
+            username TEXT PRIMARY KEY,
+            password TEXT NOT NULL,
+            name TEXT NOT NULL,
+            email TEXT NOT NULL,
+            role TEXT NOT NULL,
+            role_level TEXT NOT NULL DEFAULT 'restricted',
+            is_active INTEGER NOT NULL DEFAULT 1,
+            is_restricted INTEGER NOT NULL DEFAULT 0,
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL
+        )
+        """
+    )
+    conn.execute(
+        """
+        CREATE TABLE IF NOT EXISTS user_activities (
+            id TEXT PRIMARY KEY,
+            uid TEXT NOT NULL,
+            activity_type TEXT NOT NULL,
+            description TEXT NOT NULL,
+            ip_address TEXT,
+            created_at TEXT NOT NULL
+        )
+        """
+    )
+    for col_def in [
+        "ALTER TABLE website_users ADD COLUMN email_verified INTEGER NOT NULL DEFAULT 0",
+        "ALTER TABLE website_users ADD COLUMN is_deactivated INTEGER NOT NULL DEFAULT 0",
+        "ALTER TABLE website_users ADD COLUMN deactivated_until TEXT",
+        "ALTER TABLE website_users ADD COLUMN deactivation_reason TEXT"
+    ]:
+        try:
+            conn.execute(col_def)
+        except Exception:
+            pass
+
+    seed_default_admins(conn)
     return conn
 
 
@@ -1182,7 +1390,7 @@ def complete_payment_api(reg_id):
     })
 
 @app.route("/api/admin/career-registrations", methods=["GET"])
-@require_admin_session
+@require_master_admin
 @require_shared_database
 def admin_career_registrations():
     registrations_map = {}
@@ -1309,32 +1517,32 @@ def api_admin_login():
         if not username or not password:
             return jsonify({"error": "Username and password required"}), 400
 
-        # Check credentials
-        if username not in ADMIN_CREDENTIALS or ADMIN_CREDENTIALS[username] != password:
+        admin_acc = get_admin_account(username)
+        if not admin_acc or admin_acc.get("password") != password:
             return jsonify({"error": "Invalid username or password"}), 401
+
+        if admin_acc.get("is_active") == 0:
+            return jsonify({"error": "This admin account has been deactivated by Master Admin."}), 403
 
         # Set admin session
         session.clear()
-        session["admin_username"] = username
+        session["admin_username"] = admin_acc["username"]
         session.permanent = True
         session.modified = True
-        
-        # Find admin info
-        admin_info = None
-        for member in ADMIN_TEAM:
-            if member["id"] == username:
-                admin_info = member
-                break
-        
+
         return jsonify({
             "success": True,
-            "username": username,
-            "name": admin_info.get("name") if admin_info else username,
+            "username": admin_acc["username"],
+            "name": admin_acc.get("name"),
+            "role_level": admin_acc.get("role_level"),
+            "is_master": (admin_acc.get("role_level") == "master"),
+            "is_restricted": bool(admin_acc.get("is_restricted")),
             "message": "Login successful"
         }), 200
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
 
 @app.route("/api/admin/check-session", methods=["GET"])
 def api_admin_check_session():
@@ -1342,21 +1550,23 @@ def api_admin_check_session():
     admin_username = session.get("admin_username")
     if not admin_username:
         return jsonify({"loggedIn": False}), 401
-    
-    # Find admin info
-    admin_info = None
-    for member in ADMIN_TEAM:
-        if member["id"] == admin_username:
-            admin_info = member
-            break
-    
+
+    admin_acc = get_admin_account(admin_username)
+    if not admin_acc or admin_acc.get("is_active") == 0:
+        session.clear()
+        return jsonify({"loggedIn": False, "error": "Session expired or account deactivated."}), 401
+
     return jsonify({
         "loggedIn": True,
-        "username": admin_username,
-        "name": admin_info.get("name") if admin_info else admin_username,
-        "email": admin_info.get("email") if admin_info else None,
-        "role": admin_info.get("role") if admin_info else None
+        "username": admin_acc["username"],
+        "name": admin_acc.get("name"),
+        "email": admin_acc.get("email"),
+        "role": admin_acc.get("role"),
+        "role_level": admin_acc.get("role_level"),
+        "is_master": (admin_acc.get("role_level") == "master"),
+        "is_restricted": bool(admin_acc.get("is_restricted"))
     }), 200
+
 
 @app.route("/api/admin/sign-out", methods=["POST"])
 def api_admin_sign_out():
@@ -1364,24 +1574,177 @@ def api_admin_sign_out():
     session.clear()
     return jsonify({"message": "Signed out successfully"}), 200
 
+
 @app.route("/api/admin/me", methods=["GET"])
 @require_admin_session
 def admin_me():
     admin_info = request._admin_info or {}
+    team_accounts = []
+    try:
+        with get_quota_db() as conn:
+            rows = conn.execute("SELECT username as id, name, email, role, role_level, is_active, is_restricted FROM admin_accounts ORDER BY created_at ASC").fetchall()
+            team_accounts = [dict(r) for r in rows]
+    except Exception:
+        team_accounts = ADMIN_TEAM
+
     return jsonify({
         "admin": True,
         "username": request._admin_username,
         "name": admin_info.get("name"),
         "email": admin_info.get("email"),
         "role": admin_info.get("role"),
-        "team": ADMIN_TEAM,
-        "configuredAdmins": len(ADMIN_TEAM)
+        "role_level": admin_info.get("role_level", "restricted"),
+        "is_master": request._is_master,
+        "is_restricted": request._is_restricted,
+        "team": team_accounts,
+        "configuredAdmins": len(team_accounts)
     })
+
+
+@app.route("/api/admin/team", methods=["GET"])
+@require_master_admin
+@require_shared_database
+def admin_get_team():
+    """Get full list of registered admin accounts (Master Admin only)."""
+    try:
+        with get_quota_db() as conn:
+            rows = conn.execute("SELECT username, name, email, role, role_level, is_active, is_restricted, created_at FROM admin_accounts ORDER BY created_at ASC").fetchall()
+        return jsonify({"team": [dict(r) for r in rows]})
+    except Exception as exc:
+        return jsonify({"error": str(exc)}), 500
+
+
+@app.route("/api/admin/team/register", methods=["POST"])
+@require_master_admin
+@require_shared_database
+def admin_register_new_admin():
+    """Master Admin route to register a new admin account."""
+    data = request.get_json(silent=True) or {}
+    username = str(data.get("username", "")).strip().lower()
+    password = str(data.get("password", "")).strip()
+    name = str(data.get("name", "")).strip()
+    email = str(data.get("email", "")).strip().lower()
+    role = str(data.get("role", "Admin")).strip()
+    role_level = str(data.get("role_level", "restricted")).strip().lower()
+
+    if not username or not password or not name or not email:
+        return jsonify({"success": False, "error": "Username, password, name, and email are required."}), 400
+
+    if role_level not in ["master", "restricted"]:
+        role_level = "restricted"
+
+    is_restricted = 0 if role_level == "master" else 1
+    now = datetime.now(timezone.utc).isoformat()
+
+    try:
+        with get_quota_db() as conn:
+            conn.execute(
+                """
+                INSERT INTO admin_accounts (username, password, name, email, role, role_level, is_active, is_restricted, created_at, updated_at)
+                VALUES (?, ?, ?, ?, ?, ?, 1, ?, ?, ?)
+                """,
+                (username, password, name, email, role, role_level, is_restricted, now, now)
+            )
+        return jsonify({"success": True, "message": f"Admin '{name}' registered successfully as {role_level.upper()} admin!"})
+    except Exception as exc:
+        return jsonify({"success": False, "error": f"Registration failed: Username or email may already exist. Details: {exc}"}), 400
+
+
+@app.route("/api/admin/team/<target_username>/status", methods=["POST"])
+@require_master_admin
+@require_shared_database
+def admin_update_team_status(target_username):
+    """Master Admin route to activate/deactivate, restrict/unrestrict, or change access tier of an admin."""
+    target_username = str(target_username).strip().lower()
+    if target_username == request._admin_username:
+        return jsonify({"error": "You cannot modify your own active Master Admin session."}), 400
+
+    data = request.get_json(silent=True) or {}
+    now = datetime.now(timezone.utc).isoformat()
+    updates = []
+    params = []
+
+    if "is_active" in data:
+        is_act = 1 if data["is_active"] else 0
+        updates.append("is_active = ?")
+        params.append(is_act)
+
+    if "is_restricted" in data:
+        is_res = 1 if data["is_restricted"] else 0
+        updates.append("is_restricted = ?")
+        params.append(is_res)
+
+    if "role_level" in data:
+        rl = str(data["role_level"]).strip().lower()
+        if rl in ["master", "restricted"]:
+            updates.append("role_level = ?")
+            params.append(rl)
+            updates.append("is_restricted = ?")
+            params.append(0 if rl == "master" else 1)
+
+    if not updates:
+        return jsonify({"error": "No update parameters provided."}), 400
+
+    updates.append("updated_at = ?")
+    params.append(now)
+    params.append(target_username)
+
+    try:
+        with get_quota_db() as conn:
+            conn.execute(f"UPDATE admin_accounts SET {', '.join(updates)} WHERE LOWER(username) = ?", params)
+        return jsonify({"success": True, "username": target_username})
+    except Exception as exc:
+        return jsonify({"error": str(exc)}), 500
+
+
+@app.route("/api/admin/team/<target_username>", methods=["DELETE"])
+@require_master_admin
+@require_shared_database
+def admin_delete_team_member(target_username):
+    """Master Admin route to delete an admin account."""
+    target_username = str(target_username).strip().lower()
+    if target_username == request._admin_username:
+        return jsonify({"error": "You cannot delete your own Master Admin account."}), 400
+
+    try:
+        with get_quota_db() as conn:
+            conn.execute("DELETE FROM admin_accounts WHERE LOWER(username) = ?", (target_username,))
+        return jsonify({"success": True, "message": f"Admin account '{target_username}' deleted."})
+    except Exception as exc:
+        return jsonify({"error": str(exc)}), 500
+
 
 @app.route("/api/admin/summary", methods=["GET"])
 @require_admin_session
 @require_shared_database
 def admin_summary():
+    # Requirement 1 & 5: If non-master admin, return restricted summary without registration details and revenue
+    if not request._is_master:
+        user_count = 0
+        try:
+            with get_quota_db() as conn:
+                r = conn.execute("SELECT COUNT(*) as cnt FROM website_users").fetchone()
+                user_count = r["cnt"] if isinstance(r, dict) else (r[0] if r else 0)
+        except Exception:
+            pass
+
+        return jsonify({
+            "campaignRegistrations": 0,
+            "paidCampaignRegistrations": 0,
+            "pendingCampaignPayments": 0,
+            "careerRegistrations": 0,
+            "pendingCareerPayments": 0,
+            "approvedCareerRegistrations": 0,
+            "registeredUsers": user_count,
+            "strategyCalls": 0,
+            "totalRevenueNgn": None, # Hidden for restricted non-master admin
+            "packageCounts": {},
+            "adminTeam": [],
+            "is_master": False,
+            "is_restricted": True,
+            "warning": "Restricted Admin access mode. Submissions and Estimated Revenue are accessible to Master Admin only."
+        })
+
     registrations_map = {}
     users_map = {}
     strategy_calls_map = {}
@@ -1424,12 +1787,9 @@ def admin_summary():
     elif not DATABASE_URL:
         error = "Firebase Firestore is unconfigured or offline (FIREBASE_SERVICE_ACCOUNT_JSON missing or invalid)."
 
-    # Never read instance-local SQLite data in Vercel. It would make one
-    # deployed function return records that another function cannot see.
     if DATABASE_URL or not IS_VERCEL_DEPLOYMENT:
       try:
         with get_quota_db() as conn:
-            # Campaign Registrations
             c_rows = conn.execute("SELECT * FROM campaign_registrations").fetchall()
             for r in c_rows:
                 row_dict = dict(r)
@@ -1444,7 +1804,6 @@ def admin_summary():
                     else:
                         registrations_map[reg_id] = row_dict
 
-            # Strategy Calls
             sc_rows = conn.execute("SELECT * FROM strategy_calls").fetchall()
             for r in sc_rows:
                 row_dict = dict(r)
@@ -1452,7 +1811,6 @@ def admin_summary():
                 if sc_id not in strategy_calls_map:
                     strategy_calls_map[sc_id] = row_dict
 
-            # Career / training registrations
             career_rows = conn.execute("SELECT * FROM career_registrations").fetchall()
             for r in career_rows:
                 row_dict = dict(r)
@@ -1490,7 +1848,6 @@ def admin_summary():
         except (TypeError, ValueError):
             pass
 
-    # Career / training registration statistics use the shared Firestore data.
     career_registrations_list = list(career_registrations_map.values())
     career_pending = 0
     career_approved = 0
@@ -1505,6 +1862,14 @@ def admin_summary():
         else:
             career_pending += 1
 
+    team_accounts = []
+    try:
+        with get_quota_db() as conn:
+            rows = conn.execute("SELECT username as id, name, email, role, role_level, is_active, is_restricted FROM admin_accounts ORDER BY created_at ASC").fetchall()
+            team_accounts = [dict(r) for r in rows]
+    except Exception:
+        team_accounts = ADMIN_TEAM
+
     result = {
         "campaignRegistrations": len(registrations),
         "paidCampaignRegistrations": paid_registrations,
@@ -1516,7 +1881,9 @@ def admin_summary():
         "strategyCalls": len(strategy_calls),
         "totalRevenueNgn": total_revenue,
         "packageCounts": package_counts,
-        "adminTeam": ADMIN_TEAM
+        "adminTeam": team_accounts,
+        "is_master": True,
+        "is_restricted": False
     }
     if error and not (registrations or users or strategy_calls or career_registrations_list):
         result["warning"] = error
@@ -1758,7 +2125,7 @@ def admin_send_chat_message(conversation_id):
 
 
 @app.route("/api/admin/campaign-registrations", methods=["GET"])
-@require_admin_session
+@require_master_admin
 @require_shared_database
 def admin_campaign_registrations():
     registrations_map = {}
@@ -1812,14 +2179,105 @@ def admin_campaign_registrations():
 def admin_users():
     try:
         with get_quota_db() as conn:
-            rows = conn.execute("SELECT * FROM website_users ORDER BY created_at DESC").fetchall()
+            rows = conn.execute("SELECT uid, username, email, photo_url, email_verified, is_deactivated, deactivated_until, deactivation_reason, created_at, updated_at FROM website_users ORDER BY created_at DESC").fetchall()
         users = [{
-            "uid": row["uid"], "username": row["username"], "email": row["email"],
-            "photoURL": row["photo_url"], "createdAt": row["created_at"], "updatedAt": row["updated_at"]
+            "uid": row["uid"],
+            "username": row["username"] or row["email"],
+            "email": row["email"],
+            "photoURL": row["photo_url"],
+            "emailVerified": bool(row["email_verified"] if "email_verified" in row.keys() else 1),
+            "isDeactivated": bool(row["is_deactivated"] if "is_deactivated" in row.keys() else 0),
+            "deactivatedUntil": row["deactivated_until"] if "deactivated_until" in row.keys() else None,
+            "deactivationReason": row["deactivation_reason"] if "deactivation_reason" in row.keys() else None,
+            "createdAt": row["created_at"],
+            "updatedAt": row["updated_at"]
         } for row in rows]
     except Exception as exc:
-        return jsonify({"error": "Could not load users from the shared database."}), 503
+        return jsonify({"error": f"Could not load users from database: {exc}"}), 503
     return jsonify({"users": users})
+
+
+@app.route("/api/admin/users/<uid>/activities", methods=["GET"])
+@require_admin_session
+@require_shared_database
+def admin_user_activities(uid):
+    """Retrieve activity log for a specific registered user."""
+    try:
+        with get_quota_db() as conn:
+            rows = conn.execute("SELECT id, uid, activity_type, description, ip_address, created_at FROM user_activities WHERE uid = ? ORDER BY created_at DESC LIMIT 50", (str(uid),)).fetchall()
+        return jsonify({"activities": [dict(r) for r in rows]})
+    except Exception as exc:
+        return jsonify({"error": str(exc)}), 500
+
+
+@app.route("/api/admin/users/<uid>/deactivate", methods=["POST"])
+@require_master_admin
+@require_shared_database
+def admin_deactivate_user(uid):
+    """Deactivate a user account for a specified number of days."""
+    data = request.get_json(silent=True) or {}
+    try:
+        days = int(data.get("days") or 7)
+    except (ValueError, TypeError):
+        days = 7
+
+    if days < 1:
+        days = 1
+
+    reason = str(data.get("reason") or "Administrative or suspicious activity deactivation").strip()[:200]
+    deactivated_until = (datetime.now(timezone.utc) + timedelta(days=days)).isoformat()
+    now = datetime.now(timezone.utc).isoformat()
+
+    try:
+        with get_quota_db() as conn:
+            conn.execute(
+                """
+                UPDATE website_users
+                SET is_deactivated = 1, deactivated_until = ?, deactivation_reason = ?, updated_at = ?
+                WHERE uid = ?
+                """,
+                (deactivated_until, reason, now, str(uid))
+            )
+        log_user_activity(str(uid), "ACCOUNT_DEACTIVATED", f"Account deactivated for {days} days by Master Admin ({request._admin_username}). Reason: {reason}")
+        return jsonify({"success": True, "uid": uid, "days": days, "deactivatedUntil": deactivated_until})
+    except Exception as exc:
+        return jsonify({"error": str(exc)}), 500
+
+
+@app.route("/api/admin/users/<uid>/reactivate", methods=["POST"])
+@require_master_admin
+@require_shared_database
+def admin_reactivate_user(uid):
+    """Reactivate a user account."""
+    now = datetime.now(timezone.utc).isoformat()
+    try:
+        with get_quota_db() as conn:
+            conn.execute(
+                """
+                UPDATE website_users
+                SET is_deactivated = 0, deactivated_until = NULL, deactivation_reason = NULL, updated_at = ?
+                WHERE uid = ?
+                """,
+                (now, str(uid))
+            )
+        log_user_activity(str(uid), "ACCOUNT_REACTIVATED", f"Account reactivated by Master Admin ({request._admin_username}).")
+        return jsonify({"success": True, "uid": uid})
+    except Exception as exc:
+        return jsonify({"error": str(exc)}), 500
+
+
+@app.route("/api/admin/users/<uid>", methods=["DELETE"])
+@require_master_admin
+@require_shared_database
+def admin_delete_user(uid):
+    """Delete a registered user account and its activity logs."""
+    try:
+        with get_quota_db() as conn:
+            conn.execute("DELETE FROM website_users WHERE uid = ?", (str(uid),))
+            conn.execute("DELETE FROM user_activities WHERE uid = ?", (str(uid),))
+        return jsonify({"success": True, "uid": uid, "message": "User account and activity log deleted."})
+    except Exception as exc:
+        return jsonify({"error": str(exc)}), 500
 
 
 @app.route("/api/users/sync", methods=["POST"])
@@ -1832,15 +2290,18 @@ def sync_website_user():
     now = datetime.now(timezone.utc).isoformat()
     username = str(data.get("username") or user.get("email") or "User").strip()[:120]
     photo_url = str(data.get("photoURL") or "").strip()[:1000]
+    email_verified = 1 if data.get("emailVerified") else 1
+
     try:
         with get_quota_db() as conn:
             conn.execute(
-                """INSERT INTO website_users (uid, email, username, photo_url, created_at, updated_at)
-                   VALUES (?, ?, ?, ?, ?, ?)
+                """INSERT INTO website_users (uid, email, username, photo_url, email_verified, is_deactivated, created_at, updated_at)
+                   VALUES (?, ?, ?, ?, ?, 0, ?, ?)
                    ON CONFLICT (uid) DO UPDATE SET email = EXCLUDED.email, username = EXCLUDED.username,
-                   photo_url = EXCLUDED.photo_url, updated_at = EXCLUDED.updated_at""",
-                (user["uid"], user.get("email"), username, photo_url, now, now),
+                   photo_url = EXCLUDED.photo_url, email_verified = EXCLUDED.email_verified, updated_at = EXCLUDED.updated_at""",
+                (user["uid"], user.get("email"), username, photo_url, email_verified, now, now),
             )
+        log_user_activity(user["uid"], "LOGIN_SYNC", f"User profile synced / Logged in as {username}")
     except Exception:
         return jsonify({"error": "Could not save user profile."}), 503
     return jsonify({"saved": True})
@@ -2433,7 +2894,7 @@ def submit_strategy_call():
 
 
 @app.route("/api/admin/strategy-calls", methods=["GET"])
-@require_admin_session
+@require_master_admin
 @require_shared_database
 def admin_strategy_calls():
     calls = []

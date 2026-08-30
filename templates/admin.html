@@ -525,13 +525,17 @@ button{font:inherit}
       <div class="status" id="adminStatus">Loading workbook...</div>
     </div>
 
+    <div id="restrictedAdminBanner" style="display:none; background: rgba(201, 154, 74, 0.15); border: 1px solid rgba(201, 154, 74, 0.35); color: var(--bronze-light); padding: 12px 18px; border-radius: 10px; margin-bottom: 20px; font-size: 13px; align-items: center; justify-content: space-between; gap: 12px;">
+      <span>🔒 <strong>Restricted Admin View:</strong> You are signed in as a Restricted Admin. Campaign/Career registrations and Estimated Revenue are restricted to Master Admin accounts.</span>
+    </div>
+
     <!-- Summary Metric Cards -->
     <div class="cards">
-      <div class="card"><small>Training & Career</small><b id="careerCount">0</b></div>
-      <div class="card"><small>Campaign Submissions</small><b id="campaignCount">0</b></div>
-      <div class="card"><small>Strategy Call Bookings</small><b id="callsCount">0</b></div>
+      <div class="card master-only-card"><small>Training & Career</small><b id="careerCount">0</b></div>
+      <div class="card master-only-card"><small>Campaign Submissions</small><b id="campaignCount">0</b></div>
+      <div class="card master-only-card"><small>Strategy Call Bookings</small><b id="callsCount">0</b></div>
       <div class="card"><small>Registered Users</small><b id="userCount">0</b></div>
-      <div class="card"><small>Estimated Revenue</small><b id="revenueCount">0</b></div>
+      <div class="card master-only-card" id="cardRevenueContainer"><small>Estimated Revenue</small><b id="revenueCount">0</b></div>
       <div class="card"><small>Configured Admins</small><b id="adminCount">0</b></div>
     </div>
 
@@ -540,15 +544,15 @@ button{font:inherit}
       
       <!-- Excel Navigation Tabs -->
       <div class="excel-tab-bar">
-        <button type="button" class="excel-tab active" data-sheet="career">
+        <button type="button" class="excel-tab active master-only-tab" data-sheet="career">
           <span>🎓 Career & Training</span>
           <span class="tab-count" id="tabCountCareer">0</span>
         </button>
-        <button type="button" class="excel-tab" data-sheet="calls">
+        <button type="button" class="excel-tab master-only-tab" data-sheet="calls">
           <span>💼 Strategy Calls</span>
           <span class="tab-count" id="tabCountCalls">0</span>
         </button>
-        <button type="button" class="excel-tab" data-sheet="campaign">
+        <button type="button" class="excel-tab master-only-tab" data-sheet="campaign">
           <span>📣 Campaign Submissions</span>
           <span class="tab-count" id="tabCountCampaign">0</span>
         </button>
@@ -562,7 +566,7 @@ button{font:inherit}
         </button>
         <button type="button" class="excel-tab" data-sheet="team">
           <span>🛡️ Admin Team</span>
-          <span class="tab-count" id="tabCountTeam">7</span>
+          <span class="tab-count" id="tabCountTeam">0</span>
         </button>
       </div>
 
@@ -573,6 +577,7 @@ button{font:inherit}
           <input type="text" id="sheetSearchInput" class="excel-search-input" placeholder="Filter rows in active worksheet (e.g. name, email, program, status)...">
         </div>
         <div class="excel-actions-right">
+          <button type="button" class="btn primary master-only-btn" id="openRegisterAdminBtn" style="display:none; padding:7px 12px; font-size:12px;">➕ Register New Admin</button>
           <span class="sheet-counter-badge" id="activeSheetSummary">Sheet: Career Applications</span>
           <button type="button" class="btn excel-btn" id="exportCsvBtn">📥 Export CSV (.csv)</button>
         </div>
@@ -680,13 +685,16 @@ button{font:inherit}
             <thead>
               <tr>
                 <th class="col-row-idx">#</th>
-                <th>User Name / Email</th>
+                <th>User Name</th>
+                <th>Email Address</th>
                 <th>Firebase User ID (UID)</th>
-                <th>Email Verified</th>
+                <th>Email Verification</th>
+                <th>Activities & Monitor</th>
+                <th>Cell Action</th>
               </tr>
             </thead>
             <tbody id="userRows">
-              <tr><td colspan="4" style="text-align:center; padding:24px;" class="muted">Loading user accounts...</td></tr>
+              <tr><td colspan="7" style="text-align:center; padding:24px;" class="muted">Loading user accounts...</td></tr>
             </tbody>
           </table>
         </div>
@@ -699,20 +707,108 @@ button{font:inherit}
             <thead>
               <tr>
                 <th class="col-row-idx">#</th>
-                <th>Admin Name</th>
+                <th>Admin Name & Username</th>
                 <th>Official Email</th>
                 <th>Role Title</th>
                 <th>Access Tier</th>
+                <th>Account Status</th>
+                <th>Cell Action</th>
               </tr>
             </thead>
             <tbody id="teamRows">
-              <tr><td colspan="5" style="text-align:center; padding:24px;" class="muted">Loading admin team...</td></tr>
+              <tr><td colspan="7" style="text-align:center; padding:24px;" class="muted">Loading admin team...</td></tr>
             </tbody>
           </table>
         </div>
       </div>
 
     </div>
+  </section>
+</main>
+
+<!-- MODAL 1: REGISTER NEW ADMIN MODAL -->
+<div class="modal-overlay" id="registerAdminModal">
+  <div class="inspector-modal-window" style="max-width:480px;">
+    <div class="modal-header">
+      <div>
+        <h3>Register New Admin Account</h3>
+        <p>Master Admin &bull; Admin Account Control</p>
+      </div>
+      <button class="modal-close-btn" id="closeRegisterAdminBtn" type="button">✕</button>
+    </div>
+    <form id="registerAdminForm" style="padding:24px; display:flex; flex-direction:column; gap:16px;">
+      <div>
+        <label style="font-size:11px; text-transform:uppercase; color:var(--bronze-light); font-weight:600; display:block; margin-bottom:6px;">Username</label>
+        <input type="text" id="regAdminUsername" required placeholder="e.g. john-doe" style="width:100%; padding:10px 14px; background:rgba(10,2,2,0.6); border:1px solid var(--border); border-radius:6px; color:#fff;">
+      </div>
+      <div>
+        <label style="font-size:11px; text-transform:uppercase; color:var(--bronze-light); font-weight:600; display:block; margin-bottom:6px;">Password</label>
+        <input type="password" id="regAdminPassword" required placeholder="Enter strong password" style="width:100%; padding:10px 14px; background:rgba(10,2,2,0.6); border:1px solid var(--border); border-radius:6px; color:#fff;">
+      </div>
+      <div>
+        <label style="font-size:11px; text-transform:uppercase; color:var(--bronze-light); font-weight:600; display:block; margin-bottom:6px;">Full Name</label>
+        <input type="text" id="regAdminName" required placeholder="e.g. John Doe" style="width:100%; padding:10px 14px; background:rgba(10,2,2,0.6); border:1px solid var(--border); border-radius:6px; color:#fff;">
+      </div>
+      <div>
+        <label style="font-size:11px; text-transform:uppercase; color:var(--bronze-light); font-weight:600; display:block; margin-bottom:6px;">Official Email</label>
+        <input type="email" id="regAdminEmail" required placeholder="e.g. john@nakconel.com" style="width:100%; padding:10px 14px; background:rgba(10,2,2,0.6); border:1px solid var(--border); border-radius:6px; color:#fff;">
+      </div>
+      <div>
+        <label style="font-size:11px; text-transform:uppercase; color:var(--bronze-light); font-weight:600; display:block; margin-bottom:6px;">Role Title</label>
+        <input type="text" id="regAdminRole" required placeholder="e.g. Content Designer" style="width:100%; padding:10px 14px; background:rgba(10,2,2,0.6); border:1px solid var(--border); border-radius:6px; color:#fff;">
+      </div>
+      <div>
+        <label style="font-size:11px; text-transform:uppercase; color:var(--bronze-light); font-weight:600; display:block; margin-bottom:6px;">Access Level & Permission</label>
+        <select id="regAdminRoleLevel" style="width:100%; padding:10px 14px; background:rgba(10,2,2,0.8); border:1px solid var(--border); border-radius:6px; color:#fff; font-family:inherit;">
+          <option value="restricted">Restricted Admin (No Submissions/Revenue Access)</option>
+          <option value="master">Master Admin (Full Access to Everything)</option>
+        </select>
+      </div>
+      <button type="submit" class="btn primary" style="margin-top:8px; padding:12px; width:100%;">Create Admin Account</button>
+    </form>
+  </div>
+</div>
+
+<!-- MODAL 2: USER TIMED DEACTIVATION MODAL -->
+<div class="modal-overlay" id="userDeactivateModal">
+  <div class="inspector-modal-window" style="max-width:440px;">
+    <div class="modal-header">
+      <div>
+        <h3 id="deactModalUserTitle">Deactivate User Account</h3>
+        <p>Master Admin &bull; Timed Account Deactivation</p>
+      </div>
+      <button class="modal-close-btn" id="closeUserDeactivateBtn" type="button">✕</button>
+    </div>
+    <form id="userDeactivateForm" style="padding:24px; display:flex; flex-direction:column; gap:16px;">
+      <input type="hidden" id="deactModalUid">
+      <div>
+        <label style="font-size:11px; text-transform:uppercase; color:var(--bronze-light); font-weight:600; display:block; margin-bottom:6px;">How many days do you want to deactivate the account?</label>
+        <input type="number" id="deactDaysInput" required min="1" max="3650" value="7" style="width:100%; padding:10px 14px; background:rgba(10,2,2,0.6); border:1px solid var(--border); border-radius:6px; color:#fff; font-size:16px; font-weight:bold;">
+      </div>
+      <div>
+        <label style="font-size:11px; text-transform:uppercase; color:var(--bronze-light); font-weight:600; display:block; margin-bottom:6px;">Deactivation Reason</label>
+        <input type="text" id="deactReasonInput" placeholder="e.g. Suspicious activity detected" value="Suspicious activity monitored" style="width:100%; padding:10px 14px; background:rgba(10,2,2,0.6); border:1px solid var(--border); border-radius:6px; color:#fff;">
+      </div>
+      <button type="submit" class="btn primary" style="background:#e8a0a0; color:#1b0404; border-color:#e8a0a0; font-weight:bold; margin-top:8px; padding:12px; width:100%;">Confirm Deactivation</button>
+    </form>
+  </div>
+</div>
+
+<!-- MODAL 3: USER ACTIVITY MONITOR LOG MODAL -->
+<div class="modal-overlay" id="userActivityModal">
+  <div class="inspector-modal-window" style="max-width:680px;">
+    <div class="modal-header">
+      <div>
+        <h3 id="activityModalUserTitle">User Activity Monitor</h3>
+        <p id="activityModalUserSub">Audit log and activity history</p>
+      </div>
+      <button class="modal-close-btn" id="closeUserActivityBtn" type="button">✕</button>
+    </div>
+    <div class="inspector-body" id="userActivityContent" style="padding:20px; max-height:60vh; overflow-y:auto;">
+      <div class="muted" style="text-align:center;">Loading activity log...</div>
+    </div>
+  </div>
+</div>
   </section>
 </main>
 
@@ -999,12 +1095,13 @@ document.getElementById('exportCsvBtn').addEventListener('click', () => {
     const filtered = (masterData.chats || []).filter(item => !q || JSON.stringify(item).toLowerCase().includes(q));
     rows = filtered.map(item => [item.id, item.visitorName, item.visitorEmail, item.lastMessage, item.teamMemberName]);
   } else if (activeSheet === 'users') {
-    headers = ['Username / Email', 'Firebase UID', 'Email'];
+    headers = ['User Name', 'Email Address', 'Firebase User ID (UID)', 'Email Verified', 'Deactivation Status', 'Deactivated Until'];
     const filtered = (masterData.users || []).filter(item => !q || JSON.stringify(item).toLowerCase().includes(q));
-    rows = filtered.map(item => [item.username || item.email, item.uid || item.id, item.email]);
+    rows = filtered.map(item => [item.username || item.email, item.email, item.uid, item.emailVerified ? 'Verified' : 'Unverified', item.isDeactivated ? 'Deactivated' : 'Active', item.deactivatedUntil || 'N/A']);
   } else if (activeSheet === 'team') {
-    headers = ['ID', 'Name', 'Email', 'Role'];
-    rows = (masterData.team || []).map(item => [item.id, item.name, item.email, item.role]);
+    headers = ['Username', 'Full Name', 'Official Email', 'Role Title', 'Access Tier', 'Account Status'];
+    const filtered = (masterData.team || []).filter(item => !q || JSON.stringify(item).toLowerCase().includes(q));
+    rows = filtered.map(item => [item.username || item.id, item.name, item.email, item.role, (item.role_level || 'restricted') === 'master' ? 'Master Admin' : 'Restricted Admin', item.is_active !== 0 ? 'Active' : 'Deactivated']);
   }
 
   if (!rows.length) {
@@ -1418,7 +1515,41 @@ document.getElementById('modalChatForm').addEventListener('submit', async (e) =>
 });
 
 /* =========================================================
-   WORKSHEET 5 & 6: USERS & TEAM RENDERING
+   MASTER ADMIN PERMISSIONS & WORKBOOK INITIALIZATION
+   ========================================================= */
+let currentAdmin = { is_master: false, is_restricted: true, username: '' };
+
+function applyAdminPermissions(me) {
+  currentAdmin = me || { is_master: false, is_restricted: true, username: '' };
+  
+  const isMaster = Boolean(currentAdmin.is_master);
+  const banner = document.getElementById('restrictedAdminBanner');
+  const regBtn = document.getElementById('openRegisterAdminBtn');
+  const revenueCard = document.getElementById('cardRevenueContainer');
+
+  if (isMaster) {
+    if (banner) banner.style.display = 'none';
+    if (regBtn) regBtn.style.display = 'inline-flex';
+    document.querySelectorAll('.master-only-card').forEach(el => el.style.display = 'block');
+    document.querySelectorAll('.master-only-tab').forEach(el => el.style.display = 'inline-flex');
+  } else {
+    if (banner) banner.style.display = 'flex';
+    if (regBtn) regBtn.style.display = 'none';
+    document.querySelectorAll('.master-only-card').forEach(el => el.style.display = 'none');
+    document.querySelectorAll('.master-only-tab').forEach(el => el.style.display = 'none');
+    
+    document.getElementById('revenueCount').textContent = 'Restricted';
+
+    // If current tab is restricted, auto-switch to Registered Users sheet
+    if (['career', 'calls', 'campaign'].includes(activeSheet)) {
+      const userTab = document.querySelector('.excel-tab[data-sheet="users"]');
+      if (userTab) userTab.click();
+    }
+  }
+}
+
+/* =========================================================
+   WORKSHEET 5: REGISTERED USERS RENDERING & MONITORING
    ========================================================= */
 function renderUsers(){
   const rows = masterData.users || [];
@@ -1430,29 +1561,261 @@ function renderUsers(){
     return `${user.username} ${user.email} ${user.uid}`.toLowerCase().includes(q);
   });
 
-  document.getElementById('userRows').innerHTML = filtered.length ? filtered.map((user, idx) => `
-    <tr>
+  const tbody = document.getElementById('userRows');
+  tbody.innerHTML = filtered.length ? filtered.map((user, idx) => {
+    const isDeact = Boolean(user.isDeactivated);
+    const deactUntil = user.deactivatedUntil ? user.deactivatedUntil.slice(0, 10) : '';
+    
+    let statusBadge = isDeact 
+      ? `<span class="badge-new">Deactivated (until ${esc(deactUntil)}) 🔴</span>`
+      : `<span class="badge-completed">Active Account 🟢</span>`;
+
+    let emailBadge = user.emailVerified 
+      ? `<span class="badge-completed">Verified ✓</span>`
+      : `<span class="badge-contacted">Unverified ⏳</span>`;
+
+    let actionBtns = '';
+    if (currentAdmin.is_master) {
+      const deactBtn = isDeact
+        ? `<button class="btn" style="padding:3px 8px; font-size:11px; background:rgba(145,217,155,0.2); color:#91d99b; border-color:#91d99b;" onclick="reactivateUserAccount('${esc(user.uid)}')">Reactivate 🟢</button>`
+        : `<button class="btn" style="padding:3px 8px; font-size:11px; background:rgba(232,160,160,0.18); color:#f7a3a3; border-color:#e8a0a0;" onclick="openDeactivateUserModal('${esc(user.uid)}', '${esc(user.username || user.email)}')">Deactivate 🚫</button>`;
+
+      actionBtns = `
+        <div style="display:flex; gap:6px; align-items:center;">
+          ${deactBtn}
+          <button class="btn" style="padding:3px 8px; font-size:11px; color:#f7a3a3;" onclick="deleteUserAccount('${esc(user.uid)}', '${esc(user.username || user.email)}')">Delete 🗑️</button>
+        </div>
+      `;
+    } else {
+      actionBtns = `<span class="muted">Restricted Mode</span>`;
+    }
+
+    return `<tr>
       <td class="cell-row-idx">${idx + 1}</td>
-      <td><strong>${esc(user.username || user.email || 'Registered User')}</strong></td>
-      <td class="cell-mono">${esc(user.uid || user.id || '-')}</td>
-      <td><span class="badge-completed">Verified Sync ✓</span></td>
-    </tr>
-  `).join('') : '<tr><td colspan="4" style="text-align:center; padding:24px;" class="muted">No matching registered users found.</td></tr>';
+      <td><strong>${esc(user.username || user.email || 'User')}</strong></td>
+      <td class="cell-mono">${esc(user.email || '-')}</td>
+      <td class="cell-mono">${esc(user.uid || '-')}</td>
+      <td>${emailBadge}</td>
+      <td>
+        <div style="display:flex; gap:8px; align-items:center;">
+          ${statusBadge}
+          <button class="btn" style="padding:3px 8px; font-size:11px; background:rgba(201,154,74,0.12); color:var(--bronze-light);" onclick="openUserActivityModal('${esc(user.uid)}', '${esc(user.username || user.email)}')">Monitor 👁️</button>
+        </div>
+      </td>
+      <td>${actionBtns}</td>
+    </tr>`;
+  }).join('') : '<tr><td colspan="7" style="text-align:center; padding:24px;" class="muted">No matching registered users found.</td></tr>';
 }
 
+/* User Deactivation & Activity Modals */
+const userDeactivateModal = document.getElementById('userDeactivateModal');
+const userActivityModal = document.getElementById('userActivityModal');
+const registerAdminModal = document.getElementById('registerAdminModal');
+
+function openDeactivateUserModal(uid, name) {
+  document.getElementById('deactModalUid').value = uid;
+  document.getElementById('deactModalUserTitle').textContent = `Deactivate: ${name}`;
+  userDeactivateModal.classList.add('active');
+}
+
+document.getElementById('closeUserDeactivateBtn').addEventListener('click', () => {
+  userDeactivateModal.classList.remove('active');
+});
+
+document.getElementById('userDeactivateForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const uid = document.getElementById('deactModalUid').value;
+  const days = document.getElementById('deactDaysInput').value;
+  const reason = document.getElementById('deactReasonInput').value;
+
+  try {
+    await adminFetch(`/api/admin/users/${encodeURIComponent(uid)}/deactivate`, {
+      method: 'POST',
+      body: JSON.stringify({ days: parseInt(days, 10), reason })
+    });
+    userDeactivateModal.classList.remove('active');
+    await loadAdminUsers();
+  } catch (err) {
+    alert(err.message || 'Failed to deactivate account.');
+  }
+});
+
+async function reactivateUserAccount(uid) {
+  try {
+    await adminFetch(`/api/admin/users/${encodeURIComponent(uid)}/reactivate`, { method: 'POST' });
+    await loadAdminUsers();
+  } catch (err) {
+    alert(err.message || 'Failed to reactivate account.');
+  }
+}
+
+async function deleteUserAccount(uid, name) {
+  if (!confirm(`Are you sure you want to permanently delete user account '${name}'? This action cannot be undone.`)) return;
+  try {
+    await adminFetch(`/api/admin/users/${encodeURIComponent(uid)}`, { method: 'DELETE' });
+    await loadAdminUsers();
+  } catch (err) {
+    alert(err.message || 'Failed to delete user account.');
+  }
+}
+
+async function openUserActivityModal(uid, name) {
+  document.getElementById('activityModalUserTitle').textContent = `Activity Monitor: ${name}`;
+  document.getElementById('activityModalUserSub').textContent = `Firebase UID: ${uid}`;
+  const container = document.getElementById('userActivityContent');
+  container.innerHTML = '<div class="muted" style="text-align:center;">Loading activity log...</div>';
+  userActivityModal.classList.add('active');
+
+  try {
+    const data = await adminFetch(`/api/admin/users/${encodeURIComponent(uid)}/activities`);
+    const logs = data.activities || [];
+    container.innerHTML = logs.length ? `
+      <div style="display:flex; flex-direction:column; gap:10px;">
+        ${logs.map(log => `
+          <div style="background:rgba(10,2,2,0.6); border:1px solid var(--border); padding:10px 14px; border-radius:8px;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+              <strong style="color:var(--bronze-light); font-size:12px;">${esc(log.activity_type)}</strong>
+              <span class="cell-mono" style="font-size:11px; color:var(--muted);">${esc(fmtDate(log.created_at))}</span>
+            </div>
+            <div style="font-size:13px; color:var(--white);">${esc(log.description)}</div>
+          </div>
+        `).join('')}
+      </div>
+    ` : '<div class="muted" style="text-align:center; padding:24px;">No recent activities logged for this user account.</div>';
+  } catch (err) {
+    container.innerHTML = `<div class="error show">${esc(err.message)}</div>`;
+  }
+}
+
+document.getElementById('closeUserActivityBtn').addEventListener('click', () => {
+  userActivityModal.classList.remove('active');
+});
+
+async function loadAdminUsers(){
+  try {
+    const res = await adminFetch('/api/admin/users');
+    masterData.users = res.users || [];
+    renderUsers();
+  } catch(err) {
+    logAdminError('Failed to load users', err);
+  }
+}
+
+/* =========================================================
+   WORKSHEET 6: ADMIN TEAM & MANAGEMENT RENDERING
+   ========================================================= */
 function renderTeam(){
   const rows = masterData.team || [];
   document.getElementById('tabCountTeam').textContent = rows.length;
-  
-  document.getElementById('teamRows').innerHTML = rows.length ? rows.map((member, idx) => `
-    <tr>
+  const q = getSearchQuery();
+
+  const filtered = rows.filter(member => {
+    if (!q) return true;
+    return `${member.name} ${member.email} ${member.role} ${member.username || member.id}`.toLowerCase().includes(q);
+  });
+
+  const tbody = document.getElementById('teamRows');
+  tbody.innerHTML = filtered.length ? filtered.map((member, idx) => {
+    const isMasterRole = (member.role_level || (member.id === 'samuel-akinomolafe' ? 'master' : 'restricted')) === 'master';
+    const isActive = member.is_active !== 0;
+
+    let tierBadge = isMasterRole
+      ? `<span class="chip" style="background:rgba(201,154,74,0.25); color:var(--bronze-light); border-color:var(--bronze);">⭐ Master Admin</span>`
+      : `<span class="chip">🔒 Restricted Admin</span>`;
+
+    let statusBadge = isActive
+      ? `<span class="badge-completed">Active 🟢</span>`
+      : `<span class="badge-new">Deactivated 🔴</span>`;
+
+    let actionBtns = '';
+    const uname = member.username || member.id;
+    if (currentAdmin.is_master && uname !== currentAdmin.username) {
+      const roleToggle = isMasterRole
+        ? `<button class="btn" style="padding:3px 8px; font-size:11px;" onclick="updateAdminAccountStatus('${esc(uname)}', {role_level:'restricted'})">Make Restricted 🔒</button>`
+        : `<button class="btn primary" style="padding:3px 8px; font-size:11px;" onclick="updateAdminAccountStatus('${esc(uname)}', {role_level:'master'})">Make Master ⭐</button>`;
+
+      const activeToggle = isActive
+        ? `<button class="btn" style="padding:3px 8px; font-size:11px; color:#f7a3a3;" onclick="updateAdminAccountStatus('${esc(uname)}', {is_active:0})">Deactivate 🔴</button>`
+        : `<button class="btn primary" style="padding:3px 8px; font-size:11px;" onclick="updateAdminAccountStatus('${esc(uname)}', {is_active:1})">Reactivate 🟢</button>`;
+
+      actionBtns = `
+        <div style="display:flex; gap:6px; align-items:center;">
+          ${roleToggle}
+          ${activeToggle}
+          <button class="btn" style="padding:3px 8px; font-size:11px; color:#f7a3a3;" onclick="deleteAdminAccount('${esc(uname)}')">Delete 🗑️</button>
+        </div>
+      `;
+    } else {
+      actionBtns = `<span class="muted">${uname === currentAdmin.username ? 'Current Account' : 'View Only'}</span>`;
+    }
+
+    return `<tr>
       <td class="cell-row-idx">${idx + 1}</td>
-      <td><strong>${esc(member.name)}</strong></td>
+      <td><strong>${esc(member.name)}</strong> <small class="cell-mono muted">(@${esc(uname)})</small></td>
       <td class="cell-mono">${esc(member.email)}</td>
       <td><strong>${esc(member.role)}</strong></td>
-      <td><span class="chip">Full Access Admin</span></td>
-    </tr>
-  `).join('') : '<tr><td colspan="5" style="text-align:center; padding:24px;" class="muted">No admin team configured.</td></tr>';
+      <td>${tierBadge}</td>
+      <td>${statusBadge}</td>
+      <td>${actionBtns}</td>
+    </tr>`;
+  }).join('') : '<tr><td colspan="7" style="text-align:center; padding:24px;" class="muted">No admin team accounts found.</td></tr>';
+}
+
+/* Register New Admin Modal & Submit Handlers */
+const openRegisterAdminBtn = document.getElementById('openRegisterAdminBtn');
+if (openRegisterAdminBtn) {
+  openRegisterAdminBtn.addEventListener('click', () => {
+    registerAdminModal.classList.add('active');
+  });
+}
+
+document.getElementById('closeRegisterAdminBtn').addEventListener('click', () => {
+  registerAdminModal.classList.remove('active');
+});
+
+document.getElementById('registerAdminForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const username = document.getElementById('regAdminUsername').value.trim();
+  const password = document.getElementById('regAdminPassword').value.trim();
+  const name = document.getElementById('regAdminName').value.trim();
+  const email = document.getElementById('regAdminEmail').value.trim();
+  const role = document.getElementById('regAdminRole').value.trim();
+  const role_level = document.getElementById('regAdminRoleLevel').value;
+
+  try {
+    const res = await adminFetch('/api/admin/team/register', {
+      method: 'POST',
+      body: JSON.stringify({ username, password, name, email, role, role_level })
+    });
+    alert(res.message || 'Admin registered successfully!');
+    registerAdminModal.classList.remove('active');
+    document.getElementById('registerAdminForm').reset();
+    await loadAdmin();
+  } catch (err) {
+    alert(err.message || 'Failed to register admin.');
+  }
+});
+
+async function updateAdminAccountStatus(username, updatePayload) {
+  try {
+    await adminFetch(`/api/admin/team/${encodeURIComponent(username)}/status`, {
+      method: 'POST',
+      body: JSON.stringify(updatePayload)
+    });
+    await loadAdmin();
+  } catch (err) {
+    alert(err.message || 'Failed to update admin account status.');
+  }
+}
+
+async function deleteAdminAccount(username) {
+  if (!confirm(`Are you sure you want to permanently delete admin account '@${username}'?`)) return;
+  try {
+    await adminFetch(`/api/admin/team/${encodeURIComponent(username)}`, { method: 'DELETE' });
+    await loadAdmin();
+  } catch (err) {
+    alert(err.message || 'Failed to delete admin account.');
+  }
 }
 
 /* =========================================================
@@ -1465,8 +1828,13 @@ async function loadAdminSummary() {
     document.getElementById('campaignCount').textContent = summary.campaignRegistrations || 0;
     document.getElementById('callsCount').textContent = summary.strategyCalls || 0;
     document.getElementById('userCount').textContent = summary.registeredUsers || 0;
-    const revenueLocal = await fmtNgnAsLocal(summary.totalRevenueNgn || 0);
-    document.getElementById('revenueCount').textContent = revenueLocal;
+    
+    if (summary.totalRevenueNgn !== null && summary.totalRevenueNgn !== undefined) {
+      const revenueLocal = await fmtNgnAsLocal(summary.totalRevenueNgn || 0);
+      document.getElementById('revenueCount').textContent = revenueLocal;
+    } else {
+      document.getElementById('revenueCount').textContent = 'Restricted';
+    }
   } catch(e) { logAdminError('Summary load failed', e); }
 }
 
@@ -1475,22 +1843,29 @@ async function loadAdmin(){
     const me = await adminFetch('/api/admin/me');
     gate.style.display = 'none';
     dashboard.style.display = 'block';
-    document.getElementById('adminStatus').textContent = `Signed in as ${me.name}`;
-    document.getElementById('adminCount').textContent = me.configuredAdmins || 7;
+    
+    applyAdminPermissions(me);
+
+    document.getElementById('adminStatus').textContent = `Signed in as ${me.name} (${me.is_master ? 'Master Admin' : 'Restricted Admin'})`;
+    document.getElementById('adminCount').textContent = me.configuredAdmins || (me.team ? me.team.length : 0);
     masterData.team = me.team || [];
     renderTeam();
 
-    await Promise.allSettled([
+    const fetchTasks = [
       loadAdminSummary(),
-      loadCareerRegistrations(),
-      loadStrategyCalls(),
-      loadCampaigns(),
       loadAdminChats(),
-      adminFetch('/api/admin/users').then(res => {
-        masterData.users = res.users || [];
-        renderUsers();
-      })
-    ]);
+      loadAdminUsers()
+    ];
+
+    if (me.is_master) {
+      fetchTasks.push(
+        loadCareerRegistrations(),
+        loadStrategyCalls(),
+        loadCampaigns()
+      );
+    }
+
+    await Promise.allSettled(fetchTasks);
   } catch(err){
     logAdminError('Could not load admin dashboard', err);
     showError(err.message);
