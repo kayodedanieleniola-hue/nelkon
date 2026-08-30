@@ -474,7 +474,9 @@ class PostgresConnection:
     def execute(self, sql, params=None):
         if sql.strip().upper() == "BEGIN IMMEDIATE":
             return self.conn.execute("SELECT 1")
-        return self.conn.execute(sql.replace("?", "%s"), params or ())
+        if params is not None and len(params) > 0:
+            return self.conn.execute(sql.replace("?", "%s"), params)
+        return self.conn.execute(sql)
 
     def commit(self):
         self.conn.commit()
@@ -495,12 +497,11 @@ class PostgresConnection:
 def seed_default_admins(conn):
     """Seed initial admin accounts into admin_accounts table if empty."""
     try:
-        row = conn.execute("SELECT COUNT(*) as count FROM admin_accounts").fetchone()
-        count = row["count"] if isinstance(row, dict) else (row[0] if row else 0)
-        if count == 0:
-            now = datetime.now(timezone.utc).isoformat()
-            for member in ADMIN_TEAM:
-                uname = member["id"]
+        now = datetime.now(timezone.utc).isoformat()
+        for member in ADMIN_TEAM:
+            uname = member["id"]
+            row = conn.execute("SELECT username FROM admin_accounts WHERE LOWER(username) = ?", (uname.lower(),)).fetchone()
+            if not row:
                 pwd = ADMIN_CREDENTIALS.get(uname, "AdminPass123!")
                 role_level = "master" if uname == "samuel-akinomolafe" else "restricted"
                 is_restricted = 0 if role_level == "master" else 1
@@ -511,7 +512,7 @@ def seed_default_admins(conn):
                     """,
                     (uname, pwd, member["name"], member["email"], member["role"], role_level, is_restricted, now, now)
                 )
-            conn.commit()
+        conn.commit()
     except Exception as exc:
         try:
             conn.rollback()
