@@ -513,6 +513,10 @@ def seed_default_admins(conn):
                 )
             conn.commit()
     except Exception as exc:
+        try:
+            conn.rollback()
+        except Exception:
+            pass
         print(f"Seed default admins warning: {exc}")
 
 
@@ -536,26 +540,21 @@ def initialize_postgres_schema(conn):
         "CREATE INDEX IF NOT EXISTS team_conversations_visitor_idx ON team_conversations(visitor_id)",
         "CREATE INDEX IF NOT EXISTS team_messages_conversation_idx ON team_messages(conversation_id, time)",
         "CREATE INDEX IF NOT EXISTS user_activities_uid_idx ON user_activities(uid, created_at DESC)",
+        "ALTER TABLE website_users ADD COLUMN IF NOT EXISTS email_verified INTEGER NOT NULL DEFAULT 0",
+        "ALTER TABLE website_users ADD COLUMN IF NOT EXISTS is_deactivated INTEGER NOT NULL DEFAULT 0",
+        "ALTER TABLE website_users ADD COLUMN IF NOT EXISTS deactivated_until TEXT",
+        "ALTER TABLE website_users ADD COLUMN IF NOT EXISTS deactivation_reason TEXT",
     ]
     for statement in statements:
         try:
             conn.execute(statement)
+            conn.commit()
         except Exception:
-            pass
+            try:
+                conn.rollback()
+            except Exception:
+                pass
 
-    # Ensure added columns exist if table was created earlier
-    for col_def in [
-        "ALTER TABLE website_users ADD COLUMN email_verified INTEGER NOT NULL DEFAULT 0",
-        "ALTER TABLE website_users ADD COLUMN is_deactivated INTEGER NOT NULL DEFAULT 0",
-        "ALTER TABLE website_users ADD COLUMN deactivated_until TEXT",
-        "ALTER TABLE website_users ADD COLUMN deactivation_reason TEXT"
-    ]:
-        try:
-            conn.execute(col_def)
-        except Exception:
-            pass
-
-    conn.commit()
     seed_default_admins(conn)
     _database_schema_ready = True
 
