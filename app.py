@@ -508,7 +508,9 @@ class PostgresConnection:
             self.conn.close()
 
 
-MASTER_ADMIN_USERNAMES = {"samuel-akinomolafe", "oreoluwa-farodoye", "kayode-daniel"}
+# Team members are created as Restricted Admins. The founder is the initial
+# Master Admin and can promote individual team members from Admin Management.
+MASTER_ADMIN_USERNAMES = {"samuel-akinomolafe"}
 
 
 def seed_default_admins(conn):
@@ -1609,6 +1611,9 @@ def admin_me():
     team_accounts = []
     try:
         with get_quota_db() as conn:
+            # Keep the configured team represented in the management list even
+            # when the deployment starts against an empty shared database.
+            seed_default_admins(conn)
             rows = conn.execute("SELECT username as id, name, email, role, role_level, is_active, is_restricted FROM admin_accounts ORDER BY created_at ASC").fetchall()
             team_accounts = [dict(r) for r in rows]
     except Exception:
@@ -1635,6 +1640,7 @@ def admin_get_team():
     """Get full list of registered admin accounts (Master Admin only)."""
     try:
         with get_quota_db() as conn:
+            seed_default_admins(conn)
             rows = conn.execute("SELECT username, name, email, role, role_level, is_active, is_restricted, created_at FROM admin_accounts ORDER BY created_at ASC").fetchall()
         return jsonify({"team": [dict(r) for r in rows]})
     except Exception as exc:
