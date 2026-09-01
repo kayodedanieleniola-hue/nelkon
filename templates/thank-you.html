@@ -111,6 +111,15 @@ p.lead {
   font-size: 13px;
   font-weight: 700;
 }
+@media (max-width: 520px) {
+  body { padding: 20px 12px; align-items: flex-start; }
+  .wrap { padding: 32px 18px; border-radius: 16px; }
+  .icon-badge { width: 66px; height: 66px; font-size: 30px; margin-bottom: 18px; }
+  p.lead { font-size: 14px; margin-bottom: 24px; }
+  .receipt-card, .steps-list { padding: 18px; }
+  .row { align-items: flex-start; flex-direction: column; gap: 4px; }
+  .val { text-align: left; overflow-wrap: anywhere; }
+}
 
 .steps-list {
   text-align: left;

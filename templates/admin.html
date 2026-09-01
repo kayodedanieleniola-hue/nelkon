@@ -824,6 +824,18 @@
     }
 
     @media(max-width:768px) {
+      .topbar-in {
+        height: auto;
+        min-height: 64px;
+        padding: 10px 14px;
+        align-items: flex-start
+      }
+
+      .brand { gap: 8px; min-width: 0 }
+      .brand img { height: 42px }
+      .brand strong { font-size: 15px }
+      .brand-excel-badge { display: none }
+
       .cards {
         grid-template-columns: 1fr 1fr
       }
@@ -836,6 +848,21 @@
         flex-wrap: wrap;
         justify-content: flex-end
       }
+
+      .page { padding: 18px 12px 50px }
+      .hero { align-items: flex-start; flex-direction: column }
+      .excel-formula-bar { min-width: 0; width: 100% }
+      .excel-actions-right { width: 100%; flex-wrap: wrap }
+      .sheet-counter-badge { white-space: normal }
+    }
+
+    @media(max-width:480px) {
+      .cards { grid-template-columns: 1fr }
+      .nav-actions { gap: 6px }
+      .nav-actions .btn { padding: 7px 9px; font-size: 11px }
+      .hero h1 { font-size: 25px }
+      .gate { margin: 36px auto; padding: 24px 18px }
+      .excel-toolbar { padding: 10px 12px }
     }
   </style>
 </head>
