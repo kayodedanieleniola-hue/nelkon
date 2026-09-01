@@ -519,6 +519,12 @@ def seed_default_admins(conn):
         now = datetime.now(timezone.utc).isoformat()
         for member in ADMIN_TEAM:
             uname = member["id"]
+            deleted = conn.execute(
+                "SELECT username FROM deleted_admin_accounts WHERE LOWER(username) = ?",
+                (uname.lower(),)
+            ).fetchone()
+            if deleted:
+                continue
             row = conn.execute("SELECT username FROM admin_accounts WHERE LOWER(username) = ?", (uname.lower(),)).fetchone()
             role_level = "master" if uname.lower() in MASTER_ADMIN_USERNAMES else "restricted"
             is_restricted = 0 if role_level == "master" else 1
@@ -560,6 +566,7 @@ def initialize_postgres_schema(conn):
         "CREATE TABLE IF NOT EXISTS campaign_registrations (id TEXT PRIMARY KEY, uid TEXT NOT NULL, email TEXT NOT NULL, full_name TEXT, business TEXT, challenge TEXT, package_name TEXT, amount DOUBLE PRECISION, currency TEXT, status TEXT NOT NULL DEFAULT 'pending_payment', payment_reference TEXT, created_at TEXT NOT NULL, raw_json TEXT)",
         "CREATE TABLE IF NOT EXISTS website_users (uid TEXT PRIMARY KEY, email TEXT, username TEXT, photo_url TEXT, email_verified INTEGER NOT NULL DEFAULT 0, is_deactivated INTEGER NOT NULL DEFAULT 0, deactivated_until TEXT, deactivation_reason TEXT, created_at TEXT NOT NULL, updated_at TEXT NOT NULL)",
         "CREATE TABLE IF NOT EXISTS admin_accounts (username TEXT PRIMARY KEY, password TEXT NOT NULL, name TEXT NOT NULL, email TEXT NOT NULL, role TEXT NOT NULL, role_level TEXT NOT NULL DEFAULT 'restricted', is_active INTEGER NOT NULL DEFAULT 1, is_restricted INTEGER NOT NULL DEFAULT 0, created_at TEXT NOT NULL, updated_at TEXT NOT NULL)",
+        "CREATE TABLE IF NOT EXISTS deleted_admin_accounts (username TEXT PRIMARY KEY, deleted_at TEXT NOT NULL)",
         "CREATE TABLE IF NOT EXISTS user_activities (id TEXT PRIMARY KEY, uid TEXT NOT NULL, activity_type TEXT NOT NULL, description TEXT NOT NULL, ip_address TEXT, created_at TEXT NOT NULL)",
         "CREATE TABLE IF NOT EXISTS admin_portal_sessions (id TEXT PRIMARY KEY, session_id TEXT NOT NULL, username TEXT NOT NULL, created_at TEXT NOT NULL)",
         "CREATE TABLE IF NOT EXISTS team_conversations (id TEXT PRIMARY KEY, visitor_id TEXT NOT NULL, visitor_email TEXT, visitor_name TEXT, team_member_id TEXT NOT NULL, team_member_name TEXT, team_member_role TEXT, status TEXT NOT NULL DEFAULT 'open', last_message TEXT, last_sender TEXT, last_updated TEXT NOT NULL, created_at TEXT NOT NULL)",
@@ -714,6 +721,14 @@ def get_quota_db():
             is_restricted INTEGER NOT NULL DEFAULT 0,
             created_at TEXT NOT NULL,
             updated_at TEXT NOT NULL
+        )
+        """
+    )
+    conn.execute(
+        """
+        CREATE TABLE IF NOT EXISTS deleted_admin_accounts (
+            username TEXT PRIMARY KEY,
+            deleted_at TEXT NOT NULL
         )
         """
     )
@@ -1078,8 +1093,6 @@ def register_training_api():
     address = str(data.get("address") or "").strip()
     social = str(data.get("social") or "").strip()
     comments = str(data.get("comments") or data.get("statement") or "").strip()
-    guardian_name = str(data.get("guardianName") or "").strip()
-    guardian_phone = str(data.get("guardianPhone") or "").strip()
 
     if not name or not email or not phone:
         return jsonify({"success": False, "error": "Full Name, Email, and Phone Number are required."}), 400
@@ -1088,7 +1101,7 @@ def register_training_api():
     reg_id = f"TRN-{int(time.time()*1000)}"
     details_str = json.dumps({
         "age": age, "gender": gender, "address": address, "social": social,
-        "comments": comments, "guardianName": guardian_name, "guardianPhone": guardian_phone
+        "comments": comments
     })
 
     try:
@@ -1671,6 +1684,9 @@ def admin_register_new_admin():
 
     try:
         with get_quota_db() as conn:
+            # Allow a deliberately deleted account to be created again through
+            # the Master Admin registration form.
+            conn.execute("DELETE FROM deleted_admin_accounts WHERE LOWER(username) = ?", (username,))
             conn.execute(
                 """
                 INSERT INTO admin_accounts (username, password, name, email, role, role_level, is_active, is_restricted, created_at, updated_at)
@@ -1747,6 +1763,17 @@ def admin_delete_team_member(target_username):
 
     try:
         with get_quota_db() as conn:
+            existing = conn.execute(
+                "SELECT username FROM admin_accounts WHERE LOWER(username) = ?",
+                (target_username,)
+            ).fetchone()
+            if not existing:
+                return jsonify({"error": "Admin account not found."}), 404
+            conn.execute(
+                "INSERT INTO deleted_admin_accounts (username, deleted_at) VALUES (?, ?) "
+                "ON CONFLICT(username) DO UPDATE SET deleted_at = excluded.deleted_at",
+                (target_username, datetime.now(timezone.utc).isoformat())
+            )
             conn.execute("DELETE FROM admin_accounts WHERE LOWER(username) = ?", (target_username,))
         return jsonify({"success": True, "message": f"Admin account '{target_username}' deleted."})
     except Exception as exc:
