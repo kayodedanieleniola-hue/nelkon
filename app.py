@@ -467,14 +467,16 @@ def check_rate_limit(client_key, max_requests=15, window_seconds=60):
 
 
 def convert_sqlite_to_pg_sql(sql):
+    """Translate the SQLite-style placeholders used by this app for psycopg.
+
+    psycopg performs parameter binding with ``%s`` placeholders. PostgreSQL
+    itself supports ``$1`` placeholders, but passing those to psycopg with a
+    parameter tuple causes a runtime ProgrammingError, which previously made
+    public registration submissions fail with HTTP 500 on Vercel.
+    """
     if "?" not in sql:
         return sql
-    parts = sql.split("?")
-    result = []
-    for i, part in enumerate(parts[:-1]):
-        result.append(f"{part}${i + 1}")
-    result.append(parts[-1])
-    return "".join(result)
+    return sql.replace("?", "%s")
 
 
 class PostgresConnection:

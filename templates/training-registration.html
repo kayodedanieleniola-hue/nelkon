@@ -268,7 +268,11 @@ document.getElementById('regForm').addEventListener('submit', function(e){
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data)
   })
-  .then(res => res.json())
+  .then(async res => {
+    const result = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(result.error || 'We could not save your registration. Please try again.');
+    return result;
+  })
   .then(res => {
     if (res.success && res.redirect_url) {
       window.location.href = res.redirect_url;
@@ -279,9 +283,9 @@ document.getElementById('regForm').addEventListener('submit', function(e){
     }
   })
   .catch(err => {
-    // Local fallback preview redirect
-    const dummyId = 'TRN-' + Date.now();
-    window.location.href = '/payment.html?id=' + dummyId + '&type=training';
+    alert(err.message || 'We could not save your registration. Please try again.');
+    btn.disabled = false;
+    btn.textContent = 'Submit Registration';
   });
 });
 </script>

@@ -478,7 +478,11 @@ form.addEventListener('submit', function(e){
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data)
   })
-  .then(res => res.json())
+  .then(async res => {
+    const result = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(result.error || 'We could not save your application. Please try again.');
+    return result;
+  })
   .then(res => {
     if (res.success && res.redirect_url) {
       window.location.href = res.redirect_url;
@@ -490,8 +494,10 @@ form.addEventListener('submit', function(e){
     }
   })
   .catch(err => {
-    const dummyId = 'INT-' + Date.now();
-    window.location.href = '/thank-you.html?id=' + dummyId + '&type=internship';
+    statusMsg.textContent = err.message || 'We could not save your application. Please try again.';
+    statusMsg.className = 'status-msg err';
+    btn.textContent = 'Submit Application';
+    btn.disabled = false;
   });
 });
 </script>
