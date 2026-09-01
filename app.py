@@ -1715,6 +1715,12 @@ def admin_update_team_status(target_username):
 
     try:
         with get_quota_db() as conn:
+            existing = conn.execute(
+                "SELECT username FROM admin_accounts WHERE LOWER(username) = ?",
+                (target_username,)
+            ).fetchone()
+            if not existing:
+                return jsonify({"error": "Admin account not found."}), 404
             conn.execute(f"UPDATE admin_accounts SET {', '.join(updates)} WHERE LOWER(username) = ?", params)
         return jsonify({"success": True, "username": target_username})
     except Exception as exc:

@@ -925,8 +925,8 @@
             <span>👥 Registered Users</span>
             <span class="tab-count" id="tabCountUsers">0</span>
           </button>
-          <button type="button" class="excel-tab" data-sheet="team">
-            <span>🛡️ Admin Team</span>
+          <button type="button" class="excel-tab master-only-tab" data-sheet="team">
+            <span>🛡️ Admin Management</span>
             <span class="tab-count" id="tabCountTeam">0</span>
           </button>
         </div>
@@ -1078,6 +1078,8 @@
 
         <!-- WORKSHEET 6: ADMIN TEAM -->
         <div class="worksheet-panel" id="sheet-team">
+          <div class="section-title" style="margin:0 0 8px;">Admin Management</div>
+          <p class="muted" style="margin:0 0 16px;">Master Admins can view every admin account, grant or remove Master Admin access, and deactivate or reactivate accounts.</p>
           <div class="excel-table-wrap">
             <table class="excel-table">
               <thead>
@@ -1945,7 +1947,7 @@
         document.getElementById('revenueCount').textContent = 'Restricted';
 
         // If current tab is restricted, auto-switch to Registered Users sheet
-        if (['career', 'calls', 'campaign'].includes(activeSheet)) {
+        if (['career', 'calls', 'campaign', 'team'].includes(activeSheet)) {
           const userTab = document.querySelector('.excel-tab[data-sheet="users"]');
           if (userTab) userTab.click();
         }
@@ -2105,6 +2107,16 @@
       }
     }
 
+    async function loadAdminTeam() {
+      try {
+        const res = await adminFetch('/api/admin/team');
+        masterData.team = res.team || [];
+        renderTeam();
+      } catch (err) {
+        logAdminError('Failed to load admin team', err);
+      }
+    }
+
     /* =========================================================
        WORKSHEET 6: ADMIN TEAM & MANAGEMENT RENDERING
        ========================================================= */
@@ -2201,6 +2213,14 @@
     });
 
     async function updateAdminAccountStatus(username, updatePayload) {
+      const action = updatePayload.role_level === 'master'
+        ? `make @${username} a Master Admin`
+        : updatePayload.role_level === 'restricted'
+          ? `remove Master Admin access from @${username}`
+          : updatePayload.is_active === 0
+            ? `deactivate @${username}'s admin account`
+            : `reactivate @${username}'s admin account`;
+      if (!confirm(`Are you sure you want to ${action}?`)) return;
       try {
         await adminFetch(`/api/admin/team/${encodeURIComponent(username)}/status`, {
           method: 'POST',
@@ -2263,6 +2283,7 @@
 
         if (me.is_master) {
           fetchTasks.push(
+            loadAdminTeam(),
             loadCareerRegistrations(),
             loadStrategyCalls(),
             loadCampaigns()
