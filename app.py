@@ -580,7 +580,10 @@ def initialize_postgres_schema(conn):
             except Exception:
                 pass
 
-    seed_default_admins(conn)
+    # `conn` is the raw psycopg connection here. Seed through the compatibility
+    # wrapper so the SQLite-style parameter placeholders used by the seed helper
+    # are translated for PostgreSQL as well.
+    seed_default_admins(PostgresConnection(conn))
     _database_schema_ready = True
 
 
