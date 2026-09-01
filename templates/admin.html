@@ -1632,7 +1632,10 @@
       <td>${statusBadge}</td>
       <td class="cell-mono">#${esc(item.id)}</td>
       <td class="cell-mono">${esc(fmtDate(item.created_at || item.createdAt))}</td>
-      <td>${actionBtn}</td>
+      <td style="display: flex; gap: 6px;">
+        ${actionBtn}
+        <button class="btn" style="padding:4px 8px;font-size:11px; color:#f7a3a3;" onclick="event.stopPropagation(); deleteCareerRegistration('${esc(item.id)}', '${esc(item.name || 'Applicant')}')">Delete 🗑️</button>
+      </td>
     </tr>`;
       }).join('') : '<tr><td colspan="10" style="text-align:center; padding:24px;" class="muted">No matching training or career submissions found.</td></tr>';
     }
@@ -1675,6 +1678,19 @@
       } catch (err) {
         logAdminError('Could not update career registration status', err, { registrationId: regId });
         alert(err.message || 'Status update failed.');
+      }
+    }
+
+    async function deleteCareerRegistration(regId, applicantName) {
+      if (!confirm(`Are you sure you want to permanently delete the registration for '${applicantName}' (#${regId})? This action cannot be undone.`)) return;
+      try {
+        await adminFetch(`/api/admin/career-registrations/${encodeURIComponent(regId)}`, { method: 'DELETE' });
+        await loadCareerRegistrations();
+        loadAdminSummary();
+        alert(`Registration for '${applicantName}' has been permanently deleted.`);
+      } catch (err) {
+        logAdminError('Could not delete career registration', err, { registrationId: regId });
+        alert(err.message || 'Failed to delete registration.');
       }
     }
 

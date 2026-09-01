@@ -1093,15 +1093,23 @@ def register_training_api():
     address = str(data.get("address") or "").strip()
     social = str(data.get("social") or "").strip()
     comments = str(data.get("comments") or data.get("statement") or "").strip()
+    pricing = str(data.get("pricing") or "regular").strip().lower()
 
     if not name or not email or not phone:
         return jsonify({"success": False, "error": "Full Name, Email, and Phone Number are required."}), 400
+
+    # Map pricing to amount
+    pricing_map = {
+        "early-bird": 150000,
+        "regular": 250000
+    }
+    amount = pricing_map.get(pricing, 250000)
 
     now = datetime.now(timezone.utc).isoformat()
     reg_id = f"TRN-{int(time.time()*1000)}"
     details_str = json.dumps({
         "age": age, "gender": gender, "address": address, "social": social,
-        "comments": comments
+        "comments": comments, "pricing": pricing
     })
 
     try:
@@ -1112,7 +1120,7 @@ def register_training_api():
                 (id, type, name, email, phone, program, experience_level, statement, details, amount, status, created_at, updated_at)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
-                (reg_id, "training", name, email, phone, course, "", comments, details_str, 250000, "pending_payment", now, now)
+                (reg_id, "training", name, email, phone, course, "", comments, details_str, amount, "pending_payment", now, now)
             )
     except Exception as exc:
         print(f"Error saving training registration: {exc}")
@@ -1123,7 +1131,7 @@ def register_training_api():
         try:
             db.collection("careerRegistrations").document(reg_id).set({
                 "id": reg_id, "type": "training", "name": name, "email": email, "phone": phone,
-                "program": course, "amount": 250000, "status": "pending_payment",
+                "program": course, "amount": amount, "status": "pending_payment",
                 "details": details_str, "createdAt": now, "updatedAt": now
             })
         except Exception as exc:
@@ -1132,7 +1140,7 @@ def register_training_api():
     return jsonify({
         "success": True,
         "id": reg_id,
-        "amount": 250000,
+        "amount": amount,
         "redirect_url": f"/payment.html?id={reg_id}&type=training"
     })
 
@@ -1515,6 +1523,35 @@ def admin_update_career_status(reg_id):
 
     return jsonify({"success": True, "id": reg_id, "status": new_status})
 
+@app.route("/api/admin/career-registrations/<reg_id>", methods=["DELETE"])
+@require_admin_session
+@require_shared_database
+def admin_delete_career_registration(reg_id):
+    """Delete a career registration permanently from the database."""
+    try:
+        with get_quota_db() as conn:
+            # Check if registration exists
+            existing = conn.execute(
+                "SELECT id FROM career_registrations WHERE id = ?",
+                (reg_id,)
+            ).fetchone()
+            if not existing:
+                return jsonify({"error": "Registration not found."}), 404
+            
+            # Delete from database
+            conn.execute("DELETE FROM career_registrations WHERE id = ?", (reg_id,))
+        
+        # Also delete from Firestore if available
+        db = get_firestore_client()
+        if db:
+            try:
+                db.collection("careerRegistrations").document(reg_id).delete()
+            except Exception as exc:
+                print(f"Firestore deletion warning: {exc}")
+        
+        return jsonify({"success": True, "message": f"Registration '{reg_id}' deleted permanently."})
+    except Exception as exc:
+        return jsonify({"error": str(exc)}), 500
 
 
 @app.route("/contact")
