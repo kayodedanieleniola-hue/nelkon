@@ -2441,15 +2441,10 @@
   </footer>
 
   <div class="chat-choice-pop" id="chatChoicePop" aria-hidden="true">
-    <span class="chat-choice-item is-disabled" aria-disabled="true">
+    <a href="/ai-chat" class="chat-choice-item">
       <span class="chat-choice-icon">AI</span>
       <span class="chat-choice-text"><strong>Chat with Nakconel AI</strong><span>Brand strategy assistant (Coming
           <span class="coming-soon">Soon</span>)</span></span>
-    </span>
-    <a href="/chat" class="chat-choice-item">
-      <span class="chat-choice-icon">TM</span>
-      <span class="chat-choice-text"><strong>Chat with the team</strong><span>Message a Nakconel team
-          member</span></span>
     </a>
   </div>
 
@@ -2480,11 +2475,15 @@
       const pop = document.getElementById('chatChoicePop');
       if (!fab || !pop) return;
       if (fab.contains(event.target)) {
-        const open = !pop.classList.contains('open');
-        pop.classList.toggle('open', open);
-        fab.classList.toggle('chat-open', open);
-        fab.setAttribute('aria-expanded', String(open));
-        pop.setAttribute('aria-hidden', String(!open));
+        const tip = fab.querySelector('.ai-chat-fab-tip');
+        if (tip) {
+          tip.textContent = 'Coming Soon';
+          fab.classList.add('show-tip');
+          setTimeout(() => {
+            tip.textContent = 'Chat with our AI';
+            fab.classList.remove('show-tip');
+          }, 2500);
+        }
         return;
       }
       if (!pop.contains(event.target)) {

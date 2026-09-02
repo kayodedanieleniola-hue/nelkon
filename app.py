@@ -1032,7 +1032,7 @@ def meet_the_team():
 
 @app.route("/ai-chat")
 def ai_chat():
-    return render_template("ai-chat.html")
+    return render_template("coming-soon.html")
 
 @app.route("/chat")
 @app.route("/team-chat")
@@ -1078,6 +1078,8 @@ def thank_you_page():
 
 @app.route("/templates/<path:filename>")
 def serve_template_direct(filename):
+    if filename == "ai-chat.html":
+        return render_template("coming-soon.html")
     return render_template(filename)
 
 @app.route("/api/register-training", methods=["POST"])

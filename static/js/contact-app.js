@@ -141,7 +141,7 @@ async function renderContacts(){
   const ai = document.createElement('div');
   ai.className = 'contact-row ai';
   ai.innerHTML = `<div class="contact-avatar">◈</div><div class="contact-mid"><div class="contact-name">Nakconel AI</div><div class="contact-preview">Ask me anything about the brand</div></div><div class="contact-side"><span class="contact-time">Online</span></div>`;
-  ai.addEventListener('click', () => openChat('ai'));
+  ai.addEventListener('click', showComingSoonToast);
   list.appendChild(ai);
 
   LOCKED_CONTACTS.forEach(c => {
@@ -153,7 +153,15 @@ async function renderContacts(){
   });
 }
 
+function showComingSoonToast(){
+  toast.textContent = 'Nakconel AI is coming soon.';
+  toast.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.remove('show'), 5000);
+}
+
 function showLockToast(){
+  toast.textContent = 'Referral required — ask the Owner to unlock this chat.';
   toast.classList.add('show');
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => toast.classList.remove('show'), 5000);

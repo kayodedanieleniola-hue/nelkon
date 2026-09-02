@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script src="/static/js/error-logger.js" defer></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Coming Soon | NAKCONEL</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ground: #0A0202;
+      --wine-mid: #3D0A0A;
+      --bronze: #C99A4A;
+      --bronze-light: #E8C57A;
+      --cream: #F5E8C7;
+      --muted: rgba(245, 232, 199, 0.62);
+    }
+    * { box-sizing: border-box; }
+    body {
+      min-height: 100vh;
+      margin: 0;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      background: radial-gradient(ellipse 70% 55% at 50% 25%, var(--wine-mid), transparent 72%), var(--ground);
+      color: var(--cream);
+      font-family: 'Poppins', sans-serif;
+      text-align: center;
+    }
+    main { max-width: 560px; }
+    img { width: 100px; margin: 0 auto 28px; }
+    h1 { margin: 0 0 12px; color: var(--bronze-light); font-size: clamp(32px, 7vw, 54px); line-height: 1.1; }
+    p { margin: 0 0 28px; color: var(--muted); line-height: 1.7; }
+    a {
+      display: inline-block;
+      padding: 12px 20px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, var(--bronze), var(--bronze-light));
+      color: var(--ground);
+      font-weight: 700;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <img src="/static/image/logo.png" alt="NAKCONEL">
+    <h1>Coming Soon</h1>
+    <p>Nakconel AI is being prepared for launch. Check back soon.</p>
+    <a href="/home">Return to Home</a>
+  </main>
+</body>
+</html>
