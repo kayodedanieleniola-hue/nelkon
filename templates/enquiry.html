@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Send Nakconel an enquiry about your next project.">
+  <title>Enquire | Nakconel</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root { --ground:#0A0202; --wine:#751008; --wine-deep:#1B0404; --bronze:#C99A4A; --bronze-light:#E8C57A; --cream:#F5E8C7; --white:#FDFAF4; --muted:rgba(245,232,199,.65); --border:rgba(201,154,74,.22); }
+    * { box-sizing:border-box; }
+    body { min-height:100vh; margin:0; padding:32px 20px 64px; color:var(--white); font:14px/1.6 'Poppins',sans-serif; background:radial-gradient(circle at 50% -12%, #751008 0, #300300 43%, var(--ground) 100%); }
+    .page { width:min(100%,760px); margin:auto; }
+    .top { display:flex; align-items:center; justify-content:space-between; gap:18px; margin-bottom:50px; }
+    .logo { display:block; width:150px; height:auto; }
+    .back { color:var(--cream); text-decoration:none; font-size:13px; }
+    .back:hover { color:var(--bronze-light); }
+    .intro { text-align:center; max-width:590px; margin:0 auto 30px; }
+    .eyebrow { margin:0 0 10px; color:var(--bronze); font-weight:600; font-size:11px; letter-spacing:2.5px; text-transform:uppercase; }
+    h1 { margin:0 0 12px; color:var(--cream); font:600 clamp(34px,6vw,48px)/1.15 'Fraunces',serif; }
+    .intro p { margin:0; color:var(--muted); }
+    .card { padding:clamp(24px,5vw,44px); border:1px solid var(--border); border-radius:20px; background:linear-gradient(160deg,rgba(27,4,4,.82),rgba(10,2,2,.9)); box-shadow:0 30px 70px rgba(0,0,0,.45); }
+    .grid { display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+    .field { margin-bottom:18px; }
+    label { display:block; margin-bottom:7px; color:var(--bronze); font-size:11px; font-weight:600; letter-spacing:.7px; text-transform:uppercase; }
+    input, select, textarea { width:100%; padding:13px 14px; border:1px solid var(--border); border-radius:10px; outline:0; color:var(--white); background:rgba(245,232,199,.055); font:14px 'Poppins',sans-serif; transition:.2s; }
+    select option { color:#111; }
+    textarea { min-height:130px; resize:vertical; }
+    input::placeholder, textarea::placeholder { color:rgba(245,232,199,.38); }
+    input:focus, select:focus, textarea:focus { border-color:var(--bronze); box-shadow:0 0 0 3px rgba(201,154,74,.12); }
+    .service-questions { display:none; margin:28px 0 22px; padding:24px; border:1px solid var(--border); border-radius:14px; background:rgba(201,154,74,.055); }
+    .service-questions.show { display:block; }
+    .service-questions h2 { margin:0 0 5px; color:var(--bronze-light); font:600 22px/1.25 'Fraunces',serif; }
+    .service-questions > p { margin:0 0 20px; color:var(--muted); font-size:13px; }
+    .note { margin:-2px 0 20px; color:var(--muted); font-size:12px; }
+    button { width:100%; padding:14px 20px; border:0; border-radius:10px; cursor:pointer; color:#1b0d05; background:linear-gradient(135deg,var(--bronze-light),var(--bronze)); font:700 14px 'Poppins',sans-serif; transition:transform .2s,filter .2s; }
+    button:hover { filter:brightness(1.06); transform:translateY(-1px); }
+    button:disabled { cursor:wait; opacity:.72; transform:none; }
+    .status { display:none; margin:16px 0 0; text-align:center; font-size:13px; }
+    .status.show { display:block; } .status.error { color:#ff9d91; } .status.success { color:var(--bronze-light); }
+    @media (max-width:600px) { body { padding:22px 16px 48px; } .top { margin-bottom:38px; } .logo { width:125px; } .grid { grid-template-columns:1fr; gap:0; } }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <div class="top"><a href="/" aria-label="Nakconel home"><img class="logo" src="/static/image/logo.png" alt="Nakconel"></a><a class="back" href="/">← Back to home</a></div>
+    <section class="intro"><p class="eyebrow">Start a conversation</p><h1>Tell us about your project.</h1><p>Share a few details and our team will get back to you within 1–2 business days.</p></section>
+    <section class="card">
+      <form id="enquiryForm">
+        <div class="grid">
+          <div class="field"><label for="name">Full name *</label><input id="name" name="name" autocomplete="name" required placeholder="Your name"></div>
+          <div class="field"><label for="business">Business / brand</label><input id="business" name="business" autocomplete="organization" placeholder="Your business name"></div>
+          <div class="field"><label for="email">Email address *</label><input id="email" name="email" type="email" autocomplete="email" required placeholder="you@example.com"></div>
+          <div class="field"><label for="phone">Phone number</label><input id="phone" name="phone" type="tel" autocomplete="tel" placeholder="Your phone number"></div>
+        </div>
+        <div class="field"><label for="service">What do you need help with? *</label><select id="service" name="service" required><option value="" disabled selected>Select a service</option><option>Brand strategy & management</option><option>AI strategy & enablement</option><option>AI automation</option><option>Web & app development</option><option>Content & creative services</option><option>Something else</option></select></div>
+        <section id="serviceQuestions" class="service-questions" aria-live="polite"></section>
+        <div class="field"><label for="details">Project details *</label><textarea id="details" name="details" required placeholder="Tell us about your goals, timeline, and anything helpful for our team."></textarea></div>
+        <p class="note">Your details are kept confidential and used only to respond to your enquiry.</p>
+        <button id="submitButton" type="submit">Send enquiry</button>
+        <p id="status" class="status" role="status" aria-live="polite"></p>
+      </form>
+    </section>
+  </main>
+  <script>
+    const form = document.getElementById('enquiryForm');
+    const button = document.getElementById('submitButton');
+    const status = document.getElementById('status');
+    const service = document.getElementById('service');
+    const serviceQuestions = document.getElementById('serviceQuestions');
+    const questionsByService = {
+      'Brand strategy & management': { title:'Help us understand your brand', intro:'A little context helps us recommend the right direction.', questions:[
+        ['text', 'brand_stage', 'What stage is your brand at?', 'For example: new, growing, established, rebranding'],
+        ['textarea', 'brand_goal', 'What would you like to achieve with your brand?', 'For example: clearer positioning, a rebrand, more visibility or customer trust'],
+        ['textarea', 'audience', 'Who are you trying to reach?', 'Describe your ideal customers or audience']
+      ]},
+      'AI strategy & enablement': { title:'Help us understand your AI goals', intro:'Tell us where AI could make the biggest difference for your business.', questions:[
+        ['textarea', 'ai_challenge', 'Which process or challenge should AI help improve?', 'For example: customer support, operations, content, sales, data analysis'],
+        ['select', 'ai_readiness', 'How are you currently using AI?', '', ['We are not using AI yet', 'We use basic AI tools', 'We have existing AI workflows', 'We need help improving current AI systems']],
+        ['textarea', 'ai_outcome', 'What result would make this project successful?', 'Describe the outcome you want to see']
+      ]},
+      'Web & app development': { title:'Help us scope your digital product', intro:'Share the essentials so we can understand what you need built.', questions:[
+        ['select', 'product_type', 'What would you like to build?', '', ['A website', 'An e-commerce store', 'A web application', 'A mobile app', 'A website and app']],
+        ['textarea', 'key_features', 'What are the most important features?', 'For example: bookings, payments, dashboards, user accounts, chat or an online store'],
+        ['text', 'existing_link', 'Do you have an existing website or reference link?', 'Optional: https://example.com']
+      ]},
+      'Content & creative services': { title:'Help us shape the creative brief', intro:'Let us know the story you want your content to tell.', questions:[
+        ['select', 'creative_need', 'What type of creative support do you need?', '', ['Social media content', 'Brand identity / design', 'Campaign creative', 'Video or motion design', 'Copywriting', 'A combination of services']],
+        ['textarea', 'creative_audience', 'Who is the content for and what should they do?', 'Describe the audience and the action or feeling you want to create'],
+        ['textarea', 'creative_style', 'Do you have a preferred style or examples?', 'Share colours, tone, visual references or links']
+      ]},
+      'AI automation': { title:'Help us understand your automation needs', intro:'Tell us what work you would like to streamline or automate.', questions:[
+        ['textarea', 'automation_process', 'Which process would you like to automate?', 'For example: lead follow-up, customer support, reporting, bookings or content workflows'],
+        ['select', 'automation_tools', 'Which tools do you currently use?', '', ['No tools yet', 'Google Workspace', 'Microsoft 365', 'WhatsApp', 'CRM or sales platform', 'Multiple business tools']],
+        ['textarea', 'automation_result', 'What should the automation achieve?', 'Describe the time, cost, or customer experience improvement you want']
+      ]},
+      'Something else': { title:'Tell us a little more', intro:'We would love to understand what you have in mind.', questions:[
+        ['textarea', 'custom_need', 'What do you need help with?', 'Please describe the service or project you are looking for'],
+        ['textarea', 'custom_outcome', 'What outcome are you hoping for?', 'Describe what success would look like']
+      ]}
+    };
+    function renderServiceQuestions() {
+      const config = questionsByService[service.value];
+      serviceQuestions.innerHTML = '';
+      serviceQuestions.classList.remove('show');
+      if (!config) return;
+      const heading = document.createElement('h2'); heading.textContent = config.title;
+      const intro = document.createElement('p'); intro.textContent = config.intro;
+      serviceQuestions.append(heading, intro);
+      config.questions.forEach(([type, name, labelText, placeholder, choices]) => {
+        const field = document.createElement('div'); field.className = 'field';
+        const isRequired = name !== 'existing_link';
+        const label = document.createElement('label'); label.htmlFor = name; label.textContent = `${labelText}${isRequired ? ' *' : ''}`;
+        let input;
+        if (type === 'textarea') input = document.createElement('textarea');
+        else if (type === 'select') {
+          input = document.createElement('select');
+          const defaultOption = new Option('Select an option', '', true, true); defaultOption.disabled = true; input.add(defaultOption);
+          choices.forEach(choice => input.add(new Option(choice, choice)));
+        } else { input = document.createElement('input'); input.type = type; }
+        input.id = name; input.name = name; input.required = isRequired; input.placeholder = placeholder;
+        field.append(label, input); serviceQuestions.append(field);
+      });
+      serviceQuestions.classList.add('show');
+    }
+    service.addEventListener('change', renderServiceQuestions);
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      if (!form.reportValidity()) return;
+      const values = Object.fromEntries(new FormData(form));
+      button.disabled = true; button.textContent = 'Sending…'; status.className = 'status';
+      const followUpAnswers = Object.entries(values)
+        .filter(([key]) => !['name', 'business', 'email', 'phone', 'service', 'details'].includes(key))
+        .map(([key, value]) => `${key.replaceAll('_', ' ')}: ${value}`)
+        .join('\n');
+      const message = `Enquiry service: ${values.service}\nBusiness / brand: ${values.business || 'Not provided'}\n\nService brief:\n${followUpAnswers}\n\nProject details:\n${values.details}`;
+      try {
+        const response = await fetch('/api/strategy-call', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({name:values.name,email:values.email,phone:values.phone,message}) });
+        const result = await response.json();
+        if (!response.ok || !result.saved) throw new Error(result.error || 'Unable to send your enquiry.');
+        form.reset(); renderServiceQuestions(); status.textContent = 'Thank you — your enquiry has been received. We’ll be in touch soon.'; status.className = 'status show success';
+      } catch (error) {
+        status.textContent = error.message || 'Something went wrong. Please try again.'; status.className = 'status show error';
+      } finally { button.disabled = false; button.textContent = 'Send enquiry'; }
+    });
+  </script>
+</body>
+</html>

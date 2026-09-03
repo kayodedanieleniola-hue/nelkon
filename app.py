@@ -1064,6 +1064,11 @@ def career():
 def training_registration():
     return render_template("training-registration.html")
 
+@app.route("/enquiry")
+@app.route("/enquiry.html")
+def enquiry():
+    return render_template("enquiry.html")
+
 @app.route("/internship-application")
 @app.route("/internship-application.html")
 def internship_application():

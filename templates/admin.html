@@ -920,7 +920,7 @@
       <div class="cards">
         <div class="card master-only-card"><small>Training & Career</small><b id="careerCount">0</b></div>
         <div class="card master-only-card"><small>Campaign Submissions</small><b id="campaignCount">0</b></div>
-        <div class="card master-only-card"><small>Strategy Call Bookings</small><b id="callsCount">0</b></div>
+        <div class="card master-only-card"><small>Enquiries & Strategy Calls</small><b id="callsCount">0</b></div>
         <div class="card"><small>Registered Users</small><b id="userCount">0</b></div>
         <div class="card master-only-card" id="cardRevenueContainer"><small>Estimated Revenue</small><b
             id="revenueCount">0</b></div>
@@ -937,7 +937,7 @@
             <span class="tab-count" id="tabCountCareer">0</span>
           </button>
           <button type="button" class="excel-tab master-only-tab" data-sheet="calls">
-            <span>💼 Strategy Calls</span>
+            <span>💼 Enquiries</span>
             <span class="tab-count" id="tabCountCalls">0</span>
           </button>
           <button type="button" class="excel-tab master-only-tab" data-sheet="campaign">
@@ -1001,7 +1001,7 @@
           </div>
         </div>
 
-        <!-- WORKSHEET 2: STRATEGY CALL BOOKINGS -->
+        <!-- WORKSHEET 2: ENQUIRIES AND STRATEGY CALLS -->
         <div class="worksheet-panel" id="sheet-calls">
           <div class="excel-table-wrap">
             <table class="excel-table">
@@ -1010,7 +1010,7 @@
                   <th class="col-row-idx">#</th>
                   <th>Client Name</th>
                   <th>Email Address</th>
-                  <th>Operational Focus / Inquiry</th>
+                  <th>Enquiry Details</th>
                   <th>Status</th>
                   <th>Booking ID</th>
                   <th>Date Booked</th>
@@ -1019,8 +1019,7 @@
               </thead>
               <tbody id="callsRows">
                 <tr>
-                  <td colspan="8" style="text-align:center; padding:24px;" class="muted">Loading strategy call
-                    bookings...</td>
+                  <td colspan="8" style="text-align:center; padding:24px;" class="muted">Loading enquiries...</td>
                 </tr>
               </tbody>
             </table>
@@ -1725,17 +1724,17 @@
         </button>
       </td>
     </tr>`;
-      }).join('') : '<tr><td colspan="8" style="text-align:center; padding:24px;" class="muted">No matching strategy call bookings found.</td></tr>';
+      }).join('') : '<tr><td colspan="8" style="text-align:center; padding:24px;" class="muted">No matching enquiries found.</td></tr>';
     }
 
     function inspectCallRecord(id) {
       const item = (masterData.calls || []).find(r => String(r.id) === String(id));
       if (!item) return;
-      openRecordInspector(`Client: ${item.name || 'Unknown'}`, `Strategy Call #${item.id}`, {
+      openRecordInspector(`Client: ${item.name || 'Unknown'}`, `Enquiry / Strategy Call #${item.id}`, {
         "Client Name": item.name,
         "Email Address": item.email,
         "Current Status": item.status,
-        "Message / Operational Focus": item.message,
+        "Enquiry Details": item.message,
         "Booking ID": item.id,
         "Date Booked": fmtDate(item.createdAt)
       });
