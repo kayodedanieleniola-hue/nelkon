@@ -11,7 +11,7 @@
   .top { display: none; }
   .site-nav { position: sticky; top: 0; z-index: 20; margin: -32px -20px 34px; padding: 0 20px; background: rgba(10,2,2,.92); backdrop-filter: blur(16px); border-bottom: 1px solid var(--border); }
   .site-nav-inner { width: min(100%,1320px); min-height: 68px; margin: auto; display:flex; align-items:center; justify-content:space-between; gap:24px; }
-  .site-nav-logo img { display:block; width:86px; height:auto; }
+  .site-nav-logo img { display:block; width:66px; height:auto; }
   .site-nav-links { display:flex; align-items:center; gap:23px; margin:0; padding:0; list-style:none; }
   .site-nav-links a { color:var(--cream); text-decoration:none; font-size:13px; white-space:nowrap; }
   .site-nav-links a:hover, .site-nav-links .nav-current { color:var(--bronze-light); }
@@ -30,6 +30,15 @@
   .site-nav .about-item.open .about-menu { display:block; }
   .site-nav .about-menu a { display:block; padding:9px 10px; color:var(--cream); font-size:13px; letter-spacing:0; }
   .site-nav .about-menu a:hover { background:rgba(201,154,74,.1); border-radius:8px; }
+  .site-footer { margin:72px -20px -64px; padding:52px 20px 20px; border-top:1px solid var(--border); background:linear-gradient(180deg,rgba(27,4,4,.65),#0A0202); }
+  .site-footer-main { width:min(100%,1320px); margin:auto; display:grid; grid-template-columns:2fr 1fr 1fr 1fr; gap:42px; }
+  .site-footer-logo { display:block; width:104px; margin-bottom:14px; }
+  .site-footer-desc { max-width:330px; margin:0 0 14px; color:var(--muted); font-size:13px; }
+  .site-footer-email { color:var(--bronze-light); text-decoration:none; font-size:13px; }
+  .site-footer-col h5 { margin:0 0 14px; color:var(--cream); font-size:13px; letter-spacing:.4px; }
+  .site-footer-col ul { margin:0; padding:0; list-style:none; }.site-footer-col li { margin:0 0 9px; }
+  .site-footer-col a { color:var(--muted); text-decoration:none; font-size:13px; }.site-footer-col a:hover { color:var(--bronze-light); }
+  .site-footer-bottom { width:min(100%,1320px); margin:42px auto 0; padding-top:18px; border-top:1px solid var(--border); display:flex; justify-content:space-between; gap:20px; color:var(--muted); font-size:11px; }
   :root { --enquiry-font: 'Agrandir', Poppins, sans-serif; }
   body, input, select, textarea, button { font-family: var(--enquiry-font); }
   h1, .section h2 { font-family: var(--enquiry-font); }
@@ -53,7 +62,7 @@
     .site-nav { margin:0; }
     .site-nav + .page { padding-top:80px; }
     .site-nav-inner { min-height:60px; }
-    .site-nav-logo img { width:72px; }
+    .site-nav-logo img { width:58px; }
     .site-sign-in { padding:7px 10px; font-size:12px; }
     .site-menu { display:block; }
     .site-nav-links { display:none; position:absolute; top:60px; left:0; right:0; padding:14px 18px 18px; border-bottom:1px solid var(--border); background:rgba(10,2,2,.98); flex-direction:column; align-items:stretch; gap:4px; }
@@ -61,6 +70,10 @@
     .site-nav-links a { display:block; padding:10px 4px; }
     .site-nav .about-menu { position:static; width:auto; margin-top:8px; box-shadow:none; }
     .site-nav .about-trigger { font-size:16px; color:var(--muted); }
+    .site-footer { margin:52px -12px -40px; padding:38px 16px 18px; }
+    .site-footer-main { grid-template-columns:1fr 1fr; gap:30px 22px; }
+    .site-footer-main > :first-child { grid-column:span 2; }
+    .site-footer-logo { width:90px; }.site-footer-bottom { margin-top:30px; flex-direction:column; gap:5px; }
   }
 </style>
 <script>
@@ -69,5 +82,6 @@ const aboutLink=document.querySelector('#siteNavLinks a[href="/about"]');
 aboutLink.parentElement.outerHTML=`<li class="about-item"><button class="about-trigger" id="aboutTrigger" type="button" aria-expanded="false">About ▾</button><div class="about-menu" id="aboutMenu"><a href="/about">About Nakconel</a><a href="/meet-the-team">Meet the Team</a><a href="/about#vision-mission">Vision & Mission</a><a href="/voice">Brand Voice</a></div></li>`;
 document.getElementById('aboutTrigger').addEventListener('click', () => { const item=document.querySelector('.about-item'); const open=item.classList.toggle('open'); document.getElementById('aboutTrigger').setAttribute('aria-expanded', String(open)); });
 document.getElementById('siteMenu').addEventListener('click', () => { const links=document.getElementById('siteNavLinks'); const open=links.classList.toggle('open'); document.getElementById('siteMenu').setAttribute('aria-expanded', String(open)); });
+document.body.insertAdjacentHTML('beforeend', `<footer class="site-footer"><div class="site-footer-main"><div><a href="/"><img class="site-footer-logo" src="/static/image/logo.png" alt="Nakconel"></a><p class="site-footer-desc">Combining brand strategy, content design, and enterprise technology with deep cultural intelligence.</p><a class="site-footer-email" href="mailto:nakconelcompany@gmail.com">nakconelcompany@gmail.com</a></div><div class="site-footer-col"><h5>Pillars</h5><ul><li><a href="/home#services">Brand Strategy</a></li><li><a href="/home#services">Content & Design</a></li><li><a href="/home#services">IT & Tech Systems</a></li></ul></div><div class="site-footer-col"><h5>Enablement</h5><ul><li><a href="/about">About Identity</a></li><li><a href="/home#contact">Strategy Support Desk</a></li></ul></div><div class="site-footer-col"><h5>Footprints</h5><ul><li><a href="/home#markets">Africa & Gulf Regions</a></li><li><a href="/home#markets">United States & Australia</a></li></ul></div></div><div class="site-footer-bottom"><span>© 2026 NAKCONEL Studio Inc. All rights reserved.</span><span>Culture gives meaning. Intelligence gives movement.</span></div></footer>`);
 const FEATURES=['Home Page','About Us','Services','Products','Portfolio','Blog','Contact Page','FAQ','Testimonials','Team Members','Live Chat','AI Assistant','Contact Form','Appointment Booking','Online Store','Payment Gateway','User Login/Register','Newsletter','Search Bar','Image Gallery','Video Gallery','Google Maps','WhatsApp Chat','Social Media Integration','Customer Reviews','Notifications','Dashboard/Admin Panel','Analytics','Multi-language Support','Dark Mode','Light Mode','Other'];const featureList=document.getElementById('featureList');FEATURES.forEach(feature=>{const label=document.createElement('label');label.innerHTML=`<input type="checkbox" name="website_features" value="${feature}"><span>${feature}</span>`;featureList.append(label)});function toggleBlock(name,yesBlock,noBlock){document.querySelectorAll(`input[name="${name}"]`).forEach(input=>input.addEventListener('change',()=>{document.getElementById(yesBlock).classList.toggle('show',input.value==='Yes'&&input.checked);if(noBlock)document.getElementById(noBlock).classList.toggle('show',input.value==='No'&&input.checked)}))}toggleBlock('has_logo','logoYes','logoNo');toggleBlock('has_website','websiteYes');const form=document.getElementById('enquiryForm'),button=document.getElementById('submitButton'),status=document.getElementById('status');form.addEventListener('submit',async event=>{event.preventDefault();if(!form.reportValidity())return;const selectedFeatures=[...document.querySelectorAll('input[name="website_features"]:checked')].map(input=>input.value);if(!selectedFeatures.length){status.textContent='Please select at least one website feature.';status.className='status show error';return}const data=new FormData(form),lines=[];for(const[key,value]of data.entries()){if(value instanceof File){if(value.name)lines.push(`${key.replaceAll('_',' ')}: ${value.name}`)}else if(key!=='website_features')lines.push(`${key.replaceAll('_',' ')}: ${value}`)}lines.push(`website features: ${selectedFeatures.join(', ')}`);const upload=new FormData();upload.append('payload',JSON.stringify({name:data.get('brand_name'),email:data.get('brand_email'),message:lines.join('\n')}));[...document.getElementById('logo_file').files,...document.getElementById('supporting_files').files].forEach(file=>upload.append('attachments',file));button.disabled=true;button.textContent='Sending...';status.className='status';try{const response=await fetch('/api/enquiry',{method:'POST',body:upload});const result=await response.json();if(!response.ok||!result.saved)throw new Error(result.error||'Unable to send your enquiry.');form.reset();document.getElementById('logoYes').classList.remove('show');document.getElementById('logoNo').classList.remove('show');document.getElementById('websiteYes').classList.remove('show');status.textContent='Thank you - your enquiry has been received. We will be in touch soon.';status.className='status show success'}catch(error){status.textContent=error.message||'Something went wrong. Please try again.';status.className='status show error'}finally{button.disabled=false;button.textContent='Send enquiry'}});
 </script></body></html>
