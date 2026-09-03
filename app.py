@@ -53,6 +53,10 @@ def log_unhandled_request_error(error):
 def favicon():
     return send_from_directory(os.path.join(app.root_path, "static", "image"), "logo.png", mimetype="image/png")
 
+@app.route("/sitemap.xml")
+def sitemap():
+    return send_from_directory(app.root_path, "sitemap.xml", mimetype="application/xml")
+
 app.secret_key = os.environ.get("SECRET_KEY", "your-secret-key-change-this-in-production")
 app.config["SESSION_COOKIE_SECURE"] = (
     os.environ.get("SESSION_COOKIE_SECURE", "").lower() in {"1", "true", "yes"}
