@@ -1569,6 +1569,11 @@
 
       for (const [key, value] of Object.entries(fieldsObj)) {
         if (value === undefined || value === null || value === '') continue;
+        if (key === 'Attachments' && Array.isArray(value)) {
+          const files = value.length ? value.map(file => `<a class="btn" style="margin:4px 6px 4px 0" href="${esc(file.url)}">Download ${esc(file.filename)}</a>`).join('') : 'No files attached.';
+          html += `<div class="inspector-field full-width"><span class="inspector-label">Attachments</span><div class="inspector-value">${files}</div></div>`;
+          continue;
+        }
         const isWide = String(value).length > 60 || typeof value === 'object';
         const displayVal = typeof value === 'object' ? JSON.stringify(value, null, 2) : String(value);
         html += `
@@ -1731,17 +1736,25 @@
       }).join('') : '<tr><td colspan="9" style="text-align:center; padding:24px;" class="muted">No matching enquiries or strategy calls found.</td></tr>';
     }
 
-    function inspectCallRecord(id) {
+    async function inspectCallRecord(id) {
       const item = (masterData.calls || []).find(r => String(r.id) === String(id));
       if (!item) return;
       const isEnquiry = item.type === 'enquiry' || String(item.message || '').startsWith('[Enquiry]');
       const recordType = isEnquiry ? 'Enquiry' : 'Strategic Call';
+      let attachments = [];
+      try {
+        const data = await adminFetch(`/api/admin/strategy-calls/${encodeURIComponent(id)}/attachments`);
+        attachments = (data.attachments || []).map(file => ({ ...file, url: `/api/admin/strategy-calls/${encodeURIComponent(id)}/attachments/${encodeURIComponent(file.id)}` }));
+      } catch (error) {
+        attachments = [];
+      }
       openRecordInspector(`Client: ${item.name || 'Unknown'}`, `${recordType} #${item.id}`, {
         "Client Name": item.name,
         "Email Address": item.email,
         "Submission Type": recordType,
         "Current Status": item.status,
         "Enquiry Details": item.message,
+        "Attachments": attachments,
         "Booking ID": item.id,
         "Date Booked": fmtDate(item.createdAt)
       });

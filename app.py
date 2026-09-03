@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify, session, send_from_directory, redirect
+from flask import Flask, render_template, request, jsonify, session, send_from_directory, send_file, redirect
 import json
 import os
 import requests
@@ -12,6 +12,7 @@ from collections import defaultdict
 import base64
 import jwt
 import uuid
+import io
 from cryptography import x509
 
 try:
@@ -566,6 +567,7 @@ def initialize_postgres_schema(conn):
         "CREATE TABLE IF NOT EXISTS ai_quotas (client_key TEXT PRIMARY KEY, period_start TEXT NOT NULL, used INTEGER NOT NULL DEFAULT 0, boost_claimed_on TEXT)",
         "CREATE TABLE IF NOT EXISTS ai_subscriptions (reference TEXT PRIMARY KEY, client_key TEXT NOT NULL, email TEXT NOT NULL, plan_id TEXT NOT NULL, plan_name TEXT NOT NULL, amount INTEGER NOT NULL, status TEXT NOT NULL, authorization_url TEXT, paid_at TEXT, starts_at TEXT, expires_at TEXT, created_at TEXT NOT NULL)",
         "CREATE TABLE IF NOT EXISTS strategy_calls (id TEXT PRIMARY KEY, name TEXT NOT NULL, email TEXT NOT NULL, phone TEXT, message TEXT NOT NULL, status TEXT NOT NULL DEFAULT 'new', created_at TEXT NOT NULL, updated_at TEXT)",
+        "CREATE TABLE IF NOT EXISTS strategy_call_attachments (id TEXT PRIMARY KEY, strategy_call_id TEXT NOT NULL REFERENCES strategy_calls(id) ON DELETE CASCADE, filename TEXT NOT NULL, content_type TEXT, file_size INTEGER NOT NULL, content BYTEA NOT NULL, created_at TEXT NOT NULL)",
         "CREATE TABLE IF NOT EXISTS career_registrations (id TEXT PRIMARY KEY, type TEXT NOT NULL, name TEXT NOT NULL, email TEXT NOT NULL, phone TEXT, program TEXT NOT NULL, experience_level TEXT, statement TEXT, details TEXT, amount INTEGER NOT NULL DEFAULT 250000, status TEXT NOT NULL DEFAULT 'pending_payment', payment_reference TEXT, paid_at TEXT, created_at TEXT NOT NULL, updated_at TEXT)",
         "CREATE TABLE IF NOT EXISTS campaign_registrations (id TEXT PRIMARY KEY, uid TEXT NOT NULL, email TEXT NOT NULL, full_name TEXT, business TEXT, challenge TEXT, package_name TEXT, amount DOUBLE PRECISION, currency TEXT, status TEXT NOT NULL DEFAULT 'pending_payment', payment_reference TEXT, created_at TEXT NOT NULL, raw_json TEXT)",
         "CREATE TABLE IF NOT EXISTS website_users (uid TEXT PRIMARY KEY, email TEXT, username TEXT, photo_url TEXT, email_verified INTEGER NOT NULL DEFAULT 0, is_deactivated INTEGER NOT NULL DEFAULT 0, deactivated_until TEXT, deactivation_reason TEXT, created_at TEXT NOT NULL, updated_at TEXT NOT NULL)",
@@ -621,6 +623,19 @@ def get_quota_db():
             period_start TEXT NOT NULL,
             used INTEGER NOT NULL DEFAULT 0,
             boost_claimed_on TEXT
+        )
+        """
+    )
+    conn.execute(
+        """
+        CREATE TABLE IF NOT EXISTS strategy_call_attachments (
+            id TEXT PRIMARY KEY,
+            strategy_call_id TEXT NOT NULL,
+            filename TEXT NOT NULL,
+            content_type TEXT,
+            file_size INTEGER NOT NULL,
+            content BLOB NOT NULL,
+            created_at TEXT NOT NULL
         )
         """
     )
@@ -2982,7 +2997,9 @@ def submit_strategy_call():
         "name": name[:100],
         "email": email[:120],
         "phone": phone[:50],
-        "message": message[:2000],
+        # Enquiry briefs contain several long-form answers, so retain the full
+        # admin-facing record instead of truncating it to the old call-form size.
+        "message": message[:12000],
         "type": submission_type,
         "status": "new",
         "createdAt": now
@@ -3014,6 +3031,56 @@ def submit_strategy_call():
             print(f"Strategy call Firestore save warning: {exc}")
 
     return jsonify({"saved": True, "id": doc_id, "message": "Strategy call request submitted successfully!"})
+
+
+@app.route("/api/enquiry", methods=["POST"])
+@require_shared_database
+def submit_enquiry_with_attachments():
+    """Save the enquiry brief and its small supporting files in Neon."""
+    try:
+        data = json.loads(request.form.get("payload", "{}"))
+    except (TypeError, ValueError):
+        return jsonify({"saved": False, "error": "Invalid enquiry data."}), 400
+
+    name = str(data.get("name") or "").strip()
+    email = str(data.get("email") or "").strip().lower()
+    message = str(data.get("message") or "").strip()
+    if not name or not email or not message:
+        return jsonify({"saved": False, "error": "Name, email, and enquiry details are required."}), 400
+
+    uploads = [item for item in request.files.getlist("attachments") if item and item.filename]
+    if len(uploads) > 6:
+        return jsonify({"saved": False, "error": "Please upload no more than 6 files."}), 400
+
+    attachment_rows, total_size = [], 0
+    for upload in uploads:
+        content = upload.read()
+        size = len(content)
+        total_size += size
+        if size > 5 * 1024 * 1024 or total_size > 15 * 1024 * 1024:
+            return jsonify({"saved": False, "error": "Files must be 5 MB or less each and 15 MB or less in total."}), 400
+        filename = os.path.basename(str(upload.filename)).replace("\x00", "").strip()[:255]
+        if filename:
+            attachment_rows.append((str(uuid.uuid4()), filename, (upload.mimetype or "application/octet-stream")[:120], size, content))
+
+    now = datetime.now(timezone.utc).isoformat()
+    doc_id = f"CALL-{int(time.time() * 1000)}"
+    stored_message = f"[Enquiry]\n{message}"[:12000]
+    try:
+        with get_quota_db() as conn:
+            conn.execute(
+                "INSERT INTO strategy_calls (id, name, email, phone, message, status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                (doc_id, name[:100], email[:120], "", stored_message, "new", now)
+            )
+            for attachment_id, filename, content_type, size, content in attachment_rows:
+                conn.execute(
+                    "INSERT INTO strategy_call_attachments (id, strategy_call_id, filename, content_type, file_size, content, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                    (attachment_id, doc_id, filename, content_type, size, content, now)
+                )
+    except Exception:
+        return jsonify({"saved": False, "error": "Could not save your enquiry. Please try again."}), 503
+
+    return jsonify({"saved": True, "id": doc_id, "attachments": len(attachment_rows)})
 
 
 @app.route("/api/admin/strategy-calls", methods=["GET"])
@@ -3051,6 +3118,32 @@ def admin_strategy_calls():
 
     calls.sort(key=lambda item: item.get("createdAt", ""), reverse=True)
     return jsonify({"strategyCalls": calls})
+
+
+@app.route("/api/admin/strategy-calls/<call_id>/attachments", methods=["GET"])
+@require_admin_session
+@require_shared_database
+def admin_strategy_call_attachments(call_id):
+    with get_quota_db() as conn:
+        rows = conn.execute(
+            "SELECT id, filename, content_type, file_size, created_at FROM strategy_call_attachments WHERE strategy_call_id = ? ORDER BY created_at",
+            (call_id,)
+        ).fetchall()
+    return jsonify({"attachments": [{"id": r["id"], "filename": r["filename"], "contentType": r["content_type"], "size": r["file_size"]} for r in rows]})
+
+
+@app.route("/api/admin/strategy-calls/<call_id>/attachments/<attachment_id>", methods=["GET"])
+@require_admin_session
+@require_shared_database
+def admin_download_strategy_call_attachment(call_id, attachment_id):
+    with get_quota_db() as conn:
+        row = conn.execute(
+            "SELECT filename, content_type, content FROM strategy_call_attachments WHERE id = ? AND strategy_call_id = ?",
+            (attachment_id, call_id)
+        ).fetchone()
+    if not row:
+        return jsonify({"error": "Attachment not found."}), 404
+    return send_file(io.BytesIO(bytes(row["content"])), mimetype=row["content_type"] or "application/octet-stream", as_attachment=True, download_name=row["filename"])
 
 
 @app.route("/api/admin/strategy-calls/<call_id>/status", methods=["POST"])
