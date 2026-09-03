@@ -2678,7 +2678,7 @@
         const res = await fetch('/api/strategy-call', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, email, message })
+          body: JSON.stringify({ name, email, message, submission_type: 'strategy_call' })
         });
         const data = await res.json();
         if (res.ok && data.saved) {

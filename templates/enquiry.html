@@ -137,7 +137,7 @@
         .join('\n');
       const message = `Enquiry service: ${values.service}\nBusiness / brand: ${values.business || 'Not provided'}\n\nService brief:\n${followUpAnswers}\n\nProject details:\n${values.details}`;
       try {
-        const response = await fetch('/api/strategy-call', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({name:values.name,email:values.email,phone:values.phone,message}) });
+        const response = await fetch('/api/strategy-call', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({name:values.name,email:values.email,phone:values.phone,message,submission_type:'enquiry'}) });
         const result = await response.json();
         if (!response.ok || !result.saved) throw new Error(result.error || 'Unable to send your enquiry.');
         form.reset(); renderServiceQuestions(); status.textContent = 'Thank you — your enquiry has been received. We’ll be in touch soon.'; status.className = 'status show success';

@@ -937,7 +937,7 @@
             <span class="tab-count" id="tabCountCareer">0</span>
           </button>
           <button type="button" class="excel-tab master-only-tab" data-sheet="calls">
-            <span>💼 Enquiries</span>
+            <span>💼 Enquiries & Calls</span>
             <span class="tab-count" id="tabCountCalls">0</span>
           </button>
           <button type="button" class="excel-tab master-only-tab" data-sheet="campaign">
@@ -1010,6 +1010,7 @@
                   <th class="col-row-idx">#</th>
                   <th>Client Name</th>
                   <th>Email Address</th>
+                  <th>Type</th>
                   <th>Enquiry Details</th>
                   <th>Status</th>
                   <th>Booking ID</th>
@@ -1019,7 +1020,7 @@
               </thead>
               <tbody id="callsRows">
                 <tr>
-                  <td colspan="8" style="text-align:center; padding:24px;" class="muted">Loading enquiries...</td>
+                  <td colspan="9" style="text-align:center; padding:24px;" class="muted">Loading enquiries and strategy calls...</td>
                 </tr>
               </tbody>
             </table>
@@ -1710,10 +1711,13 @@
       const tbody = document.getElementById('callsRows');
       tbody.innerHTML = filtered.length ? filtered.map((item, idx) => {
         const statusClass = item.status === 'completed' ? 'badge-completed' : item.status === 'contacted' ? 'badge-contacted' : 'badge-new';
+        const isEnquiry = item.type === 'enquiry' || String(item.message || '').startsWith('[Enquiry]');
+        const recordType = isEnquiry ? 'Enquiry' : 'Strategic Call';
         return `<tr class="clickable-row" onclick="inspectCallRecord('${esc(item.id)}')">
       <td class="cell-row-idx">${idx + 1}</td>
       <td><strong>${esc(item.name || 'Unknown')}</strong></td>
       <td class="cell-mono">${esc(item.email || '-')}</td>
+      <td><span class="${isEnquiry ? 'badge-contacted' : 'badge-new'}">${recordType}</span></td>
       <td style="max-width:300px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${esc(item.message || '-')}</td>
       <td><span class="${statusClass}">${esc(item.status || 'new')}</span></td>
       <td class="cell-mono">#${esc(item.id)}</td>
@@ -1724,15 +1728,18 @@
         </button>
       </td>
     </tr>`;
-      }).join('') : '<tr><td colspan="8" style="text-align:center; padding:24px;" class="muted">No matching enquiries found.</td></tr>';
+      }).join('') : '<tr><td colspan="9" style="text-align:center; padding:24px;" class="muted">No matching enquiries or strategy calls found.</td></tr>';
     }
 
     function inspectCallRecord(id) {
       const item = (masterData.calls || []).find(r => String(r.id) === String(id));
       if (!item) return;
-      openRecordInspector(`Client: ${item.name || 'Unknown'}`, `Enquiry / Strategy Call #${item.id}`, {
+      const isEnquiry = item.type === 'enquiry' || String(item.message || '').startsWith('[Enquiry]');
+      const recordType = isEnquiry ? 'Enquiry' : 'Strategic Call';
+      openRecordInspector(`Client: ${item.name || 'Unknown'}`, `${recordType} #${item.id}`, {
         "Client Name": item.name,
         "Email Address": item.email,
+        "Submission Type": recordType,
         "Current Status": item.status,
         "Enquiry Details": item.message,
         "Booking ID": item.id,

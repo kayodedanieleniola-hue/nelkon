@@ -2963,9 +2963,17 @@ def submit_strategy_call():
     email = str(data.get("email") or data.get("from_email") or "").strip().lower()
     message = str(data.get("message") or data.get("usrMsg") or "").strip()
     phone = str(data.get("phone") or "").strip()
+    submission_type = str(data.get("submission_type") or "strategy_call").strip().lower()
+    if submission_type not in {"strategy_call", "enquiry"}:
+        submission_type = "strategy_call"
+    type_label = "Enquiry" if submission_type == "enquiry" else "Strategic Call"
 
     if not name or not email or not message:
         return jsonify({"saved": False, "error": "Name, email, and operational focus/message are required."}), 400
+
+    # Keep the source in the persisted text too, so existing SQLite databases
+    # can distinguish records without requiring a schema migration.
+    message = f"[{type_label}]\n{message}"
 
     now = datetime.now(timezone.utc).isoformat()
     doc_id = f"CALL-{int(time.time()*1000)}"
@@ -2975,6 +2983,7 @@ def submit_strategy_call():
         "email": email[:120],
         "phone": phone[:50],
         "message": message[:2000],
+        "type": submission_type,
         "status": "new",
         "createdAt": now
     }
@@ -3033,6 +3042,7 @@ def admin_strategy_calls():
                         "email": r["email"],
                         "phone": r["phone"],
                         "message": r["message"],
+                        "type": "enquiry" if str(r["message"]).startswith("[Enquiry]") else "strategy_call",
                         "status": r["status"],
                         "createdAt": r["created_at"]
                     })
