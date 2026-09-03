@@ -684,6 +684,32 @@
       line-height: 1.5;
     }
 
+    .enquiry-brief {
+      display: grid;
+      gap: 10px;
+    }
+
+    .enquiry-brief-row {
+      padding: 10px 12px;
+      border-radius: 6px;
+      background: rgba(245, 232, 199, 0.035);
+      border-left: 2px solid rgba(201, 154, 74, 0.55);
+    }
+
+    .enquiry-brief-key {
+      display: block;
+      margin-bottom: 3px;
+      color: var(--bronze-light);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .7px;
+      text-transform: uppercase;
+    }
+
+    .enquiry-brief-answer {
+      white-space: pre-wrap;
+    }
+
     /* Chat Modal Window Specifics */
     .chat-modal-window {
       width: 100%;
@@ -1572,6 +1598,17 @@
         if (key === 'Attachments' && Array.isArray(value)) {
           const files = value.length ? value.map(file => `<a class="btn" style="margin:4px 6px 4px 0" href="${esc(file.url)}">Download ${esc(file.filename)}</a>`).join('') : 'No files attached.';
           html += `<div class="inspector-field full-width"><span class="inspector-label">Attachments</span><div class="inspector-value">${files}</div></div>`;
+          continue;
+        }
+        if (key === 'Enquiry Details') {
+          const rows = String(value).split(/\r?\n/).filter(Boolean).map(line => {
+            if (/^\[(Enquiry|Strategic Call)\]$/i.test(line.trim())) return '';
+            const separator = line.indexOf(':');
+            const briefKey = separator > -1 ? line.slice(0, separator).replaceAll('_', ' ') : 'Details';
+            const briefValue = separator > -1 ? line.slice(separator + 1).trim() : line;
+            return `<div class="enquiry-brief-row"><span class="enquiry-brief-key">${esc(briefKey)}</span><div class="enquiry-brief-answer">${esc(briefValue)}</div></div>`;
+          }).join('');
+          html += `<div class="inspector-field full-width"><span class="inspector-label">Enquiry Details</span><div class="enquiry-brief">${rows || '<span class="inspector-value">No details provided.</span>'}</div></div>`;
           continue;
         }
         const isWide = String(value).length > 60 || typeof value === 'object';
