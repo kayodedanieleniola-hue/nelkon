@@ -1596,7 +1596,7 @@
       for (const [key, value] of Object.entries(fieldsObj)) {
         if (value === undefined || value === null || value === '') continue;
         if (key === 'Attachments' && Array.isArray(value)) {
-          const files = value.length ? value.map(file => `<a class="btn" style="margin:4px 6px 4px 0" href="${esc(file.url)}">Download ${esc(file.filename)}</a>`).join('') : 'No files attached.';
+          const files = value.length ? value.map(file => `<a class="btn" style="margin:4px 6px 4px 0" href="${esc(file.url)}" download>Download attached file: ${esc(file.filename)}</a>`).join('') : 'No files attached.';
           html += `<div class="inspector-field full-width"><span class="inspector-label">Attachments</span><div class="inspector-value">${files}</div></div>`;
           continue;
         }
