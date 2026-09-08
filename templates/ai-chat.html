@@ -437,15 +437,16 @@ body.dark .send-btn{background:#f0f0f0;color:#0d0d0d;}
  </div>
  <div class="sb-boost">
  <div class="sb-boost-head">ðŸŽ Daily Boost</div>
+ <div class="sb-boost-head">ðŸŽ  Daily Boost</div>
  <div class="sb-boost-sub">+5 extra messages per day</div>
  <button class="sb-boost-btn" id="boost-btn" onclick="claimBoost()">Watch Ad →’ Claim</button>
  <div class="sb-boost-claimed" id="boost-claimed" style="display:none"></div>
  </div>
  <div class="sb-bottom">
  <div class="sb-btn"><span></span><div><div class="sb-uname" id="sb-uname">User</div><div class="sb-uemail" id="sb-uemail"></div></div></div>
- <button class="sb-btn" onclick="showToast('Settings coming soon!')"><span></span><span>Settings</span></button>
- <button class="dark-pill" onclick="toggleDark()"><div style="display:flex;align-items:center;gap:10px;"><span>🌙</span><span style="font-size:13px;color:var(--text2)">Dark Mode</span></div><div class="tog-sw" id="dark-sw"><div class="tog-knob"></div></div></button>
- <button class="sb-btn danger" onclick="startOver()"><span>🔄</span><span>Start Over</span></button>
+ <button class="sb-btn" onclick="showToast('Settings coming soon!')"><span> </span><span>Settings</span></button>
+ <button class="dark-pill" onclick="toggleDark()"><div style="display:flex;align-items:center;gap:10px;"><span style="font-size:13px;color:var(--text2)">Dark Mode</span></div><div class="tog-sw" id="dark-sw"><div class="tog-knob"></div></div></button>
+ <button class="sb-btn danger" onclick="startOver()"><span>Start Over</span></button>
  </div>
  </div>
 
@@ -453,11 +454,11 @@ body.dark .send-btn{background:#f0f0f0;color:#0d0d0d;}
  <div class="chat-main">
  <div class="topbar">
  <div class="topbar-l">
- <button class="mob-toggle" onclick="toggleSidebar()">☰</button>
+ <button class="mob-toggle" onclick="toggleSidebar()"></button>
  <div class="topbar-logo">Nakconel <span style="font-weight:400;font-size:12px;-webkit-text-fill-color:var(--text3)">AI</span></div>
  </div>
  <div class="topbar-r">
- <button class="tb-btn" onclick="showToast('No new notifications')">🔔<span class="notif-dot"></span></button>
+ <button class="tb-btn" onclick="showToast('No new notifications')"><span class="notif-dot"></span></button>
  <div class="av-wrap">
  <button class="av-btn" id="av-btn" onclick="toggleAvMenu()">N</button>
  <div class="av-dd" id="av-dd">
@@ -465,14 +466,14 @@ body.dark .send-btn{background:#f0f0f0;color:#0d0d0d;}
  <div class="av-dd-email" id="av-email"></div>
  <div class="av-dd-div"></div>
  <button class="av-dd-item" onclick="showToast('Settings coming soon!')"> Settings</button>
- <button class="av-dd-item danger" onclick="startOver()">🔄 Start Over</button>
+ <button class="av-dd-item danger" onclick="startOver()"> Start Over</button>
  </div>
  </div>
  </div>
  </div>
 
  <!-- WARNINGS -->
- <div class="lim-warn" id="warn10">⚠️  Only <b>10 messages</b> left!<div class="lim-warn-acts"><button class="w-btn s" onclick="claimBoost()">ðŸŽ Boost</button><button class="w-btn p" onclick="openUpgrade()"> Upgrade</button></div></div>
+ <div class="lim-warn" id="warn10">️  Only <b>10 messages</b> left!<div class="lim-warn-acts"><button class="w-btn s" onclick="claimBoost()">ðŸŽ Boost</button><button class="w-btn p" onclick="openUpgrade()"> Upgrade</button></div></div>
  <div class="lim-warn danger" id="warn5"> Only <b>5 messages</b> left! Resets <span id="warn-timer">--:--:--</span><div class="lim-warn-acts"><button class="w-btn p" onclick="openUpgrade()"> Upgrade Now</button></div></div>
 
  <div class="limit-bar">
@@ -487,7 +488,7 @@ body.dark .send-btn{background:#f0f0f0;color:#0d0d0d;}
  <div class="chat-area" id="chat-area">
  <div class="empty-state" id="empty-state">
  <div class="empty-logo">Nakconel</div>
- <div class="empty-greet">Hi, <span id="greet-name">there</span> 👋</div>
+ <div class="empty-greet">Hi, <span id="greet-name">there</span> </div>
  <div class="empty-sub">Your brand intelligence partner — what should we build today?</div>
  <div class="sug-grid">
  <div class="sug-card" onclick="useSug('Audit my brand identity and tell me what to improve')"><span class="sc-icon">ðŸ“</span><span class="sc-text">Audit my brand identity</span></div>
@@ -507,18 +508,18 @@ body.dark .send-btn{background:#f0f0f0;color:#0d0d0d;}
  <div class="plus-wrap">
  <button class="plus-btn" id="plus-btn" onclick="togglePlus()">+</button>
  <div class="plus-menu" id="plus-menu">
- <div class="pm-item" onclick="triggerUpload('image/*')">📷 Upload Image</div>
- <div class="pm-item" onclick="openCamera()">📸 Take Photo</div>
- <div class="pm-item" onclick="triggerUpload('.pdf,.txt,.docx,.doc')">📄 Upload Document</div>
+ <div class="pm-item" onclick="triggerUpload('image/*')"> Upload Image</div>
+ <div class="pm-item" onclick="openCamera()"> Take Photo</div>
+ <div class="pm-item" onclick="triggerUpload('.pdf,.txt,.docx,.doc')"> Upload Document</div>
  <div class="pm-item" onclick="getLocation()">ðŸ“ Share Location</div>
- <div class="pm-item" onclick="pasteLink()">🔗 Paste Link</div>
+ <div class="pm-item" onclick="pasteLink()"> Paste Link</div>
  </div>
  </div>
  <input type="file" id="file-inp" style="display:none" onchange="handleFile(event)"/>
  <input type="file" id="cam-inp" accept="image/*" capture="environment" style="display:none" onchange="handleFile(event)"/>
  <div class="input-pill">
  <textarea class="chat-ta" id="chat-input" placeholder="Ask Nakconel AI about your brand..." onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
- <button class="mic-btn" id="mic-btn" onclick="startVoice()">🎙️</button>
+ <button class="mic-btn" id="mic-btn" onclick="startVoice()">️</button>
  <button class="send-btn" id="send-btn" onclick="sendMessage()">
  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
  </button>
@@ -701,7 +702,7 @@ function renderAttachments(){
  if(a.type.startsWith('image/')&&a.dataUrl){
  return `<div class="attach-img"><img src="${a.dataUrl}" onclick="openLightbox('${a.dataUrl}')"/><button class="attach-img-rm" onclick="rmAttach(${i})">✕</button></div>`;
  }
- const icon=a.type.includes('pdf')?'📄':a.type.includes('doc')?'ðŸ“':'📄';
+ const icon=a.type.includes('pdf')?'':a.type.includes('doc')?'ðŸ“':'';
  return `<div class="attach-file"><div class="attach-file-icon">${icon}</div><div class="attach-file-info"><div class="attach-file-name">${a.name}</div><div class="attach-file-size">${(a.size/1024).toFixed(1)} KB</div></div><button class="attach-rm" onclick="rmAttach(${i})">✕</button></div>`;
  }).join('');
 }
@@ -741,7 +742,7 @@ function chatItem(c){
  <span>ðŸ’¬</span><span class="sb-item-title">${esc(c.title)}</span>
  <span class="sb-arrow" onclick="event.stopPropagation();toggleDD('${c.id}')">▼
  <div class="sb-dd" id="dd-${c.id}">
- <div class="sb-dd-item" onclick="event.stopPropagation();shareChat('${c.id}')">📤 Share</div>
+ <div class="sb-dd-item" onclick="event.stopPropagation();shareChat('${c.id}')"> Share</div>
  <div class="sb-dd-item danger" onclick="event.stopPropagation();confDelete('${c.id}')"> Delete</div>
  </div>
  </span>
@@ -757,7 +758,7 @@ function renderSidebar(filter=''){
  if(g.today.length){html+='<div class="sb-sec"> TODAY</div>';g.today.forEach(c=>html+=chatItem(c));}
  if(g.yesterday.length){html+='<div class="sb-sec"> YESTERDAY</div>';g.yesterday.forEach(c=>html+=chatItem(c));}
  if(g.week.length){html+='<div class="sb-sec"> LAST 7 DAYS</div>';g.week.forEach(c=>html+=chatItem(c));}
- if(g.older.length){html+='<div class="sb-sec">📁 OLDER</div>';g.older.forEach(c=>html+=chatItem(c));}
+ if(g.older.length){html+='<div class="sb-sec"> OLDER</div>';g.older.forEach(c=>html+=chatItem(c));}
  list.innerHTML=html;
 }
 function filterChats(v){renderSidebar(v);}
@@ -890,7 +891,7 @@ function formatAIMsg(text){
  // Code blocks
  html=html.replace(/```(\w*)\n?([\s\S]*?)```/g,(m,lang,code)=>{
  const l=lang||'code';
- return `</p><div class="code-block"><div class="code-header"><span class="code-lang">${esc(l)}</span><button class="code-copy-btn" onclick="copyCode(this)">📋 Copy</button></div><div class="code-content">${code.trim()}</div></div><p>`;
+ return `</p><div class="code-block"><div class="code-header"><span class="code-lang">${esc(l)}</span><button class="code-copy-btn" onclick="copyCode(this)"> Copy</button></div><div class="code-content">${code.trim()}</div></div><p>`;
  });
  // Inline code
  html=html.replace(/`([^`]+)`/g,'<span class="inline-code">$1</span>');
@@ -933,7 +934,7 @@ function addMessage(role,text,imgData,animate=true){
  content+=`<div class="user-img-preview"><img src="${imgData}" onclick="openLightbox('${imgData}')"/></div>`;
  }
  if(text)content+=`<div>${esc(text)}</div>`;
- wrap.innerHTML=`<div><div class="user-bubble">${content}</div><div class="msg-time user-time">${relTime(ts)}</div><div class="msg-acts" style="justify-content:flex-end;"><button class="act-btn" onclick="copyTxt('${esc(text).replace(/'/g,"\\'")}')">📋</button></div></div>`;
+ wrap.innerHTML=`<div><div class="user-bubble">${content}</div><div class="msg-time user-time">${relTime(ts)}</div><div class="msg-acts" style="justify-content:flex-end;"><button class="act-btn" onclick="copyTxt('${esc(text).replace(/'/g,"\\'")}')"></button></div></div>`;
  }else{
  wrap.className='ai-msg-wrap';
  const formatted=formatAIMsg(text);
@@ -941,12 +942,12 @@ function addMessage(role,text,imgData,animate=true){
  wrap.innerHTML=`<div class="ai-bubble">${formatted}</div>
  <div class="msg-time">${relTime(ts)}</div>
  <div class="msg-acts">
- <button class="act-btn" onclick="readAloud(this,${t})">🔊</button>
- <button class="act-btn" onclick="copyTxt(${t})">📋</button>
- <button class="act-btn" onclick="likeMsg(this)">👍</button>
- <button class="act-btn" onclick="dislikeMsg(this)">👎</button>
+ <button class="act-btn" onclick="readAloud(this,${t})"></button>
+ <button class="act-btn" onclick="copyTxt(${t})"></button>
+ <button class="act-btn" onclick="likeMsg(this)"></button>
+ <button class="act-btn" onclick="dislikeMsg(this)"></button>
  <button class="act-btn" onclick="regenMsg(this)">→»</button>
- <button class="act-btn" onclick="shareMsg(${t})">📤</button>
+ <button class="act-btn" onclick="shareMsg(${t})"></button>
  </div>`;
  }
  area.appendChild(wrap);area.scrollTop=area.scrollHeight;
@@ -966,9 +967,9 @@ function addMediaMsg(type,prompt,refPhoto){
  if(type==='song'){
  const cid='song-'+Date.now();
  html=`<div id="${cid}" style="background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:16px;max-width:320px;">
- <div style="font-weight:700;color:var(--text);margin-bottom:12px;">🎵 AI Generated Song</div>
+ <div style="font-weight:700;color:var(--text);margin-bottom:12px;"> AI Generated Song</div>
  <div id="${cid}-body" style="text-align:center;padding:16px 0;">
- <div style="font-size:28px;margin-bottom:8px;">🎶</div>
+ <div style="font-size:28px;margin-bottom:8px;"></div>
  <div style="font-weight:600;font-size:14px;">Composing your song...</div>
  <div style="font-size:12px;color:var(--text3);margin-top:4px;">This takes 30–60 seconds</div>
  </div>
@@ -977,7 +978,7 @@ function addMediaMsg(type,prompt,refPhoto){
  }else if(type==='image'){
  const cid='img-'+Date.now();
  html=`<div id="${cid}" style="background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:16px;max-width:320px;">
- <div style="font-weight:700;color:var(--text);margin-bottom:12px;">🖼️ Generated Image</div>
+ <div style="font-weight:700;color:var(--text);margin-bottom:12px;">️ Generated Image</div>
  <div id="${cid}-body" style="width:100%;height:200px;border-radius:12px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;background:linear-gradient(100deg,rgba(201,154,74,.10) 30%,rgba(201,154,74,.25) 50%,rgba(201,154,74,.10) 70%);background-size:200% 100%;animation:shimmerMove 1.6s ease-in-out infinite;">
  <span class="gen-status" style="font-size:13px;color:var(--text2);font-weight:600;">Sketching the concept...</span>
  </div>
@@ -986,9 +987,9 @@ function addMediaMsg(type,prompt,refPhoto){
  setTimeout(()=>generateRealImage(prompt,cid,refPhoto),100);
  }else{
  html=`<div style="background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:16px;max-width:320px;">
- <div style="font-weight:700;color:var(--text);margin-bottom:12px;">🎬 Generated Video</div>
+ <div style="font-weight:700;color:var(--text);margin-bottom:12px;"> Generated Video</div>
  <div style="width:100%;height:180px;background:linear-gradient(135deg,rgba(239,68,68,.1),rgba(245,158,11,.1));border-radius:12px;display:flex;align-items:center;justify-content:center;">
- <span style="font-size:70px">🎬</span>
+ <span style="font-size:70px"></span>
  </div>
  <div style="font-size:12px;color:var(--text3);margin-top:8px;">Video clip · 5 seconds · HD</div>
  <div style="display:flex;gap:6px;margin-top:10px;">
@@ -1065,7 +1066,7 @@ async function sendMessage(){
  const data=await res.json();
  if(data.quota)applyQuota(data.quota);
  if(res.status===429){loader.remove();isTyping=false;openUpgrade();addMessage('ai',data.reply||'Daily message limit reached. Upgrade or wait for reset.');return;}
- if(!res.ok){loader.remove();isTyping=false;addMessage('ai','⚠️ '+(data.reply||data.error||'Server error occurred. Please try again.'));return;}
+ if(!res.ok){loader.remove();isTyping=false;addMessage('ai','️ '+(data.reply||data.error||'Server error occurred. Please try again.'));return;}
  const reply=data.reply||"I'm having trouble responding. Please try again.";
  history.push({role:'assistant',content:reply});
  addToMemory('user',aiContent);
@@ -1074,18 +1075,18 @@ async function sendMessage(){
  saveChatHistory(curChatId,history);
  }catch(err){
  loader.remove();isTyping=false;
- addMessage('ai','⚠️  Connection error: '+( err.message||'Please check your network and try again.'));
+ addMessage('ai','️  Connection error: '+( err.message||'Please check your network and try again.'));
  console.error('Chat error:',err);
  }
 }
 
 // MESSAGE ACTIONS
-function copyTxt(text){navigator.clipboard?.writeText(text);showToast('✅ Copied!');}
-function copyCode(btn){const code=btn.closest('.code-block').querySelector('.code-content').textContent;navigator.clipboard?.writeText(code).then(()=>{btn.textContent='✅ Copied';setTimeout(()=>btn.textContent='📋 Copy',1500);});}
+function copyTxt(text){navigator.clipboard?.writeText(text);showToast(' Copied!');}
+function copyCode(btn){const code=btn.closest('.code-block').querySelector('.code-content').textContent;navigator.clipboard?.writeText(code).then(()=>{btn.textContent=' Copied';setTimeout(()=>btn.textContent=' Copy',1500);});}
 function readAloud(btn,text){
- if(curTTS){speechSynthesis.cancel();curTTS=null;btn.textContent='🔊';return;}
+ if(curTTS){speechSynthesis.cancel();curTTS=null;btn.textContent='';return;}
  if(!('speechSynthesis'in window)){showToast('TTS not supported');return;}
- const u=new SpeechSynthesisUtterance(text);u.rate=1.05;u.onend=()=>{curTTS=null;btn.textContent='🔊';};
+ const u=new SpeechSynthesisUtterance(text);u.rate=1.05;u.onend=()=>{curTTS=null;btn.textContent='';};
  curTTS=u;btn.textContent='⏹';speechSynthesis.speak(u);
 }
 function likeMsg(btn){const w=btn.classList.contains('liked');btn.closest('.msg-acts').querySelectorAll('.act-btn').forEach(b=>b.classList.remove('liked','disliked'));if(!w){btn.classList.add('liked');showToast('Thanks for the feedback!');}}
@@ -1167,10 +1168,10 @@ async function generateRealSong(prompt,cid){
  +'<span style="font-size:11px;color:var(--text3);">MusicGen</span></div>'
  +'<div style="display:flex;gap:6px;margin-top:10px;">'
  +"<button onclick=\"dlSong('"+cid+"')\" style=\"flex:1;padding:7px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text2);font-size:12px;cursor:pointer;\">⬇️ Download</button>"
- +"<button onclick=\"showToast('Saved! ❤️')\" style=\"flex:1;padding:7px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text2);font-size:12px;cursor:pointer;\">💾 Save</button></div>";
+ +"<button onclick=\"showToast('Saved! ️')\" style=\"flex:1;padding:7px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text2);font-size:12px;cursor:pointer;\"> Save</button></div>";
  }catch(err){
  const b=getBody();
- if(b)b.innerHTML='<div style="color:#ef4444;font-size:13px;text-align:center;padding:10px;">⚠️ '+(err.message||'Song generation failed')+'</div>';
+ if(b)b.innerHTML='<div style="color:#ef4444;font-size:13px;text-align:center;padding:10px;">️ '+(err.message||'Song generation failed')+'</div>';
  }
 }
 function tsp(id){const a=document.getElementById('aud-'+id),b=document.getElementById('pb-'+id);if(!a)return;if(a.paused){a.play();if(b)b.textContent='⏸';}else{a.pause();if(b)b.textContent='▶';}a.onended=()=>{if(b)b.textContent='▶';};}
@@ -1205,13 +1206,13 @@ async function generateRealImage(prompt,cid,refPhoto){
  actions.style.cssText='display:flex;gap:6px;margin-top:10px;';
  actions.innerHTML=
  "<button onclick=\"dlImage('"+cid+"')\" style=\"flex:1;padding:7px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text2);font-size:12px;cursor:pointer;\">⬇️ Save</button>"
- +"<button onclick=\"showToast('Liked! ❤️')\" style=\"flex:1;padding:7px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text2);font-size:12px;cursor:pointer;\">❤️ Like</button>";
+ +"<button onclick=\"showToast('Liked! ️')\" style=\"flex:1;padding:7px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text2);font-size:12px;cursor:pointer;\">️ Like</button>";
  card2.appendChild(actions);
  }
  }catch(err){
  clearInterval(statusTimer);
  const b=getBody();
- if(b)b.innerHTML='<div style="color:#ef4444;font-size:13px;text-align:center;padding:10px;">⚠️ '+(err.message||'Image generation failed')+'</div>';
+ if(b)b.innerHTML='<div style="color:#ef4444;font-size:13px;text-align:center;padding:10px;">️ '+(err.message||'Image generation failed')+'</div>';
  }
 }
 function dlImage(id){const img=document.querySelector('#'+id+'-body img');if(!img)return;const l=document.createElement('a');l.href=img.src;l.download='nakconel-ai-image.jpg';document.body.appendChild(l);l.click();document.body.removeChild(l);showToast('⬇️ Downloading...');}

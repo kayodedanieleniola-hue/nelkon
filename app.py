@@ -2152,7 +2152,7 @@ def visitor_send_message(conversation_id):
         return jsonify({"error": "Message text or attachment is required."}), 400
 
     now = datetime.now(timezone.utc).isoformat()
-    last_msg = text if text else f"📎 {attachment.get('name', 'Attachment') if isinstance(attachment, dict) else 'Attachment'}"
+    last_msg = text if text else f"[Attachment] {attachment.get('name', 'Attachment') if isinstance(attachment, dict) else 'Attachment'}"
     msg_data = {
         "sender": "visitor",
         "senderName": data.get("visitorName") or user.get("email") or "Website visitor",
@@ -2223,7 +2223,7 @@ def admin_send_chat_message(conversation_id):
     admin_info = request._admin_info or {}
     admin_name = admin_info.get("name") or admin_info.get("email") or request._admin_username or "Nakconel Team"
     now = datetime.now(timezone.utc).isoformat()
-    last_msg = text if text else f"📎 {attachment.get('name', 'Attachment') if isinstance(attachment, dict) else 'Attachment'}"
+    last_msg = text if text else f"[Attachment] {attachment.get('name', 'Attachment') if isinstance(attachment, dict) else 'Attachment'}"
     msg_data = {
         "sender": "team",
         "senderName": admin_name,

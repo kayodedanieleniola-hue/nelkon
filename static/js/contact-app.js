@@ -22,7 +22,7 @@ const CHAT_PROFILES = {
   owner: {
     name: 'Owner of the Brand',
     avatarClass: 'owner',
-    avatarChar: '★',
+    avatarChar: '',
     opener: "Hey! Thanks for reaching out — I'm the owner here. What's on your mind?"
   },
   ai: {
@@ -134,7 +134,7 @@ async function renderContacts(){
 
   const owner = document.createElement('div');
   owner.className = 'contact-row owner';
-  owner.innerHTML = `<div class="contact-avatar">★</div><div class="contact-mid"><div class="contact-name">Owner of the Brand</div><div class="contact-preview">Tap to start chatting</div></div><div class="contact-side"><span class="contact-time">Online</span></div>`;
+  owner.innerHTML = `<div class="contact-avatar"></div><div class="contact-mid"><div class="contact-name">Owner of the Brand</div><div class="contact-preview">Tap to start chatting</div></div><div class="contact-side"><span class="contact-time">Online</span></div>`;
   owner.addEventListener('click', () => openChat('owner'));
   list.appendChild(owner);
 
@@ -147,7 +147,7 @@ async function renderContacts(){
   LOCKED_CONTACTS.forEach(c => {
     const row = document.createElement('div');
     row.className = 'contact-row locked';
-    row.innerHTML = `<div class="contact-avatar">${c.name[0]}</div><div class="contact-mid"><div class="contact-name">${c.name}</div><div class="contact-preview">🔒 ${c.preview}</div></div><div class="contact-side"><span class="contact-padlock">🔒</span></div>`;
+    row.innerHTML = `<div class="contact-avatar">${c.name[0]}</div><div class="contact-mid"><div class="contact-name">${c.name}</div><div class="contact-preview"> ${c.preview}</div></div><div class="contact-side"><span class="contact-padlock"></span></div>`;
     row.addEventListener('click', showLockToast);
     list.appendChild(row);
   });
@@ -176,7 +176,7 @@ function addMessage(text, who, attachment){
   row.className = `msg-row ${who}`;
   let attachHtml = '';
   if(attachment){
-    attachHtml = attachment.isImage ? `<img class="msg-attach-img" src="${attachment.url}" alt="${attachment.name}">` : `<div class="msg-attach-file">📄 ${attachment.name}</div>`;
+    attachHtml = attachment.isImage ? `<img class="msg-attach-img" src="${attachment.url}" alt="${attachment.name}">` : `<div class="msg-attach-file"> ${attachment.name}</div>`;
   }
   row.innerHTML = `<div class="msg-bubble">${attachHtml}${text || ''}<span class="msg-time">${timeNow()}</span></div>`;
   chatMessages.appendChild(row);
