@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="/static/js/error-logger.js" defer></script>
+ <script src="/static/js/error-logger.js" defer></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Brand Voice | NAKCONEL</title>
@@ -13,10 +13,10 @@
 .voice-section{ max-width:980px; margin:0 auto; padding: 0 24px 120px 24px; }
 .voice-grid{ display:grid; grid-template-columns: repeat(5, 1fr); gap:16px; }
 .voice-pill{
-  background: rgba(117,16,8,0.18); border: 1px solid rgba(201,154,74,0.2); padding: 28px 16px;
-  border-radius: var(--r); text-align: center; color: var(--cream); font-weight: 600;
-  font-family:'Poppins',sans-serif; font-size:14px; letter-spacing:0.5px;
-  display:flex; flex-direction:column; align-items:center; gap:10px; transition: var(--tr);
+ background: rgba(117,16,8,0.18); border: 1px solid rgba(201,154,74,0.2); padding: 28px 16px;
+ border-radius: var(--r); text-align: center; color: var(--cream); font-weight: 600;
+ font-family:'Poppins',sans-serif; font-size:14px; letter-spacing:0.5px;
+ display:flex; flex-direction:column; align-items:center; gap:10px; transition: var(--tr);
 }
 .voice-pill:hover{ background: rgba(117,16,8,0.3); border-color: var(--bronze); transform: translateY(-4px); }
 .voice-mark{ width:36px; height:36px; border:1px solid var(--bronze); border-radius:50%; display:flex; align-items:center; justify-content:center; color:var(--bronze-light); font-size:14px; }
@@ -29,105 +29,105 @@
 <body>
 
 <header class="h-nav" id="navbar">
-  <div class="nav-cont">
-    <div class="logo-wrapper">
-      <a href="/"><img src="/static/image/logo.png" alt="NAKCONEL Logo" style="height:72px;width:auto;object-fit:contain;"></a>
-    </div>
-    <ul class="nav-links" id="navLinks">
-      <li><a href="/home">Home</a></li>
-      <li class="about-dd-wrap">
-        <button class="about-dd-btn" id="aboutDropBtn" aria-expanded="false" aria-haspopup="true">
-          About <span class="dd-arrow">▾</span>
-        </button>
-        <div class="about-dd-menu" id="aboutDropMenu" role="menu">
-          <a class="dd-item" href="/about" role="menuitem">
-            <span class="dd-icon">◈</span>
-            <span class="dd-text"><strong>About Nakconel</strong><small>Our story &amp; direction</small></span>
-          </a>
-          <a class="dd-item" href="/meet-the-team" role="menuitem">
-            <span class="dd-icon">◉</span>
-            <span class="dd-text"><strong>Meet the Team</strong><small>The people behind the brand</small></span>
-          </a>
-          <a class="dd-item" href="/about#vision-mission" role="menuitem">
-            <span class="dd-icon">◎</span>
-            <span class="dd-text"><strong>Vision &amp; Mission</strong><small>Where we are going</small></span>
-          </a>
-          <a class="dd-item" href="/voice" role="menuitem">
-            <span class="dd-icon">◇</span>
-            <span class="dd-text"><strong>Brand Voice</strong><small>How we speak &amp; show up</small></span>
-          </a>
-          <div class="dd-divider"></div>
-          <a class="dd-item dd-cta" href="/contact" role="menuitem">
-            <span class="dd-icon">↗</span>
-            <span class="dd-text"><strong>Work With Us</strong><small>Book a strategy call</small></span>
-          </a>
-        </div>
-      </li>
-      <li><a href="/home#services">Pillars</a></li>
-      <li><a href="/home#markets">Global Footprints</a></li>
-      <li><a href="/home#work">Showcase</a></li>
-      <li><a href="/contact">Contact</a></li>
-    </ul>
-    <button class="menu-tg" id="menuToggle" aria-label="Toggle Menu">
-      <span></span><span></span><span></span>
-    </button>
-  </div>
+ <div class="nav-cont">
+ <div class="logo-wrapper">
+ <a href="/"><img src="/static/image/logo.png" alt="NAKCONEL Logo" style="height:72px;width:auto;object-fit:contain;"></a>
+ </div>
+ <ul class="nav-links" id="navLinks">
+ <li><a href="/home">Home</a></li>
+ <li class="about-dd-wrap">
+ <button class="about-dd-btn" id="aboutDropBtn" aria-expanded="false" aria-haspopup="true">
+ About <span class="dd-arrow">▾</span>
+ </button>
+ <div class="about-dd-menu" id="aboutDropMenu" role="menu">
+ <a class="dd-item" href="/about" role="menuitem">
+ <span class="dd-icon">◈</span>
+ <span class="dd-text"><strong>About Nakconel</strong><small>Our story &amp; direction</small></span>
+ </a>
+ <a class="dd-item" href="/meet-the-team" role="menuitem">
+ <span class="dd-icon">◉</span>
+ <span class="dd-text"><strong>Meet the Team</strong><small>The people behind the brand</small></span>
+ </a>
+ <a class="dd-item" href="/about#vision-mission" role="menuitem">
+ <span class="dd-icon">◎</span>
+ <span class="dd-text"><strong>Vision &amp; Mission</strong><small>Where we are going</small></span>
+ </a>
+ <a class="dd-item" href="/voice" role="menuitem">
+ <span class="dd-icon">◇</span>
+ <span class="dd-text"><strong>Brand Voice</strong><small>How we speak &amp; show up</small></span>
+ </a>
+ <div class="dd-divider"></div>
+ <a class="dd-item dd-cta" href="/contact" role="menuitem">
+ <span class="dd-icon">↗</span>
+ <span class="dd-text"><strong>Work With Us</strong><small>Book a strategy call</small></span>
+ </a>
+ </div>
+ </li>
+ <li><a href="/home#services">Pillars</a></li>
+ <li><a href="/home#markets">Global Footprints</a></li>
+ <li><a href="/home#work">Showcase</a></li>
+ <li><a href="/contact">Contact</a></li>
+ </ul>
+ <button class="menu-tg" id="menuToggle" aria-label="Toggle Menu">
+ <span></span><span></span><span></span>
+ </button>
+ </div>
 </header>
 
 <section class="page-hero">
-  <span class="eyebrow">How We Speak &amp; Show Up</span>
-  <h1>Brand <span>Voice</span></h1>
-  <p>Nakconel speaks with confidence, strategic clarity, and deep corporate respect &mdash; in every line, every deck, every conversation.</p>
+ <span class="eyebrow">How We Speak &amp; Show Up</span>
+ <h1>Brand <span>Voice</span></h1>
+ <p>Nakconel speaks with confidence, strategic clarity, and deep corporate respect &mdash; in every line, every deck, every conversation.</p>
 </section>
 
 <section class="voice-section">
-  <div class="voice-grid">
-    <div class="voice-pill"><span class="voice-mark">◈</span>Strategic</div>
-    <div class="voice-pill"><span class="voice-mark">◉</span>Premium</div>
-    <div class="voice-pill"><span class="voice-mark">◎</span>Intelligent</div>
-    <div class="voice-pill"><span class="voice-mark">◇</span>Global Aware</div>
-    <div class="voice-pill"><span class="voice-mark">↗</span>Helpful</div>
-  </div>
-  <div class="voice-detail">
-    <p>These five traits govern how we write, design, and present &mdash; from a one-line social caption to a full enterprise proposal. If it doesn't sound like clarity backed by intelligence, it isn't Nakconel.</p>
-  </div>
+ <div class="voice-grid">
+ <div class="voice-pill"><span class="voice-mark">◈</span>Strategic</div>
+ <div class="voice-pill"><span class="voice-mark">◉</span>Premium</div>
+ <div class="voice-pill"><span class="voice-mark">◎</span>Intelligent</div>
+ <div class="voice-pill"><span class="voice-mark">◇</span>Global Aware</div>
+ <div class="voice-pill"><span class="voice-mark">↗</span>Helpful</div>
+ </div>
+ <div class="voice-detail">
+ <p>These five traits govern how we write, design, and present &mdash; from a one-line social caption to a full enterprise proposal. If it doesn't sound like clarity backed by intelligence, it isn't Nakconel.</p>
+ </div>
 </section>
 
 <footer>
-  <div class="ft-main">
-    <div>
-      <div class="logo-wrapper" style="margin-bottom:16px;">
-        <a href="/"><img src="/static/image/logo.png" alt="NAKCONEL Logo" style="height:72px;width:auto;object-fit:contain;"></a>
-      </div>
-      <p class="ft-desc">Combining brand strategy, content design, and enterprise technology with deep cultural intelligence.</p>
-    </div>
-    <div class="ft-col">
-      <h5>Pillars</h5>
-      <ul>
-        <li><a href="/home#services">Brand Strategy</a></li>
-        <li><a href="/home#services">Content &amp; Design</a></li>
-        <li><a href="/home#services">IT &amp; Tech Systems</a></li>
-      </ul>
-    </div>
-    <div class="ft-col">
-      <h5>Enablement</h5>
-      <ul>
-        <li><a href="/about">About Identity</a></li>
-        <li><a href="/contact">Strategy Support Desk</a></li>
-      </ul>
-    </div>
-    <div class="ft-col">
-      <h5>Footprints</h5>
-      <ul>
-        <li><a href="/home#markets">Africa &amp; Gulf Regions</a></li>
-        <li><a href="/home#markets">United States &amp; Australia</a></li>
-      </ul>
-    </div>
-  </div>
-  <div class="ft-btm">
-    <p>&copy; 2026 NAKCONEL Studio Inc. All rights reserved.</p>
-    <p>Culture gives meaning. Intelligence gives movement.</p>
-  </div>
+ <div class="ft-main">
+ <div>
+ <div class="logo-wrapper" style="margin-bottom:16px;">
+ <a href="/"><img src="/static/image/logo.png" alt="NAKCONEL Logo" style="height:72px;width:auto;object-fit:contain;"></a>
+ </div>
+ <p class="ft-desc">Combining brand strategy, content design, and enterprise technology with deep cultural intelligence.</p>
+ </div>
+ <div class="ft-col">
+ <h5>Pillars</h5>
+ <ul>
+ <li><a href="/home#services">Brand Strategy</a></li>
+ <li><a href="/home#services">Content &amp; Design</a></li>
+ <li><a href="/home#services">IT &amp; Tech Systems</a></li>
+ </ul>
+ </div>
+ <div class="ft-col">
+ <h5>Enablement</h5>
+ <ul>
+ <li><a href="/about">About Identity</a></li>
+ <li><a href="/contact">Strategy Support Desk</a></li>
+ </ul>
+ </div>
+ <div class="ft-col">
+ <h5>Footprints</h5>
+ <ul>
+ <li><a href="/home#markets">Africa &amp; Gulf Regions</a></li>
+ <li><a href="/home#markets">United States &amp; Australia</a></li>
+ </ul>
+ </div>
+ </div>
+ <div class="ft-btm">
+ <p>&copy; 2026 NAKCONEL Studio Inc. All rights reserved.</p>
+ <p>Culture gives meaning. Intelligence gives movement.</p>
+ </div>
 </footer>
 
 <script src="/static/js/nakconel-nav.js"></script>

@@ -1,308 +1,308 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="/static/js/error-logger.js" defer></script>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Login | NAKCONEL</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --wine-deep: #1B0404;
-            --wine-mid: #3D0A0A;
-            --ground: #0A0202;
-            --bronze: #C99A4A;
-            --bronze-light: #E8C57A;
-            --bronze-dim: #8B6A2E;
-            --cream: #F5E8C7;
-            --white: #FDFAF4;
-            --muted: rgba(245, 232, 199, 0.6);
-            --border: rgba(201, 154, 74, 0.22);
-            --card: rgba(61, 10, 10, 0.55);
-        }
+ <script src="/static/js/error-logger.js" defer></script>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>Admin Login | NAKCONEL</title>
+ <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+ <style>
+ :root {
+ --wine-deep: #1B0404;
+ --wine-mid: #3D0A0A;
+ --ground: #0A0202;
+ --bronze: #C99A4A;
+ --bronze-light: #E8C57A;
+ --bronze-dim: #8B6A2E;
+ --cream: #F5E8C7;
+ --white: #FDFAF4;
+ --muted: rgba(245, 232, 199, 0.6);
+ --border: rgba(201, 154, 74, 0.22);
+ --card: rgba(61, 10, 10, 0.55);
+ }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+ * {
+ margin: 0;
+ padding: 0;
+ box-sizing: border-box;
+ }
 
-        body {
-            font-family: 'Poppins', sans-serif;
-            background: radial-gradient(ellipse 70% 50% at 50% 25%, var(--wine-mid), transparent 72%),
-                        radial-gradient(ellipse 130% 110% at 50% 50%, var(--wine-deep), var(--ground));
-            background-attachment: fixed;
-            color: var(--white);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
+ body {
+ font-family: 'Poppins', sans-serif;
+ background: radial-gradient(ellipse 70% 50% at 50% 25%, var(--wine-mid), transparent 72%),
+ radial-gradient(ellipse 130% 110% at 50% 50%, var(--wine-deep), var(--ground));
+ background-attachment: fixed;
+ color: var(--white);
+ min-height: 100vh;
+ display: flex;
+ justify-content: center;
+ align-items: center;
+ padding: 20px;
+ }
 
-        .login-container {
-            background: var(--card);
-            backdrop-filter: blur(16px);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
-            width: 100%;
-            max-width: 420px;
-            padding: 40px 32px;
-        }
+ .login-container {
+ background: var(--card);
+ backdrop-filter: blur(16px);
+ border: 1px solid var(--border);
+ border-radius: 16px;
+ box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+ width: 100%;
+ max-width: 420px;
+ padding: 40px 32px;
+ }
 
-        .brand-header {
-            text-align: center;
-            margin-bottom: 28px;
-        }
+ .brand-header {
+ text-align: center;
+ margin-bottom: 28px;
+ }
 
-        .brand-header img {
-            height: 64px;
-            width: auto;
-            margin-bottom: 12px;
-        }
+ .brand-header img {
+ height: 64px;
+ width: auto;
+ margin-bottom: 12px;
+ }
 
-        .brand-header h1 {
-            font-size: 24px;
-            font-weight: 800;
-            color: var(--bronze-light);
-            letter-spacing: 0.5px;
-            margin-bottom: 6px;
-        }
+ .brand-header h1 {
+ font-size: 24px;
+ font-weight: 800;
+ color: var(--bronze-light);
+ letter-spacing: 0.5px;
+ margin-bottom: 6px;
+ }
 
-        .brand-header p {
-            color: var(--muted);
-            font-size: 13px;
-        }
+ .brand-header p {
+ color: var(--muted);
+ font-size: 13px;
+ }
 
-        .form-group {
-            margin-bottom: 20px;
-        }
+ .form-group {
+ margin-bottom: 20px;
+ }
 
-        label {
-            display: block;
-            font-size: 12px;
-            font-weight: 600;
-            letter-spacing: 0.8px;
-            text-transform: uppercase;
-            color: var(--bronze-light);
-            margin-bottom: 8px;
-        }
+ label {
+ display: block;
+ font-size: 12px;
+ font-weight: 600;
+ letter-spacing: 0.8px;
+ text-transform: uppercase;
+ color: var(--bronze-light);
+ margin-bottom: 8px;
+ }
 
-        input[type="text"],
-        input[type="password"] {
-            width: 100%;
-            padding: 13px 16px;
-            background: rgba(10, 2, 2, 0.6);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            font-size: 14px;
-            color: var(--white);
-            font-family: inherit;
-            transition: all 0.3s ease;
-        }
+ input[type="text"],
+ input[type="password"] {
+ width: 100%;
+ padding: 13px 16px;
+ background: rgba(10, 2, 2, 0.6);
+ border: 1px solid var(--border);
+ border-radius: 8px;
+ font-size: 14px;
+ color: var(--white);
+ font-family: inherit;
+ transition: all 0.3s ease;
+ }
 
-        input[type="text"]:focus,
-        input[type="password"]:focus {
-            outline: none;
-            border-color: var(--bronze);
-            box-shadow: 0 0 0 3px rgba(201, 154, 74, 0.15);
-            background: rgba(10, 2, 2, 0.8);
-        }
+ input[type="text"]:focus,
+ input[type="password"]:focus {
+ outline: none;
+ border-color: var(--bronze);
+ box-shadow: 0 0 0 3px rgba(201, 154, 74, 0.15);
+ background: rgba(10, 2, 2, 0.8);
+ }
 
-        input::placeholder {
-            color: rgba(245, 232, 199, 0.35);
-        }
-        @media (max-width: 480px) {
-            body { padding: 14px; align-items: flex-start; }
-            .login-container { padding: 28px 20px; margin: 14px 0; border-radius: 12px; }
-            .brand-header { margin-bottom: 22px; }
-            .brand-header img { height: 52px; }
-            .brand-header h1 { font-size: 21px; }
-        }
+ input::placeholder {
+ color: rgba(245, 232, 199, 0.35);
+ }
+ @media (max-width: 480px) {
+ body { padding: 14px; align-items: flex-start; }
+ .login-container { padding: 28px 20px; margin: 14px 0; border-radius: 12px; }
+ .brand-header { margin-bottom: 22px; }
+ .brand-header img { height: 52px; }
+ .brand-header h1 { font-size: 21px; }
+ }
 
-        .alert {
-            padding: 12px 16px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            font-size: 13px;
-            display: none;
-            line-height: 1.4;
-        }
+ .alert {
+ padding: 12px 16px;
+ border-radius: 8px;
+ margin-bottom: 20px;
+ font-size: 13px;
+ display: none;
+ line-height: 1.4;
+ }
 
-        .alert.success {
-            background: rgba(145, 217, 155, 0.15);
-            color: #a3f7ad;
-            border: 1px solid rgba(145, 217, 155, 0.3);
-            display: block;
-        }
+ .alert.success {
+ background: rgba(145, 217, 155, 0.15);
+ color: #a3f7ad;
+ border: 1px solid rgba(145, 217, 155, 0.3);
+ display: block;
+ }
 
-        .alert.error {
-            background: rgba(232, 160, 160, 0.15);
-            color: #f7a3a3;
-            border: 1px solid rgba(232, 160, 160, 0.3);
-            display: block;
-        }
+ .alert.error {
+ background: rgba(232, 160, 160, 0.15);
+ color: #f7a3a3;
+ border: 1px solid rgba(232, 160, 160, 0.3);
+ display: block;
+ }
 
-        .btn {
-            width: 100%;
-            padding: 14px;
-            border: 1px solid var(--bronze);
-            border-radius: 8px;
-            font-size: 13px;
-            font-weight: 700;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-family: inherit;
-        }
+ .btn {
+ width: 100%;
+ padding: 14px;
+ border: 1px solid var(--bronze);
+ border-radius: 8px;
+ font-size: 13px;
+ font-weight: 700;
+ letter-spacing: 1px;
+ text-transform: uppercase;
+ cursor: pointer;
+ transition: all 0.3s ease;
+ font-family: inherit;
+ }
 
-        .btn.primary {
-            background: linear-gradient(135deg, var(--bronze), var(--bronze-dim));
-            color: var(--wine-deep);
-        }
+ .btn.primary {
+ background: linear-gradient(135deg, var(--bronze), var(--bronze-dim));
+ color: var(--wine-deep);
+ }
 
-        .btn.primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(201, 154, 74, 0.25);
-            filter: brightness(1.1);
-        }
+ .btn.primary:hover {
+ transform: translateY(-2px);
+ box-shadow: 0 8px 20px rgba(201, 154, 74, 0.25);
+ filter: brightness(1.1);
+ }
 
-        .btn:disabled {
-            opacity: 0.55;
-            cursor: not-allowed;
-            transform: none;
-        }
+ .btn:disabled {
+ opacity: 0.55;
+ cursor: not-allowed;
+ transform: none;
+ }
 
-        .footer {
-            text-align: center;
-            margin-top: 24px;
-            font-size: 12px;
-            color: var(--muted);
-        }
+ .footer {
+ text-align: center;
+ margin-top: 24px;
+ font-size: 12px;
+ color: var(--muted);
+ }
 
-        .footer a {
-            color: var(--bronze-light);
-            text-decoration: none;
-            transition: color 0.2s;
-        }
+ .footer a {
+ color: var(--bronze-light);
+ text-decoration: none;
+ transition: color 0.2s;
+ }
 
-        .footer a:hover {
-            text-decoration: underline;
-            color: var(--bronze);
-        }
-    </style>
+ .footer a:hover {
+ text-decoration: underline;
+ color: var(--bronze);
+ }
+ </style>
 </head>
 <body>
-    <div class="login-container">
-        <div class="brand-header">
-            <a href="/home"><img src="/static/image/logo.png" alt="NAKCONEL Logo"></a>
-            <h1>Admin Control Portal</h1>
-            <p>Sign in with your team credentials</p>
-        </div>
+ <div class="login-container">
+ <div class="brand-header">
+ <a href="/home"><img src="/static/image/logo.png" alt="NAKCONEL Logo"></a>
+ <h1>Admin Control Portal</h1>
+ <p>Sign in with your team credentials</p>
+ </div>
 
-        <div id="alertBox" class="alert"></div>
+ <div id="alertBox" class="alert"></div>
 
-        <form id="loginForm">
-            <div class="form-group">
-                <label for="username">Username</label>
-                <input type="text" id="username" name="username" required placeholder="Enter your admin username" autocomplete="username">
-            </div>
+ <form id="loginForm">
+ <div class="form-group">
+ <label for="username">Username</label>
+ <input type="text" id="username" name="username" required placeholder="Enter your admin username" autocomplete="username">
+ </div>
 
-            <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password" id="password" name="password" required placeholder="Enter your password" autocomplete="current-password">
-            </div>
+ <div class="form-group">
+ <label for="password">Password</label>
+ <input type="password" id="password" name="password" required placeholder="Enter your password" autocomplete="current-password">
+ </div>
 
-            <button type="submit" class="btn primary" id="submitBtn">Sign In to Dashboard</button>
-        </form>
+ <button type="submit" class="btn primary" id="submitBtn">Sign In to Dashboard</button>
+ </form>
 
-        <div class="footer">
-            <p>Return to <a href="/home">NAKCONEL Main Site</a></p>
-        </div>
-    </div>
+ <div class="footer">
+ <p>Return to <a href="/home">NAKCONEL Main Site</a></p>
+ </div>
+ </div>
 
-    <script>
-        const alertBox = document.getElementById('alertBox');
-        const loginForm = document.getElementById('loginForm');
-        const submitBtn = document.getElementById('submitBtn');
+ <script>
+ const alertBox = document.getElementById('alertBox');
+ const loginForm = document.getElementById('loginForm');
+ const submitBtn = document.getElementById('submitBtn');
 
-        // Log technical details only. Do not write login credentials to the console.
-        function logAdminLoginError(context, error, details = {}) {
-            console.error(`[NAKCONEL Admin Login] ${context}`, {
-                message: error instanceof Error ? error.message : String(error),
-                ...details
-            });
-        }
+ // Log technical details only. Do not write login credentials to the console.
+ function logAdminLoginError(context, error, details = {}) {
+ console.error(`[NAKCONEL Admin Login] ${context}`, {
+ message: error instanceof Error ? error.message : String(error),
+ ...details
+ });
+ }
 
-        window.addEventListener('error', (event) => {
-            logAdminLoginError('Unhandled page error', event.error || event.message, {
-                source: event.filename,
-                line: event.lineno,
-                column: event.colno
-            });
-        });
+ window.addEventListener('error', (event) => {
+ logAdminLoginError('Unhandled page error', event.error || event.message, {
+ source: event.filename,
+ line: event.lineno,
+ column: event.colno
+ });
+ });
 
-        window.addEventListener('unhandledrejection', (event) => {
-            logAdminLoginError('Unhandled promise rejection', event.reason);
-        });
+ window.addEventListener('unhandledrejection', (event) => {
+ logAdminLoginError('Unhandled promise rejection', event.reason);
+ });
 
-        function showAlert(message, type) {
-            alertBox.textContent = message;
-            alertBox.className = `alert ${type}`;
-        }
+ function showAlert(message, type) {
+ alertBox.textContent = message;
+ alertBox.className = `alert ${type}`;
+ }
 
-        loginForm.addEventListener('submit', async function(e) {
-            e.preventDefault();
+ loginForm.addEventListener('submit', async function(e) {
+ e.preventDefault();
 
-            const username = document.getElementById('username').value.trim();
-            const password = document.getElementById('password').value.trim();
+ const username = document.getElementById('username').value.trim();
+ const password = document.getElementById('password').value.trim();
 
-            if (!username || !password) {
-                showAlert('Please enter both username and password.', 'error');
-                return;
-            }
+ if (!username || !password) {
+ showAlert('Please enter both username and password.', 'error');
+ return;
+ }
 
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Signing in...';
+ submitBtn.disabled = true;
+ submitBtn.textContent = 'Signing in...';
 
-            try {
-                const response = await fetch('/api/admin-login', {
-                    method: 'POST',
-                    credentials: 'include',
-                    cache: 'no-store',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ username, password })
-                });
+ try {
+ const response = await fetch('/api/admin-login', {
+ method: 'POST',
+ credentials: 'include',
+ cache: 'no-store',
+ headers: {
+ 'Content-Type': 'application/json'
+ },
+ body: JSON.stringify({ username, password })
+ });
 
-                let data;
-                try {
-                    data = await response.json();
-                } catch (error) {
-                    logAdminLoginError('Invalid server response', error, { status: response.status });
-                    throw new Error(`The server returned an invalid response (HTTP ${response.status}).`);
-                }
+ let data;
+ try {
+ data = await response.json();
+ } catch (error) {
+ logAdminLoginError('Invalid server response', error, { status: response.status });
+ throw new Error(`The server returned an invalid response (HTTP ${response.status}).`);
+ }
 
-                if (response.ok) {
-                    showAlert('Login successful! Redirecting to Control Center...', 'success');
-                    setTimeout(() => {
-                        window.location.href = '/admin';
-                    }, 1000);
-                } else {
-                    logAdminLoginError('Login request rejected', new Error(data.error || 'Login failed.'), { status: response.status });
-                    showAlert(data.error || 'Invalid username or password. Please try again.', 'error');
-                }
-            } catch (error) {
-                showAlert('Network error occurred. Please try again.', 'error');
-                logAdminLoginError('Login request failed', error);
-            } finally {
-                submitBtn.disabled = false;
-                submitBtn.textContent = 'Sign In to Dashboard';
-            }
-        });
-    </script>
+ if (response.ok) {
+ showAlert('Login successful! Redirecting to Control Center...', 'success');
+ setTimeout(() => {
+ window.location.href = '/admin';
+ }, 1000);
+ } else {
+ logAdminLoginError('Login request rejected', new Error(data.error || 'Login failed.'), { status: response.status });
+ showAlert(data.error || 'Invalid username or password. Please try again.', 'error');
+ }
+ } catch (error) {
+ showAlert('Network error occurred. Please try again.', 'error');
+ logAdminLoginError('Login request failed', error);
+ } finally {
+ submitBtn.disabled = false;
+ submitBtn.textContent = 'Sign In to Dashboard';
+ }
+ });
+ </script>
 </body>
 </html>

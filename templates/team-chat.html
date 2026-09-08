@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="/static/js/error-logger.js" defer></script>
+ <script src="/static/js/error-logger.js" defer></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Chat With The Team | NAKCONEL</title>
@@ -26,58 +26,58 @@
 </head>
 <body>
 <header class="topbar">
-  <a class="brand" href="/home"><img src="/static/image/logo.png" alt="NAKCONEL"><strong>Team <span>Chat</span></strong></a>
-  <div class="top-actions">
-    <a class="btn" href="/home">Home</a>
-    <a class="btn" href="/ai-chat">Nakconel AI</a>
-    <button class="btn" id="signOutBtn" type="button" style="display:none;">Sign Out</button>
-  </div>
+ <a class="brand" href="/home"><img src="/static/image/logo.png" alt="NAKCONEL"><strong>Team <span>Chat</span></strong></a>
+ <div class="top-actions">
+ <a class="btn" href="/home">Home</a>
+ <a class="btn" href="/ai-chat">Nakconel AI</a>
+ <button class="btn" id="signOutBtn" type="button" style="display:none;">Sign Out</button>
+ </div>
 </header>
 
 <main class="page">
-  <section class="gate" id="gate">
-    <h1>Chat With The Team</h1>
-    <p>Sign in with your NAKCONEL account, choose a team member, and continue the conversation from here.</p>
-    <a class="btn primary" href="/login?next=/chat">Sign In To Chat</a>
-    <a class="btn" href="/register?next=/chat" style="margin-top:14px;display:inline-flex;justify-content:center;">Register on main site</a>
-    <p class="secondary-note">Need an account? Use the main website signup instead of a chat-only registration.</p>
-  </section>
+ <section class="gate" id="gate">
+ <h1>Chat With The Team</h1>
+ <p>Sign in with your NAKCONEL account, choose a team member, and continue the conversation from here.</p>
+ <a class="btn primary" href="/login?next=/chat">Sign In To Chat</a>
+ <a class="btn" href="/register?next=/chat" style="margin-top:14px;display:inline-flex;justify-content:center;">Register on main site</a>
+ <p class="secondary-note">Need an account? Use the main website signup instead of a chat-only registration.</p>
+ </section>
 
-  <section class="shell" id="shell">
-    <aside class="panel">
-      <div class="panel-head">
-        <small>Nakconel Team</small>
-        <h1>Choose who to message</h1>
-      </div>
-      <div class="notice" id="visitorNote"></div>
-      <div class="team-list" id="teamList"></div>
-    </aside>
+ <section class="shell" id="shell">
+ <aside class="panel">
+ <div class="panel-head">
+ <small>Nakconel Team</small>
+ <h1>Choose who to message</h1>
+ </div>
+ <div class="notice" id="visitorNote"></div>
+ <div class="team-list" id="teamList"></div>
+ </aside>
 
-    <section class="panel chat-panel">
-      <div class="chat-head">
-        <div class="avatar" id="chatAvatar">N</div>
-        <div class="row-main">
-          <strong id="chatName">Select a team member</strong>
-          <span id="chatRole">Your messages are saved for the admin dashboard.</span>
-        </div>
-      </div>
-      <div class="chat-state" id="chatState">Pick someone from the list to start or continue a conversation.</div>
-      <div class="messages" id="messages"></div>
+ <section class="panel chat-panel">
+ <div class="chat-head">
+ <div class="avatar" id="chatAvatar">N</div>
+ <div class="row-main">
+ <strong id="chatName">Select a team member</strong>
+ <span id="chatRole">Your messages are saved for the admin dashboard.</span>
+ </div>
+ </div>
+ <div class="chat-state" id="chatState">Pick someone from the list to start or continue a conversation.</div>
+ <div class="messages" id="messages"></div>
 
-      <div class="chat-form-wrap" id="chatFormWrap">
-        <div class="attach-preview-bar" id="attachPreviewBar">
-          <span id="attachPreviewText">📎 file.png</span>
-          <button type="button" id="removeAttachBtn">✕</button>
-        </div>
-        <form class="chat-form" id="chatForm">
-          <input type="file" id="fileInput" style="display:none">
-          <button class="attach-btn" type="button" id="attachBtn">📎 Attach</button>
-          <textarea id="messageInput" placeholder="Type your message..." rows="1"></textarea>
-          <button class="btn primary" type="submit">Send</button>
-        </form>
-      </div>
-    </section>
-  </section>
+ <div class="chat-form-wrap" id="chatFormWrap">
+ <div class="attach-preview-bar" id="attachPreviewBar">
+ <span id="attachPreviewText"> file.png</span>
+ <button type="button" id="removeAttachBtn">✕</button>
+ </div>
+ <form class="chat-form" id="chatForm">
+ <input type="file" id="fileInput" style="display:none">
+ <button class="attach-btn" type="button" id="attachBtn"> Attach</button>
+ <textarea id="messageInput" placeholder="Type your message..." rows="1"></textarea>
+ <button class="btn primary" type="submit">Send</button>
+ </form>
+ </div>
+ </section>
+ </section>
 </main>
 
 <script type="module">
@@ -108,141 +108,141 @@ function esc(value){return String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'
 function fmt(value){const d=new Date(value);return Number.isNaN(d.getTime())?'':d.toLocaleTimeString([], {hour:'numeric',minute:'2-digit'});}
 
 function renderTeam(){
-  teamList.innerHTML = TEAM.map(member => `
-    <div class="team-row ${activeMember && activeMember.id === member.id ? 'active' : ''}" data-id="${member.id}">
-      <div class="avatar">${initials(member.name)}</div>
-      <div class="row-main"><strong>${esc(member.name)}</strong><span>${esc(member.role)}</span></div>
-    </div>
-  `).join('');
-  teamList.querySelectorAll('.team-row').forEach(row => {
-    row.addEventListener('click', () => startConversation(row.dataset.id));
-  });
+ teamList.innerHTML = TEAM.map(member => `
+ <div class="team-row ${activeMember && activeMember.id === member.id ? 'active' : ''}" data-id="${member.id}">
+ <div class="avatar">${initials(member.name)}</div>
+ <div class="row-main"><strong>${esc(member.name)}</strong><span>${esc(member.role)}</span></div>
+ </div>
+ `).join('');
+ teamList.querySelectorAll('.team-row').forEach(row => {
+ row.addEventListener('click', () => startConversation(row.dataset.id));
+ });
 }
 
 async function startConversation(memberId){
-  activeMember = TEAM.find(member => member.id === memberId);
-  renderTeam();
-  document.getElementById('chatAvatar').textContent = initials(activeMember.name);
-  document.getElementById('chatName').textContent = activeMember.name;
-  document.getElementById('chatRole').textContent = activeMember.role;
-  chatState.textContent = 'Opening conversation...';
-  chatState.style.display = 'flex';
-  messagesEl.style.display = 'none';
-  chatFormWrap.style.display = 'none';
+ activeMember = TEAM.find(member => member.id === memberId);
+ renderTeam();
+ document.getElementById('chatAvatar').textContent = initials(activeMember.name);
+ document.getElementById('chatName').textContent = activeMember.name;
+ document.getElementById('chatRole').textContent = activeMember.role;
+ chatState.textContent = 'Opening conversation...';
+ chatState.style.display = 'flex';
+ messagesEl.style.display = 'none';
+ chatFormWrap.style.display = 'none';
 
-  const res = await fetchWithAuth('/api/chat/conversations', {
-    method: 'POST',
-    body: JSON.stringify({teamMemberId: activeMember.id, visitorName: getDisplayName(auth.currentUser)})
-  });
-  const data = await res.json();
-  if(!res.ok) throw new Error(data.error || 'Could not open conversation.');
-  activeConversation = data.conversation;
-  chatState.style.display = 'none';
-  messagesEl.style.display = 'flex';
-  chatFormWrap.style.display = 'flex';
-  await loadMessages();
-  clearInterval(pollTimer);
-  pollTimer = setInterval(loadMessages, 4000);
+ const res = await fetchWithAuth('/api/chat/conversations', {
+ method: 'POST',
+ body: JSON.stringify({teamMemberId: activeMember.id, visitorName: getDisplayName(auth.currentUser)})
+ });
+ const data = await res.json();
+ if(!res.ok) throw new Error(data.error || 'Could not open conversation.');
+ activeConversation = data.conversation;
+ chatState.style.display = 'none';
+ messagesEl.style.display = 'flex';
+ chatFormWrap.style.display = 'flex';
+ await loadMessages();
+ clearInterval(pollTimer);
+ pollTimer = setInterval(loadMessages, 4000);
 }
 
 function renderAttachmentHTML(attachment){
-  if(!attachment || !attachment.url) return '';
-  const url = esc(attachment.url);
-  const name = esc(attachment.name || 'Attachment');
-  const type = esc(attachment.type || '');
-  if(type.startsWith('image/') || url.startsWith('data:image/')){
-    return `<a href="${url}" target="_blank"><img src="${url}" alt="${name}" class="chat-attachment-img"></a>`;
-  }
-  return `<a href="${url}" download="${name}" target="_blank" class="chat-attachment-file">📎 Download ${name}</a>`;
+ if(!attachment || !attachment.url) return '';
+ const url = esc(attachment.url);
+ const name = esc(attachment.name || 'Attachment');
+ const type = esc(attachment.type || '');
+ if(type.startsWith('image/') || url.startsWith('data:image/')){
+ return `<a href="${url}" target="_blank"><img src="${url}" alt="${name}" class="chat-attachment-img"></a>`;
+ }
+ return `<a href="${url}" download="${name}" target="_blank" class="chat-attachment-file"> Download ${name}</a>`;
 }
 
 async function loadMessages(){
-  if(!activeConversation) return;
-  const res = await fetchWithAuth(`/api/chat/conversations/${encodeURIComponent(activeConversation.id)}/messages`);
-  const data = await res.json();
-  if(!res.ok) throw new Error(data.error || 'Could not load messages.');
-  const messages = data.messages || [];
-  messagesEl.innerHTML = messages.length ? messages.map(msg => `
-    <div class="msg ${msg.sender === 'visitor' ? 'visitor' : 'team'}">
-      ${esc(msg.text || '')}
-      ${renderAttachmentHTML(msg.attachment)}
-      <small>${esc(msg.senderName || '')} ${fmt(msg.time)}</small>
-    </div>
-  `).join('') : '<div class="chat-state" style="display:flex;min-height:260px;">No messages yet. Send the first one.</div>';
-  messagesEl.scrollTop = messagesEl.scrollHeight;
+ if(!activeConversation) return;
+ const res = await fetchWithAuth(`/api/chat/conversations/${encodeURIComponent(activeConversation.id)}/messages`);
+ const data = await res.json();
+ if(!res.ok) throw new Error(data.error || 'Could not load messages.');
+ const messages = data.messages || [];
+ messagesEl.innerHTML = messages.length ? messages.map(msg => `
+ <div class="msg ${msg.sender === 'visitor' ? 'visitor' : 'team'}">
+ ${esc(msg.text || '')}
+ ${renderAttachmentHTML(msg.attachment)}
+ <small>${esc(msg.senderName || '')} ${fmt(msg.time)}</small>
+ </div>
+ `).join('') : '<div class="chat-state" style="display:flex;min-height:260px;">No messages yet. Send the first one.</div>';
+ messagesEl.scrollTop = messagesEl.scrollHeight;
 }
 
 attachBtn.addEventListener('click', () => fileInput.click());
 fileInput.addEventListener('change', (e) => {
-  const file = e.target.files[0];
-  if(!file) return;
-  if(file.size > 8 * 1024 * 1024){
-    alert('File size exceeds maximum limit of 8MB.');
-    return;
-  }
-  const reader = new FileReader();
-  reader.onload = (event) => {
-    currentAttachment = {
-      url: event.target.result,
-      name: file.name,
-      type: file.type,
-      size: file.size
-    };
-    attachPreviewText.textContent = `📎 ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
-    attachPreviewBar.classList.add('active');
-  };
-  reader.readAsDataURL(file);
+ const file = e.target.files[0];
+ if(!file) return;
+ if(file.size > 8 * 1024 * 1024){
+ alert('File size exceeds maximum limit of 8MB.');
+ return;
+ }
+ const reader = new FileReader();
+ reader.onload = (event) => {
+ currentAttachment = {
+ url: event.target.result,
+ name: file.name,
+ type: file.type,
+ size: file.size
+ };
+ attachPreviewText.textContent = ` ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+ attachPreviewBar.classList.add('active');
+ };
+ reader.readAsDataURL(file);
 });
 
 function clearAttachment(){
-  currentAttachment = null;
-  fileInput.value = '';
-  attachPreviewBar.classList.remove('active');
+ currentAttachment = null;
+ fileInput.value = '';
+ attachPreviewBar.classList.remove('active');
 }
 removeAttachBtn.addEventListener('click', clearAttachment);
 
 chatForm.addEventListener('submit', async event => {
-  event.preventDefault();
-  const text = input.value.trim();
-  if((!text && !currentAttachment) || !activeConversation) return;
+ event.preventDefault();
+ const text = input.value.trim();
+ if((!text && !currentAttachment) || !activeConversation) return;
 
-  const payload = { text, visitorName: getDisplayName(auth.currentUser) };
-  if(currentAttachment) payload.attachment = currentAttachment;
+ const payload = { text, visitorName: getDisplayName(auth.currentUser) };
+ if(currentAttachment) payload.attachment = currentAttachment;
 
-  input.value = '';
-  const sentAttach = currentAttachment;
-  clearAttachment();
+ input.value = '';
+ const sentAttach = currentAttachment;
+ clearAttachment();
 
-  const res = await fetchWithAuth(`/api/chat/conversations/${encodeURIComponent(activeConversation.id)}/messages`, {
-    method: 'POST',
-    body: JSON.stringify(payload)
-  });
-  const data = await res.json();
-  if(!res.ok) {
-    input.value = text;
-    currentAttachment = sentAttach;
-    alert(data.error || 'Message was not sent.');
-    return;
-  }
-  await loadMessages();
+ const res = await fetchWithAuth(`/api/chat/conversations/${encodeURIComponent(activeConversation.id)}/messages`, {
+ method: 'POST',
+ body: JSON.stringify(payload)
+ });
+ const data = await res.json();
+ if(!res.ok) {
+ input.value = text;
+ currentAttachment = sentAttach;
+ alert(data.error || 'Message was not sent.');
+ return;
+ }
+ await loadMessages();
 });
 
 onAuthStateChanged(auth, user => {
-  if(!user){
-    gate.style.display = 'block';
-    shell.style.display = 'none';
-    return;
-  }
-  gate.style.display = 'none';
-  shell.style.display = 'grid';
-  document.getElementById('signOutBtn').style.display = 'inline-flex';
-  document.getElementById('visitorNote').textContent = `Signed in as ${user.email || getDisplayName(user)}`;
-  renderTeam();
+ if(!user){
+ gate.style.display = 'block';
+ shell.style.display = 'none';
+ return;
+ }
+ gate.style.display = 'none';
+ shell.style.display = 'grid';
+ document.getElementById('signOutBtn').style.display = 'inline-flex';
+ document.getElementById('visitorNote').textContent = `Signed in as ${user.email || getDisplayName(user)}`;
+ renderTeam();
 });
 
 document.getElementById('signOutBtn').addEventListener('click', async () => {
-  await nakSignOut();
-  window.location.href = '/login?next=/chat';
+ await nakSignOut();
+ window.location.href = '/login?next=/chat';
 });
 </script>
 </body>

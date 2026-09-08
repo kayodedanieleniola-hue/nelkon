@@ -2253,6 +2253,49 @@ def admin_send_chat_message(conversation_id):
     return jsonify({"sent": True, "message": {"id": message_id, **msg_data}})
 
 
+@app.route("/api/admin/chat/conversations/<conversation_id>", methods=["DELETE"])
+@require_admin_session
+@require_shared_database
+def admin_delete_chat_conversation(conversation_id):
+    """Delete a visitor chat conversation and its messages."""
+    conversation_id = str(conversation_id).strip()
+    if not conversation_id:
+        return jsonify({"error": "Conversation ID is required."}), 400
+
+    try:
+        with get_quota_db() as conn:
+            conn.execute("DELETE FROM team_messages WHERE conversation_id = ?", (conversation_id,))
+            conn.execute("DELETE FROM team_conversations WHERE id = ?", (conversation_id,))
+        return jsonify({"success": True, "message": "Conversation deleted successfully.", "id": conversation_id})
+    except Exception as exc:
+        return jsonify({"error": f"Could not delete conversation: {exc}"}), 500
+
+
+@app.route("/api/admin/campaign-registrations/<reg_id>", methods=["DELETE"])
+@require_admin_session
+@require_shared_database
+def admin_delete_campaign_registration(reg_id):
+    """Delete a campaign registration by ID."""
+    reg_id = str(reg_id).strip()
+    if not reg_id:
+        return jsonify({"error": "Registration ID is required."}), 400
+
+    try:
+        with get_quota_db() as conn:
+            conn.execute("DELETE FROM campaign_registrations WHERE id = ?", (reg_id,))
+    except Exception as exc:
+        print(f"Delete campaign registration SQLite error: {exc}")
+
+    db = get_firestore_client()
+    if db:
+        try:
+            db.collection("campaignRegistrations").document(reg_id).delete()
+        except Exception as exc:
+            print(f"Delete campaign registration Firestore warning: {exc}")
+
+    return jsonify({"success": True, "message": "Campaign submission deleted successfully.", "id": reg_id})
+
+
 @app.route("/api/admin/campaign-registrations", methods=["GET"])
 @require_master_admin
 @require_shared_database
@@ -3174,6 +3217,32 @@ def admin_update_strategy_call_status(call_id):
             print(f"Update call status Firestore warning: {exc}")
 
     return jsonify({"success": True, "id": call_id, "status": new_status})
+
+
+@app.route("/api/admin/strategy-calls/<call_id>", methods=["DELETE"])
+@require_admin_session
+@require_shared_database
+def admin_delete_strategy_call(call_id):
+    """Delete an enquiry / strategy call by ID along with attachments."""
+    call_id = str(call_id).strip()
+    if not call_id:
+        return jsonify({"error": "Call ID is required."}), 400
+
+    try:
+        with get_quota_db() as conn:
+            conn.execute("DELETE FROM strategy_call_attachments WHERE strategy_call_id = ?", (call_id,))
+            conn.execute("DELETE FROM strategy_calls WHERE id = ?", (call_id,))
+    except Exception as exc:
+        print(f"Delete strategy call SQLite error: {exc}")
+
+    db = get_firestore_client()
+    if db:
+        try:
+            db.collection("strategyCalls").document(call_id).delete()
+        except Exception as exc:
+            print(f"Delete strategy call Firestore warning: {exc}")
+
+    return jsonify({"success": True, "message": "Enquiry deleted successfully.", "id": call_id})
 
 
 if __name__ == "__main__":

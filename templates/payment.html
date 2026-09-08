@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="/static/js/error-logger.js" defer></script>
+ <script src="/static/js/error-logger.js" defer></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Secure Checkout | Nakconel Career</title>
@@ -9,96 +9,96 @@
 <script src="https://js.paystack.co/v1/inline.js"></script>
 <style>
 :root {
-  --bg-dark: #0A0202;
-  --wine-deep: #1B0404;
-  --wine-mid: #3D0A0A;
-  --bronze: #C99A4A;
-  --bronze-light: #E8C57A;
-  --bronze-dim: #8B6A2E;
-  --white: #FFFFFF;
-  --muted: #A3917F;
-  --border: rgba(201, 154, 74, 0.2);
-  --rs: 14px;
+ --bg-dark: #0A0202;
+ --wine-deep: #1B0404;
+ --wine-mid: #3D0A0A;
+ --bronze: #C99A4A;
+ --bronze-light: #E8C57A;
+ --bronze-dim: #8B6A2E;
+ --white: #FFFFFF;
+ --muted: #A3917F;
+ --border: rgba(201, 154, 74, 0.2);
+ --rs: 14px;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-  font-family: 'Poppins', sans-serif;
-  background: var(--bg-dark);
-  color: var(--white);
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 40px 20px;
-  background-image: 
-    radial-gradient(ellipse 60% 40% at 50% 0%, var(--wine-mid) 0%, transparent 70%),
-    radial-gradient(ellipse 80% 50% at 50% 100%, var(--wine-deep) 0%, var(--bg-dark) 100%);
+ font-family: 'Poppins', sans-serif;
+ background: var(--bg-dark);
+ color: var(--white);
+ min-height: 100vh;
+ display: flex;
+ flex-direction: column;
+ align-items: center;
+ justify-content: center;
+ padding: 40px 20px;
+ background-image: 
+ radial-gradient(ellipse 60% 40% at 50% 0%, var(--wine-mid) 0%, transparent 70%),
+ radial-gradient(ellipse 80% 50% at 50% 100%, var(--wine-deep) 0%, var(--bg-dark) 100%);
 }
 
 .wrap {
-  width: 100%;
-  max-width: 680px;
-  background: rgba(27, 4, 4, 0.75);
-  border: 1px solid var(--border);
-  border-radius: 20px;
-  padding: 40px 32px;
-  backdrop-filter: blur(12px);
-  box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+ width: 100%;
+ max-width: 680px;
+ background: rgba(27, 4, 4, 0.75);
+ border: 1px solid var(--border);
+ border-radius: 20px;
+ padding: 40px 32px;
+ backdrop-filter: blur(12px);
+ box-shadow: 0 20px 60px rgba(0,0,0,0.6);
 }
 
 .top-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 30px;
-  padding-bottom: 20px;
-  border-bottom: 1px solid var(--border);
+ display: flex;
+ align-items: center;
+ justify-content: space-between;
+ margin-bottom: 30px;
+ padding-bottom: 20px;
+ border-bottom: 1px solid var(--border);
 }
 
 .brand-logo {
-  font-weight: 800;
-  font-size: 22px;
-  letter-spacing: 1px;
+ font-weight: 800;
+ font-size: 22px;
+ letter-spacing: 1px;
 }
 .brand-logo span { color: var(--bronze-light); }
 
 .secure-badge {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 13px;
-  color: var(--bronze-light);
-  background: rgba(201, 154, 74, 0.1);
-  padding: 6px 14px;
-  border-radius: 20px;
-  border: 1px solid var(--border);
+ display: flex;
+ align-items: center;
+ gap: 6px;
+ font-size: 13px;
+ color: var(--bronze-light);
+ background: rgba(201, 154, 74, 0.1);
+ padding: 6px 14px;
+ border-radius: 20px;
+ border: 1px solid var(--border);
 }
 
 .summary-card {
-  background: rgba(61, 10, 10, 0.5);
-  border: 1px solid var(--border);
-  border-radius: var(--rs);
-  padding: 24px;
-  margin-bottom: 28px;
+ background: rgba(61, 10, 10, 0.5);
+ border: 1px solid var(--border);
+ border-radius: var(--rs);
+ padding: 24px;
+ margin-bottom: 28px;
 }
 
 .summary-title {
-  font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: 1.5px;
-  color: var(--muted);
-  margin-bottom: 12px;
+ font-size: 12px;
+ text-transform: uppercase;
+ letter-spacing: 1.5px;
+ color: var(--muted);
+ margin-bottom: 12px;
 }
 
 .summary-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
-  font-size: 15px;
+ display: flex;
+ justify-content: space-between;
+ align-items: center;
+ margin-bottom: 10px;
+ font-size: 15px;
 }
 .summary-row:last-child { margin-bottom: 0; }
 
@@ -106,187 +106,187 @@ body {
 .summary-val { font-weight: 600; color: var(--white); text-align: right; }
 
 .price-tag {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 16px;
-  padding-top: 16px;
-  border-top: 1px dashed var(--border);
+ display: flex;
+ justify-content: space-between;
+ align-items: center;
+ margin-top: 16px;
+ padding-top: 16px;
+ border-top: 1px dashed var(--border);
 }
 
 .price-amount {
-  font-size: 28px;
-  font-weight: 800;
-  color: var(--bronze-light);
+ font-size: 28px;
+ font-weight: 800;
+ color: var(--bronze-light);
 }
 
 .pay-options {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  margin-bottom: 24px;
+ display: grid;
+ grid-template-columns: 1fr 1fr;
+ gap: 12px;
+ margin-bottom: 24px;
 }
 
 .pay-tab {
-  padding: 14px;
-  border-radius: 12px;
-  border: 1px solid var(--border);
-  background: rgba(255,255,255,0.03);
-  color: var(--muted);
-  font-family: inherit;
-  font-size: 13.5px;
-  font-weight: 600;
-  cursor: pointer;
-  text-align: center;
-  transition: all 0.2s;
+ padding: 14px;
+ border-radius: 12px;
+ border: 1px solid var(--border);
+ background: rgba(255,255,255,0.03);
+ color: var(--muted);
+ font-family: inherit;
+ font-size: 13.5px;
+ font-weight: 600;
+ cursor: pointer;
+ text-align: center;
+ transition: all 0.2s;
 }
 
 .pay-tab.active {
-  background: rgba(201, 154, 74, 0.15);
-  border-color: var(--bronze-light);
-  color: var(--bronze-light);
+ background: rgba(201, 154, 74, 0.15);
+ border-color: var(--bronze-light);
+ color: var(--bronze-light);
 }
 
 .pay-form-box {
-  display: none;
-  margin-bottom: 24px;
+ display: none;
+ margin-bottom: 24px;
 }
 .pay-form-box.active { display: block; }
 
 .field-g {
-  margin-bottom: 16px;
+ margin-bottom: 16px;
 }
 .field-g label {
-  display: block;
-  font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  color: var(--muted);
-  margin-bottom: 6px;
+ display: block;
+ font-size: 12px;
+ text-transform: uppercase;
+ letter-spacing: 1px;
+ color: var(--muted);
+ margin-bottom: 6px;
 }
 .field-g input, .field-g select {
-  width: 100%;
-  padding: 14px;
-  background: rgba(10, 2, 2, 0.8);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  color: var(--white);
-  font-family: inherit;
-  font-size: 14px;
-  outline: none;
+ width: 100%;
+ padding: 14px;
+ background: rgba(10, 2, 2, 0.8);
+ border: 1px solid var(--border);
+ border-radius: 10px;
+ color: var(--white);
+ font-family: inherit;
+ font-size: 14px;
+ outline: none;
 }
 .field-g input:focus { border-color: var(--bronze-light); }
 
 .bank-info {
-  background: rgba(10, 2, 2, 0.6);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 20px;
-  line-height: 1.8;
-  font-size: 14px;
+ background: rgba(10, 2, 2, 0.6);
+ border: 1px solid var(--border);
+ border-radius: 12px;
+ padding: 20px;
+ line-height: 1.8;
+ font-size: 14px;
 }
 .bank-info strong { color: var(--bronze-light); }
 
 .paystack-notice {
-  background: rgba(201, 154, 74, 0.08);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 18px;
-  text-align: center;
-  font-size: 13.5px;
-  color: var(--muted);
-  line-height: 1.6;
+ background: rgba(201, 154, 74, 0.08);
+ border: 1px solid var(--border);
+ border-radius: 12px;
+ padding: 18px;
+ text-align: center;
+ font-size: 13.5px;
+ color: var(--muted);
+ line-height: 1.6;
 }
 .paystack-notice strong { color: var(--bronze-light); }
 
 .pay-btn {
-  width: 100%;
-  padding: 18px;
-  background: linear-gradient(135deg, var(--bronze), var(--bronze-light));
-  color: var(--wine-deep);
-  font-family: inherit;
-  font-size: 17px;
-  font-weight: 800;
-  border: none;
-  border-radius: 14px;
-  cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
-  box-shadow: 0 6px 20px rgba(201, 154, 74, 0.3);
+ width: 100%;
+ padding: 18px;
+ background: linear-gradient(135deg, var(--bronze), var(--bronze-light));
+ color: var(--wine-deep);
+ font-family: inherit;
+ font-size: 17px;
+ font-weight: 800;
+ border: none;
+ border-radius: 14px;
+ cursor: pointer;
+ transition: transform 0.2s, box-shadow 0.2s;
+ box-shadow: 0 6px 20px rgba(201, 154, 74, 0.3);
 }
 
 .pay-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 25px rgba(201, 154, 74, 0.4);
+ transform: translateY(-2px);
+ box-shadow: 0 10px 25px rgba(201, 154, 74, 0.4);
 }
 
 .footnote {
-  text-align: center;
-  color: var(--muted);
-  font-size: 12px;
-  margin-top: 20px;
+ text-align: center;
+ color: var(--muted);
+ font-size: 12px;
+ margin-top: 20px;
 }
 @media (max-width: 520px) {
-  body { padding: 20px 12px; align-items: flex-start; }
-  .wrap { padding: 28px 18px; border-radius: 16px; }
-  .top-bar { align-items: flex-start; flex-direction: column; gap: 12px; margin-bottom: 22px; }
-  .brand-logo { font-size: 20px; }
-  .secure-badge { font-size: 11px; padding: 5px 10px; }
-  .summary-card { padding: 18px; margin-bottom: 20px; }
-  .summary-row, .price-tag { align-items: flex-start; flex-direction: column; gap: 4px; }
-  .summary-val { text-align: left; overflow-wrap: anywhere; }
-  .price-amount { font-size: 24px; }
-  .pay-btn { font-size: 15px; padding: 16px 12px; }
+ body { padding: 20px 12px; align-items: flex-start; }
+ .wrap { padding: 28px 18px; border-radius: 16px; }
+ .top-bar { align-items: flex-start; flex-direction: column; gap: 12px; margin-bottom: 22px; }
+ .brand-logo { font-size: 20px; }
+ .secure-badge { font-size: 11px; padding: 5px 10px; }
+ .summary-card { padding: 18px; margin-bottom: 20px; }
+ .summary-row, .price-tag { align-items: flex-start; flex-direction: column; gap: 4px; }
+ .summary-val { text-align: left; overflow-wrap: anywhere; }
+ .price-amount { font-size: 24px; }
+ .pay-btn { font-size: 15px; padding: 16px 12px; }
 }
 </style>
 </head>
 <body>
 
 <div class="wrap">
-  <div class="top-bar">
-    <div class="brand-logo">NAK<span>CON</span>EL</div>
-    <div class="secure-badge">🔒 Paystack Secure Gateway</div>
-  </div>
+ <div class="top-bar">
+ <div class="brand-logo">NAK<span>CON</span>EL</div>
+ <div class="secure-badge"> Paystack Secure Gateway</div>
+ </div>
 
-  <div class="summary-card">
-    <div class="summary-title">Program Summary</div>
-    <div class="summary-row">
-      <span class="summary-label">Applicant Name</span>
-      <span class="summary-val" id="regName">Loading...</span>
-    </div>
-    <div class="summary-row">
-      <span class="summary-label">Program Track</span>
-      <span class="summary-val" id="regProgram">Career Registration</span>
-    </div>
-    <div class="summary-row">
-      <span class="summary-label">Reference ID</span>
-      <span class="summary-val" id="regId">#TRN-0000</span>
-    </div>
-    <div class="summary-row">
-      <span class="summary-label">Status</span>
-      <span class="summary-val" style="color: #e8a0a0;">Pending Payment</span>
-    </div>
+ <div class="summary-card">
+ <div class="summary-title">Program Summary</div>
+ <div class="summary-row">
+ <span class="summary-label">Applicant Name</span>
+ <span class="summary-val" id="regName">Loading...</span>
+ </div>
+ <div class="summary-row">
+ <span class="summary-label">Program Track</span>
+ <span class="summary-val" id="regProgram">Career Registration</span>
+ </div>
+ <div class="summary-row">
+ <span class="summary-label">Reference ID</span>
+ <span class="summary-val" id="regId">#TRN-0000</span>
+ </div>
+ <div class="summary-row">
+ <span class="summary-label">Status</span>
+ <span class="summary-val" style="color: #e8a0a0;">Pending Payment</span>
+ </div>
 
-    <div class="price-tag">
-      <span class="summary-label">Total Enrollment Fee</span>
-      <span class="price-amount" id="regAmount">₦250,000</span>
-    </div>
-  </div>
+ <div class="price-tag">
+ <span class="summary-label">Total Enrollment Fee</span>
+ <span class="price-amount" id="regAmount">₦250,000</span>
+ </div>
+ </div>
 
-  <div class="pay-options" style="grid-template-columns: 1fr;">
-    <div class="pay-tab active" style="cursor: default;">⚡ Paystack Gateway (Card / Mobile Transfer / USSD / Bank)</div>
-  </div>
+ <div class="pay-options" style="grid-template-columns: 1fr;">
+ <div class="pay-tab active" style="cursor: default;"> Paystack Gateway (Card / Mobile Transfer / USSD / Bank)</div>
+ </div>
 
-  <form id="payForm">
-    <div class="pay-form-box active">
-      <div class="paystack-notice">
-        ⚡ Clicking complete payment will connect securely to <strong>Paystack Gateway</strong>. You can choose Card, Bank Transfer, USSD, or Mobile Money.
-      </div>
-    </div>
+ <form id="payForm">
+ <div class="pay-form-box active">
+ <div class="paystack-notice">
+ Clicking complete payment will connect securely to <strong>Paystack Gateway</strong>. You can choose Card, Bank Transfer, USSD, or Mobile Money.
+ </div>
+ </div>
 
-    <button type="submit" class="pay-btn" id="submitPayBtn">Pay with Paystack (₦250,000) 🔒</button>
-  </form>
+ <button type="submit" class="pay-btn" id="submitPayBtn">Pay with Paystack (₦250,000) </button>
+ </form>
 
-  <div class="footnote">Nakconel Digital Services — Brand Management & AI Strategy Desk</div>
+ <div class="footnote">Nakconel Digital Services — Brand Management & AI Strategy Desk</div>
 </div>
 
 <script>
@@ -297,53 +297,53 @@ let regDetails = { name: 'Applicant', email: 'applicant@nakconel.com', amount: 2
 document.getElementById('regId').textContent = '#' + regId;
 
 fetch('/api/registration/' + regId)
-  .then(res => res.json())
-  .then(data => {
-    if (data.success && data.registration) {
-      const r = data.registration;
-      regDetails = {
-        name: r.name || 'Applicant',
-        email: r.email || 'applicant@nakconel.com',
-        amount: Number(r.amount || 250000),
-        program: r.program || 'Career Program'
-      };
-      document.getElementById('regName').textContent = regDetails.name;
-      document.getElementById('regProgram').textContent = regDetails.program;
-      const amt = regDetails.amount.toLocaleString();
-      document.getElementById('regAmount').textContent = '₦' + amt;
-      document.getElementById('submitPayBtn').textContent = 'Pay with Paystack (₦' + amt + ') 🔒';
-    }
-  }).catch(err => console.log(err));
+ .then(res => res.json())
+ .then(data => {
+ if (data.success && data.registration) {
+ const r = data.registration;
+ regDetails = {
+ name: r.name || 'Applicant',
+ email: r.email || 'applicant@nakconel.com',
+ amount: Number(r.amount || 250000),
+ program: r.program || 'Career Program'
+ };
+ document.getElementById('regName').textContent = regDetails.name;
+ document.getElementById('regProgram').textContent = regDetails.program;
+ const amt = regDetails.amount.toLocaleString();
+ document.getElementById('regAmount').textContent = '₦' + amt;
+ document.getElementById('submitPayBtn').textContent = 'Pay with Paystack (₦' + amt + ') ';
+ }
+ }).catch(err => console.log(err));
 
 document.getElementById('payForm').addEventListener('submit', function(e) {
-  e.preventDefault();
-  const btn = document.getElementById('submitPayBtn');
-  btn.disabled = true;
-  btn.textContent = 'Connecting to Paystack Secure Server...';
+ e.preventDefault();
+ const btn = document.getElementById('submitPayBtn');
+ btn.disabled = true;
+ btn.textContent = 'Connecting to Paystack Secure Server...';
 
-  fetch('/api/registration/' + regId + '/initialize-paystack', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email: regDetails.email })
-  })
-  .then(res => res.json())
-  .then(data => {
-    if (data.success && data.authorization_url) {
-      btn.textContent = 'Redirecting to Paystack Checkout...';
-      window.location.href = data.authorization_url;
-    } else {
-      alert('Paystack initialization error: ' + (data.error || 'Please try again.'));
-      btn.disabled = false;
-      const amt = regDetails.amount.toLocaleString();
-      btn.textContent = 'Pay with Paystack (₦' + amt + ') 🔒';
-    }
-  })
-  .catch(err => {
-    alert('Connection error. Please try again.');
-    btn.disabled = false;
-    const amt = regDetails.amount.toLocaleString();
-    btn.textContent = 'Pay with Paystack (₦' + amt + ') 🔒';
-  });
+ fetch('/api/registration/' + regId + '/initialize-paystack', {
+ method: 'POST',
+ headers: { 'Content-Type': 'application/json' },
+ body: JSON.stringify({ email: regDetails.email })
+ })
+ .then(res => res.json())
+ .then(data => {
+ if (data.success && data.authorization_url) {
+ btn.textContent = 'Redirecting to Paystack Checkout...';
+ window.location.href = data.authorization_url;
+ } else {
+ alert('Paystack initialization error: ' + (data.error || 'Please try again.'));
+ btn.disabled = false;
+ const amt = regDetails.amount.toLocaleString();
+ btn.textContent = 'Pay with Paystack (₦' + amt + ') ';
+ }
+ })
+ .catch(err => {
+ alert('Connection error. Please try again.');
+ btn.disabled = false;
+ const amt = regDetails.amount.toLocaleString();
+ btn.textContent = 'Pay with Paystack (₦' + amt + ') ';
+ });
 });
 </script>
 </body>
