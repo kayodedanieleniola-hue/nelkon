@@ -3245,5 +3245,305 @@ def admin_delete_strategy_call(call_id):
     return jsonify({"success": True, "message": "Enquiry deleted successfully.", "id": call_id})
 
 
+# ─────────────────────────────────────────────────────────────────────────────
+#  PAYMENT TEST  (/test)  — hidden, internal use only
+#  Table: test_payments
+#  Amount fixed at ₦500 (50000 kobo)
+# ─────────────────────────────────────────────────────────────────────────────
+
+TEST_PAYMENT_AMOUNT = 500        # NGN
+TEST_PAYMENT_AMOUNT_KOBO = 50000  # kobo
+
+
+def ensure_test_payments_table(conn):
+    """Create the test_payments table if it does not exist yet."""
+    conn.execute(
+        """
+        CREATE TABLE IF NOT EXISTS test_payments (
+            id TEXT PRIMARY KEY,
+            name TEXT NOT NULL,
+            email TEXT NOT NULL,
+            phone TEXT,
+            purpose TEXT,
+            notes TEXT,
+            status TEXT NOT NULL DEFAULT 'pending_payment',
+            payment_reference TEXT,
+            paid_at TEXT,
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL
+        )
+        """
+    )
+    # PostgreSQL-safe migration: ADD COLUMN IF NOT EXISTS is idempotent.
+    for col in [
+        "ALTER TABLE test_payments ADD COLUMN IF NOT EXISTS payment_reference TEXT",
+        "ALTER TABLE test_payments ADD COLUMN IF NOT EXISTS paid_at TEXT",
+    ]:
+        try:
+            conn.execute(col)
+        except Exception:
+            pass
+
+
+@app.route("/test")
+def test_payment_page():
+    """Hidden internal payment test page — not linked anywhere on the site."""
+    return render_template("payment-test.html")
+
+
+@app.route("/api/test-payment/initialize", methods=["POST"])
+def test_payment_initialize():
+    """Create a pending test-payment record and return a Paystack auth URL."""
+    PAYSTACK_SECRET_KEY = os.environ.get("PAYSTACK_SECRET_KEY")
+    if not PAYSTACK_SECRET_KEY:
+        return jsonify({"success": False, "error": "PAYSTACK_SECRET_KEY is not configured."}), 500
+
+    data = request.get_json(silent=True) or {}
+    name    = str(data.get("name")    or "").strip()[:120]
+    email   = str(data.get("email")   or "").strip().lower()[:120]
+    phone   = str(data.get("phone")   or "").strip()[:50]
+    purpose = str(data.get("purpose") or "Gateway check").strip()[:120]
+    notes   = str(data.get("notes")   or "").strip()[:500]
+
+    if not name or not email or "@" not in email:
+        return jsonify({"success": False, "error": "Name and a valid email are required."}), 400
+    if not phone:
+        return jsonify({"success": False, "error": "Phone number is required."}), 400
+
+    now    = datetime.now(timezone.utc).isoformat()
+    rec_id = f"TST-{int(time.time()*1000)}-{uuid.uuid4().hex[:6]}"
+
+    callback_url = (
+        request.host_url.rstrip("/")
+        + f"/api/test-payment/callback?test_id={rec_id}"
+    )
+
+    # Save pending record first
+    try:
+        with get_quota_db() as conn:
+            ensure_test_payments_table(conn)
+            conn.execute(
+                """
+                INSERT INTO test_payments
+                    (id, name, email, phone, purpose, notes, status, created_at, updated_at)
+                VALUES (?, ?, ?, ?, ?, ?, 'pending_payment', ?, ?)
+                """,
+                (rec_id, name, email, phone, purpose, notes, now, now)
+            )
+    except Exception as exc:
+        print(f"Test payment DB save error: {exc}")
+        return jsonify({"success": False, "error": "Could not save test payment record."}), 500
+
+    # Initialise Paystack transaction
+    try:
+        resp = requests.post(
+            "https://api.paystack.co/transaction/initialize",
+            headers={
+                "Authorization": f"Bearer {PAYSTACK_SECRET_KEY}",
+                "Content-Type": "application/json"
+            },
+            json={
+                "email": email,
+                "amount": TEST_PAYMENT_AMOUNT_KOBO,
+                "currency": "NGN",
+                "callback_url": callback_url,
+                "reference": f"TST-PAY-{rec_id}-{int(time.time())}",
+                "metadata": {
+                    "test_payment_id": rec_id,
+                    "tester_name": name,
+                    "purpose": purpose,
+                    "kind": "nakconel_test_payment"
+                }
+            },
+            timeout=15
+        )
+        payload = resp.json()
+    except Exception as exc:
+        return jsonify({"success": False, "error": f"Could not reach Paystack: {exc}"}), 502
+
+    ps_data   = payload.get("data") or {}
+    auth_url  = ps_data.get("authorization_url")
+    reference = ps_data.get("reference")
+
+    if not resp.ok or payload.get("status") is not True or not auth_url:
+        return jsonify({"success": False, "error": payload.get("message") or "Paystack initialisation failed."}), 400
+
+    # Store the reference against the record
+    try:
+        with get_quota_db() as conn:
+            ensure_test_payments_table(conn)
+            conn.execute(
+                "UPDATE test_payments SET payment_reference = ?, updated_at = ? WHERE id = ?",
+                (reference, now, rec_id)
+            )
+    except Exception as exc:
+        print(f"Test payment reference update error: {exc}")
+
+    return jsonify({
+        "success": True,
+        "id": rec_id,
+        "authorization_url": auth_url,
+        "reference": reference
+    })
+
+
+@app.route("/api/test-payment/callback", methods=["GET", "POST"])
+def test_payment_callback():
+    """Paystack redirects here after the payer completes checkout."""
+    reference = (
+        request.args.get("reference")
+        or request.args.get("trxref")
+        or (request.get_json(silent=True) or {}).get("reference")
+    )
+    test_id = (
+        request.args.get("test_id")
+        or (request.get_json(silent=True) or {}).get("test_id")
+    )
+
+    if not reference:
+        return redirect("/test?status=error&reason=missing_reference")
+
+    PAYSTACK_SECRET_KEY = os.environ.get("PAYSTACK_SECRET_KEY")
+    if not PAYSTACK_SECRET_KEY:
+        return redirect(f"/test?reference={reference}&test_id={test_id or ''}&status=success")
+
+    try:
+        verify_resp = requests.get(
+            f"https://api.paystack.co/transaction/verify/{reference}",
+            headers={"Authorization": f"Bearer {PAYSTACK_SECRET_KEY}"},
+            timeout=15
+        )
+        vdata = verify_resp.json().get("data") or {}
+    except Exception:
+        return redirect(f"/test?reference={reference}&test_id={test_id or ''}")
+
+    if (
+        verify_resp.ok
+        and vdata.get("status") == "success"
+        and int(vdata.get("amount") or 0) == TEST_PAYMENT_AMOUNT_KOBO
+    ):
+        now = datetime.now(timezone.utc).isoformat()
+        paid_at = vdata.get("paid_at") or now
+
+        # Resolve test_id from metadata if not in query string
+        if not test_id:
+            test_id = (vdata.get("metadata") or {}).get("test_payment_id")
+
+        if test_id:
+            try:
+                with get_quota_db() as conn:
+                    ensure_test_payments_table(conn)
+                    conn.execute(
+                        """
+                        UPDATE test_payments
+                        SET status = 'complete', payment_reference = ?, paid_at = ?, updated_at = ?
+                        WHERE id = ?
+                        """,
+                        (reference, paid_at, now, test_id)
+                    )
+            except Exception as exc:
+                print(f"Test payment callback DB update error: {exc}")
+
+        return redirect(f"/test?reference={reference}&test_id={test_id or ''}&status=success")
+
+    return redirect(f"/test?reference={reference}&test_id={test_id or ''}&status=failed")
+
+
+@app.route("/api/test-payment/verify", methods=["POST"])
+def test_payment_verify():
+    """Front-end calls this after returning from Paystack to confirm status."""
+    data      = request.get_json(silent=True) or {}
+    reference = str(data.get("reference") or "").strip()
+    test_id   = str(data.get("test_id")   or "").strip()
+
+    if not reference:
+        return jsonify({"verified": False, "error": "Missing payment reference."}), 400
+
+    PAYSTACK_SECRET_KEY = os.environ.get("PAYSTACK_SECRET_KEY")
+    if not PAYSTACK_SECRET_KEY:
+        return jsonify({"verified": False, "error": "Payment verification not configured."}), 500
+
+    try:
+        resp  = requests.get(
+            f"https://api.paystack.co/transaction/verify/{reference}",
+            headers={"Authorization": f"Bearer {PAYSTACK_SECRET_KEY}"},
+            timeout=15
+        )
+        vdata = resp.json().get("data") or {}
+    except Exception:
+        return jsonify({"verified": False, "error": "Could not reach Paystack."}), 502
+
+    if (
+        resp.ok
+        and vdata.get("status") == "success"
+        and int(vdata.get("amount") or 0) == TEST_PAYMENT_AMOUNT_KOBO
+    ):
+        now     = datetime.now(timezone.utc).isoformat()
+        paid_at = vdata.get("paid_at") or now
+
+        # Resolve test_id from Paystack metadata if not supplied
+        if not test_id:
+            test_id = (vdata.get("metadata") or {}).get("test_payment_id", "")
+
+        if test_id:
+            try:
+                with get_quota_db() as conn:
+                    ensure_test_payments_table(conn)
+                    conn.execute(
+                        """
+                        UPDATE test_payments
+                        SET status = 'complete', payment_reference = ?, paid_at = ?, updated_at = ?
+                        WHERE id = ?
+                        """,
+                        (reference, paid_at, now, test_id)
+                    )
+            except Exception as exc:
+                print(f"Test payment verify DB update error: {exc}")
+
+        return jsonify({
+            "verified": True,
+            "reference": reference,
+            "paidAt": paid_at,
+            "amount": vdata.get("amount"),
+            "currency": vdata.get("currency")
+        })
+
+    return jsonify({
+        "verified": False,
+        "error": "Payment not confirmed by Paystack.",
+        "paystackStatus": vdata.get("status")
+    }), 400
+
+
+@app.route("/api/admin/test-payments", methods=["GET"])
+@require_admin_session
+def admin_test_payments():
+    """Admin endpoint — returns all test payment records."""
+    try:
+        with get_quota_db() as conn:
+            ensure_test_payments_table(conn)
+            rows = conn.execute(
+                "SELECT * FROM test_payments ORDER BY created_at DESC"
+            ).fetchall()
+        records = [dict(r) for r in rows]
+    except Exception as exc:
+        return jsonify({"error": f"Could not load test payments: {exc}"}), 500
+    return jsonify({"testPayments": records, "total": len(records)})
+
+
+@app.route("/api/admin/test-payments/<rec_id>", methods=["DELETE"])
+@require_admin_session
+def admin_delete_test_payment(rec_id):
+    """Admin endpoint — delete a single test payment record."""
+    rec_id = str(rec_id).strip()
+    try:
+        with get_quota_db() as conn:
+            ensure_test_payments_table(conn)
+            conn.execute("DELETE FROM test_payments WHERE id = ?", (rec_id,))
+    except Exception as exc:
+        return jsonify({"error": str(exc)}), 500
+    return jsonify({"success": True, "id": rec_id})
+
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", debug=True)

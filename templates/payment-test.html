@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script src="/static/js/error-logger.js" defer></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Payment Test | Nakconel</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://js.paystack.co/v1/inline.js"></script>
+  <style>
+    :root {
+      --bg-dark: #0A0202;
+      --wine-deep: #1B0404;
+      --wine-mid: #3D0A0A;
+      --bronze: #C99A4A;
+      --bronze-light: #E8C57A;
+      --bronze-dim: #8B6A2E;
+      --white: #FFFFFF;
+      --muted: #A3917F;
+      --border: rgba(201, 154, 74, 0.2);
+      --good: #8cf0b4;
+      --bad: #e8a0a0;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: var(--bg-dark);
+      color: var(--white);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+      background-image:
+        radial-gradient(ellipse 60% 40% at 50% 0%, var(--wine-mid) 0%, transparent 70%),
+        radial-gradient(ellipse 80% 50% at 50% 100%, var(--wine-deep) 0%, var(--bg-dark) 100%);
+    }
+
+    .test-banner {
+      width: 100%;
+      max-width: 680px;
+      background: rgba(201, 154, 74, 0.12);
+      border: 1px dashed var(--bronze);
+      border-radius: 10px;
+      padding: 10px 18px;
+      font-size: 12px;
+      color: var(--bronze-light);
+      text-align: center;
+      margin-bottom: 18px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    .wrap {
+      width: 100%;
+      max-width: 680px;
+      background: rgba(27, 4, 4, 0.75);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 40px 32px;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+    }
+
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 30px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .brand-logo { font-weight: 800; font-size: 22px; letter-spacing: 1px; }
+    .brand-logo span { color: var(--bronze-light); }
+
+    .secure-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      color: var(--bronze-light);
+      background: rgba(201, 154, 74, 0.1);
+      padding: 6px 14px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+    }
+
+    /* STEP INDICATOR */
+    .steps {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      margin-bottom: 32px;
+    }
+
+    .step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .step-circle {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: 2px solid var(--border);
+      background: rgba(10, 2, 2, 0.6);
+      color: var(--muted);
+      font-weight: 700;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s;
+    }
+
+    .step-circle.active {
+      border-color: var(--bronze-light);
+      background: rgba(201, 154, 74, 0.15);
+      color: var(--bronze-light);
+    }
+
+    .step-circle.done {
+      border-color: var(--good);
+      background: rgba(140, 240, 180, 0.1);
+      color: var(--good);
+    }
+
+    .step-label {
+      font-size: 11px;
+      color: var(--muted);
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    .step-label.active { color: var(--bronze-light); font-weight: 600; }
+
+    .step-connector {
+      width: 60px;
+      height: 2px;
+      background: var(--border);
+      margin: 0 6px;
+      margin-bottom: 22px;
+      transition: background 0.3s;
+    }
+
+    .step-connector.done { background: var(--good); }
+
+    /* FORMS */
+    .form-section { display: none; }
+    .form-section.active { display: block; }
+
+    .section-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--bronze-light);
+      margin-bottom: 6px;
+    }
+
+    .section-sub {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 24px;
+      line-height: 1.6;
+    }
+
+    .field-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .field-g { margin-bottom: 16px; }
+
+    .field-g label {
+      display: block;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--muted);
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+
+    .field-g input,
+    .field-g select,
+    .field-g textarea {
+      width: 100%;
+      padding: 13px 14px;
+      background: rgba(10, 2, 2, 0.8);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--white);
+      font-family: inherit;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .field-g input:focus,
+    .field-g select:focus,
+    .field-g textarea:focus { border-color: var(--bronze-light); }
+
+    .field-g textarea { resize: vertical; min-height: 90px; }
+
+    .field-g select option { background: #1B0404; }
+
+    /* SUMMARY CARD */
+    .summary-card {
+      background: rgba(61, 10, 10, 0.5);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+
+    .summary-title {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--muted);
+      margin-bottom: 14px;
+      font-weight: 600;
+    }
+
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 10px;
+      font-size: 14px;
+      gap: 12px;
+    }
+
+    .summary-row:last-child { margin-bottom: 0; }
+    .summary-label { color: var(--muted); flex-shrink: 0; }
+    .summary-val { font-weight: 600; color: var(--white); text-align: right; word-break: break-word; }
+
+    .price-tag {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px dashed var(--border);
+    }
+
+    .price-amount {
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--bronze-light);
+    }
+
+    .test-amount-note {
+      font-size: 11px;
+      color: var(--bronze);
+      background: rgba(201, 154, 74, 0.1);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 4px 10px;
+      margin-top: 6px;
+      display: inline-block;
+    }
+
+    /* PAYSTACK NOTICE */
+    .paystack-notice {
+      background: rgba(201, 154, 74, 0.08);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 18px;
+      font-size: 13.5px;
+      color: var(--muted);
+      line-height: 1.6;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .paystack-notice strong { color: var(--bronze-light); }
+
+    /* BUTTONS */
+    .btn-row {
+      display: flex;
+      gap: 12px;
+      margin-top: 8px;
+    }
+
+    .pay-btn {
+      flex: 1;
+      padding: 16px;
+      background: linear-gradient(135deg, var(--bronze), var(--bronze-light));
+      color: var(--wine-deep);
+      font-family: inherit;
+      font-size: 16px;
+      font-weight: 800;
+      border: none;
+      border-radius: 14px;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 6px 20px rgba(201, 154, 74, 0.3);
+    }
+
+    .pay-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(201, 154, 74, 0.4);
+    }
+
+    .pay-btn:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+    }
+
+    .back-btn {
+      padding: 16px 22px;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .back-btn:hover {
+      border-color: var(--bronze);
+      color: var(--bronze-light);
+    }
+
+    /* SUCCESS STATE */
+    .success-box {
+      text-align: center;
+      padding: 20px 0;
+    }
+
+    .success-icon {
+      font-size: 56px;
+      margin-bottom: 16px;
+      display: block;
+    }
+
+    .success-box h2 {
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--good);
+      margin-bottom: 10px;
+    }
+
+    .success-box p {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.7;
+      max-width: 460px;
+      margin: 0 auto 24px;
+    }
+
+    .success-ref {
+      background: rgba(10, 2, 2, 0.6);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 18px;
+      font-size: 13px;
+      color: var(--bronze-light);
+      font-family: 'Courier New', monospace;
+      margin-bottom: 24px;
+      word-break: break-all;
+    }
+
+    /* ERROR ALERT */
+    .alert {
+      display: none;
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-size: 13px;
+      margin-bottom: 16px;
+      line-height: 1.5;
+    }
+
+    .alert.error {
+      background: rgba(232, 160, 160, 0.12);
+      border: 1px solid rgba(232, 160, 160, 0.3);
+      color: var(--bad);
+    }
+
+    .alert.show { display: block; }
+
+    .footnote {
+      text-align: center;
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 22px;
+    }
+
+    @media (max-width: 520px) {
+      body { padding: 20px 12px; align-items: flex-start; }
+      .wrap { padding: 26px 18px; border-radius: 16px; }
+      .top-bar { flex-direction: column; gap: 10px; }
+      .field-row { grid-template-columns: 1fr; }
+      .step-connector { width: 30px; }
+      .price-amount { font-size: 22px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="test-banner">&#9888; Internal Payment Test — Not Public-Facing &#9888;</div>
+
+  <div class="wrap">
+    <div class="top-bar">
+      <div class="brand-logo">NAK<span>CON</span>EL</div>
+      <div class="secure-badge">&#128274; Paystack Test Gateway</div>
+    </div>
+
+    <!-- Step Indicator -->
+    <div class="steps">
+      <div class="step">
+        <div class="step-circle active" id="stepCircle1">1</div>
+        <div class="step-label active" id="stepLabel1">Your Details</div>
+      </div>
+      <div class="step-connector" id="stepConn1"></div>
+      <div class="step">
+        <div class="step-circle" id="stepCircle2">2</div>
+        <div class="step-label" id="stepLabel2">Review & Pay</div>
+      </div>
+      <div class="step-connector" id="stepConn2"></div>
+      <div class="step">
+        <div class="step-circle" id="stepCircle3">3</div>
+        <div class="step-label" id="stepLabel3">Confirmed</div>
+      </div>
+    </div>
+
+    <!-- STEP 1: Details Form -->
+    <div class="form-section active" id="step1">
+      <div class="section-title">Your Details</div>
+      <div class="section-sub">Fill in your info to proceed to the test payment of <strong style="color:var(--bronze-light)">&#8358;500</strong>. This is an internal test only.</div>
+
+      <div class="alert error" id="formError"></div>
+
+      <div class="field-row">
+        <div class="field-g">
+          <label>Full Name *</label>
+          <input type="text" id="inputName" placeholder="e.g. John Doe" autocomplete="name">
+        </div>
+        <div class="field-g">
+          <label>Email Address *</label>
+          <input type="email" id="inputEmail" placeholder="you@example.com" autocomplete="email">
+        </div>
+      </div>
+
+      <div class="field-row">
+        <div class="field-g">
+          <label>Phone Number *</label>
+          <input type="tel" id="inputPhone" placeholder="e.g. 08012345678" autocomplete="tel">
+        </div>
+        <div class="field-g">
+          <label>Purpose of Test</label>
+          <select id="inputPurpose">
+            <option value="Gateway check">Gateway check</option>
+            <option value="Callback verification">Callback verification</option>
+            <option value="Webhook test">Webhook test</option>
+            <option value="End-to-end flow">End-to-end flow</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field-g">
+        <label>Notes (optional)</label>
+        <textarea id="inputNotes" placeholder="Any notes about this test run..."></textarea>
+      </div>
+
+      <button class="pay-btn" id="toStep2Btn" type="button">Continue to Review &#8594;</button>
+    </div>
+
+    <!-- STEP 2: Review & Pay -->
+    <div class="form-section" id="step2">
+      <div class="section-title">Review &amp; Pay</div>
+      <div class="section-sub">Confirm your details below then click <strong style="color:var(--bronze-light)">Pay &#8358;500</strong> to proceed to Paystack checkout.</div>
+
+      <div class="summary-card">
+        <div class="summary-title">Test Payment Summary</div>
+        <div class="summary-row">
+          <span class="summary-label">Name</span>
+          <span class="summary-val" id="summName">—</span>
+        </div>
+        <div class="summary-row">
+          <span class="summary-label">Email</span>
+          <span class="summary-val" id="summEmail">—</span>
+        </div>
+        <div class="summary-row">
+          <span class="summary-label">Phone</span>
+          <span class="summary-val" id="summPhone">—</span>
+        </div>
+        <div class="summary-row">
+          <span class="summary-label">Purpose</span>
+          <span class="summary-val" id="summPurpose">—</span>
+        </div>
+        <div class="summary-row" id="summNotesRow" style="display:none;">
+          <span class="summary-label">Notes</span>
+          <span class="summary-val" id="summNotes">—</span>
+        </div>
+        <div class="price-tag">
+          <span class="summary-label">Test Amount</span>
+          <div>
+            <div class="price-amount">&#8358;500</div>
+            <div class="test-amount-note">Internal Test — &#8358;500 only</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="paystack-notice">
+        You will be securely redirected to <strong>Paystack Gateway</strong>. Choose Card, Bank Transfer, USSD, or Mobile Money. This is a real transaction of <strong>&#8358;500</strong>.
+      </div>
+
+      <div class="alert error" id="payError"></div>
+
+      <div class="btn-row">
+        <button class="back-btn" id="backToStep1Btn" type="button">&#8592; Back</button>
+        <button class="pay-btn" id="payNowBtn" type="button">Pay &#8358;500 via Paystack &#128274;</button>
+      </div>
+    </div>
+
+    <!-- STEP 3: Success -->
+    <div class="form-section" id="step3">
+      <div class="success-box">
+        <span class="success-icon">&#9989;</span>
+        <h2>Payment Confirmed!</h2>
+        <p>Your test payment of <strong>&#8358;500</strong> was verified successfully. The record has been logged in the admin panel as <strong>Complete</strong>.</p>
+        <div class="success-ref" id="successRef">REF: —</div>
+        <button class="pay-btn" style="max-width:320px; margin:0 auto; display:block;" onclick="window.location.reload()">Run Another Test</button>
+      </div>
+    </div>
+
+    <div class="footnote">Nakconel Digital Services &mdash; Internal Test Environment</div>
+  </div>
+
+<script>
+  // ── State ──────────────────────────────────────────────────────────────────
+  let currentTestId = null;
+
+  // ── Helpers ────────────────────────────────────────────────────────────────
+  function showError(elId, msg) {
+    const el = document.getElementById(elId);
+    el.textContent = msg;
+    el.classList.add('show');
+  }
+
+  function clearError(elId) {
+    const el = document.getElementById(elId);
+    el.textContent = '';
+    el.classList.remove('show');
+  }
+
+  function setStep(n) {
+    [1, 2, 3].forEach(i => {
+      document.getElementById('step' + i).classList.toggle('active', i === n);
+      const circle = document.getElementById('stepCircle' + i);
+      const label  = document.getElementById('stepLabel' + i);
+      circle.classList.remove('active', 'done');
+      label.classList.remove('active');
+      if (i < n)  { circle.classList.add('done');  circle.textContent = '✓'; }
+      if (i === n){ circle.classList.add('active'); circle.textContent = i;   label.classList.add('active'); }
+      if (i > n)  { circle.textContent = i; }
+    });
+    if (document.getElementById('stepConn1'))
+      document.getElementById('stepConn1').classList.toggle('done', n > 1);
+    if (document.getElementById('stepConn2'))
+      document.getElementById('stepConn2').classList.toggle('done', n > 2);
+  }
+
+  // ── Step 1 → Step 2 ────────────────────────────────────────────────────────
+  document.getElementById('toStep2Btn').addEventListener('click', function () {
+    clearError('formError');
+    const name    = document.getElementById('inputName').value.trim();
+    const email   = document.getElementById('inputEmail').value.trim();
+    const phone   = document.getElementById('inputPhone').value.trim();
+    const purpose = document.getElementById('inputPurpose').value;
+    const notes   = document.getElementById('inputNotes').value.trim();
+
+    if (!name)  { showError('formError', 'Please enter your full name.'); return; }
+    if (!email || !email.includes('@')) { showError('formError', 'Please enter a valid email address.'); return; }
+    if (!phone) { showError('formError', 'Please enter your phone number.'); return; }
+
+    document.getElementById('summName').textContent    = name;
+    document.getElementById('summEmail').textContent   = email;
+    document.getElementById('summPhone').textContent   = phone;
+    document.getElementById('summPurpose').textContent = purpose;
+    if (notes) {
+      document.getElementById('summNotes').textContent = notes;
+      document.getElementById('summNotesRow').style.display = 'flex';
+    } else {
+      document.getElementById('summNotesRow').style.display = 'none';
+    }
+    setStep(2);
+  });
+
+  // ── Back to Step 1 ─────────────────────────────────────────────────────────
+  document.getElementById('backToStep1Btn').addEventListener('click', function () {
+    setStep(1);
+  });
+
+  // ── Pay Now ────────────────────────────────────────────────────────────────
+  document.getElementById('payNowBtn').addEventListener('click', async function () {
+    clearError('payError');
+    const btn = this;
+    btn.disabled = true;
+    btn.textContent = 'Initialising payment…';
+
+    const name    = document.getElementById('inputName').value.trim();
+    const email   = document.getElementById('inputEmail').value.trim();
+    const phone   = document.getElementById('inputPhone').value.trim();
+    const purpose = document.getElementById('inputPurpose').value;
+    const notes   = document.getElementById('inputNotes').value.trim();
+
+    try {
+      // 1. Create a pending record and get Paystack auth URL
+      const initRes = await fetch('/api/test-payment/initialize', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, phone, purpose, notes })
+      });
+      const initData = await initRes.json();
+
+      if (!initData.success) {
+        showError('payError', initData.error || 'Could not initialise payment. Please try again.');
+        btn.disabled = false;
+        btn.textContent = 'Pay ₦500 via Paystack 🔒';
+        return;
+      }
+
+      currentTestId = initData.id;
+      btn.textContent = 'Redirecting to Paystack…';
+
+      // 2. Redirect to Paystack checkout
+      window.location.href = initData.authorization_url;
+
+    } catch (err) {
+      showError('payError', 'Connection error. Please check your internet and try again.');
+      btn.disabled = false;
+      btn.textContent = 'Pay ₦500 via Paystack 🔒';
+    }
+  });
+
+  // ── On page load: check if returning from Paystack callback ───────────────
+  (async function checkCallback() {
+    const params    = new URLSearchParams(window.location.search);
+    const reference = params.get('reference') || params.get('trxref');
+    const testId    = params.get('test_id');
+    const status    = params.get('status');
+
+    if (!reference) return;
+
+    if (status === 'success' || !status) {
+      // Verify payment on backend
+      try {
+        const res  = await fetch('/api/test-payment/verify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ reference, test_id: testId })
+        });
+        const data = await res.json();
+        if (data.verified) {
+          document.getElementById('successRef').textContent = 'REF: ' + reference;
+          setStep(3);
+          // Clean URL
+          window.history.replaceState({}, document.title, '/test');
+          return;
+        }
+      } catch (e) { /* fall through */ }
+    }
+    // Payment failed or could not be verified
+    setStep(2);
+    showError('payError', 'Payment could not be verified. Please try again or contact support.');
+    window.history.replaceState({}, document.title, '/test');
+  })();
+</script>
+</body>
+</html>
