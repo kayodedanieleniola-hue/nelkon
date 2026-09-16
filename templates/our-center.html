@@ -4,316 +4,341 @@
 <script src="/static/js/error-logger.js" defer></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Center Login | Nakconel CBT &amp; Learning Portal</title>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<title>Nakconel Examinations | Educational Center</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/static/css/nakconel-core.css">
-<link rel="stylesheet" href="/static/css/nakconel-pages.css">
 <style>
   :root {
-    --wine-deep: #1b0404;
-    --gold: #c5a059;
-    --gold-bright: #e5c178;
-    --cream: #f5eedc;
+    --burgundy-bg: #590d0d;
+    --burgundy-deep: #3b0606;
+    --gold: #d4a843;
+    --gold-light: #e8c57a;
+    --cream: #fdfaf4;
+    --dark-text: #1b0404;
   }
   
-  .login-container {
-    max-width: 480px;
-    margin: 40px auto 80px;
-    padding: 0 20px;
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
   }
   
-  .login-card {
-    background: rgba(27, 4, 4, 0.85);
-    border: 1px solid rgba(197, 160, 89, 0.3);
-    border-radius: 20px;
-    padding: 36px 30px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), 0 0 30px rgba(197, 160, 89, 0.12);
-    backdrop-filter: blur(20px);
-  }
-  
-  .center-header-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    background: rgba(197, 160, 89, 0.15);
-    border: 1px solid rgba(197, 160, 89, 0.35);
-    color: var(--gold-bright);
-    padding: 6px 16px;
-    border-radius: 50px;
-    font-size: 13px;
-    font-weight: 500;
-    margin-bottom: 16px;
-  }
-  
-  .center-header-badge .dot {
-    width: 8px;
-    height: 8px;
-    background-color: #22c55e;
-    border-radius: 50%;
-    box-shadow: 0 0 8px #22c55e;
-  }
-  
-  .tab-nav {
+  body {
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(145deg, #600e0e 0%, #450808 50%, #290303 100%);
+    color: var(--cream);
+    min-height: 100vh;
     display: flex;
-    gap: 8px;
-    background: rgba(0, 0, 0, 0.3);
-    padding: 6px;
-    border-radius: 12px;
-    border: 1px solid rgba(197, 160, 89, 0.2);
-    margin-bottom: 24px;
+    flex-direction: column;
+    justify-content: space-between;
+    overflow-x: hidden;
   }
   
-  .tab-btn {
-    flex: 1;
-    padding: 10px 12px;
-    border: none;
-    background: transparent;
-    color: rgba(245, 238, 220, 0.6);
-    font-size: 13px;
-    font-weight: 500;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.25s ease;
-    font-family: inherit;
-  }
-  
-  .tab-btn.active {
-    background: linear-gradient(135deg, #c5a059, #9e7a38);
-    color: #110303;
-    font-weight: 600;
-    box-shadow: 0 4px 12px rgba(197, 160, 89, 0.3);
-  }
-  
-  .form-group {
-    margin-bottom: 20px;
-    text-align: left;
-  }
-  
-  .form-group label {
-    display: block;
-    font-size: 13px;
-    color: rgba(245, 238, 220, 0.85);
-    margin-bottom: 8px;
-    font-weight: 500;
-  }
-  
-  .form-group input {
-    width: 100%;
-    padding: 14px 16px;
-    border-radius: 10px;
-    background: rgba(0, 0, 0, 0.4);
-    border: 1px solid rgba(197, 160, 89, 0.3);
-    color: #fff;
-    font-size: 15px;
-    outline: none;
-    transition: border-color 0.25s ease;
-  }
-  
-  .form-group input:focus {
-    border-color: var(--gold-bright);
-    box-shadow: 0 0 10px rgba(197, 160, 89, 0.25);
-  }
-  
-  .login-btn {
-    width: 100%;
-    padding: 15px;
-    border-radius: 10px;
-    border: none;
-    background: linear-gradient(135deg, #c5a059, #9e7a38);
-    color: #110303;
-    font-size: 16px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.25s ease;
+  /* Navbar */
+  .site-header {
+    padding: 24px 6vw;
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 10px;
+    justify-content: space-between;
+  }
+  
+  .logo-brand {
+    display: flex;
+    align-items: center;
+    gap: 14px;
     text-decoration: none;
   }
   
-  .login-btn:hover {
-    background: linear-gradient(135deg, #e5c178, #c5a059);
-    box-shadow: 0 6px 20px rgba(197, 160, 89, 0.35);
-    transform: translateY(-2px);
+  .logo-brand img {
+    height: 52px;
+    width: auto;
+    object-fit: contain;
   }
   
-  .status-message {
-    margin-top: 16px;
-    padding: 12px;
-    border-radius: 8px;
-    font-size: 13px;
-    display: none;
-    line-height: 1.5;
+  .logo-brand span {
+    color: var(--gold-light);
+    font-size: 1.05rem;
+    font-weight: 500;
+    letter-spacing: 0.02em;
   }
-  .status-message.info {
-    background: rgba(197, 160, 89, 0.15);
-    border: 1px solid rgba(197, 160, 89, 0.3);
-    color: var(--gold-bright);
+  
+  .nav-back-link {
+    color: var(--gold-light);
+    text-decoration: none;
+    font-size: 0.9rem;
+    opacity: 0.85;
+    transition: opacity 0.2s;
+  }
+  .nav-back-link:hover {
+    opacity: 1;
+    text-decoration: underline;
+  }
+  
+  /* Main Hero Section */
+  .hero-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 4vh 6vw 8vh;
+    max-width: 760px;
+  }
+  
+  .hero-headline {
+    font-size: clamp(2.2rem, 5.5vw, 3.4rem);
+    font-style: italic;
+    font-weight: 500;
+    color: var(--cream);
+    line-height: 1.22;
+    margin-bottom: 1.5rem;
+    letter-spacing: -0.01em;
+  }
+  
+  .hero-subtitle {
+    color: var(--gold-light);
+    font-size: 1.1rem;
+    line-height: 1.65;
+    margin-bottom: 2.5rem;
+    max-width: 620px;
+    opacity: 0.95;
+  }
+  
+  /* Action Button */
+  .portal-cta-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background: var(--gold);
+    color: var(--dark-text);
+    padding: 0.95rem 1.8rem;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 1.05rem;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  }
+  
+  .portal-cta-btn:hover {
+    background: #e5b954;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 24px rgba(212, 168, 67, 0.4);
+  }
+  
+  /* Modal Login overlay */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(15, 2, 2, 0.85);
+    backdrop-filter: blur(12px);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  
+  .modal-overlay.active {
+    display: flex;
+  }
+  
+  .login-modal {
+    background: #ffffff;
+    color: #330808;
+    width: 100%;
+    max-width: 440px;
+    border-radius: 20px;
+    padding: 2.5rem 2rem;
+    box-shadow: 0 24px 80px rgba(0,0,0,0.6);
+    position: relative;
+    animation: modalSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  
+  @keyframes modalSlideUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  .close-modal-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: transparent;
+    border: none;
+    font-size: 24px;
+    color: #9b5c5c;
+    cursor: pointer;
+    line-height: 1;
+  }
+  
+  .modal-header {
+    text-align: center;
+    margin-bottom: 1.75rem;
+  }
+  
+  .modal-header img {
+    height: 52px;
+    width: auto;
+    object-fit: contain;
+    margin-bottom: 0.75rem;
+  }
+  
+  .modal-header h2 {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #330808;
+    margin: 0;
+  }
+  
+  .modal-header p {
+    color: #9b5c5c;
+    font-size: 0.88rem;
+    margin-top: 4px;
+  }
+  
+  .form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    margin-bottom: 1.25rem;
+    text-align: left;
+  }
+  
+  .form-field label {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #330808;
+  }
+  
+  .form-field input {
+    padding: 0.75rem 1rem;
+    border-radius: 10px;
+    border: 1.5px solid #fde8e8;
+    font-size: 1rem;
+    color: #330808;
+    outline: none;
+    transition: border-color 0.15s;
+    font-family: inherit;
+  }
+  
+  .form-field input:focus {
+    border-color: var(--gold);
+  }
+  
+  .modal-submit-btn {
+    width: 100%;
+    background: linear-gradient(135deg, #330808 0%, #4a1010 100%);
+    color: #ffffff;
+    padding: 0.85rem;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 1rem;
+    border: none;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  
+  .modal-submit-btn:hover {
+    background: #651212;
+  }
+  
+  /* Footer */
+  .site-footer {
+    border-top: 1px solid rgba(212, 168, 67, 0.2);
+    padding: 1.25rem 6vw;
+    font-size: 0.85rem;
+    color: var(--gold-light);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .site-footer a {
+    color: var(--gold-light);
+    text-decoration: none;
+  }
+  .site-footer a:hover {
+    text-decoration: underline;
   }
 </style>
 </head>
 <body>
 
-<header class="h-nav" id="navbar">
-  <div class="nav-cont">
-    <div class="logo-wrapper">
-      <a href="/"><img src="/static/image/logo.png" alt="NAKCONEL Logo" style="height:72px;width:auto;object-fit:contain;"></a>
-    </div>
-    <ul class="nav-links" id="navLinks">
-      <li><a href="/home">Home</a></li>
-      <li class="about-dd-wrap">
-        <button class="about-dd-btn" id="aboutDropBtn" aria-expanded="false" aria-haspopup="true">
-          About <span class="dd-arrow">▾</span>
-        </button>
-        <div class="about-dd-menu" id="aboutDropMenu" role="menu">
-          <a class="dd-item" href="/about" role="menuitem">
-            <span class="dd-icon">◈</span>
-            <span class="dd-text"><strong>About Nakconel</strong><small>Our story &amp; direction</small></span>
-          </a>
-          <a class="dd-item" href="/meet-the-team" role="menuitem">
-            <span class="dd-icon">◉</span>
-            <span class="dd-text"><strong>Meet the Team</strong><small>The people behind the brand</small></span>
-          </a>
-        </div>
-      </li>
-      <li><a href="/our-center" class="active">Our Center</a></li>
-      <li><a href="/home#services">Pillars</a></li>
-      <li><a href="/home#markets">Global Footprints</a></li>
-      <li><a href="/home#work">Showcase</a></li>
-      <li><a href="/career">Career</a></li>
-      <li><a href="/contact">Contact</a></li>
-    </ul>
-    <button class="menu-tg" id="menuToggle" aria-label="Toggle Menu">
-      <span></span><span></span><span></span>
-    </button>
-  </div>
+<header class="site-header">
+  <a href="/home" class="logo-brand">
+    <img src="/static/image/logo.png" alt="NAKCONEL Logo">
+    <span>Nakconel Examinations</span>
+  </a>
+  <a href="/home" class="nav-back-link">← Return to Website</a>
 </header>
 
-<section class="page-hero" style="padding-bottom: 20px;">
-  <div class="center-header-badge">
-    <span class="dot"></span> Nakconel Examination &amp; Learning Portal
-  </div>
-  <span class="eyebrow">Center Access</span>
-  <h1>Center <span>Login</span></h1>
-  <p class="hero-sub" style="max-width: 600px; margin: 12px auto 0;">
-    Sign in to access your CBT Examination session, student learning dashboard, or center admin dashboard.
+<main class="hero-container">
+  <h1 class="hero-headline">
+    Where your Nakconel training becomes a result you can show for it.
+  </h1>
+  <p class="hero-subtitle">
+    Register for your programme, sit your assessments, and track your scores — all in one place.
   </p>
-</section>
+  <div>
+    <button class="portal-cta-btn" onclick="openLoginModal()">
+      Log in to Portal →
+    </button>
+  </div>
+</main>
 
-<div class="login-container">
-  <div class="login-card">
-    <div class="tab-nav">
-      <button class="tab-btn active" onclick="switchTab('cbt', event)">CBT Exam</button>
-      <button class="tab-btn" onclick="switchTab('student', event)">Student Portal</button>
-      <button class="tab-btn" onclick="switchTab('admin', event)">Admin</button>
+<!-- Login Modal -->
+<div class="modal-overlay" id="loginModal">
+  <div class="login-modal">
+    <button class="close-modal-btn" onclick="closeLoginModal()">&times;</button>
+    <div class="modal-header">
+      <img src="/static/image/logo.png" alt="NAKCONEL Logo">
+      <h2>Student Sign In</h2>
+      <p>Nakconel Examinations Portal</p>
     </div>
-
-    <!-- CBT Exam Form -->
-    <form id="cbtForm" onsubmit="handleCbtLogin(event)">
-      <div class="form-group">
-        <label for="cbtEmail">Candidate Email Address</label>
-        <input type="email" id="cbtEmail" placeholder="e.g. candidate@example.com" required>
+    <form onsubmit="handlePortalSubmit(event)">
+      <div class="form-field">
+        <label for="portalEmail">Registered Email Address</label>
+        <input type="email" id="portalEmail" placeholder="you@example.com" required>
       </div>
-      <button type="submit" class="login-btn">
-        Login to Take Exam <span>➔</span>
+      <button type="submit" class="modal-submit-btn">
+        Access Exam Session ➔
       </button>
     </form>
-
-    <!-- Student Learning Form -->
-    <form id="studentForm" style="display:none;" onsubmit="handleStudentLogin(event)">
-      <div class="form-group">
-        <label for="studentId">Student ID or Phone Number</label>
-        <input type="text" id="studentId" placeholder="e.g. STU-10293 or 08012345678" required>
-      </div>
-      <button type="submit" class="login-btn">
-        Access Learning Dashboard <span>➔</span>
-      </button>
-    </form>
-
-    <!-- Admin Form -->
-    <form id="adminForm" style="display:none;" onsubmit="handleAdminLogin(event)">
-      <div class="form-group">
-        <label for="adminEmail">Center Admin Email</label>
-        <input type="email" id="adminEmail" placeholder="admin@nakconel.com" required>
-      </div>
-      <button type="submit" class="login-btn">
-        Enter Admin Control Room <span>➔</span>
-      </button>
-    </form>
-
-    <div id="statusMsg" class="status-message info"></div>
   </div>
 </div>
 
-<footer style="text-align: center; padding: 40px 20px; border-top: 1px solid rgba(197, 160, 89, 0.15); color: #8a7a68; font-size: 14px;">
-  <p>&copy; 2026 Nakconel Brand Management &amp; IT Systems. All Rights Reserved.</p>
+<footer class="site-footer">
+  <span>Nakconel &middot; Student examination portal</span>
+  <a href="#" onclick="openLoginModal(); return false;">Admin</a>
 </footer>
 
 <script>
-  const portalBase = "{{ cbt_portal_url }}";
-
-  function switchTab(tab, evt) {
-    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-    document.getElementById('cbtForm').style.display = 'none';
-    document.getElementById('studentForm').style.display = 'none';
-    document.getElementById('adminForm').style.display = 'none';
-    
-    if (evt && evt.target) evt.target.classList.add('active');
-
-    if (tab === 'cbt') {
-      document.getElementById('cbtForm').style.display = 'block';
-    } else if (tab === 'student') {
-      document.getElementById('studentForm').style.display = 'block';
-    } else if (tab === 'admin') {
-      document.getElementById('adminForm').style.display = 'block';
-    }
+  function openLoginModal() {
+    document.getElementById('loginModal').classList.add('active');
   }
 
-  function showStatus(msg) {
-    const el = document.getElementById('statusMsg');
-    if (el) {
-      el.style.display = 'block';
-      el.innerHTML = msg;
-    }
+  function closeLoginModal() {
+    document.getElementById('loginModal').classList.remove('active');
   }
 
-  function handleCbtLogin(e) {
+  function handlePortalSubmit(e) {
     e.preventDefault();
-    const email = encodeURIComponent(document.getElementById('cbtEmail').value);
-    if (portalBase && portalBase.startsWith('http')) {
-      window.location.href = portalBase + "/login?email=" + email;
-    } else {
-      showStatus("Connecting to Nakconel Examination Session for <strong>" + document.getElementById('cbtEmail').value + "</strong>...");
-    }
+    const email = document.getElementById('portalEmail').value;
+    alert("Connecting to Nakconel Examination Session for " + email);
   }
 
-  function handleStudentLogin(e) {
-    e.preventDefault();
-    if (portalBase && portalBase.startsWith('http')) {
-      window.location.href = portalBase + "/learning/login";
-    } else {
-      showStatus("Connecting to Nakconel Student Learning Portal...");
+  // Close modal when clicking background
+  document.getElementById('loginModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+      closeLoginModal();
     }
-  }
-
-  function handleAdminLogin(e) {
-    e.preventDefault();
-    if (portalBase && portalBase.startsWith('http')) {
-      window.location.href = portalBase + "/admin/login";
-    } else {
-      showStatus("Connecting to Nakconel Center Administrator Control Room...");
-    }
-  }
-
-  const menuToggle = document.getElementById('menuToggle');
-  const navLinks = document.getElementById('navLinks');
-  if (menuToggle && navLinks) {
-    menuToggle.addEventListener('click', () => {
-      navLinks.classList.toggle('open');
-      menuToggle.classList.toggle('active');
-    });
-  }
+  });
 </script>
 
 </body>
