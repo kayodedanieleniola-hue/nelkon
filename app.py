@@ -1088,10 +1088,11 @@ def enquiry():
 @app.route("/our-center.html")
 @app.route("/center")
 @app.route("/cbt-exam")
+@app.route("/center/login")
 def our_center():
     cbt_portal_url = os.environ.get("CBT_EXAM_URL", "http://localhost:3000")
-    if request.args.get("redirect") == "true":
-        return redirect(cbt_portal_url)
+    if request.args.get("redirect") == "true" or request.path == "/center/login":
+        return redirect(f"{cbt_portal_url.rstrip('/')}/login")
     return render_template("our-center.html", cbt_portal_url=cbt_portal_url)
 
 

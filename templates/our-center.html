@@ -4,130 +4,156 @@
 <script src="/static/js/error-logger.js" defer></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Our Center | Nakconel CBT &amp; Learning Portal</title>
+<title>Center Login | Nakconel CBT &amp; Learning Portal</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/static/css/nakconel-core.css">
 <link rel="stylesheet" href="/static/css/nakconel-pages.css">
 <style>
-  .center-badge {
+  :root {
+    --wine-deep: #1b0404;
+    --gold: #c5a059;
+    --gold-bright: #e5c178;
+    --cream: #f5eedc;
+  }
+  
+  .login-container {
+    max-width: 480px;
+    margin: 40px auto 80px;
+    padding: 0 20px;
+  }
+  
+  .login-card {
+    background: rgba(27, 4, 4, 0.85);
+    border: 1px solid rgba(197, 160, 89, 0.3);
+    border-radius: 20px;
+    padding: 36px 30px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), 0 0 30px rgba(197, 160, 89, 0.12);
+    backdrop-filter: blur(20px);
+  }
+  
+  .center-header-badge {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    background: rgba(197, 160, 89, 0.12);
-    border: 1px solid rgba(197, 160, 89, 0.3);
-    color: #e5c178;
+    background: rgba(197, 160, 89, 0.15);
+    border: 1px solid rgba(197, 160, 89, 0.35);
+    color: var(--gold-bright);
     padding: 6px 16px;
     border-radius: 50px;
     font-size: 13px;
     font-weight: 500;
-    letter-spacing: 0.5px;
-    margin-bottom: 20px;
+    margin-bottom: 16px;
   }
-  .center-badge .dot {
+  
+  .center-header-badge .dot {
     width: 8px;
     height: 8px;
     background-color: #22c55e;
     border-radius: 50%;
     box-shadow: 0 0 8px #22c55e;
-    animation: pulse 2s infinite;
   }
-  @keyframes pulse {
-    0% { opacity: 0.4; }
-    50% { opacity: 1; }
-    100% { opacity: 0.4; }
-  }
-  .portal-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    gap: 28px;
-    max-width: 1200px;
-    margin: 40px auto 60px;
-    padding: 0 20px;
-  }
-  .portal-card {
-    background: rgba(30, 8, 8, 0.65);
-    border: 1px solid rgba(197, 160, 89, 0.2);
-    border-radius: 16px;
-    padding: 32px 28px;
-    backdrop-filter: blur(16px);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  .tab-nav {
     display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    position: relative;
-    overflow: hidden;
-  }
-  .portal-card:hover {
-    transform: translateY(-6px);
-    border-color: rgba(197, 160, 89, 0.6);
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4), 0 0 20px rgba(197, 160, 89, 0.15);
-  }
-  .portal-icon {
-    width: 56px;
-    height: 56px;
+    gap: 8px;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 6px;
     border-radius: 12px;
-    background: linear-gradient(135deg, rgba(197, 160, 89, 0.2), rgba(120, 40, 40, 0.3));
-    border: 1px solid rgba(197, 160, 89, 0.3);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 26px;
-    margin-bottom: 20px;
-  }
-  .portal-card h3 {
-    font-size: 22px;
-    font-weight: 600;
-    color: #f5eedc;
-    margin-bottom: 12px;
-  }
-  .portal-card p {
-    color: rgba(245, 238, 220, 0.72);
-    font-size: 14px;
-    line-height: 1.6;
+    border: 1px solid rgba(197, 160, 89, 0.2);
     margin-bottom: 24px;
   }
-  .portal-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    width: 100%;
-    padding: 14px 24px;
-    border-radius: 10px;
+  
+  .tab-btn {
+    flex: 1;
+    padding: 10px 12px;
+    border: none;
+    background: transparent;
+    color: rgba(245, 238, 220, 0.6);
+    font-size: 13px;
+    font-weight: 500;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    font-family: inherit;
+  }
+  
+  .tab-btn.active {
     background: linear-gradient(135deg, #c5a059, #9e7a38);
     color: #110303;
     font-weight: 600;
-    font-size: 15px;
-    text-decoration: none;
-    transition: all 0.25s ease;
+    box-shadow: 0 4px 12px rgba(197, 160, 89, 0.3);
   }
-  .portal-btn:hover {
-    background: linear-gradient(135deg, #e5c178, #c5a059);
-    box-shadow: 0 6px 18px rgba(197, 160, 89, 0.35);
-    transform: scale(1.02);
-  }
-  .portal-btn-secondary {
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(197, 160, 89, 0.3);
-    color: #e5c178;
-  }
-  .portal-btn-secondary:hover {
-    background: rgba(197, 160, 89, 0.18);
-    color: #fff;
-  }
-  .feature-pills {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
+  
+  .form-group {
     margin-bottom: 20px;
+    text-align: left;
   }
-  .feature-pill {
-    font-size: 12px;
-    padding: 4px 10px;
-    border-radius: 20px;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    color: #d1c4b2;
+  
+  .form-group label {
+    display: block;
+    font-size: 13px;
+    color: rgba(245, 238, 220, 0.85);
+    margin-bottom: 8px;
+    font-weight: 500;
+  }
+  
+  .form-group input {
+    width: 100%;
+    padding: 14px 16px;
+    border-radius: 10px;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(197, 160, 89, 0.3);
+    color: #fff;
+    font-size: 15px;
+    outline: none;
+    transition: border-color 0.25s ease;
+  }
+  
+  .form-group input:focus {
+    border-color: var(--gold-bright);
+    box-shadow: 0 0 10px rgba(197, 160, 89, 0.25);
+  }
+  
+  .login-btn {
+    width: 100%;
+    padding: 15px;
+    border-radius: 10px;
+    border: none;
+    background: linear-gradient(135deg, #c5a059, #9e7a38);
+    color: #110303;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    text-decoration: none;
+  }
+  
+  .login-btn:hover {
+    background: linear-gradient(135deg, #e5c178, #c5a059);
+    box-shadow: 0 6px 20px rgba(197, 160, 89, 0.35);
+    transform: translateY(-2px);
+  }
+  
+  .direct-link-box {
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(197, 160, 89, 0.15);
+    text-align: center;
+  }
+  
+  .direct-link-box a {
+    color: var(--gold-bright);
+    text-decoration: none;
+    font-size: 13px;
+    transition: color 0.2s;
+  }
+  
+  .direct-link-box a:hover {
+    text-decoration: underline;
   }
 </style>
 </head>
@@ -168,84 +194,61 @@
   </div>
 </header>
 
-<section class="page-hero">
-  <div class="center-badge">
-    <span class="dot"></span> CBT &amp; Learning Center Online
+<section class="page-hero" style="padding-bottom: 20px;">
+  <div class="center-header-badge">
+    <span class="dot"></span> Nakconel Examination &amp; Learning Portal
   </div>
-  <span class="eyebrow">Nakconel Educational Systems</span>
-  <h1>Our <span>Center</span></h1>
-  <p class="hero-sub" style="max-width: 680px; margin: 16px auto 0;">
-    Welcome to Nakconel CBT &amp; Examination Center. Access computer-based testing, virtual classrooms, real-time assessments, and student learning management.
+  <span class="eyebrow">Center Access</span>
+  <h1>Center <span>Login</span></h1>
+  <p class="hero-sub" style="max-width: 600px; margin: 12px auto 0;">
+    Sign in to access your CBT Examination session, student learning dashboard, or center admin dashboard.
   </p>
 </section>
 
-<div class="portal-grid">
-  <!-- CBT Exam Portal -->
-  <div class="portal-card">
-    <div>
-      <div class="portal-icon">📝</div>
-      <h3>Computer-Based Testing (CBT)</h3>
-      <p>Secure, automated examination engine with live camera monitoring, question randomization, anti-cheat detection, and instant result scoring.</p>
-      <div class="feature-pills">
-        <span class="feature-pill">Live Monitoring</span>
-        <span class="feature-pill">Instant Scoring</span>
-        <span class="feature-pill">Anti-Cheat</span>
-      </div>
+<div class="login-container">
+  <div class="login-card">
+    <div class="tab-nav">
+      <button class="tab-btn active" onclick="switchTab('cbt')">CBT Exam</button>
+      <button class="tab-btn" onclick="switchTab('student')">Student Portal</button>
+      <button class="tab-btn" onclick="switchTab('admin')">Admin</button>
     </div>
-    <a href="{{ cbt_portal_url }}/login" target="_blank" class="portal-btn">
-      Take CBT Exam <span>➔</span>
-    </a>
-  </div>
 
-  <!-- Student Learning Portal -->
-  <div class="portal-card">
-    <div>
-      <div class="portal-icon">🎓</div>
-      <h3>Student Learning Portal</h3>
-      <p>Access your personalized learning dashboard, course materials, class schedules, assignments, and verified certificates of completion.</p>
-      <div class="feature-pills">
-        <span class="feature-pill">Course Materials</span>
-        <span class="feature-pill">Assignments</span>
-        <span class="feature-pill">Certificates</span>
+    <!-- CBT Exam Form -->
+    <form id="cbtForm" onsubmit="handleCbtLogin(event)">
+      <div class="form-group">
+        <label for="cbtEmail">Candidate Email Address</label>
+        <input type="email" id="cbtEmail" placeholder="e.g. candidate@example.com" required>
       </div>
-    </div>
-    <a href="{{ cbt_portal_url }}/learning/login" target="_blank" class="portal-btn portal-btn-secondary">
-      Student Login <span>➔</span>
-    </a>
-  </div>
+      <button type="submit" class="login-btn">
+        Login to Take Exam <span>➔</span>
+      </button>
+    </form>
 
-  <!-- Virtual Live Classroom -->
-  <div class="portal-card">
-    <div>
-      <div class="portal-icon">🎥</div>
-      <h3>Virtual Classroom &amp; LiveKit</h3>
-      <p>Interactive real-time video sessions, live instructor broadcasting, participant chat, interactive polls, and lecture replays.</p>
-      <div class="feature-pills">
-        <span class="feature-pill">HD Video Feed</span>
-        <span class="feature-pill">Live Polls</span>
-        <span class="feature-pill">Class Chat</span>
+    <!-- Student Learning Form -->
+    <form id="studentForm" style="display:none;" onsubmit="handleStudentLogin(event)">
+      <div class="form-group">
+        <label for="studentId">Student ID or Phone Number</label>
+        <input type="text" id="studentId" placeholder="e.g. STU-10293 or 08012345678" required>
       </div>
-    </div>
-    <a href="{{ cbt_portal_url }}/learning" target="_blank" class="portal-btn portal-btn-secondary">
-      Join Virtual Class <span>➔</span>
-    </a>
-  </div>
+      <button type="submit" class="login-btn">
+        Access Learning Dashboard <span>➔</span>
+      </button>
+    </form>
 
-  <!-- Instructor & Administrator Portal -->
-  <div class="portal-card">
-    <div>
-      <div class="portal-icon">⚙️</div>
-      <h3>Center Admin &amp; Instructor Portal</h3>
-      <p>Comprehensive admin control room for bulk question imports, candidate management, exam scheduling, attendance tracking, and analytics.</p>
-      <div class="feature-pills">
-        <span class="feature-pill">Bulk Imports</span>
-        <span class="feature-pill">Attempt Logs</span>
-        <span class="feature-pill">Admin Guard</span>
+    <!-- Admin Form -->
+    <form id="adminForm" style="display:none;" onsubmit="handleAdminLogin(event)">
+      <div class="form-group">
+        <label for="adminEmail">Center Admin Email</label>
+        <input type="email" id="adminEmail" placeholder="admin@nakconel.com" required>
       </div>
+      <button type="submit" class="login-btn">
+        Enter Admin Control Room <span>➔</span>
+      </button>
+    </form>
+
+    <div class="direct-link-box">
+      <a href="{{ cbt_portal_url }}/login" target="_blank">Launch Fullscreen Center App Directly ↗</a>
     </div>
-    <a href="{{ cbt_portal_url }}/login" target="_blank" class="portal-btn portal-btn-secondary">
-      Admin Portal <span>➔</span>
-    </a>
   </div>
 </div>
 
@@ -254,6 +257,42 @@
 </footer>
 
 <script>
+  const portalBase = "{{ cbt_portal_url }}";
+
+  function switchTab(tab) {
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    document.getElementById('cbtForm').style.display = 'none';
+    document.getElementById('studentForm').style.display = 'none';
+    document.getElementById('adminForm').style.display = 'none';
+
+    if (tab === 'cbt') {
+      event.target.classList.add('active');
+      document.getElementById('cbtForm').style.display = 'block';
+    } else if (tab === 'student') {
+      event.target.classList.add('active');
+      document.getElementById('studentForm').style.display = 'block';
+    } else if (tab === 'admin') {
+      event.target.classList.add('active');
+      document.getElementById('adminForm').style.display = 'block';
+    }
+  }
+
+  function handleCbtLogin(e) {
+    e.preventDefault();
+    const email = encodeURIComponent(document.getElementById('cbtEmail').value);
+    window.location.href = portalBase + "/login?email=" + email;
+  }
+
+  function handleStudentLogin(e) {
+    e.preventDefault();
+    window.location.href = portalBase + "/learning/login";
+  }
+
+  function handleAdminLogin(e) {
+    e.preventDefault();
+    window.location.href = portalBase + "/admin/login";
+  }
+
   const menuToggle = document.getElementById('menuToggle');
   const navLinks = document.getElementById('navLinks');
   if (menuToggle && navLinks) {
