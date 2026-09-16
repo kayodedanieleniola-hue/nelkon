@@ -315,10 +315,12 @@
 
 <footer class="site-footer">
   <span>Nakconel &middot; Student examination portal</span>
-  <a href="#" onclick="openLoginModal(); return false;">Admin</a>
+  <a href="#" onclick="openAdminLogin(); return false;">Admin</a>
 </footer>
 
 <script>
+  const portalBase = "{{ cbt_portal_url }}";
+
   function openLoginModal() {
     document.getElementById('loginModal').classList.add('active');
   }
@@ -329,8 +331,14 @@
 
   function handlePortalSubmit(e) {
     e.preventDefault();
-    const email = document.getElementById('portalEmail').value;
-    alert("Connecting to Nakconel Examination Session for " + email);
+    const email = encodeURIComponent(document.getElementById('portalEmail').value.trim());
+    const baseUrl = (portalBase && portalBase.startsWith('http')) ? portalBase : "http://localhost:3000";
+    window.location.href = baseUrl + "/login?email=" + email;
+  }
+
+  function openAdminLogin() {
+    const baseUrl = (portalBase && portalBase.startsWith('http')) ? portalBase : "http://localhost:3000";
+    window.location.href = baseUrl + "/admin/login";
   }
 
   // Close modal when clicking background
