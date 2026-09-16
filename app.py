@@ -1088,10 +1088,9 @@ def enquiry():
 @app.route("/our-center.html")
 @app.route("/center")
 @app.route("/cbt-exam")
-@app.route("/center/login")
 def our_center():
-    cbt_portal_url = os.environ.get("CBT_EXAM_URL", "https://nakconel-cbt.vercel.app")
-    return redirect(f"{cbt_portal_url.rstrip('/')}/login")
+    cbt_portal_url = os.environ.get("CBT_EXAM_URL", "http://localhost:3000")
+    return render_template("our-center.html", cbt_portal_url=cbt_portal_url)
 
 
 @app.route("/internship-application")
