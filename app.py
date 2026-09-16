@@ -1084,6 +1084,8 @@ def training_registration():
 def enquiry():
     return render_template("enquiry.html")
 
+@app.route("/our-service")
+@app.route("/our-services")
 @app.route("/our-center")
 @app.route("/our-center.html")
 @app.route("/center")
