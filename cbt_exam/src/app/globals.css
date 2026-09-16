@@ -1,0 +1,122 @@
+/*
+ * NAKCONEL Design Tokens & Global Styles (ui-ux-pro-max enhanced)
+ */
+
+:root {
+  /* ── Colours ──────────────────────────────────────────────────────────── */
+  --burgundy-950: #1a0505;
+  --burgundy-900: #75100B;   /* Primary Deep Wine */
+  --burgundy-800: #4a1210;
+  --burgundy-600: #7f1d1d;
+  --burgundy-300: #fca5a5;
+  --gold-600: #cda553;       /* Primary Gold Accent */
+  --gold-400: #c68f3f;
+  --gold-200: #e3c690;
+  --cream-50:  #fdfaf6;
+  --cream-100: #fff8f8;
+  --cream-200: #fde8e8;
+  --ink-900: #1f1110;
+  --ink-600: #5a4c46;
+  --line: rgba(127, 29, 29, 0.15);
+  --line-gold: rgba(198, 143, 63, 0.3);
+  --danger:  #dc2626;
+  --success: #16a34a;
+
+  /* ── Shadows & Glassmorphism ────────────────────────────────────────── */
+  --shadow-sm: 0 2px 8px rgba(31, 5, 5, 0.05);
+  --shadow-md: 0 8px 24px rgba(31, 5, 5, 0.09);
+  --shadow-lg: 0 16px 36px rgba(31, 5, 5, 0.15);
+  --glass-bg: rgba(255, 255, 255, 0.85);
+  --glass-border: rgba(127, 29, 29, 0.12);
+
+  /* ── Typography ───────────────────────────────────────────────────────── */
+  --font-display: var(--font-poppins), "Segoe UI", system-ui, sans-serif;
+  --font-body: var(--font-poppins), "Segoe UI", system-ui, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  padding: 0;
+  margin: 0;
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--cream-50);
+  color: var(--ink-900);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  color: var(--burgundy-900);
+  margin: 0;
+  line-height: 1.2;
+}
+
+a {
+  color: inherit;
+  transition: opacity 0.15s ease, color 0.15s ease;
+}
+
+button, input, select, textarea {
+  font-family: var(--font-body);
+  font-size: 1rem;
+}
+
+:focus-visible {
+  outline: 2px solid var(--gold-600);
+  outline-offset: 2px;
+}
+
+/* ── Custom Scrollbar ────────────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(127, 29, 29, 0.25);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(127, 29, 29, 0.45);
+}
+
+/* ── Keyframe Animations ────────────────────────────────────────────── */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -8px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(22, 163, 74, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}

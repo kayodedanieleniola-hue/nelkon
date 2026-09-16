@@ -1,0 +1,41 @@
+{
+  "name": "nakconel-cbt",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "prisma generate && prisma db push --accept-data-loss --skip-generate && next build",
+    "start": "next start",
+    "lint": "next lint",
+    "db:push": "prisma db push",
+    "db:seed": "tsx scripts/seed.ts"
+  },
+  "dependencies": {
+    "@next/swc-wasm-nodejs": "16.3.4",
+    "@prisma/client": "^5.20.0",
+    "@vladmandic/face-api": "^1.7.15",
+    "bcryptjs": "^2.4.3",
+    "jose": "^5.9.6",
+    "livekit-client": "^2.22.2",
+    "livekit-server-sdk": "^2.18.0",
+    "mammoth": "^1.12.2",
+    "next": "16.3.4",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "resend": "^6.28.0",
+    "write-excel-file": "^4.1.1",
+    "zod": "^3.23.8"
+  },
+  "optionalDependencies": {
+    "@next/swc-win32-x64-msvc": "16.3.4"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/node": "^20.16.11",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.5",
+    "prisma": "^5.20.0",
+    "tsx": "^4.19.1",
+    "typescript": "^5.6.3"
+  }
+}

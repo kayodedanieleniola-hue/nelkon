@@ -1084,6 +1084,17 @@ def training_registration():
 def enquiry():
     return render_template("enquiry.html")
 
+@app.route("/our-center")
+@app.route("/our-center.html")
+@app.route("/center")
+@app.route("/cbt-exam")
+def our_center():
+    cbt_portal_url = os.environ.get("CBT_EXAM_URL", "http://localhost:3000")
+    if request.args.get("redirect") == "true":
+        return redirect(cbt_portal_url)
+    return render_template("our-center.html", cbt_portal_url=cbt_portal_url)
+
+
 @app.route("/internship-application")
 @app.route("/internship-application.html")
 def internship_application():

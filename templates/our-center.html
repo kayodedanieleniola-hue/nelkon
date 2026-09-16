@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script src="/static/js/error-logger.js" defer></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Our Center | Nakconel CBT &amp; Learning Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/css/nakconel-core.css">
+<link rel="stylesheet" href="/static/css/nakconel-pages.css">
+<style>
+  .center-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(197, 160, 89, 0.12);
+    border: 1px solid rgba(197, 160, 89, 0.3);
+    color: #e5c178;
+    padding: 6px 16px;
+    border-radius: 50px;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    margin-bottom: 20px;
+  }
+  .center-badge .dot {
+    width: 8px;
+    height: 8px;
+    background-color: #22c55e;
+    border-radius: 50%;
+    box-shadow: 0 0 8px #22c55e;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0% { opacity: 0.4; }
+    50% { opacity: 1; }
+    100% { opacity: 0.4; }
+  }
+  .portal-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 28px;
+    max-width: 1200px;
+    margin: 40px auto 60px;
+    padding: 0 20px;
+  }
+  .portal-card {
+    background: rgba(30, 8, 8, 0.65);
+    border: 1px solid rgba(197, 160, 89, 0.2);
+    border-radius: 16px;
+    padding: 32px 28px;
+    backdrop-filter: blur(16px);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+    overflow: hidden;
+  }
+  .portal-card:hover {
+    transform: translateY(-6px);
+    border-color: rgba(197, 160, 89, 0.6);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4), 0 0 20px rgba(197, 160, 89, 0.15);
+  }
+  .portal-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, rgba(197, 160, 89, 0.2), rgba(120, 40, 40, 0.3));
+    border: 1px solid rgba(197, 160, 89, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    margin-bottom: 20px;
+  }
+  .portal-card h3 {
+    font-size: 22px;
+    font-weight: 600;
+    color: #f5eedc;
+    margin-bottom: 12px;
+  }
+  .portal-card p {
+    color: rgba(245, 238, 220, 0.72);
+    font-size: 14px;
+    line-height: 1.6;
+    margin-bottom: 24px;
+  }
+  .portal-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    padding: 14px 24px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #c5a059, #9e7a38);
+    color: #110303;
+    font-weight: 600;
+    font-size: 15px;
+    text-decoration: none;
+    transition: all 0.25s ease;
+  }
+  .portal-btn:hover {
+    background: linear-gradient(135deg, #e5c178, #c5a059);
+    box-shadow: 0 6px 18px rgba(197, 160, 89, 0.35);
+    transform: scale(1.02);
+  }
+  .portal-btn-secondary {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(197, 160, 89, 0.3);
+    color: #e5c178;
+  }
+  .portal-btn-secondary:hover {
+    background: rgba(197, 160, 89, 0.18);
+    color: #fff;
+  }
+  .feature-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+  .feature-pill {
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #d1c4b2;
+  }
+</style>
+</head>
+<body>
+
+<header class="h-nav" id="navbar">
+  <div class="nav-cont">
+    <div class="logo-wrapper">
+      <a href="/"><img src="/static/image/logo.png" alt="NAKCONEL Logo" style="height:72px;width:auto;object-fit:contain;"></a>
+    </div>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="/home">Home</a></li>
+      <li class="about-dd-wrap">
+        <button class="about-dd-btn" id="aboutDropBtn" aria-expanded="false" aria-haspopup="true">
+          About <span class="dd-arrow">▾</span>
+        </button>
+        <div class="about-dd-menu" id="aboutDropMenu" role="menu">
+          <a class="dd-item" href="/about" role="menuitem">
+            <span class="dd-icon">◈</span>
+            <span class="dd-text"><strong>About Nakconel</strong><small>Our story &amp; direction</small></span>
+          </a>
+          <a class="dd-item" href="/meet-the-team" role="menuitem">
+            <span class="dd-icon">◉</span>
+            <span class="dd-text"><strong>Meet the Team</strong><small>The people behind the brand</small></span>
+          </a>
+        </div>
+      </li>
+      <li><a href="/our-center" class="active">Our Center</a></li>
+      <li><a href="/home#services">Pillars</a></li>
+      <li><a href="/home#markets">Global Footprints</a></li>
+      <li><a href="/home#work">Showcase</a></li>
+      <li><a href="/career">Career</a></li>
+      <li><a href="/contact">Contact</a></li>
+    </ul>
+    <button class="menu-tg" id="menuToggle" aria-label="Toggle Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<section class="page-hero">
+  <div class="center-badge">
+    <span class="dot"></span> CBT &amp; Learning Center Online
+  </div>
+  <span class="eyebrow">Nakconel Educational Systems</span>
+  <h1>Our <span>Center</span></h1>
+  <p class="hero-sub" style="max-width: 680px; margin: 16px auto 0;">
+    Welcome to Nakconel CBT &amp; Examination Center. Access computer-based testing, virtual classrooms, real-time assessments, and student learning management.
+  </p>
+</section>
+
+<div class="portal-grid">
+  <!-- CBT Exam Portal -->
+  <div class="portal-card">
+    <div>
+      <div class="portal-icon">📝</div>
+      <h3>Computer-Based Testing (CBT)</h3>
+      <p>Secure, automated examination engine with live camera monitoring, question randomization, anti-cheat detection, and instant result scoring.</p>
+      <div class="feature-pills">
+        <span class="feature-pill">Live Monitoring</span>
+        <span class="feature-pill">Instant Scoring</span>
+        <span class="feature-pill">Anti-Cheat</span>
+      </div>
+    </div>
+    <a href="{{ cbt_portal_url }}/login" target="_blank" class="portal-btn">
+      Take CBT Exam <span>➔</span>
+    </a>
+  </div>
+
+  <!-- Student Learning Portal -->
+  <div class="portal-card">
+    <div>
+      <div class="portal-icon">🎓</div>
+      <h3>Student Learning Portal</h3>
+      <p>Access your personalized learning dashboard, course materials, class schedules, assignments, and verified certificates of completion.</p>
+      <div class="feature-pills">
+        <span class="feature-pill">Course Materials</span>
+        <span class="feature-pill">Assignments</span>
+        <span class="feature-pill">Certificates</span>
+      </div>
+    </div>
+    <a href="{{ cbt_portal_url }}/learning/login" target="_blank" class="portal-btn portal-btn-secondary">
+      Student Login <span>➔</span>
+    </a>
+  </div>
+
+  <!-- Virtual Live Classroom -->
+  <div class="portal-card">
+    <div>
+      <div class="portal-icon">🎥</div>
+      <h3>Virtual Classroom &amp; LiveKit</h3>
+      <p>Interactive real-time video sessions, live instructor broadcasting, participant chat, interactive polls, and lecture replays.</p>
+      <div class="feature-pills">
+        <span class="feature-pill">HD Video Feed</span>
+        <span class="feature-pill">Live Polls</span>
+        <span class="feature-pill">Class Chat</span>
+      </div>
+    </div>
+    <a href="{{ cbt_portal_url }}/learning" target="_blank" class="portal-btn portal-btn-secondary">
+      Join Virtual Class <span>➔</span>
+    </a>
+  </div>
+
+  <!-- Instructor & Administrator Portal -->
+  <div class="portal-card">
+    <div>
+      <div class="portal-icon">⚙️</div>
+      <h3>Center Admin &amp; Instructor Portal</h3>
+      <p>Comprehensive admin control room for bulk question imports, candidate management, exam scheduling, attendance tracking, and analytics.</p>
+      <div class="feature-pills">
+        <span class="feature-pill">Bulk Imports</span>
+        <span class="feature-pill">Attempt Logs</span>
+        <span class="feature-pill">Admin Guard</span>
+      </div>
+    </div>
+    <a href="{{ cbt_portal_url }}/login" target="_blank" class="portal-btn portal-btn-secondary">
+      Admin Portal <span>➔</span>
+    </a>
+  </div>
+</div>
+
+<footer style="text-align: center; padding: 40px 20px; border-top: 1px solid rgba(197, 160, 89, 0.15); color: #8a7a68; font-size: 14px;">
+  <p>&copy; 2026 Nakconel Brand Management &amp; IT Systems. All Rights Reserved.</p>
+</footer>
+
+<script>
+  const menuToggle = document.getElementById('menuToggle');
+  const navLinks = document.getElementById('navLinks');
+  if (menuToggle && navLinks) {
+    menuToggle.addEventListener('click', () => {
+      navLinks.classList.toggle('open');
+      menuToggle.classList.toggle('active');
+    });
+  }
+</script>
+
+</body>
+</html>
