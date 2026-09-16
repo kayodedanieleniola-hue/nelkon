@@ -1084,8 +1084,6 @@ def training_registration():
 def enquiry():
     return render_template("enquiry.html")
 
-@app.route("/our-service")
-@app.route("/our-services")
 @app.route("/our-center")
 @app.route("/our-center.html")
 @app.route("/center")
@@ -1093,9 +1091,7 @@ def enquiry():
 @app.route("/center/login")
 def our_center():
     cbt_portal_url = os.environ.get("CBT_EXAM_URL", "https://nakconel-cbt.vercel.app")
-    if request.args.get("redirect") == "true" or request.path == "/center/login":
-        return redirect(f"{cbt_portal_url.rstrip('/')}/login")
-    return render_template("our-center.html", cbt_portal_url=cbt_portal_url)
+    return redirect(f"{cbt_portal_url.rstrip('/')}/login")
 
 
 @app.route("/internship-application")
