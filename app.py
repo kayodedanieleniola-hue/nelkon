@@ -1089,7 +1089,7 @@ def enquiry():
 @app.route("/center")
 @app.route("/cbt-exam")
 def our_center():
-    cbt_portal_url = os.environ.get("CBT_EXAM_URL", "http://localhost:3000")
+    cbt_portal_url = os.environ.get("CBT_EXAM_URL", "")
     return render_template("our-center.html", cbt_portal_url=cbt_portal_url)
 
 

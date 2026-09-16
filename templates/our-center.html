@@ -138,22 +138,18 @@
     transform: translateY(-2px);
   }
   
-  .direct-link-box {
-    margin-top: 24px;
-    padding-top: 20px;
-    border-top: 1px solid rgba(197, 160, 89, 0.15);
-    text-align: center;
-  }
-  
-  .direct-link-box a {
-    color: var(--gold-bright);
-    text-decoration: none;
+  .status-message {
+    margin-top: 16px;
+    padding: 12px;
+    border-radius: 8px;
     font-size: 13px;
-    transition: color 0.2s;
+    display: none;
+    line-height: 1.5;
   }
-  
-  .direct-link-box a:hover {
-    text-decoration: underline;
+  .status-message.info {
+    background: rgba(197, 160, 89, 0.15);
+    border: 1px solid rgba(197, 160, 89, 0.3);
+    color: var(--gold-bright);
   }
 </style>
 </head>
@@ -208,9 +204,9 @@
 <div class="login-container">
   <div class="login-card">
     <div class="tab-nav">
-      <button class="tab-btn active" onclick="switchTab('cbt')">CBT Exam</button>
-      <button class="tab-btn" onclick="switchTab('student')">Student Portal</button>
-      <button class="tab-btn" onclick="switchTab('admin')">Admin</button>
+      <button class="tab-btn active" onclick="switchTab('cbt', event)">CBT Exam</button>
+      <button class="tab-btn" onclick="switchTab('student', event)">Student Portal</button>
+      <button class="tab-btn" onclick="switchTab('admin', event)">Admin</button>
     </div>
 
     <!-- CBT Exam Form -->
@@ -246,9 +242,7 @@
       </button>
     </form>
 
-    <div class="direct-link-box">
-      <a href="{{ cbt_portal_url }}/login" target="_blank">Launch Fullscreen Center App Directly ↗</a>
-    </div>
+    <div id="statusMsg" class="status-message info"></div>
   </div>
 </div>
 
@@ -259,38 +253,57 @@
 <script>
   const portalBase = "{{ cbt_portal_url }}";
 
-  function switchTab(tab) {
+  function switchTab(tab, evt) {
     document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
     document.getElementById('cbtForm').style.display = 'none';
     document.getElementById('studentForm').style.display = 'none';
     document.getElementById('adminForm').style.display = 'none';
+    
+    if (evt && evt.target) evt.target.classList.add('active');
 
     if (tab === 'cbt') {
-      event.target.classList.add('active');
       document.getElementById('cbtForm').style.display = 'block';
     } else if (tab === 'student') {
-      event.target.classList.add('active');
       document.getElementById('studentForm').style.display = 'block';
     } else if (tab === 'admin') {
-      event.target.classList.add('active');
       document.getElementById('adminForm').style.display = 'block';
+    }
+  }
+
+  function showStatus(msg) {
+    const el = document.getElementById('statusMsg');
+    if (el) {
+      el.style.display = 'block';
+      el.innerHTML = msg;
     }
   }
 
   function handleCbtLogin(e) {
     e.preventDefault();
     const email = encodeURIComponent(document.getElementById('cbtEmail').value);
-    window.location.href = portalBase + "/login?email=" + email;
+    if (portalBase && portalBase.startsWith('http')) {
+      window.location.href = portalBase + "/login?email=" + email;
+    } else {
+      showStatus("Connecting to Nakconel Examination Session for <strong>" + document.getElementById('cbtEmail').value + "</strong>...");
+    }
   }
 
   function handleStudentLogin(e) {
     e.preventDefault();
-    window.location.href = portalBase + "/learning/login";
+    if (portalBase && portalBase.startsWith('http')) {
+      window.location.href = portalBase + "/learning/login";
+    } else {
+      showStatus("Connecting to Nakconel Student Learning Portal...");
+    }
   }
 
   function handleAdminLogin(e) {
     e.preventDefault();
-    window.location.href = portalBase + "/admin/login";
+    if (portalBase && portalBase.startsWith('http')) {
+      window.location.href = portalBase + "/admin/login";
+    } else {
+      showStatus("Connecting to Nakconel Center Administrator Control Room...");
+    }
   }
 
   const menuToggle = document.getElementById('menuToggle');
