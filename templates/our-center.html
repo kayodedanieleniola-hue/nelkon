@@ -304,11 +304,9 @@
   </p>
   <div class="cta-group">
     <a id="directLearningBtn" class="portal-cta-btn" href="#">
-      Log in to Portal →
+      Student Sign In →
     </a>
-    <button class="portal-cta-btn portal-cta-secondary" onclick="openLoginModal()">
-      Student Sign In
-    </button>
+    
   </div>
 </main>
 
@@ -342,7 +340,7 @@
   const portalBase = "{{ cbt_portal_url }}";
   const baseUrl = (portalBase && portalBase.startsWith('http')) ? portalBase.replace(/\/$/, '') : "https://nakconel-learning-center.vercel.app";
 
-  document.getElementById('directLearningBtn').href = baseUrl + "/learning";
+  document.getElementById('directLearningBtn').href = baseUrl + "/login";
 
   function openLoginModal() {
     document.getElementById('loginModal').classList.add('active');
