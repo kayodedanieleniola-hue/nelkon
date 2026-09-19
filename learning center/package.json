@@ -19,7 +19,7 @@
     "livekit-client": "^2.22.2",
     "livekit-server-sdk": "^2.18.0",
     "mammoth": "^1.12.2",
-    "next": "16.3.4",
+    "next": "latest",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "resend": "^6.28.0",
