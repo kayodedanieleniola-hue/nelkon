@@ -355,7 +355,7 @@
   function handlePortalSubmit(e) {
     e.preventDefault();
     const email = encodeURIComponent(document.getElementById('portalEmail').value.trim());
-    window.location.href = baseUrl + "/learning/login?email=" + email;
+    window.location.href = baseUrl + "/login?email=" + email;
   }
 
   function openAdminLogin() {
