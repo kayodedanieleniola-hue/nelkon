@@ -1091,10 +1091,8 @@ def enquiry():
 @app.route("/learning-center")
 @app.route("/cbt-exam")
 def our_center():
-    cbt_portal_url = os.environ.get("CBT_EXAM_URL", "https://nakconel-cbt.vercel.app").rstrip('/')
-    if request.path in ["/learning", "/learning-center"] or request.args.get("direct") == "1":
-        return redirect(f"{cbt_portal_url}/learning")
-    return render_template("our-center.html", cbt_portal_url=cbt_portal_url)
+    cbt_portal_url = os.environ.get("CBT_EXAM_URL", "https://nakconel-learning-center.vercel.app").rstrip("/")
+    return redirect(cbt_portal_url)
 
 
 
