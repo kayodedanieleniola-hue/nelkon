@@ -1,11 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { jwtVerify } from "jose";
 
-// Edge-safe first line of defense: confirms a valid session cookie exists
-// AND carries the right role for the area being accessed. Every page and
-// API route still re-checks server-side — this just stops obviously-
-// unauthenticated requests before they render.
-
+// Node.js request guard for protected portal areas. Pages and API routes still
+// perform their own server-side authorization checks.
 async function verify(token: string | undefined) {
   if (!token) return null;
   try {
@@ -18,10 +15,9 @@ async function verify(token: string | undefined) {
   }
 }
 
-export async function middleware(req: NextRequest) {
+export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
-  // ── CBT exam student dashboard ─────────────────────────────────────────
   if (pathname.startsWith("/dashboard")) {
     const token = req.cookies.get("nak_student_session")?.value;
     const payload = await verify(token);
@@ -31,26 +27,22 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
-  // ── Learning Center — external students via OTP login ─────────────────
-  // /learning/login is public — everything else requires nak_lc_session
+  // /learning/login is public. Existing CBT sessions remain accepted for
+  // backwards compatibility alongside Learning Center OTP sessions.
   if (pathname.startsWith("/learning") && pathname !== "/learning/login") {
-    // Also allow the old CBT student session for backward-compat
-    const lcToken  = req.cookies.get("nak_lc_session")?.value;
+    const lcToken = req.cookies.get("nak_lc_session")?.value;
     const cbtToken = req.cookies.get("nak_student_session")?.value;
-
-    const lcPayload  = await verify(lcToken);
+    const lcPayload = await verify(lcToken);
     const cbtPayload = await verify(cbtToken);
 
-    const isLcAuthed  = !!lcPayload?.profileId;    // new external OTP session
-    const isCbtAuthed = cbtPayload?.role === "student"; // existing CBT student
-
+    const isLcAuthed = !!lcPayload?.profileId;
+    const isCbtAuthed = cbtPayload?.role === "student";
     if (!isLcAuthed && !isCbtAuthed) {
       return NextResponse.redirect(new URL("/learning/login", req.url));
     }
     return NextResponse.next();
   }
 
-  // ── Admin dashboard ────────────────────────────────────────────────────
   if (pathname.startsWith("/admin") && pathname !== "/admin/login") {
     const token = req.cookies.get("nak_admin_session")?.value;
     const payload = await verify(token);
