@@ -218,7 +218,7 @@ p.lead {
  </div>
  <div class="row">
  <span class="label" id="recAmountLabel">Amount Paid</span>
- <span class="val" style="color:var(--bronze-light);" id="recAmount">₦250,000 NGN</span>
+ <span class="val" style="color:var(--bronze-light);" id="recAmount">₦200,000 NGN</span>
  </div>
  <div class="row">
  <span class="label">Admin Status</span>
@@ -282,7 +282,7 @@ fetch('/api/registration/' + regId)
  document.getElementById('recBadge').className = 'badge-approved';
  document.getElementById('recBadge').textContent = 'Submitted ✓';
  } else {
- const amt = Number(r.amount || 250000).toLocaleString();
+ const amt = Number(r.amount || 200000).toLocaleString();
  document.getElementById('recAmount').textContent = '₦' + amt + ' NGN';
  }
  }

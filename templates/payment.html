@@ -268,7 +268,7 @@ body {
 
  <div class="price-tag">
  <span class="summary-label">Total Enrollment Fee</span>
- <span class="price-amount" id="regAmount">₦250,000</span>
+<span class="price-amount" id="regAmount">₦200,000</span>
  </div>
  </div>
 
@@ -283,7 +283,7 @@ body {
  </div>
  </div>
 
- <button type="submit" class="pay-btn" id="submitPayBtn">Pay with Paystack (₦250,000) </button>
+<button type="submit" class="pay-btn" id="submitPayBtn">Pay with Paystack (₦200,000) </button>
  </form>
 
  <div class="footnote">Nakconel Digital Services — Brand Management & AI Strategy Desk</div>
@@ -292,7 +292,7 @@ body {
 <script>
 const params = new URLSearchParams(window.location.search);
 const regId = params.get('id') || ('TRN-' + Date.now());
-let regDetails = { name: 'Applicant', email: 'applicant@nakconel.com', amount: 250000, program: 'Career Program' };
+let regDetails = { name: 'Applicant', email: 'applicant@nakconel.com', amount: 200000, program: 'Career Program' };
 
 document.getElementById('regId').textContent = '#' + regId;
 
@@ -304,7 +304,7 @@ fetch('/api/registration/' + regId)
  regDetails = {
  name: r.name || 'Applicant',
  email: r.email || 'applicant@nakconel.com',
- amount: Number(r.amount || 250000),
+amount: Number(r.amount || 200000),
  program: r.program || 'Career Program'
  };
  document.getElementById('regName').textContent = regDetails.name;

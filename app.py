@@ -568,7 +568,7 @@ def initialize_postgres_schema(conn):
         "CREATE TABLE IF NOT EXISTS ai_subscriptions (reference TEXT PRIMARY KEY, client_key TEXT NOT NULL, email TEXT NOT NULL, plan_id TEXT NOT NULL, plan_name TEXT NOT NULL, amount INTEGER NOT NULL, status TEXT NOT NULL, authorization_url TEXT, paid_at TEXT, starts_at TEXT, expires_at TEXT, created_at TEXT NOT NULL)",
         "CREATE TABLE IF NOT EXISTS strategy_calls (id TEXT PRIMARY KEY, name TEXT NOT NULL, email TEXT NOT NULL, phone TEXT, message TEXT NOT NULL, status TEXT NOT NULL DEFAULT 'new', created_at TEXT NOT NULL, updated_at TEXT)",
         "CREATE TABLE IF NOT EXISTS strategy_call_attachments (id TEXT PRIMARY KEY, strategy_call_id TEXT NOT NULL REFERENCES strategy_calls(id) ON DELETE CASCADE, filename TEXT NOT NULL, content_type TEXT, file_size INTEGER NOT NULL, content BYTEA NOT NULL, created_at TEXT NOT NULL)",
-        "CREATE TABLE IF NOT EXISTS career_registrations (id TEXT PRIMARY KEY, type TEXT NOT NULL, name TEXT NOT NULL, email TEXT NOT NULL, phone TEXT, program TEXT NOT NULL, experience_level TEXT, statement TEXT, details TEXT, amount INTEGER NOT NULL DEFAULT 250000, status TEXT NOT NULL DEFAULT 'pending_payment', payment_reference TEXT, paid_at TEXT, created_at TEXT NOT NULL, updated_at TEXT)",
+        "CREATE TABLE IF NOT EXISTS career_registrations (id TEXT PRIMARY KEY, type TEXT NOT NULL, name TEXT NOT NULL, email TEXT NOT NULL, phone TEXT, program TEXT NOT NULL, experience_level TEXT, statement TEXT, details TEXT, amount INTEGER NOT NULL DEFAULT 200000, status TEXT NOT NULL DEFAULT 'pending_payment', payment_reference TEXT, paid_at TEXT, created_at TEXT NOT NULL, updated_at TEXT)",
         "CREATE TABLE IF NOT EXISTS campaign_registrations (id TEXT PRIMARY KEY, uid TEXT NOT NULL, email TEXT NOT NULL, full_name TEXT, business TEXT, challenge TEXT, package_name TEXT, amount DOUBLE PRECISION, currency TEXT, status TEXT NOT NULL DEFAULT 'pending_payment', payment_reference TEXT, created_at TEXT NOT NULL, raw_json TEXT)",
         "CREATE TABLE IF NOT EXISTS website_users (uid TEXT PRIMARY KEY, email TEXT, username TEXT, photo_url TEXT, email_verified INTEGER NOT NULL DEFAULT 0, is_deactivated INTEGER NOT NULL DEFAULT 0, deactivated_until TEXT, deactivation_reason TEXT, created_at TEXT NOT NULL, updated_at TEXT NOT NULL)",
         "CREATE TABLE IF NOT EXISTS admin_accounts (username TEXT PRIMARY KEY, password TEXT NOT NULL, name TEXT NOT NULL, email TEXT NOT NULL, role TEXT NOT NULL, role_level TEXT NOT NULL DEFAULT 'restricted', is_active INTEGER NOT NULL DEFAULT 1, is_restricted INTEGER NOT NULL DEFAULT 0, created_at TEXT NOT NULL, updated_at TEXT NOT NULL)",
@@ -683,7 +683,7 @@ def get_quota_db():
             experience_level TEXT,
             statement TEXT,
             details TEXT,
-            amount INTEGER NOT NULL DEFAULT 250000,
+            amount INTEGER NOT NULL DEFAULT 200000,
             status TEXT NOT NULL DEFAULT 'pending_payment',
             payment_reference TEXT,
             paid_at TEXT,
@@ -1091,7 +1091,7 @@ def enquiry():
 @app.route("/learning-center")
 @app.route("/cbt-exam")
 def our_center():
-    cbt_portal_url = os.environ.get("CBT_EXAM_URL", "https://nakconel-learning-center.vercel.app").rstrip("/")
+    cbt_portal_url = os.environ.get("LEARNING_CENTER_URL", "https://learning-center.nakconel.company").rstrip("/")
     return render_template("our-center.html", cbt_portal_url=cbt_portal_url)
 
 
@@ -1139,9 +1139,9 @@ def register_training_api():
     # Map pricing to amount
     pricing_map = {
         "early-bird": 150000,
-        "regular": 250000
+        "regular": 200000
     }
-    amount = pricing_map.get(pricing, 250000)
+    amount = pricing_map.get(pricing, 200000)
 
     now = datetime.now(timezone.utc).isoformat()
     reg_id = f"TRN-{int(time.time()*1000)}"
@@ -1276,7 +1276,7 @@ def get_registration_api(reg_id):
             "email": "applicant@nakconel.com",
             "phone": "+234 800 000 0000",
             "program": "Nakconel Internship Program" if is_int else "Nakconel Professional Program",
-            "amount": 0 if is_int else 250000,
+            "amount": 0 if is_int else 200000,
             "status": "submitted" if is_int else "pending_payment",
             "created_at": datetime.now(timezone.utc).isoformat()
         }
@@ -1304,7 +1304,7 @@ def initialize_paystack_registration(reg_id):
             "id": reg_id,
             "name": "Applicant",
             "email": "applicant@nakconel.com",
-            "amount": 250000,
+            "amount": 200000,
             "program": "Career Program"
         }
 
@@ -1312,7 +1312,7 @@ def initialize_paystack_registration(reg_id):
     if "@" not in email:
         email = "applicant@nakconel.com"
 
-    amount_val = float(reg.get("amount") or 250000)
+    amount_val = float(reg.get("amount") or 200000)
     amount_kobo = round(amount_val * 100)
 
     callback_url = request.host_url.rstrip("/") + f"/api/paystack/callback?id={reg_id}"
@@ -1437,7 +1437,7 @@ def complete_payment_api(reg_id):
     # Optional Paystack verification if reference provided
     if os.environ.get("PAYSTACK_SECRET_KEY") and reference and not reference.startswith("MANUAL-"):
         try:
-            reg_amount = 250000
+            reg_amount = 200000
             with get_quota_db() as conn:
                 r = conn.execute("SELECT amount FROM career_registrations WHERE id = ?", (reg_id,)).fetchone()
                 if r and r["amount"]:
@@ -1519,7 +1519,7 @@ def admin_career_registrations():
         else:
             item["detailsParsed"] = {}
         if (item.get("status") or "").lower() in ["paid", "approved"]:
-            total_paid_revenue += int(item.get("amount") or 250000)
+            total_paid_revenue += int(item.get("amount") or 200000)
             approved_count += 1
         else:
             pending_count += 1
@@ -1997,7 +1997,7 @@ def admin_summary():
         if st in ["paid", "approved"]:
             career_approved += 1
             try:
-                total_revenue += int(c_item.get("amount") or 250000)
+                total_revenue += int(c_item.get("amount") or 200000)
             except (TypeError, ValueError):
                 pass
         else:
