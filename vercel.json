@@ -1,47 +1,24 @@
 {
-  "version": 2,
-  "builds": [
-    {
-      "src": "app.py",
-      "use": "@vercel/python"
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "services": {
+    "website": {
+      "root": ".",
+      "framework": "flask",
+      "entrypoint": "app:app"
     },
-    {
-      "src": "learning center/package.json",
-      "use": "@vercel/next"
+    "learning-center": {
+      "root": "learning center",
+      "framework": "nextjs"
     }
-  ],
-  "routes": [
-    {
-      "src": "/login",
-      "dest": "learning center/login"
-    },
-    {
-      "src": "/learning/(.*)",
-      "dest": "learning center/learning/$1"
-    },
-    {
-      "src": "/dashboard",
-      "dest": "learning center/dashboard"
-    },
-    {
-      "src": "/admin/(.*)",
-      "dest": "learning center/admin/$1"
-    },
-    {
-      "src": "/api/auth/(.*)",
-      "dest": "learning center/api/auth/$1"
-    },
-    {
-      "src": "/api/admin/(.*)",
-      "dest": "learning center/api/admin/$1"
-    },
-    {
-      "src": "/api/learning/(.*)",
-      "dest": "learning center/api/learning/$1"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "app.py"
-    }
+  },
+  "rewrites": [
+    { "source": "/login", "destination": { "service": "learning-center" } },
+    { "source": "/learning/(.*)", "destination": { "service": "learning-center" } },
+    { "source": "/dashboard", "destination": { "service": "learning-center" } },
+    { "source": "/admin/(.*)", "destination": { "service": "learning-center" } },
+    { "source": "/api/auth/(.*)", "destination": { "service": "learning-center" } },
+    { "source": "/api/admin/(.*)", "destination": { "service": "learning-center" } },
+    { "source": "/api/learning/(.*)", "destination": { "service": "learning-center" } },
+    { "source": "/(.*)", "destination": { "service": "website" } }
   ]
 }
