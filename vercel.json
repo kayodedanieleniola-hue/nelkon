@@ -7,7 +7,7 @@
       "entrypoint": "app:app"
     },
     "learning-center": {
-      "root": "learning center",
+      "root": "learning-center",
       "framework": "nextjs"
     }
   },
