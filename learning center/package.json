@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "prisma generate && prisma db push --accept-data-loss --skip-generate && next build",
+    "build": "prisma generate && next build",
+    "db:deploy": "prisma db push --skip-generate",
     "start": "next start",
     "lint": "next lint",
     "db:push": "prisma db push",
