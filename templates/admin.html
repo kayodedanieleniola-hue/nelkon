@@ -1742,14 +1742,14 @@
  }
 
  async function loadCareerRegistrations() {
- const data = await adminFetch('/api/admin/career-registrations');
+ const data = await adminFetch('/api/website-admin/career-registrations');
  masterData.career = data.registrations || [];
  renderCareerRegistrations();
  }
 
  async function updateCareerStatus(regId, newStatus) {
  try {
- await adminFetch(`/api/admin/career-registrations/${encodeURIComponent(regId)}/status`, {
+ await adminFetch(`/api/website-admin/career-registrations/${encodeURIComponent(regId)}/status`, {
  method: 'POST',
  body: JSON.stringify({ status: newStatus })
  });
@@ -1764,7 +1764,7 @@
  async function deleteCareerRegistration(regId, applicantName) {
       if (!confirm(`Are you sure you want to permanently delete the registration for '${applicantName}' (#${regId})? This action cannot be undone.`)) return;
       try {
-        await adminFetch(`/api/admin/career-registrations/${encodeURIComponent(regId)}`, { method: 'DELETE' });
+        await adminFetch(`/api/website-admin/career-registrations/${encodeURIComponent(regId)}`, { method: 'DELETE' });
         await loadCareerRegistrations();
         loadAdminSummary();
         alert(`Registration for '${applicantName}' has been permanently deleted.`);
@@ -1815,7 +1815,7 @@
     async function deleteStrategyCall(callId, clientName) {
  if (!confirm(`Are you sure you want to permanently delete the enquiry for '${clientName}' (#${callId})? This action cannot be undone.`)) return;
  try {
- await adminFetch(`/api/admin/strategy-calls/${encodeURIComponent(callId)}`, { method: 'DELETE' });
+ await adminFetch(`/api/website-admin/strategy-calls/${encodeURIComponent(callId)}`, { method: 'DELETE' });
  await loadStrategyCalls();
  loadAdminSummary();
  alert(`Enquiry for '${clientName}' has been permanently deleted.`);
@@ -1832,8 +1832,8 @@
  const recordType = isEnquiry ? 'Enquiry' : 'Strategic Call';
  let attachments = [];
  try {
- const data = await adminFetch(`/api/admin/strategy-calls/${encodeURIComponent(id)}/attachments`);
- attachments = (data.attachments || []).map(file => ({ ...file, url: `/api/admin/strategy-calls/${encodeURIComponent(id)}/attachments/${encodeURIComponent(file.id)}` }));
+ const data = await adminFetch(`/api/website-admin/strategy-calls/${encodeURIComponent(id)}/attachments`);
+ attachments = (data.attachments || []).map(file => ({ ...file, url: `/api/website-admin/strategy-calls/${encodeURIComponent(id)}/attachments/${encodeURIComponent(file.id)}` }));
  } catch (error) {
  attachments = [];
  }
@@ -1850,14 +1850,14 @@
  }
 
  async function loadStrategyCalls() {
- const data = await adminFetch('/api/admin/strategy-calls');
+ const data = await adminFetch('/api/website-admin/strategy-calls');
  masterData.calls = data.strategyCalls || [];
  renderStrategyCalls();
  }
 
  async function updateCallStatus(callId, newStatus) {
  try {
- await adminFetch(`/api/admin/strategy-calls/${encodeURIComponent(callId)}/status`, {
+ await adminFetch(`/api/website-admin/strategy-calls/${encodeURIComponent(callId)}/status`, {
  method: 'POST',
  body: JSON.stringify({ status: newStatus })
  });
@@ -1914,7 +1914,7 @@
  async function deleteCampaignSubmission(regId, fullName) {
  if (!confirm(`Are you sure you want to permanently delete the campaign submission for '${fullName}' (#${regId})? This action cannot be undone.`)) return;
  try {
- await adminFetch(`/api/admin/campaign-registrations/${encodeURIComponent(regId)}`, { method: 'DELETE' });
+ await adminFetch(`/api/website-admin/campaign-registrations/${encodeURIComponent(regId)}`, { method: 'DELETE' });
  await loadCampaigns();
  loadAdminSummary();
  alert(`Campaign submission for '${fullName}' has been permanently deleted.`);
@@ -1943,7 +1943,7 @@
 }
 
 async function loadCampaigns() {
-  const data = await adminFetch('/api/admin/campaign-registrations');
+  const data = await adminFetch('/api/website-admin/campaign-registrations');
   masterData.campaign = data.registrations || [];
   await renderCampaigns();
 }
@@ -1982,7 +1982,7 @@ function renderAdminChatsList() {
 async function deleteChatConversation(convId, visitorName) {
   if (!confirm(`Are you sure you want to permanently delete chat conversation with '${visitorName}' (#${convId})? This action cannot be undone.`)) return;
   try {
-    await adminFetch(`/api/admin/chat/conversations/${encodeURIComponent(convId)}`, { method: 'DELETE' });
+    await adminFetch(`/api/website-admin/chat/conversations/${encodeURIComponent(convId)}`, { method: 'DELETE' });
     await loadAdminChats();
     loadAdminSummary();
     alert(`Chat conversation with '${visitorName}' has been permanently deleted.`);
@@ -1993,7 +1993,7 @@ async function deleteChatConversation(convId, visitorName) {
 }
 
 async function loadAdminChats() {
-  const data = await adminFetch('/api/admin/chat/conversations');
+  const data = await adminFetch('/api/website-admin/chat/conversations');
   masterData.chats = data.conversations || [];
   renderAdminChatsList();
 }
@@ -2033,7 +2033,7 @@ function closeAdminChatModal() {
  async function loadAdminChatMessages() {
  if (!activeChatId) return;
  try {
- const data = await adminFetch(`/api/admin/chat/conversations/${encodeURIComponent(activeChatId)}/messages`);
+ const data = await adminFetch(`/api/website-admin/chat/conversations/${encodeURIComponent(activeChatId)}/messages`);
  const messages = data.messages || [];
  document.getElementById('modalChatMessages').innerHTML = messages.length ? messages.map(msg => `
  <div class="chat-msg ${msg.sender === 'team' ? 'team' : 'visitor'}">
@@ -2085,7 +2085,7 @@ function closeAdminChatModal() {
  clearAttachment();
 
  try {
- await adminFetch(`/api/admin/chat/conversations/${encodeURIComponent(activeChatId)}/messages`, {
+ await adminFetch(`/api/website-admin/chat/conversations/${encodeURIComponent(activeChatId)}/messages`, {
  method: 'POST',
  body: JSON.stringify(payload)
  });
@@ -2213,7 +2213,7 @@ function closeAdminChatModal() {
  const reason = document.getElementById('deactReasonInput').value;
 
  try {
- await adminFetch(`/api/admin/users/${encodeURIComponent(uid)}/deactivate`, {
+ await adminFetch(`/api/website-admin/users/${encodeURIComponent(uid)}/deactivate`, {
  method: 'POST',
  body: JSON.stringify({ days: parseInt(days, 10), reason })
  });
@@ -2226,7 +2226,7 @@ function closeAdminChatModal() {
 
  async function reactivateUserAccount(uid) {
  try {
- await adminFetch(`/api/admin/users/${encodeURIComponent(uid)}/reactivate`, { method: 'POST' });
+ await adminFetch(`/api/website-admin/users/${encodeURIComponent(uid)}/reactivate`, { method: 'POST' });
  await loadAdminUsers();
  } catch (err) {
  alert(err.message || 'Failed to reactivate account.');
@@ -2236,7 +2236,7 @@ function closeAdminChatModal() {
  async function deleteUserAccount(uid, name) {
  if (!confirm(`Are you sure you want to permanently delete user account '${name}'? This action cannot be undone.`)) return;
  try {
- await adminFetch(`/api/admin/users/${encodeURIComponent(uid)}`, { method: 'DELETE' });
+ await adminFetch(`/api/website-admin/users/${encodeURIComponent(uid)}`, { method: 'DELETE' });
  await loadAdminUsers();
  } catch (err) {
  alert(err.message || 'Failed to delete user account.');
@@ -2251,7 +2251,7 @@ function closeAdminChatModal() {
  userActivityModal.classList.add('active');
 
  try {
- const data = await adminFetch(`/api/admin/users/${encodeURIComponent(uid)}/activities`);
+ const data = await adminFetch(`/api/website-admin/users/${encodeURIComponent(uid)}/activities`);
  const logs = data.activities || [];
  container.innerHTML = logs.length ? `
  <div style="display:flex; flex-direction:column; gap:10px;">
@@ -2277,7 +2277,7 @@ function closeAdminChatModal() {
 
  async function loadAdminUsers() {
  try {
- const res = await adminFetch('/api/admin/users');
+ const res = await adminFetch('/api/website-admin/users');
  masterData.users = res.users || [];
  renderUsers();
  } catch (err) {
@@ -2287,7 +2287,7 @@ function closeAdminChatModal() {
 
  async function loadAdminTeam() {
  try {
- const res = await adminFetch('/api/admin/team');
+ const res = await adminFetch('/api/website-admin/team');
  masterData.team = res.team || [];
  renderTeam();
  } catch (err) {
@@ -2297,7 +2297,7 @@ function closeAdminChatModal() {
 
  async function loadTestPayments() {
  try {
- const res = await adminFetch('/api/admin/test-payments');
+ const res = await adminFetch('/api/website-admin/test-payments');
  masterData.testPayments = res.testPayments || [];
  document.getElementById('tabCountTestPayments').textContent = masterData.testPayments.length;
  if (activeSheet === 'test-payments') renderTestPayments();
@@ -2418,7 +2418,7 @@ function closeAdminChatModal() {
  async function deleteTestPayment(recId) {
  if (!confirm(`Delete test payment record ${recId}? This cannot be undone.`)) return;
  try {
- await adminFetch(`/api/admin/test-payments/${encodeURIComponent(recId)}`, { method: 'DELETE' });
+ await adminFetch(`/api/website-admin/test-payments/${encodeURIComponent(recId)}`, { method: 'DELETE' });
  masterData.testPayments = (masterData.testPayments || []).filter(r => r.id !== recId);
  renderTestPayments();
  } catch (err) {
@@ -2448,7 +2448,7 @@ function closeAdminChatModal() {
  const role_level = document.getElementById('regAdminRoleLevel').value;
 
  try {
- const res = await adminFetch('/api/admin/team/register', {
+ const res = await adminFetch('/api/website-admin/team/register', {
  method: 'POST',
  body: JSON.stringify({ username, password, name, email, role, role_level })
  });
@@ -2471,7 +2471,7 @@ function closeAdminChatModal() {
  : `reactivate @${username}'s admin account`;
  if (!confirm(`Are you sure you want to ${action}?`)) return;
  try {
- await adminFetch(`/api/admin/team/${encodeURIComponent(username)}/status`, {
+ await adminFetch(`/api/website-admin/team/${encodeURIComponent(username)}/status`, {
  method: 'POST',
  body: JSON.stringify(updatePayload)
  });
@@ -2484,7 +2484,7 @@ function closeAdminChatModal() {
  async function deleteAdminAccount(username) {
  if (!confirm(`Are you sure you want to permanently delete admin account '@${username}'?`)) return;
  try {
- await adminFetch(`/api/admin/team/${encodeURIComponent(username)}`, { method: 'DELETE' });
+ await adminFetch(`/api/website-admin/team/${encodeURIComponent(username)}`, { method: 'DELETE' });
  await loadAdmin();
  } catch (err) {
  alert(err.message || 'Failed to delete admin account.');
@@ -2496,7 +2496,7 @@ function closeAdminChatModal() {
  ========================================================= */
  async function loadAdminSummary() {
  try {
- const summary = await adminFetch('/api/admin/summary');
+ const summary = await adminFetch('/api/website-admin/summary');
  document.getElementById('careerCount').textContent = summary.careerRegistrations || 0;
  document.getElementById('campaignCount').textContent = summary.campaignRegistrations || 0;
  document.getElementById('callsCount').textContent = summary.strategyCalls || 0;
@@ -2513,7 +2513,7 @@ function closeAdminChatModal() {
 
  async function loadAdmin() {
  try {
- const me = await adminFetch('/api/admin/me');
+ const me = await adminFetch('/api/website-admin/me');
  gate.style.display = 'none';
  dashboard.style.display = 'block';
 
@@ -2549,7 +2549,7 @@ function closeAdminChatModal() {
 
  async function checkAdminSession() {
  try {
- await adminFetch('/api/admin/check-session');
+ await adminFetch('/api/website-admin/check-session');
  loadAdmin();
  } catch (err) {
  logAdminError('Admin session check failed', err);
@@ -2562,7 +2562,7 @@ function closeAdminChatModal() {
 
  document.getElementById('signOutBtn').addEventListener('click', async () => {
  try {
- await adminFetch('/api/admin/sign-out', { method: 'POST' });
+ await adminFetch('/api/website-admin/sign-out', { method: 'POST' });
  window.location.href = '/admin-login';
  } catch (err) {
  logAdminError('Could not sign out', err);

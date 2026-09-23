@@ -1477,7 +1477,7 @@ def complete_payment_api(reg_id):
         "redirect_url": f"/thank-you.html?id={reg_id}"
     })
 
-@app.route("/api/admin/career-registrations", methods=["GET"])
+@app.route("/api/website-admin/career-registrations", methods=["GET"])
 @require_master_admin
 @require_shared_database
 def admin_career_registrations():
@@ -1536,7 +1536,7 @@ def admin_career_registrations():
         result["warning"] = warning
     return jsonify(result)
 
-@app.route("/api/admin/career-registrations/<reg_id>/status", methods=["POST"])
+@app.route("/api/website-admin/career-registrations/<reg_id>/status", methods=["POST"])
 @require_admin_session
 @require_shared_database
 def admin_update_career_status(reg_id):
@@ -1561,7 +1561,7 @@ def admin_update_career_status(reg_id):
 
     return jsonify({"success": True, "id": reg_id, "status": new_status})
 
-@app.route("/api/admin/career-registrations/<reg_id>", methods=["DELETE"])
+@app.route("/api/website-admin/career-registrations/<reg_id>", methods=["DELETE"])
 @require_admin_session
 @require_shared_database
 def admin_delete_career_registration(reg_id):
@@ -1661,7 +1661,7 @@ def api_admin_login():
         return jsonify({"error": str(e)}), 500
 
 
-@app.route("/api/admin/check-session", methods=["GET"])
+@app.route("/api/website-admin/check-session", methods=["GET"])
 def api_admin_check_session():
     """Check if admin is logged in via session."""
     admin_username = session.get("admin_username")
@@ -1685,14 +1685,14 @@ def api_admin_check_session():
     }), 200
 
 
-@app.route("/api/admin/sign-out", methods=["POST"])
+@app.route("/api/website-admin/sign-out", methods=["POST"])
 def api_admin_sign_out():
     """Sign out the admin user."""
     session.clear()
     return jsonify({"message": "Signed out successfully"}), 200
 
 
-@app.route("/api/admin/me", methods=["GET"])
+@app.route("/api/website-admin/me", methods=["GET"])
 @require_admin_session
 def admin_me():
     admin_info = request._admin_info or {}
@@ -1721,7 +1721,7 @@ def admin_me():
     })
 
 
-@app.route("/api/admin/team", methods=["GET"])
+@app.route("/api/website-admin/team", methods=["GET"])
 @require_master_admin
 @require_shared_database
 def admin_get_team():
@@ -1735,7 +1735,7 @@ def admin_get_team():
         return jsonify({"error": str(exc)}), 500
 
 
-@app.route("/api/admin/team/register", methods=["POST"])
+@app.route("/api/website-admin/team/register", methods=["POST"])
 @require_master_admin
 @require_shared_database
 def admin_register_new_admin():
@@ -1774,7 +1774,7 @@ def admin_register_new_admin():
         return jsonify({"success": False, "error": f"Registration failed: Username or email may already exist. Details: {exc}"}), 400
 
 
-@app.route("/api/admin/team/<target_username>/status", methods=["POST"])
+@app.route("/api/website-admin/team/<target_username>/status", methods=["POST"])
 @require_master_admin
 @require_shared_database
 def admin_update_team_status(target_username):
@@ -1827,7 +1827,7 @@ def admin_update_team_status(target_username):
         return jsonify({"error": str(exc)}), 500
 
 
-@app.route("/api/admin/team/<target_username>", methods=["DELETE"])
+@app.route("/api/website-admin/team/<target_username>", methods=["DELETE"])
 @require_master_admin
 @require_shared_database
 def admin_delete_team_member(target_username):
@@ -1855,7 +1855,7 @@ def admin_delete_team_member(target_username):
         return jsonify({"error": str(exc)}), 500
 
 
-@app.route("/api/admin/summary", methods=["GET"])
+@app.route("/api/website-admin/summary", methods=["GET"])
 @require_admin_session
 @require_shared_database
 def admin_summary():
@@ -2194,7 +2194,7 @@ def visitor_send_message(conversation_id):
     return jsonify({"sent": True, "message": {"id": message_id, **msg_data}})
 
 
-@app.route("/api/admin/chat/conversations", methods=["GET"])
+@app.route("/api/website-admin/chat/conversations", methods=["GET"])
 @require_admin_session
 @require_shared_database
 def admin_chat_conversations():
@@ -2207,7 +2207,7 @@ def admin_chat_conversations():
     return jsonify({"conversations": conversations})
 
 
-@app.route("/api/admin/chat/conversations/<conversation_id>/messages", methods=["GET"])
+@app.route("/api/website-admin/chat/conversations/<conversation_id>/messages", methods=["GET"])
 @require_admin_session
 @require_shared_database
 def admin_chat_messages(conversation_id):
@@ -2222,7 +2222,7 @@ def admin_chat_messages(conversation_id):
         return jsonify({"error": "Could not load messages."}), 503
 
 
-@app.route("/api/admin/chat/conversations/<conversation_id>/messages", methods=["POST"])
+@app.route("/api/website-admin/chat/conversations/<conversation_id>/messages", methods=["POST"])
 @require_admin_session
 @require_shared_database
 def admin_send_chat_message(conversation_id):
@@ -2265,7 +2265,7 @@ def admin_send_chat_message(conversation_id):
     return jsonify({"sent": True, "message": {"id": message_id, **msg_data}})
 
 
-@app.route("/api/admin/chat/conversations/<conversation_id>", methods=["DELETE"])
+@app.route("/api/website-admin/chat/conversations/<conversation_id>", methods=["DELETE"])
 @require_admin_session
 @require_shared_database
 def admin_delete_chat_conversation(conversation_id):
@@ -2283,7 +2283,7 @@ def admin_delete_chat_conversation(conversation_id):
         return jsonify({"error": f"Could not delete conversation: {exc}"}), 500
 
 
-@app.route("/api/admin/campaign-registrations/<reg_id>", methods=["DELETE"])
+@app.route("/api/website-admin/campaign-registrations/<reg_id>", methods=["DELETE"])
 @require_admin_session
 @require_shared_database
 def admin_delete_campaign_registration(reg_id):
@@ -2308,7 +2308,7 @@ def admin_delete_campaign_registration(reg_id):
     return jsonify({"success": True, "message": "Campaign submission deleted successfully.", "id": reg_id})
 
 
-@app.route("/api/admin/campaign-registrations", methods=["GET"])
+@app.route("/api/website-admin/campaign-registrations", methods=["GET"])
 @require_master_admin
 @require_shared_database
 def admin_campaign_registrations():
@@ -2357,7 +2357,7 @@ def admin_campaign_registrations():
     return jsonify(res)
 
 
-@app.route("/api/admin/users", methods=["GET"])
+@app.route("/api/website-admin/users", methods=["GET"])
 @require_admin_session
 @require_shared_database
 def admin_users():
@@ -2381,7 +2381,7 @@ def admin_users():
     return jsonify({"users": users})
 
 
-@app.route("/api/admin/users/<uid>/activities", methods=["GET"])
+@app.route("/api/website-admin/users/<uid>/activities", methods=["GET"])
 @require_admin_session
 @require_shared_database
 def admin_user_activities(uid):
@@ -2394,7 +2394,7 @@ def admin_user_activities(uid):
         return jsonify({"error": str(exc)}), 500
 
 
-@app.route("/api/admin/users/<uid>/deactivate", methods=["POST"])
+@app.route("/api/website-admin/users/<uid>/deactivate", methods=["POST"])
 @require_master_admin
 @require_shared_database
 def admin_deactivate_user(uid):
@@ -2428,7 +2428,7 @@ def admin_deactivate_user(uid):
         return jsonify({"error": str(exc)}), 500
 
 
-@app.route("/api/admin/users/<uid>/reactivate", methods=["POST"])
+@app.route("/api/website-admin/users/<uid>/reactivate", methods=["POST"])
 @require_master_admin
 @require_shared_database
 def admin_reactivate_user(uid):
@@ -2450,7 +2450,7 @@ def admin_reactivate_user(uid):
         return jsonify({"error": str(exc)}), 500
 
 
-@app.route("/api/admin/users/<uid>", methods=["DELETE"])
+@app.route("/api/website-admin/users/<uid>", methods=["DELETE"])
 @require_master_admin
 @require_shared_database
 def admin_delete_user(uid):
@@ -3138,7 +3138,7 @@ def submit_enquiry_with_attachments():
     return jsonify({"saved": True, "id": doc_id, "attachments": len(attachment_rows)})
 
 
-@app.route("/api/admin/strategy-calls", methods=["GET"])
+@app.route("/api/website-admin/strategy-calls", methods=["GET"])
 @require_master_admin
 @require_shared_database
 def admin_strategy_calls():
@@ -3175,7 +3175,7 @@ def admin_strategy_calls():
     return jsonify({"strategyCalls": calls})
 
 
-@app.route("/api/admin/strategy-calls/<call_id>/attachments", methods=["GET"])
+@app.route("/api/website-admin/strategy-calls/<call_id>/attachments", methods=["GET"])
 @require_admin_session
 @require_shared_database
 def admin_strategy_call_attachments(call_id):
@@ -3187,7 +3187,7 @@ def admin_strategy_call_attachments(call_id):
     return jsonify({"attachments": [{"id": r["id"], "filename": r["filename"], "contentType": r["content_type"], "size": r["file_size"]} for r in rows]})
 
 
-@app.route("/api/admin/strategy-calls/<call_id>/attachments/<attachment_id>", methods=["GET"])
+@app.route("/api/website-admin/strategy-calls/<call_id>/attachments/<attachment_id>", methods=["GET"])
 @require_admin_session
 @require_shared_database
 def admin_download_strategy_call_attachment(call_id, attachment_id):
@@ -3201,7 +3201,7 @@ def admin_download_strategy_call_attachment(call_id, attachment_id):
     return send_file(io.BytesIO(bytes(row["content"])), mimetype=row["content_type"] or "application/octet-stream", as_attachment=True, download_name=row["filename"])
 
 
-@app.route("/api/admin/strategy-calls/<call_id>/status", methods=["POST"])
+@app.route("/api/website-admin/strategy-calls/<call_id>/status", methods=["POST"])
 @require_admin_session
 @require_shared_database
 def admin_update_strategy_call_status(call_id):
@@ -3231,7 +3231,7 @@ def admin_update_strategy_call_status(call_id):
     return jsonify({"success": True, "id": call_id, "status": new_status})
 
 
-@app.route("/api/admin/strategy-calls/<call_id>", methods=["DELETE"])
+@app.route("/api/website-admin/strategy-calls/<call_id>", methods=["DELETE"])
 @require_admin_session
 @require_shared_database
 def admin_delete_strategy_call(call_id):
@@ -3527,7 +3527,7 @@ def test_payment_verify():
     }), 400
 
 
-@app.route("/api/admin/test-payments", methods=["GET"])
+@app.route("/api/website-admin/test-payments", methods=["GET"])
 @require_admin_session
 def admin_test_payments():
     """Admin endpoint — returns all test payment records."""
@@ -3543,7 +3543,7 @@ def admin_test_payments():
     return jsonify({"testPayments": records, "total": len(records)})
 
 
-@app.route("/api/admin/test-payments/<rec_id>", methods=["DELETE"])
+@app.route("/api/website-admin/test-payments/<rec_id>", methods=["DELETE"])
 @require_admin_session
 def admin_delete_test_payment(rec_id):
     """Admin endpoint — delete a single test payment record."""
