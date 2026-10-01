@@ -1138,7 +1138,7 @@ def register_training_api():
 
     # Map pricing to amount
     pricing_map = {
-        "early-bird": 150000,
+        "early-bird": 100000,
         "regular": 200000
     }
     amount = pricing_map.get(pricing, 200000)
